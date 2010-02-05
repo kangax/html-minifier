@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title></title>
+    <script src="htmlparser.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="master.css" type="text/css">
+  </head>
+  <body>
+    <div>
+      <div id="wrapper">
+        <h1>HTML Minifier</h1>
+        <textarea rows="8" cols="40" id="input"></textarea>
+        <div id="options">
+          <ul>
+            <li>
+              <input type="checkbox" id="remove-comments" checked>
+              <label for="remove-comments">Remove comments</label>
+            </li>
+            <li>
+              <input type="checkbox" id="collapse-whitespace" checked>
+              <label for="collapse-whitespace">Collapse whitespace</label>
+            </li>
+            <li>
+              <input type="checkbox" id="collapse-boolean-attributes" checked>
+              <label for="collapse-boolean-attributes">Collapse boolean attributes</label>
+            </li>
+            <li>
+              <input type="checkbox" id="remove-attribute-quotes" checked>
+              <label for="remove-attribute-quotes">Remove attribute quotes</label>
+            </li>
+            <li>
+              <input type="checkbox" id="remove-redundant-attributes" checked>
+              <label for="remove-redundant-attributes">Remove redundant attributes</label>
+            </li>
+          </ul>
+          <p><button type="button" id="convert-btn">Convert</button></p>
+        </div>
+      </div>
+      <textarea rows="8" cols="40" id="output" readonly></textarea>
+      <p id="stats"></p>
+      <p>By <a href="http://twitter.com/kangax/">kangax</a></p>
+    </div>
+    <script src="master.js" type="text/javascript"></script>
+  </body>
+</html>
