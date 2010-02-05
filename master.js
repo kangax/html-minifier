@@ -19,6 +19,9 @@
     },
     shouldRemoveRedundantAttributes: function(){
       return byId('remove-redundant-attributes').checked;
+    },
+    shouldUseShortDoctype: function() {
+      return byId('use-short-doctype').checked;
     }
   };
   
@@ -98,7 +101,7 @@
         results += (options.shouldRemoveComments() ? '' : ('<!--' + text + '-->'));
       },
       doctype: function(doctype) {
-        results += doctype;
+        results += (options.shouldUseShortDoctype() ? '<!DOCTYPE html>' : doctype);
       }
     });
     return results;
