@@ -26,9 +26,10 @@
 (function(){
 
 	// Regular Expressions for parsing tags and attributes
-	var startTag = /^<(\w+)((?:\s+\w+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
-		endTag = /^<\/(\w+)[^>]*>/,
-		attr = /(\w+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g;
+	var startTag = /^<(\w+)((?:\s+[\w-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
+		  endTag = /^<\/(\w+)[^>]*>/,
+		  attr = /([\w-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
+		  doctype = /<!DOCTYPE [^>]+>/;
 		
 	// Empty Elements - HTML 4.01
 	var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
@@ -71,7 +72,16 @@
 						html = html.substring( index + 3 );
 						chars = false;
 					}
-	
+				}
+	      else if ( html.indexOf("<!DOCTYPE") == 0 ) {
+	        match = html.match( doctype );
+
+	        if ( match ) {
+	          if ( handler.doctype )
+  						handler.doctype( match[0] );
+  					html = html.substring( match[0].length );
+  					chars = false;
+	        }
 				// end tag
 				} else if ( html.indexOf("</") == 0 ) {
 					match = html.match( endTag );

@@ -96,6 +96,9 @@
       },
       comment: function( text ) {
         results += (options.shouldRemoveComments() ? '' : ('<!--' + text + '-->'));
+      },
+      doctype: function(doctype) {
+        results += doctype;
       }
     });
     return results;
