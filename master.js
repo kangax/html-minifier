@@ -32,7 +32,9 @@
     return str.replace(/^\s+/, ' ').replace(/\s+$/, ' ');
   }
   function canRemoveAttributeQuotes(value) {
-    return /^[\w-]+$/.test(value);
+    // http://www.w3.org/TR/html4/intro/sgmltut.html#attributes
+    // avoid \w, which could match unicode in certain implementations
+    return /^[a-zA-Z0-9-._:]+$/.test(value);
   }
   function isAttributeRedundant(tag, attributeName, attributeValue) {
     return (
