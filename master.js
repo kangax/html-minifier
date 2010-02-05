@@ -29,7 +29,7 @@
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
   function collapseWhitespace(str) {
-    return str.replace(/^\s+/, ' ').replace(/\s+$/, ' ');
+    return str.replace(/^\s+/, '').replace(/\s+$/, '');
   }
   function canRemoveAttributeQuotes(value) {
     // http://www.w3.org/TR/html4/intro/sgmltut.html#attributes
@@ -38,16 +38,16 @@
   }
   function isAttributeRedundant(tag, attributeName, attributeValue) {
     return (
-        (tag === 'script' && 
-        attributeName === 'language' && 
+        (/^script$/i.test(tag) && 
+        /^language$/i.test(attributeName) && 
         /^javascript$/i.test(attributeValue)) ||
         
-        (tag === 'form' && 
-        attributeName === 'method' && 
+        (/^form$/i.test(tag) && 
+        /^method$/i.test(attributeName) && 
         /^get$/i.test(attributeValue)) ||
         
-        (tag === 'input' && 
-        attributeName === 'type' && 
+        (/^input$/i.test(tag) && 
+        /^type$/i.test(attributeName) &&
         /^text$/i.test(attributeValue))
     );
   }

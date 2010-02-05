@@ -1,15 +1,19 @@
 body { font-family: "Cambria", Georgia, Times, "Times New Roman", serif; }
 textarea { height: 20em; }
 h1 { margin-top: 0.5em; font-size: 1.25em; }
+button { font-weight: bold; width: 100px; }
 
 #wrapper { overflow: hidden; min-width: 900px; }
-#input { width: 65%; margin-bottom: 1em; }
-#output { width: 100%; height: 18em; }
+#input { width: 65%; }
+#output { width: 100%; height: 18em; margin-bottom: 2em; }
 #options { float: right; width: 33%; padding-left: 1em; }
 #options ul { list-style: none; padding: 0.5em; overflow: hidden; background: #ffe; margin-top: 0; }
 #options ul li { float: left; clear: both; padding-bottom: 0.5em; }
 #options label, #options input { float: left; }
 #options input { margin-right: 0.5em; }
+#stats { margin-bottom: 2em; }
+#todo { font-family: monospace; }
+#warning { background: #fcc; padding: 0.25em; display: inline-block; }
 
 .success { color: green; }
 .failure { color: red; }

@@ -63,13 +63,27 @@
               </label>
             </li>
           </ul>
-          <p><button type="button" id="convert-btn">Convert</button></p>
         </div>
       </div>
+      <p><button type="button" id="convert-btn">Convert</button></p>
       <textarea rows="8" cols="40" id="output" readonly></textarea>
       <p id="stats"></p>
+      <p id="warning">
+        Minifier is <strong>very draft</strong> and is <strong>not yet thoroughly tested</strong>. Use at your own risk. 
+      </p>
+      <div id="todo">
+        TODO:
+        <ul>
+          <li>Detect empty elements/attributes</li>
+          <li>Detect smells like "javascript:" in event attributes</li>
+          <li>Report deprecated (or presentational) attributes (e.g.: <code>&lt;td width="..." height="..."></code>)</li>
+          <li>Add option to collapse all whitespace to 1 character, instead of completely removing it (to preserve empty text nodes)</li>
+          <li>Figure out when it is safe to remove optional closing tags, so that it doesn't affect document tree</li>
+          <li>Replace NAME attributes with IDs when they serve as anchors (e.g. on <code>A</code> elements)</li>
+        </ul>
+      </div>
       <p class="quiet" style="font-style:italic;">
-        Minifier is made by <a href="http://twitter.com/kangax/">kangax</a>, 
+        Minifier is made by <a href="http://perfectionkills.com/">kangax</a>, 
         using tweaked version of HTML parser by <a href="http://ejohn.org/">John Resig</a> 
         (which, in its turn, is based on work of <a href="http://erik.eae.net/">Erik Arvidsson</a>).
       </p>
