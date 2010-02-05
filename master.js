@@ -118,7 +118,7 @@
       byId('stats').innerHTML = '<span class="success">' +
         'Original size: <strong>' + originalValue.length + '</strong>' +
         '. Minified size: <strong>' + minifiedValue.length + '</strong>' +
-        '. Savings: <strong>' + ((100 * diff) / originalValue.length).toFixed(2) + '</strong>%.' +
+        '. Savings: <strong>' + (originalValue.length ? ((100 * diff) / originalValue.length).toFixed(2) : 0) + '</strong>%.' +
       '</span>';
     }
     catch(err) {
