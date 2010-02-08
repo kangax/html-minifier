@@ -65,10 +65,10 @@
         });
         
         test('empty attributes', function(){
-          var input = '<p id="" class="" style=" " title="\n" lang="" dir="">x</p>';
+          var input = '<p id="" class="" STYLE=" " title="\n" lang="" dir="">x</p>';
           equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<p>x</p>');
           
-          input = '<p onclick=""   ondblclick=" " onmousedown="" onmouseup="" onmouseover=" " onmousemove="" onmouseout="" '+
+          input = '<p onclick=""   ondblclick=" " onmousedown="" ONMOUSEUP="" onmouseover=" " onmousemove="" onmouseout="" '+
                   'onkeypress=\n\n  "\n     " onkeydown=\n"" onkeyup\n="">x</p>';
           equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<p>x</p>');
           

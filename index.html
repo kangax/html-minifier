@@ -28,8 +28,8 @@
               <label for="collapse-boolean-attributes">
                 Collapse boolean attributes
                 <br>
-                <span class="quiet">
-                  (e.g. <code>&lt;input disabled="disabled"&gt; &rarr; &lt;input disabled&gt;</code>)
+                <span class="quiet short">
+                  (e.g. <code>&lt;... disabled="disabled"&gt; &rarr; &lt;... disabled&gt;</code>)
                 </span>
               </label>
             </li>
@@ -57,10 +57,8 @@
             </li>
             <li>
               <input type="checkbox" id="use-short-doctype" checked>
-              <label for="use-short-doctype">
+              <label for="use-short-doctype" title="i.e. <!DOCTYPE html>">
                 Use short doctype
-                <br>
-                <code class="quiet">&lt;!DOCTYPE html&gt;</code>
               </label>
             </li>
             <li>
@@ -68,7 +66,9 @@
               <label for="remove-empty-attributes">
                 Remove empty (or blank) attributes
                 <br>
-                <code class="quiet">Valid combinations are: class, id, style, title, lang, dir, event attributes</code>
+                <span class="quiet short">
+                  Valid attributes are: class, id, style, title, lang, dir, event attributes
+                </span>
               </label>
             </li>
           </ul>
@@ -85,11 +85,13 @@
         <ul>
           <li>Write unit tests for minifier (!)</li>
           <li>Detect empty elements (not just attributes)</li>
+          <li>Detect repeating attributes (e.g. multiple styles)</li>
           <li>Report deprecated (or presentational) attributes (e.g.: <code>&lt;td width="..." height="..."></code>)</li>
           <li>Add option to collapse all whitespace to 1 character, instead of completely removing it (to preserve empty text nodes)</li>
           <li>Figure out when it is safe to remove optional closing tags, so that it doesn't affect document tree</li>
           <li>Do not strip IE conditional comments</li>
           <li>Remove as many empty/blank attributes as possible (not just core ones)</li>
+          <li>Add option to remove comments/CDATA sections from scripts/styles</li>
           <li>Parser trips over xml declarations (need to ignore or strip them)</li>
           <li>Generate a report of all applied transformations</li>
         </ul>

@@ -19,3 +19,4 @@ button { font-weight: bold; width: 100px; }
 .success { color: green; }
 .failure { color: red; }
 .quiet { font-size: 0.85em; color: #888; }
+.short { display: inline-block; width: 20em; margin-top: 0.25em; }
