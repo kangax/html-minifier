@@ -95,6 +95,9 @@
           
           input = '<p class="\n  \n foo   \n\n\t  \t\n   ">foo bar baz</p>';
           equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo">foo bar baz</p>');
+          
+          input = '<p class="\n  \n foo   \n\n\t  \t\n  class1 class-23 ">foo bar baz</p>';
+          equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo class1 class-23">foo bar baz</p>');
         });
         
       })(this);

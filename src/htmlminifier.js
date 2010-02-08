@@ -66,7 +66,8 @@
       return attrValue.replace(/^(['"])?javascript:/i, '$1');
     }
     if (attrName.toLowerCase() === 'class') {
-      return attrValue.replace(/^(["'])?\s+/, '$1').replace(/\s+(["'])?$/, '$1');
+      // trim and collapse whitesapce
+      return attrValue.replace(/^(["'])?\s+/, '$1').replace(/\s+(["'])?$/, '$1').replace(/\s+/g, ' ');
     }
     return attrValue;
   }
