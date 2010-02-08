@@ -64,7 +64,23 @@
           equals(minify(input, { shouldRemoveComments: true }), input);
         });
         
+        test('empty attributes', function(){
+          var input = '<p id="" class="" style=" " title="\n" lang="" dir="">x</p>';
+          equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<p>x</p>');
+          
+          input = '<p onclick=""   ondblclick=" " onmousedown="" onmouseup="" onmouseover=" " onmousemove="" onmouseout="" '+
+                  'onkeypress=\n\n  "\n     " onkeydown=\n"" onkeyup\n="">x</p>';
+          equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<p>x</p>');
+          
+          input = '<input onfocus="" onblur="" onchange=" " value=" boo ">';
+          equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<input value=" boo ">');
+          
+          input = '<input value="" name="foo">';
+          equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<input name="foo">');
+        });
+        
       })(this);
     </script>
+    <input type="input" title=" ">
   </body>
 </html>

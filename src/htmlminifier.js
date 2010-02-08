@@ -68,6 +68,10 @@
     return attrValue;
   }
   
+  var reEmptyAttribute = new RegExp(
+    '^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(' +
+      '?:down|up|over|move|out)|key(?:press|down|up)))$');
+      
   function canDeleteEmptyAttribute(tag, attrName, attrValue) {
     var isValueEmpty = /^(["'])?\s*\1$/.test(attrValue);
     
@@ -80,8 +84,7 @@
 
       return (
         (tag === 'input' && attrName === 'value') ||
-        /^(?:class|id|style|title|lang|dir|on(?:click|dblclick|mouse(?:down|up|over|move|out)|key(?:press|down|up)))$/.test(attrName)
-      );
+        reEmptyAttribute.test(attrName));
     }
     return false;
   }
