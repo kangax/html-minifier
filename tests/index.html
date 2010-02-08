@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title></title>
+    <link rel="stylesheet" href="qunit.css" type="text/css">
+    <script type="text/javascript" src="qunit.js"></script>
+    <script type="text/javascript" src="../src/htmlparser.js"></script>
+    <script type="text/javascript" src="../src/htmlminifier.js"></script>
+  </head>
+  <body>
+    
+    <h1 id="qunit-header">HTML Minifier</h1>
+    <!-- <h2 id="qunit-banner"></h2> -->
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+    
+    <script type="text/javascript">
+      
+      (function(global){
+        
+        var minify = global.minify;
+        
+        test('`minifiy` exists', function() {
+          ok(minify);
+        });
+        
+        test('Short doctype with html 4.01 doctype', function() {
+          var html401doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"\n    "http://www.w3.org/TR/html4/strict.dtd">';
+          var actual = minify(html401doctype, { shouldUseShortDoctype: true });
+          var expected = '<!DOCTYPE html>';
+          
+          equals(actual, expected);
+        });
+        
+        test('Short doctype with HTML 5 doctype', function() {
+          equals(minify('<!DOCTYPE html>', { shouldUseShortDoctype: true }), '<!DOCTYPE html>');
+        });
+        
+        test('Short doctype off', function(){
+          var html401doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"\n    "http://www.w3.org/TR/html4/strict.dtd">';
+          var actual = minify(html401doctype, { shouldUseShortDoctype: false });
+          var expected = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
+          
+          equals(actual, expected);;
+        });
+        
+        test('Remove comments', function(){
+          var input = '<!-- test -->';
+          equals(minify(input, { shouldRemoveComments: true }), '');
+          
+          var input = '<!-- foo --><div>baz</div><!-- bar\n\n moo -->';
+          equals(minify(input, { shouldRemoveComments: true }), '<div>baz</div>');
+          equals(minify(input, { shouldRemoveComments: false }), input);
+          
+          var input = '<p title="<!-- comment in attribute -->">foo</p>';
+          equals(minify(input, { shouldRemoveComments: true }), input);
+          
+          var input = '<script><!-- alert(1) --><\/script>';
+          equals(minify(input, { shouldRemoveComments: true }), input);
+          
+          var input = '<STYLE><!-- alert(1) --><\/STYLE>';
+          equals(minify(input, { shouldRemoveComments: true }), input);
+        });
+        
+      })(this);
+    </script>
+  </body>
+</html>

@@ -9,6 +9,7 @@ button { font-weight: bold; width: 100px; }
 #options { float: right; width: 33%; padding-left: 1em; }
 #options ul { list-style: none; padding: 0.5em; overflow: hidden; background: #ffe; margin-top: 0; }
 #options ul li { float: left; clear: both; padding-bottom: 0.5em; }
+#options ul li div { margin-left: 1.75em; }
 #options label, #options input { float: left; }
 #options input { margin-right: 0.5em; }
 #stats { margin-bottom: 2em; }

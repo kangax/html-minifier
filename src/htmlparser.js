@@ -49,6 +49,8 @@
 
 	// Special Elements (can contain anything)
 	var special = makeMap("script,style");
+	
+	var reCache = { }, stackedTag, re;
 
 	var HTMLParser = this.HTMLParser = function( html, handler ) {
 		var index, chars, match, stack = [], last = html;
@@ -63,7 +65,7 @@
 			if ( !stack.last() || !special[ stack.last() ] ) {
 
 				// Comment
-				if ( html.indexOf("<!--") == 0 ) {
+				if ( html.indexOf("<!--") === 0 ) {
 					index = html.indexOf("-->");
 	
 					if ( index >= 0 ) {
@@ -80,7 +82,7 @@
 					chars = false;
 				
 				// end tag
-				} else if ( html.indexOf("</") == 0 ) {
+				} else if ( html.indexOf("</") === 0 ) {
 					match = html.match( endTag );
 	
 					if ( match ) {
@@ -90,7 +92,7 @@
 					}
 	
 				// start tag
-				} else if ( html.indexOf("<") == 0 ) {
+				} else if ( html.indexOf("<") === 0 ) {
 					match = html.match( startTag );
 	
 					if ( match ) {
@@ -111,10 +113,16 @@
 				}
 
 			} else {
-				html = html.replace(new RegExp("([\\s\\S]*?)<\/" + stack.last() + "[^>]*>"), function(all, text){
-					text = text
-					  .replace(/<!--([\s\S]*?)-->/g, "$1")
-						.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1");
+			  
+			  stackedTag = stack.last().toLowerCase();
+			  reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp("([\\s\\S]*?)<\/" + stackedTag + "[^>]*>", "i"));
+			  
+				html = html.replace(reStackedTag, function(all, text) {
+				  if (stackedTag !== 'script' && stackedTag !== 'style') {
+				    text = text
+  					  .replace(/<!--([\s\S]*?)-->/g, "$1")
+  						.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1");
+				  }
 
 					if ( handler.chars )
 						handler.chars( text );
@@ -122,7 +130,7 @@
 					return "";
 				});
 
-				parseEndTag( "", stack.last() );
+				parseEndTag( "", stackedTag );
 			}
 
 			if ( html == last )
@@ -310,8 +318,10 @@
 
 	function makeMap(str){
 		var obj = {}, items = str.split(",");
-		for ( var i = 0; i < items.length; i++ )
-			obj[ items[i] ] = true;
+		for ( var i = 0; i < items.length; i++ ) {
+		  obj[ items[i] ] = true;
+			obj[ items[i].toUpperCase() ] = true;
+		}
 		return obj;
 	}
 })();

@@ -4,7 +4,8 @@
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <title>HTML minifier</title>
-    <script src="htmlparser.js" type="text/javascript"></script>
+    <script src="src/htmlparser.js" type="text/javascript"></script>
+    <script src="src/htmlminifier.js" type="text/javascript"></script>
     <link rel="stylesheet" href="master.css" type="text/css">
   </head>
   <body>
@@ -44,22 +45,30 @@
             </li>
             <li>
               <input type="checkbox" id="remove-redundant-attributes" checked>
-              <label for="remove-redundant-attributes">
-                Remove redundant attributes
-                <br>
-                <span class="quiet">
-                  (e.g. <code>&lt;script language="Javascript" ...&gt;</code>)
-                </span>
-              </label>
+              <label for="remove-redundant-attributes">Remove redundant attributes/values</label>
+              <div class="quiet">
+                <code>&lt;script language="Javascript" ...&gt;</code><br>
+                <code>&lt;form method="get" ...&gt;</code><br>
+                <code>&lt;input type="text" ...&gt;</code><br>
+                <code>&lt;script src="..." charset="..."&gt;</code><br>
+                <code>&lt;a id="..." name="..."&gt;</code><br>
+                <code>&lt;... onclick="javascript:..." ...&gt;</code>
+              </div>
             </li>
             <li>
               <input type="checkbox" id="use-short-doctype" checked>
               <label for="use-short-doctype">
                 Use short doctype
                 <br>
-                <span class="quiet">
-                  (<code>&lt;!DOCTYPE html&gt;</code>)
-                </span>
+                <code class="quiet">&lt;!DOCTYPE html&gt;</code>
+              </label>
+            </li>
+            <li>
+              <input type="checkbox" id="remove-empty-attributes" checked>
+              <label for="remove-empty-attributes">
+                Remove empty (or blank) attributes
+                <br>
+                <code class="quiet">Valid combinations are: class, id, style, title, lang, dir, event attributes</code>
               </label>
             </li>
           </ul>
@@ -74,12 +83,15 @@
       <div id="todo">
         TODO:
         <ul>
-          <li>Detect empty elements/attributes</li>
-          <li>Detect smells like "javascript:" in event attributes</li>
+          <li>Write unit tests for minifier (!)</li>
+          <li>Detect empty elements (not just attributes)</li>
           <li>Report deprecated (or presentational) attributes (e.g.: <code>&lt;td width="..." height="..."></code>)</li>
           <li>Add option to collapse all whitespace to 1 character, instead of completely removing it (to preserve empty text nodes)</li>
           <li>Figure out when it is safe to remove optional closing tags, so that it doesn't affect document tree</li>
-          <li>Replace NAME attributes with IDs when they serve as anchors (e.g. on <code>A</code> elements)</li>
+          <li>Do not strip IE conditional comments</li>
+          <li>Remove as many empty/blank attributes as possible (not just core ones)</li>
+          <li>Parser trips over xml declarations (need to ignore or strip them)</li>
+          <li>Generate a report of all applied transformations</li>
         </ul>
       </div>
       <p class="quiet" style="font-style:italic;">
@@ -91,3 +103,11 @@
     <script src="master.js" type="text/javascript"></script>
   </body>
 </html>
+
+<!-- 
+  parser deficiencies:
+    Didn't understand doctype
+    Didn't match all attribute names (e.g. those with "-", like "http-equiv").
+    Didn't work properly with _multiline_ comments and CDATA sections.
+    Would strip comments and CDATA blocks from within all elements (even those like SCRIPT, with CDATA content)
+-->
