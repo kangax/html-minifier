@@ -11,7 +11,7 @@
     log = function(){ };
   }
   
-  function collapseWhitespace(str) {
+  function trimWhitespace(str) {
     return (str.trim ? str.trim() : str.replace(/^\s+/, '').replace(/\s+$/, ''));
   }
   
@@ -65,6 +65,9 @@
     if (/^on[a-z]+/.test(attrName)) {
       return attrValue.replace(/^(['"])?javascript:/i, '$1');
     }
+    if (attrName.toLowerCase() === 'class') {
+      return attrValue.replace(/^(["'])?\s+/, '$1').replace(/\s+(["'])?$/, '$1');
+    }
     return attrValue;
   }
   
@@ -104,24 +107,24 @@
             continue;
           }
 
-          var attrValue, 
-              escaped = attrs[i].escaped, 
-              attrName = attrs[i].name;
-
+          var escaped = attrs[i].escaped, 
+              attrName = attrs[i].name,
+              attrValue = escaped;
+          
+          attrValue = cleanAttributeValue(tag, attrName, attrValue);
+          
           if (options.shouldRemoveAttributeQuotes && 
-              canRemoveAttributeQuotes(escaped)) {
-            attrValue = escaped;
+              canRemoveAttributeQuotes(attrValue)) {
+            // noop
           }
           else {
-            attrValue = '"' + escaped + '"';
+            attrValue = '"' + attrValue + '"';
           }
           
           if (options.shouldRemoveEmptyAttributes &&
               canDeleteEmptyAttribute(tag, attrName, attrValue)) {
             continue;
           }
-
-          attrValue = cleanAttributeValue(tag, attrName, attrValue);
 
           var attributeFragment;
           if (options.shouldCollapseBooleanAttributes && 
@@ -141,7 +144,7 @@
       },
       chars: function( text ) {
         if (options.shouldCollapseWhitespace) {
-          results.push(collapseWhitespace(text));
+          results.push(trimWhitespace(text));
         }
         else {
           results.push(text);

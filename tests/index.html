@@ -79,6 +79,24 @@
           equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<input name="foo">');
         });
         
+        test('Clean attributes', function(){
+          var input = '<p onclick="javascript:alert(1)">x</p>';
+          equals(minify(input, { shouldCleanAttributes: true }), '<p onclick="alert(1)">x</p>');
+          
+          input = '<p onclick="javascript:x">x</p>';
+          equals(minify(input, { shouldCleanAttributes: true, shouldRemoveAttributeQuotes: true }), '<p onclick=x>x</p>');
+          
+          input = '<p class=" foo bar  ">foo bar baz</p>';
+          equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo bar">foo bar baz</p>');
+          
+          input = '<p class=" foo      ">foo bar baz</p>';
+          equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo">foo bar baz</p>');
+          equals(minify(input, { shouldCleanAttributes: true, shouldRemoveAttributeQuotes: true }), '<p class=foo>foo bar baz</p>');
+          
+          input = '<p class="\n  \n foo   \n\n\t  \t\n   ">foo bar baz</p>';
+          equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo">foo bar baz</p>');
+        });
+        
       })(this);
     </script>
     <input type="input" title=" ">
