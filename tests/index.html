@@ -12,7 +12,7 @@
   <body>
     
     <h1 id="qunit-header">HTML Minifier</h1>
-    <!-- <h2 id="qunit-banner"></h2> -->
+    <h2 id="qunit-banner"></h2>
     <h2 id="qunit-userAgent"></h2>
     <ol id="qunit-tests"></ol>
     
@@ -26,7 +26,33 @@
           ok(minify);
         });
         
-        test('Short doctype with html 4.01 doctype', function() {
+        test('options', function() {
+          var input = '<p>blah<span>blah 2<span>blah 3</span></span></p>';
+          equals(minify(input), input);
+          equals(minify(input, {}), input);
+        });
+        
+        test('case normalization', function() {
+          equals(minify('<P>foo</p>'), '<p>foo</p>');
+          equals(minify('<DIV>boo</DIV>'), '<div>boo</div>');
+          equals(minify('<DIV title="moo">boo</DiV>'), '<div title="moo">boo</div>');
+          equals(minify('<DIV TITLE="blah">boo</DIV>'), '<div title="blah">boo</div>');
+          equals(minify('<DIV tItLe="blah">boo</DIV>'), '<div title="blah">boo</div>');
+          equals(minify('<DiV tItLe="blah">boo</DIV>'), '<div title="blah">boo</div>');
+        });
+        
+        test('space normalization between attributes', function() {
+          equals(minify('<p title="bar">foo</p>'), '<p title="bar">foo</p>');
+          equals(minify('<p title = "bar">foo</p>'), '<p title="bar">foo</p>');
+          equals(minify('<p title\n\n\t  =\n     "bar">foo</p>'), '<p title="bar">foo</p>');
+          equals(minify('<input title="bar"       id="boo"    value="hello world">'), '<input title="bar" id="boo" value="hello world">');
+        });
+        
+        test('space normalization around text', function(){
+          equals(minify('   <p>blah</p>\n\n\n   '), '<p>blah</p>');
+        });
+        
+        test('doctype normalization', function() {
           var html401doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"\n    "http://www.w3.org/TR/html4/strict.dtd">';
           var actual = minify(html401doctype, { shouldUseShortDoctype: true });
           var expected = '<!DOCTYPE html>';
@@ -41,7 +67,7 @@
           equals(actual, expected);
         });
         
-        test('Remove comments', function(){
+        test('removing comments', function(){
           var input = '<!-- test -->';
           equals(minify(input, { shouldRemoveComments: true }), '');
           
@@ -56,7 +82,7 @@
           equals(minify(input, { shouldRemoveComments: true }), input);
           
           var input = '<STYLE><!-- alert(1) --><\/STYLE>';
-          equals(minify(input, { shouldRemoveComments: true }), input);
+          equals(minify(input, { shouldRemoveComments: true }), '<style><!-- alert(1) --><\/style>');
         });
         
         test('empty attributes', function(){
@@ -74,7 +100,7 @@
           equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<input name="foo">');
         });
         
-        test('Clean attributes', function(){
+        test('cleaning attributes', function(){
           var input = '<p onclick="javascript:alert(1)">x</p>';
           equals(minify(input, { shouldCleanAttributes: true }), '<p onclick="alert(1)">x</p>');
           
@@ -95,7 +121,7 @@
           equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo class1 class-23">foo bar baz</p>');
         });
         
-        test('remove attribute quotes', function(){
+        test('removing attribute quotes', function(){
           var input = '<p title="blah" class="a23B-foo.bar_baz:qux" id="moo">foo</p>';
           equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<p title=blah class=a23B-foo.bar_baz:qux id=moo>foo</p>');
           
@@ -109,8 +135,19 @@
           equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<a href="http://example.com" title=blah>\nfoo\n\n</a>');
         });
         
+        test('collapsing whitespace', function() {
+          var input = '<script type="text/javascript">  \n\t   alert(1) \n\n\n  \t <\/script>', 
+              output = '<script type="text/javascript">alert(1)<\/script>';
+              
+          equals(minify(input, { shouldCollapseWhitespace: true }), output);
+          
+          input = '<p>foo</p>    <p> bar</p>\n\n   \n\t\t  <div title="quz">baz  </div>';
+          output = '<p>foo</p><p>bar</p><div title="quz">baz</div>';
+          
+          equals(minify(input, { shouldCollapseWhitespace: true }), output);
+        });
+        
       })(this);
     </script>
-    <input type="input" title=" ">
   </body>
 </html>

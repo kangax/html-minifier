@@ -31,8 +31,6 @@
   }
   
   function isAttributeRedundant(tag, attrName, attrValue, attrs) {
-    tag = tag.toLowerCase();
-    attrName = attrName.toLowerCase();
     attrValue = attrValue.toLowerCase();
     return (
         (tag === 'script' && 
@@ -78,14 +76,8 @@
       
   function canDeleteEmptyAttribute(tag, attrName, attrValue) {
     var isValueEmpty = /^(["'])?\s*\1$/.test(attrValue);
-    
     if (isValueEmpty) {
-      
       log('empty attribute: ' + tag + ' :: ' + attrName);
-      
-      tag = tag.toLowerCase();
-      attrName = attrName.toLowerCase();
-
       return (
         (tag === 'input' && attrName === 'value') ||
         reEmptyAttribute.test(attrName));
@@ -93,63 +85,66 @@
     return false;
   }
   
+  function normalizeAttribute(attr, attrs, tag, options) {
+    
+    var attrName = attr.name.toLowerCase();
+    var attrValue = attr.escaped;
+    var attrFragment;
+    
+    if (options.shouldRemoveRedundantAttributes && 
+        isAttributeRedundant(tag, attrName, attrValue, attrs)) {
+      return '';
+    }
+    
+    attrValue = cleanAttributeValue(tag, attrName, attrValue);
+    
+    if (!options.shouldRemoveAttributeQuotes || 
+        !canRemoveAttributeQuotes(attrValue)) {
+      attrValue = '"' + attrValue + '"';
+    }
+    
+    if (options.shouldRemoveEmptyAttributes &&
+        canDeleteEmptyAttribute(tag, attrName, attrValue)) {
+      return '';
+    }
+
+    if (options.shouldCollapseBooleanAttributes && 
+        isBooleanAttribute(attrName)) {
+      attrFragment = attrName;
+    }
+    else {
+      attrFragment = attrName + '=' + attrValue;
+    }
+    
+    return (' ' + attrFragment);
+  }
+  
   function minify(value, options) {
+    
+    options = options || { };
+    value = trimWhitespace(value);
     
     var results = [];
     var t = new Date();
     
     HTMLParser(value, {
       start: function( tag, attrs, unary ) {
+        
+        tag = tag.toLowerCase();
+        
         results.push('<', tag);
+        
         for ( var i = 0, len = attrs.length; i < len; i++ ) {
-
-          if (options.shouldRemoveRedundantAttributes &&
-              isAttributeRedundant(tag, attrs[i].name, attrs[i].value, attrs)) {
-            continue;
-          }
-
-          var escaped = attrs[i].escaped, 
-              attrName = attrs[i].name,
-              attrValue = escaped;
-          
-          attrValue = cleanAttributeValue(tag, attrName, attrValue);
-          
-          if (options.shouldRemoveAttributeQuotes && 
-              canRemoveAttributeQuotes(attrValue)) {
-            // noop
-          }
-          else {
-            attrValue = '"' + attrValue + '"';
-          }
-          
-          if (options.shouldRemoveEmptyAttributes &&
-              canDeleteEmptyAttribute(tag, attrName, attrValue)) {
-            continue;
-          }
-
-          var attributeFragment;
-          if (options.shouldCollapseBooleanAttributes && 
-              isBooleanAttribute(attrName)) {
-            attributeFragment = attrName;
-          }
-          else {
-            attributeFragment = attrName + '=' + attrValue;
-          }
-          
-          results.push(' ', attributeFragment);
+          results.push(normalizeAttribute(attrs[i], attrs, tag, options));
         }
+        
         results.push('>');
       },
       end: function( tag ) {
-        results.push('</', tag, '>');
+        results.push('</', tag.toLowerCase(), '>');
       },
       chars: function( text ) {
-        if (options.shouldCollapseWhitespace) {
-          results.push(trimWhitespace(text));
-        }
-        else {
-          results.push(text);
-        }
+        results.push(options.shouldCollapseWhitespace ? trimWhitespace(text) : text);
       },
       comment: function( text ) {
         results.push(options.shouldRemoveComments ? '' : ('<!--' + text + '-->'));
@@ -166,6 +161,7 @@
     return str;
   }
   
-  this.minify = minify;
+  // export
+  global.minify = minify;
   
 })(this);
