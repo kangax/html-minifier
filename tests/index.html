@@ -32,18 +32,13 @@
           var expected = '<!DOCTYPE html>';
           
           equals(actual, expected);
-        });
-        
-        test('Short doctype with HTML 5 doctype', function() {
-          equals(minify('<!DOCTYPE html>', { shouldUseShortDoctype: true }), '<!DOCTYPE html>');
-        });
-        
-        test('Short doctype off', function(){
-          var html401doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"\n    "http://www.w3.org/TR/html4/strict.dtd">';
-          var actual = minify(html401doctype, { shouldUseShortDoctype: false });
-          var expected = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
           
-          equals(actual, expected);;
+          equals(minify('<!DOCTYPE html>', { shouldUseShortDoctype: true }), '<!DOCTYPE html>');
+          
+          actual = minify(html401doctype, { shouldUseShortDoctype: false });
+          expected = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
+          
+          equals(actual, expected);
         });
         
         test('Remove comments', function(){
@@ -98,6 +93,20 @@
           
           input = '<p class="\n  \n foo   \n\n\t  \t\n  class1 class-23 ">foo bar baz</p>';
           equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo class1 class-23">foo bar baz</p>');
+        });
+        
+        test('remove attribute quotes', function(){
+          var input = '<p title="blah" class="a23B-foo.bar_baz:qux" id="moo">foo</p>';
+          equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<p title=blah class=a23B-foo.bar_baz:qux id=moo>foo</p>');
+          
+          input = '<input value="hello world">';
+          equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<input value="hello world">');
+          
+          input = '<a href="#" title="foo#bar">x</a>';
+          equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<a href="#" title="foo#bar">x</a>');
+          
+          input = '<a href="http://example.com" title="blah">\nfoo\n\n</a>';
+          equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<a href="http://example.com" title=blah>\nfoo\n\n</a>');
         });
         
       })(this);
