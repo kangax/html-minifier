@@ -126,13 +126,14 @@
           output = '<script>\nalert(1)\n<\/script>';
           equals(minify(input, { removeCDATASectionsFromCDATA: true }), output);
           
-          input = '<script type="text/javascript"> /* \n\t  <![[CDATA[  */ alert(1) /*  ]]>  */<\/script>';
+          input = '<script type="text/javascript"> /* \n\t  <![[CDATA[  */ alert(1) /*  ]]>  */ \n <\/script>';
           output = '<script type="text/javascript"> alert(1) <\/script>';
           equals(minify(input, { removeCDATASectionsFromCDATA: true }), output);
           
           input = '<style>/* <![[CDATA[ */p { color: red } // ]]><\/style>';
           output = '<style>p { color: red } </style>';
           equals(minify(input, { removeCDATASectionsFromCDATA: true }), output);
+          
         });
         
         test('empty attributes', function(){

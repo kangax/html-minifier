@@ -14,7 +14,7 @@
       removeCommentsFromCDATA:      byId('remove-comments-from-cdata').checked,
       removeCDATASectionsFromCDATA: byId('remove-cdata-sections-from-cdata').checked,
       collapseWhitespace:           byId('collapse-whitespace').checked,
-      collapseBooleanAttributes:    byId('collapse-boolean-attributes').checked,q
+      collapseBooleanAttributes:    byId('collapse-boolean-attributes').checked,
       removeAttributeQuotes:        byId('remove-attribute-quotes').checked,  
       removeRedundantAttributes:    byId('remove-redundant-attributes').checked,
       useShortDoctype:              byId('use-short-doctype').checked,
