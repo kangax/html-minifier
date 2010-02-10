@@ -22,6 +22,24 @@
         
         var minify = global.minify;
         
+        test('parsing non-trivial markup', function() {
+          equals(minify('<p title="</p>">x</p>'), '<p title="</p>">x</p>');
+          equals(minify('<p title=" <!-- hello world --> ">x</p>'), '<p title=" <!-- hello world --> ">x</p>');
+          equals(minify('<p title=" <![CDATA[ \n\n foobar baz ]]> ">x</p>'), '<p title=" <![CDATA[ \n\n foobar baz ]]> ">x</p>');
+          equals(minify('<p foo-bar=baz>xxx</p>'), '<p foo-bar="baz">xxx</p>');
+          equals(minify('<p foo:bar=baz>xxx</p>'), '<p foo:bar="baz">xxx</p>');
+          
+          var input = '<div><div><div><div><div><div><div><div><div><div>'+
+                        'i\'m 10 levels deep'+
+                      '</div></div></div></div></div></div></div></div></div></div>';
+                      
+          equals(minify(input), input);
+          
+          equals(minify('<script>alert(\'<!--\')<\/script>'), '<script>alert(\'<!--\')<\/script>');
+          equals(minify('<script>alert(\'<!-- foo -->\')<\/script>'), '<script>alert(\'<!-- foo -->\')<\/script>');
+          equals(minify('<script>alert(\'-->\')<\/script>'), '<script>alert(\'-->\')<\/script>');
+        });
+        
         test('`minifiy` exists', function() {
           ok(minify);
         });
@@ -147,7 +165,33 @@
           equals(minify(input, { shouldCollapseWhitespace: true }), output);
         });
         
+        test('removing empty elements', function() {
+          equals(minify('<p>x</p>', { shouldRemoveEmptyElements: true }), '<p>x</p>');
+          equals(minify('<p></p>', { shouldRemoveEmptyElements: true }), '');
+          
+          var input = '<p>foo<span>bar</span><span></span></p>';
+          var output = '<p>foo<span>bar</span></p>';
+          
+          equals(minify(input, { shouldRemoveEmptyElements: true }), output);
+          
+          input = '<a href="http://example/com" title="hello world"></a>';
+          output = '';
+          
+          equals(minify(input, { shouldRemoveEmptyElements: true }), output);
+          
+          input = '<textarea cols="10" rows="10"></textarea>';
+          output = '<textarea cols="10" rows="10"></textarea>';
+          
+          equals(minify(input, { shouldRemoveEmptyElements: true }), output);
+          
+          input = '<div>hello<span>world</span></div>';
+          output = '<div>hello<span>world</span></div>';
+          
+          equals(minify(input, { shouldRemoveEmptyElements: true }), output);
+        });
+        
       })(this);
     </script>
+    
   </body>
 </html>

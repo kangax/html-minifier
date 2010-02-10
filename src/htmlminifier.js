@@ -14,6 +14,9 @@
   function trimWhitespace(str) {
     return (str.trim ? str.trim() : str.replace(/^\s+/, '').replace(/\s+$/, ''));
   }
+  function collapseWhitespace(str) {
+    return str.replace(/\s+/g, ' ');
+  }
   
   function canRemoveAttributeQuotes(value) {
     // http://www.w3.org/TR/html4/intro/sgmltut.html#attributes
@@ -61,11 +64,11 @@
   
   function cleanAttributeValue(tag, attrName, attrValue) {
     if (/^on[a-z]+/.test(attrName)) {
-      return attrValue.replace(/^(['"])?javascript:/i, '$1');
+      return attrValue.replace(/^\s*javascript:/i, '');
     }
-    if (attrName.toLowerCase() === 'class') {
+    if (attrName === 'class') {
       // trim and collapse whitesapce
-      return attrValue.replace(/^(["'])?\s+/, '$1').replace(/\s+(["'])?$/, '$1').replace(/\s+/g, ' ');
+      return collapseWhitespace(trimWhitespace(attrValue));
     }
     return attrValue;
   }
@@ -85,11 +88,15 @@
     return false;
   }
   
+  function canRemoveElement(tag) {
+    return tag !== 'textarea';
+  }
+  
   function normalizeAttribute(attr, attrs, tag, options) {
     
-    var attrName = attr.name.toLowerCase();
-    var attrValue = attr.escaped;
-    var attrFragment;
+    var attrName = attr.name.toLowerCase(),
+        attrValue = attr.escaped,
+        attrFragment;
     
     if (options.shouldRemoveRedundantAttributes && 
         isAttributeRedundant(tag, attrName, attrValue, attrs)) {
@@ -124,36 +131,52 @@
     options = options || { };
     value = trimWhitespace(value);
     
-    var results = [];
-    var t = new Date();
+    var results = [ ],
+        buffer = [ ],
+        currentChars = '',
+        currentTag = '',
+        t = new Date();
     
     HTMLParser(value, {
       start: function( tag, attrs, unary ) {
         
         tag = tag.toLowerCase();
+        currentTag = tag;
         
-        results.push('<', tag);
+        buffer.push('<', tag);
         
         for ( var i = 0, len = attrs.length; i < len; i++ ) {
-          results.push(normalizeAttribute(attrs[i], attrs, tag, options));
+          buffer.push(normalizeAttribute(attrs[i], attrs, tag, options));
         }
         
-        results.push('>');
+        buffer.push('>');
       },
       end: function( tag ) {
-        results.push('</', tag.toLowerCase(), '>');
+        var isElementEmpty = currentChars === '' && tag === currentTag;
+        if (options.shouldRemoveEmptyElements && isElementEmpty && canRemoveElement(tag)) {
+          // noop
+        }
+        else {
+          buffer.push('</', tag.toLowerCase(), '>');
+          results.push.apply(results, buffer);
+        }
+        buffer.length = 0;
+        currentChars = '';
       },
       chars: function( text ) {
-        results.push(options.shouldCollapseWhitespace ? trimWhitespace(text) : text);
+        currentChars = text;
+        buffer.push(options.shouldCollapseWhitespace ? trimWhitespace(text) : text);
       },
       comment: function( text ) {
-        results.push(options.shouldRemoveComments ? '' : ('<!--' + text + '-->'));
+        buffer.push(options.shouldRemoveComments ? '' : ('<!--' + text + '-->'));
       },
       doctype: function(doctype) {
-        results.push(options.shouldUseShortDoctype ? '<!DOCTYPE html>' : doctype.replace(/\s+/g, ' '));
+        buffer.push(options.shouldUseShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
       }
     });  
-
+    
+    results.push.apply(results, buffer);
+    
     var str = results.join('');
 
     log('minified in: ' + (new Date() - t) + 'ms');
