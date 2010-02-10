@@ -10,15 +10,16 @@
   
   function getOptions() {
     return {
-      removeComments:             byId('remove-comments').checked,
-      removeCommentsFromCDATA:    byId('remove-comments-from-cdata').checked,
-      collapseWhitespace:         byId('collapse-whitespace').checked,
-      collapseBooleanAttributes:  byId('collapse-boolean-attributes').checked,
-      removeAttributeQuotes:      byId('remove-attribute-quotes').checked,
-      removeRedundantAttributes:  byId('remove-redundant-attributes').checked,
-      useShortDoctype:            byId('use-short-doctype').checked,
-      removeEmptyAttributes:      byId('remove-empty-attributes').checked,
-      removeEmptyElements:        byId('remove-empty-elements').checked
+      removeComments:               byId('remove-comments').checked,
+      removeCommentsFromCDATA:      byId('remove-comments-from-cdata').checked,
+      removeCDATASectionsFromCDATA: byId('remove-cdata-sections-from-cdata').checked,
+      collapseWhitespace:           byId('collapse-whitespace').checked,
+      collapseBooleanAttributes:    byId('collapse-boolean-attributes').checked,q
+      removeAttributeQuotes:        byId('remove-attribute-quotes').checked,  
+      removeRedundantAttributes:    byId('remove-redundant-attributes').checked,
+      useShortDoctype:              byId('use-short-doctype').checked,
+      removeEmptyAttributes:        byId('remove-empty-attributes').checked,
+      removeEmptyElements:          byId('remove-empty-elements').checked
     };
   }
   

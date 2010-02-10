@@ -181,9 +181,17 @@
         currentChars = '';
       },
       chars: function( text ) {
-        if (options.removeCommentsFromCDATA &&
-            (currentTag === 'script' || currentTag === 'style')) {
-          text = text.replace(/^\s*<!--/, '').replace(/-->\s*$/, '');
+        if (currentTag === 'script' || currentTag === 'style') {
+          if (options.removeCommentsFromCDATA) {
+            text = text.replace(/^\s*<!--/, '').replace(/-->\s*$/, '');
+          }
+          if (options.removeCDATASectionsFromCDATA) {
+            text = text
+              // /* <![[CDATA */ or // <![[CDATA
+              .replace(/^(?:\s*\/\*\s*<!\[\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[\[CDATA\[.*)/, '')
+              // /* ]]> */ or // ]]>
+              .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>.*)$/, '');
+          }
         }
         if (options.collapseWhitespace) {
           if (canTrimWhitespace(currentTag)) {

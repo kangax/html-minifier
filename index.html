@@ -19,7 +19,11 @@
               <input type="checkbox" id="remove-comments" checked>
               <label for="remove-comments">Remove comments (</label>
               <input type="checkbox" id="remove-comments-from-cdata" checked>
-              <label for="remove-comments-from-cdata">also from scripts and styles</label> )
+              <label for="remove-comments-from-cdata">also from scripts and styles )</label>
+            </li>
+            <li>
+              <input type="checkbox" id="remove-cdata-sections-from-cdata" checked>
+              <label for="remove-cdata-sections-from-cdata">Remove CDATA sections from scripts and styles</label>
             </li>
             <li>
               <input type="checkbox" id="collapse-whitespace" checked>
@@ -103,7 +107,6 @@
           <li>Figure out when it is safe to remove optional closing tags, so that it doesn't affect document tree</li>
           <li>Do not strip IE conditional comments</li>
           <li>Remove as many empty/blank attributes as possible (not just core ones)</li>
-          <li>Add option to remove CDATA sections from scripts/styles</li>
           <li>Parser trips over xml declarations (need to ignore or strip them)</li>
           <li>Generate a report of all applied transformations</li>
         </ul>
