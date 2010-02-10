@@ -17,7 +17,9 @@
           <ul>
             <li>
               <input type="checkbox" id="remove-comments" checked>
-              <label for="remove-comments">Remove comments</label>
+              <label for="remove-comments">Remove comments (</label>
+              <input type="checkbox" id="remove-comments-from-cdata" checked>
+              <label for="remove-comments-from-cdata">also from scripts and styles</label> )
             </li>
             <li>
               <input type="checkbox" id="collapse-whitespace" checked>
@@ -71,6 +73,16 @@
                 </span>
               </label>
             </li>
+            <li>
+              <input type="checkbox" id="remove-empty-elements">
+              <label for="remove-empty-elements">
+                Remove empty elements
+                <br>
+                <span class="quiet short">
+                  All except <code>textarea</code>
+                </span>
+              </label>
+            </li>
           </ul>
         </div>
       </div>
@@ -83,16 +95,15 @@
       <div id="todo">
         TODO:
         <ul>
-          <li>Write unit tests for minifier (!)</li>
-          <li>Detect empty elements (not just attributes)</li>
-          <li>Detect repeating attributes (e.g. multiple styles)</li>
+          <li>Write more unit tests (~60 so far)</li>
+          <li>Detect repeating attributes (e.g. multiple styles, classes, etc.)</li>
           <li>Strip whitespace from attributes where allowed</li>
           <li>Report deprecated (or presentational) attributes (e.g.: <code>&lt;td width="..." height="..."></code>)</li>
           <li>Add option to collapse all whitespace to 1 character, instead of completely removing it (to preserve empty text nodes)</li>
           <li>Figure out when it is safe to remove optional closing tags, so that it doesn't affect document tree</li>
           <li>Do not strip IE conditional comments</li>
           <li>Remove as many empty/blank attributes as possible (not just core ones)</li>
-          <li>Add option to remove comments/CDATA sections from scripts/styles</li>
+          <li>Add option to remove CDATA sections from scripts/styles</li>
           <li>Parser trips over xml declarations (need to ignore or strip them)</li>
           <li>Generate a report of all applied transformations</li>
         </ul>

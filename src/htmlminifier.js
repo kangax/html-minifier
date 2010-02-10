@@ -1,3 +1,12 @@
+/*!
+ * HTML Minifier v0.2
+ * http://kangax.github.com/html-minifier/
+ *
+ * Copyright (c) 2010 Juriy "kangax" Zaytsev
+ * Licensed under the MIT license.
+ *
+ */
+ 
 (function(global){
   
   var log;
@@ -92,30 +101,38 @@
     return tag !== 'textarea';
   }
   
+  function canCollapseWhitespace(tag) {
+    return !(/^(?:script|style|pre|textarea)$/.test(tag));
+  }
+  
+  function canTrimWhitespace(tag) {
+    return !(/^(?:pre|textarea)$/.test(tag));
+  }
+  
   function normalizeAttribute(attr, attrs, tag, options) {
     
     var attrName = attr.name.toLowerCase(),
         attrValue = attr.escaped,
         attrFragment;
     
-    if (options.shouldRemoveRedundantAttributes && 
+    if (options.removeRedundantAttributes && 
         isAttributeRedundant(tag, attrName, attrValue, attrs)) {
       return '';
     }
     
     attrValue = cleanAttributeValue(tag, attrName, attrValue);
     
-    if (!options.shouldRemoveAttributeQuotes || 
+    if (!options.removeAttributeQuotes || 
         !canRemoveAttributeQuotes(attrValue)) {
       attrValue = '"' + attrValue + '"';
     }
     
-    if (options.shouldRemoveEmptyAttributes &&
+    if (options.removeEmptyAttributes &&
         canDeleteEmptyAttribute(tag, attrName, attrValue)) {
       return '';
     }
 
-    if (options.shouldCollapseBooleanAttributes && 
+    if (options.collapseBooleanAttributes && 
         isBooleanAttribute(attrName)) {
       attrFragment = attrName;
     }
@@ -153,7 +170,7 @@
       },
       end: function( tag ) {
         var isElementEmpty = currentChars === '' && tag === currentTag;
-        if (options.shouldRemoveEmptyElements && isElementEmpty && canRemoveElement(tag)) {
+        if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag)) {
           // noop
         }
         else {
@@ -164,14 +181,26 @@
         currentChars = '';
       },
       chars: function( text ) {
+        if (options.removeCommentsFromCDATA &&
+            (currentTag === 'script' || currentTag === 'style')) {
+          text = text.replace(/^\s*<!--/, '').replace(/-->\s*$/, '');
+        }
+        if (options.collapseWhitespace) {
+          if (canTrimWhitespace(currentTag)) {
+            text = trimWhitespace(text);
+          }
+          if (canCollapseWhitespace(currentTag)) {
+            text = collapseWhitespace(text);
+          }
+        }
         currentChars = text;
-        buffer.push(options.shouldCollapseWhitespace ? trimWhitespace(text) : text);
+        buffer.push(text);
       },
       comment: function( text ) {
-        buffer.push(options.shouldRemoveComments ? '' : ('<!--' + text + '-->'));
+        buffer.push(options.removeComments ? '' : ('<!--' + text + '-->'));
       },
       doctype: function(doctype) {
-        buffer.push(options.shouldUseShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
+        buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
       }
     });  
     

@@ -72,14 +72,14 @@
         
         test('doctype normalization', function() {
           var html401doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"\n    "http://www.w3.org/TR/html4/strict.dtd">';
-          var actual = minify(html401doctype, { shouldUseShortDoctype: true });
+          var actual = minify(html401doctype, { useShortDoctype: true });
           var expected = '<!DOCTYPE html>';
           
           equals(actual, expected);
           
-          equals(minify('<!DOCTYPE html>', { shouldUseShortDoctype: true }), '<!DOCTYPE html>');
+          equals(minify('<!DOCTYPE html>', { useShortDoctype: true }), '<!DOCTYPE html>');
           
-          actual = minify(html401doctype, { shouldUseShortDoctype: false });
+          actual = minify(html401doctype, { useShortDoctype: false });
           expected = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
           
           equals(actual, expected);
@@ -87,111 +87,138 @@
         
         test('removing comments', function(){
           var input = '<!-- test -->';
-          equals(minify(input, { shouldRemoveComments: true }), '');
+          equals(minify(input, { removeComments: true }), '');
           
           var input = '<!-- foo --><div>baz</div><!-- bar\n\n moo -->';
-          equals(minify(input, { shouldRemoveComments: true }), '<div>baz</div>');
-          equals(minify(input, { shouldRemoveComments: false }), input);
+          equals(minify(input, { removeComments: true }), '<div>baz</div>');
+          equals(minify(input, { removeComments: false }), input);
           
           var input = '<p title="<!-- comment in attribute -->">foo</p>';
-          equals(minify(input, { shouldRemoveComments: true }), input);
+          equals(minify(input, { removeComments: true }), input);
           
           var input = '<script><!-- alert(1) --><\/script>';
-          equals(minify(input, { shouldRemoveComments: true }), input);
+          equals(minify(input, { removeComments: true }), input);
           
           var input = '<STYLE><!-- alert(1) --><\/STYLE>';
-          equals(minify(input, { shouldRemoveComments: true }), '<style><!-- alert(1) --><\/style>');
+          equals(minify(input, { removeComments: true }), '<style><!-- alert(1) --><\/style>');
+        });
+        
+        test('remove comments from scripts/styles', function(){
+          var input = '<script><!--alert(1)--><\/script>';
+          var output = '<script>alert(1)<\/script>';
+          equals(minify(input, { removeCommentsFromCDATA: true }), output);
+          
+          input = '<style type="text/css"><!-- p { color: red } --><\/style>';
+          output = '<style type="text/css"> p { color: red } <\/style>';
+          equals(minify(input, { removeCommentsFromCDATA: true }), output);
+          
+          input = '<script type="text/javascript">  <!-- alert("-->"); -->\n\n   <\/script>';
+          output = '<script type="text/javascript"> alert("-->"); <\/script>';
+          equals(minify(input, { removeCommentsFromCDATA: true }), output);
         });
         
         test('empty attributes', function(){
           var input = '<p id="" class="" STYLE=" " title="\n" lang="" dir="">x</p>';
-          equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<p>x</p>');
+          equals(minify(input, { removeEmptyAttributes: true }), '<p>x</p>');
           
           input = '<p onclick=""   ondblclick=" " onmousedown="" ONMOUSEUP="" onmouseover=" " onmousemove="" onmouseout="" '+
                   'onkeypress=\n\n  "\n     " onkeydown=\n"" onkeyup\n="">x</p>';
-          equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<p>x</p>');
+          equals(minify(input, { removeEmptyAttributes: true }), '<p>x</p>');
           
           input = '<input onfocus="" onblur="" onchange=" " value=" boo ">';
-          equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<input value=" boo ">');
+          equals(minify(input, { removeEmptyAttributes: true }), '<input value=" boo ">');
           
           input = '<input value="" name="foo">';
-          equals(minify(input, { shouldRemoveEmptyAttributes: true }), '<input name="foo">');
+          equals(minify(input, { removeEmptyAttributes: true }), '<input name="foo">');
         });
         
         test('cleaning attributes', function(){
           var input = '<p onclick="javascript:alert(1)">x</p>';
-          equals(minify(input, { shouldCleanAttributes: true }), '<p onclick="alert(1)">x</p>');
+          equals(minify(input, { cleanAttributes: true }), '<p onclick="alert(1)">x</p>');
           
           input = '<p onclick="javascript:x">x</p>';
-          equals(minify(input, { shouldCleanAttributes: true, shouldRemoveAttributeQuotes: true }), '<p onclick=x>x</p>');
+          equals(minify(input, { cleanAttributes: true, removeAttributeQuotes: true }), '<p onclick=x>x</p>');
           
           input = '<p class=" foo bar  ">foo bar baz</p>';
-          equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo bar">foo bar baz</p>');
+          equals(minify(input, { cleanAttributes: true }), '<p class="foo bar">foo bar baz</p>');
           
           input = '<p class=" foo      ">foo bar baz</p>';
-          equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo">foo bar baz</p>');
-          equals(minify(input, { shouldCleanAttributes: true, shouldRemoveAttributeQuotes: true }), '<p class=foo>foo bar baz</p>');
+          equals(minify(input, { cleanAttributes: true }), '<p class="foo">foo bar baz</p>');
+          equals(minify(input, { cleanAttributes: true, removeAttributeQuotes: true }), '<p class=foo>foo bar baz</p>');
           
           input = '<p class="\n  \n foo   \n\n\t  \t\n   ">foo bar baz</p>';
-          equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo">foo bar baz</p>');
+          equals(minify(input, { cleanAttributes: true }), '<p class="foo">foo bar baz</p>');
           
           input = '<p class="\n  \n foo   \n\n\t  \t\n  class1 class-23 ">foo bar baz</p>';
-          equals(minify(input, { shouldCleanAttributes: true }), '<p class="foo class1 class-23">foo bar baz</p>');
+          equals(minify(input, { cleanAttributes: true }), '<p class="foo class1 class-23">foo bar baz</p>');
         });
         
         test('removing attribute quotes', function(){
           var input = '<p title="blah" class="a23B-foo.bar_baz:qux" id="moo">foo</p>';
-          equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<p title=blah class=a23B-foo.bar_baz:qux id=moo>foo</p>');
+          equals(minify(input, { removeAttributeQuotes: true }), '<p title=blah class=a23B-foo.bar_baz:qux id=moo>foo</p>');
           
           input = '<input value="hello world">';
-          equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<input value="hello world">');
+          equals(minify(input, { removeAttributeQuotes: true }), '<input value="hello world">');
           
           input = '<a href="#" title="foo#bar">x</a>';
-          equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<a href="#" title="foo#bar">x</a>');
+          equals(minify(input, { removeAttributeQuotes: true }), '<a href="#" title="foo#bar">x</a>');
           
           input = '<a href="http://example.com" title="blah">\nfoo\n\n</a>';
-          equals(minify(input, { shouldRemoveAttributeQuotes: true }), '<a href="http://example.com" title=blah>\nfoo\n\n</a>');
+          equals(minify(input, { removeAttributeQuotes: true }), '<a href="http://example.com" title=blah>\nfoo\n\n</a>');
         });
         
         test('collapsing whitespace', function() {
           var input = '<script type="text/javascript">  \n\t   alert(1) \n\n\n  \t <\/script>', 
               output = '<script type="text/javascript">alert(1)<\/script>';
-              
-          equals(minify(input, { shouldCollapseWhitespace: true }), output);
+          equals(minify(input, { collapseWhitespace: true }), output);
           
           input = '<p>foo</p>    <p> bar</p>\n\n   \n\t\t  <div title="quz">baz  </div>';
           output = '<p>foo</p><p>bar</p><div title="quz">baz</div>';
+          equals(minify(input, { collapseWhitespace: true }), output);
           
-          equals(minify(input, { shouldCollapseWhitespace: true }), output);
+          input = '<p> foo    bar</p>';
+          output = '<p>foo bar</p>';
+          equals(minify(input, { collapseWhitespace: true }), output);
+          
+          input = '<p> foo    <span>  blah    22 </span> bar <img src=""></p>';
+          output = '<p>foo<span>blah 22</span>bar<img src=""></p>';
+          equals(minify(input, { collapseWhitespace: true }), output);
+          
+          input = '<textarea> foo bar     baz \n\n   x \t    y </textarea>';
+          output = '<textarea> foo bar     baz \n\n   x \t    y </textarea>';
+          equals(minify(input, { collapseWhitespace: true }), output);
+          
+          input = '<pre title="some title...">   hello     world </pre>';
+          output = '<pre title="some title...">   hello     world </pre>';
+          equals(minify(input, { collapseWhitespace: true }), output);
+          
+          input = '<script>alert("foo     bar")    <\/script>';
+          output = '<script>alert("foo     bar")<\/script>';
+          equals(minify(input, { collapseWhitespace: true }), output);
         });
         
         test('removing empty elements', function() {
-          equals(minify('<p>x</p>', { shouldRemoveEmptyElements: true }), '<p>x</p>');
-          equals(minify('<p></p>', { shouldRemoveEmptyElements: true }), '');
+          equals(minify('<p>x</p>', { removeEmptyElements: true }), '<p>x</p>');
+          equals(minify('<p></p>', { removeEmptyElements: true }), '');
           
           var input = '<p>foo<span>bar</span><span></span></p>';
           var output = '<p>foo<span>bar</span></p>';
-          
-          equals(minify(input, { shouldRemoveEmptyElements: true }), output);
+          equals(minify(input, { removeEmptyElements: true }), output);
           
           input = '<a href="http://example/com" title="hello world"></a>';
           output = '';
-          
-          equals(minify(input, { shouldRemoveEmptyElements: true }), output);
+          equals(minify(input, { removeEmptyElements: true }), output);
           
           input = '<textarea cols="10" rows="10"></textarea>';
           output = '<textarea cols="10" rows="10"></textarea>';
-          
-          equals(minify(input, { shouldRemoveEmptyElements: true }), output);
+          equals(minify(input, { removeEmptyElements: true }), output);
           
           input = '<div>hello<span>world</span></div>';
           output = '<div>hello<span>world</span></div>';
-          
-          equals(minify(input, { shouldRemoveEmptyElements: true }), output);
+          equals(minify(input, { removeEmptyElements: true }), output);
         });
         
       })(this);
     </script>
-    
   </body>
 </html>
