@@ -48,7 +48,7 @@
   }
   
   function isAttributeRedundant(tag, attrName, attrValue, attrs) {
-    attrValue = attrValue.toLowerCase();
+    attrValue = trimWhitespace(attrValue.toLowerCase());
     return (
         (tag === 'script' && 
         attrName === 'language' && 
@@ -64,7 +64,7 @@
         
         (tag === 'script' &&
         attrName === 'charset' &&
-        attributesInclude(attrs, 'src')) ||
+        !attributesInclude(attrs, 'src')) ||
         
         (tag === 'a' &&
         attrName === 'name' &&
