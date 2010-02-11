@@ -167,13 +167,7 @@
         });
         
         test('cleaning attributes', function(){
-          var input = '<p onclick="javascript:alert(1)">x</p>';
-          equals(minify(input, { cleanAttributes: true }), '<p onclick="alert(1)">x</p>');
-          
-          input = '<p onclick="javascript:x">x</p>';
-          equals(minify(input, { cleanAttributes: true, removeAttributeQuotes: true }), '<p onclick=x>x</p>');
-          
-          input = '<p class=" foo bar  ">foo bar baz</p>';
+          var input = '<p class=" foo bar  ">foo bar baz</p>', output;
           equals(minify(input, { cleanAttributes: true }), '<p class="foo bar">foo bar baz</p>');
           
           input = '<p class=" foo      ">foo bar baz</p>';
@@ -185,6 +179,24 @@
           
           input = '<p class="\n  \n foo   \n\n\t  \t\n  class1 class-23 ">foo bar baz</p>';
           equals(minify(input, { cleanAttributes: true }), '<p class="foo class1 class-23">foo bar baz</p>');
+          
+          input = '<a href="#" onclick="  window.prompt(\'boo\'); " onmouseover=" \n\n alert(123);  \t \n\t  ">blah</a>';
+          output = '<a href="#" onclick="window.prompt(\'boo\');" onmouseover="alert(123);">blah</a>';
+          equals(minify(input, { cleanAttributes: true }), output);
+        });
+        
+        test('removing redundant attributes (... = "javascript: ...")', function(){
+          var input = '<p onclick="javascript:alert(1)">x</p>';
+          equals(minify(input, { cleanAttributes: true }), '<p onclick="alert(1)">x</p>');
+          
+          input = '<p onclick="javascript:x">x</p>';
+          equals(minify(input, { cleanAttributes: true, removeAttributeQuotes: true }), '<p onclick=x>x</p>');
+          
+          input = '<p onclick=" JavaScript: x">x</p>';
+          equals(minify(input, { cleanAttributes: true }), '<p onclick="x">x</p>');
+          
+          input = '<p title="javascript:(function(){ /* some stuff here */ })()">x</p>';
+          equals(minify(input, { cleanAttributes: true }), input);
         });
         
         test('removing attribute quotes', function(){
@@ -251,6 +263,8 @@
           output = '<div>hello<span>world</span></div>';
           equals(minify(input, { removeEmptyElements: true }), output);
         });
+        
+        
         
       })(this);
     </script>

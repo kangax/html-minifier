@@ -78,7 +78,7 @@
   
   function cleanAttributeValue(tag, attrName, attrValue) {
     if (/^on[a-z]+/.test(attrName)) {
-      return attrValue.replace(/^\s*javascript:/i, '');
+      return trimWhitespace(attrValue.replace(/^\s*javascript:\s*/i, ''));
     }
     if (attrName === 'class') {
       // trim and collapse whitesapce
