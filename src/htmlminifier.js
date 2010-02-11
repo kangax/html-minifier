@@ -29,13 +29,13 @@
   }
   
   function isConditionalComment(text) {
-    return /\[if[^]+\]/.test(text);
+    return (/\[if[^\]]+\]/).test(text);
   }
   
   function canRemoveAttributeQuotes(value) {
     // http://www.w3.org/TR/html4/intro/sgmltut.html#attributes
     // avoid \w, which could match unicode in some implementations
-    return /^[a-zA-Z0-9-._:]+$/.test(value);
+    return (/^[a-zA-Z0-9-._:]+$/).test(value);
   }
   
   function attributesInclude(attributes, attribute) {
@@ -73,7 +73,7 @@
   }
   
   function isBooleanAttribute(attrName) {
-    return /^(?:checked|disabled|selected|readonly)$/.test(attrName);
+    return (/^(?:checked|disabled|selected|readonly)$/).test(attrName);
   }
   
   function cleanAttributeValue(tag, attrName, attrValue) {
@@ -87,6 +87,18 @@
     return attrValue;
   }
   
+  function removeCDATASections(text) {
+    return text
+      // "/* <![CDATA[ */" or "// <![CDATA["
+      .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
+      // "/* ]]> */" or "// ]]>"
+      .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
+  }
+  
+  function removeComments(text) {
+    return text.replace(/^\s*<!--/, '').replace(/-->\s*$/, '');
+  }
+  
   var reEmptyAttribute = new RegExp(
     '^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(' +
       '?:down|up|over|move|out)|key(?:press|down|up)))$');
@@ -94,7 +106,6 @@
   function canDeleteEmptyAttribute(tag, attrName, attrValue) {
     var isValueEmpty = /^(["'])?\s*\1$/.test(attrValue);
     if (isValueEmpty) {
-      log('empty attribute: ' + tag + ' :: ' + attrName);
       return (
         (tag === 'input' && attrName === 'value') ||
         reEmptyAttribute.test(attrName));
@@ -188,14 +199,10 @@
       chars: function( text ) {
         if (currentTag === 'script' || currentTag === 'style') {
           if (options.removeCommentsFromCDATA) {
-            text = text.replace(/^\s*<!--/, '').replace(/-->\s*$/, '');
+            text = removeComments(text);
           }
           if (options.removeCDATASectionsFromCDATA) {
-            text = text
-              // "/* <![CDATA[ */" or "// <![CDATA["
-              .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
-              // "/* ]]> */" or "// ]]>"
-              .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
+            text = removeCDATASections(text);
           }
         }
         if (options.collapseWhitespace) {
