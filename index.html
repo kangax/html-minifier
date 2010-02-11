@@ -20,6 +20,9 @@
               <label for="remove-comments">Remove comments (</label>
               <input type="checkbox" id="remove-comments-from-cdata" checked>
               <label for="remove-comments-from-cdata">also from scripts and styles )</label>
+              <span class="quiet short" style="margin-left:1.5em">
+                Conditional comments are left intact.
+              </span>
             </li>
             <li>
               <input type="checkbox" id="remove-cdata-sections-from-cdata" checked>
@@ -99,13 +102,13 @@
       <div id="todo">
         TODO:
         <ul>
-          <li>Write more unit tests (~60 so far)</li>
+          <li>Write more unit tests (~70 so far)</li>
           <li>Detect repeating attributes (e.g. multiple styles, classes, etc.)</li>
           <li>Strip whitespace from attributes where allowed</li>
           <li>Report deprecated (or presentational) attributes (e.g.: <code>&lt;td width="..." height="..."></code>)</li>
           <li>Add option to collapse all whitespace to 1 character, instead of completely removing it (to preserve empty text nodes)</li>
           <li>Figure out when it is safe to remove optional closing tags, so that it doesn't affect document tree</li>
-          <li>Do not strip IE conditional comments</li>
+          <li>Support IE "Downlevel-revealed Conditional Comments"</li>
           <li>Remove as many empty/blank attributes as possible (not just core ones)</li>
           <li>Parser trips over xml declarations (need to ignore or strip them)</li>
           <li>Generate a report of all applied transformations</li>

@@ -23,8 +23,13 @@
   function trimWhitespace(str) {
     return (str.trim ? str.trim() : str.replace(/^\s+/, '').replace(/\s+$/, ''));
   }
+  
   function collapseWhitespace(str) {
     return str.replace(/\s+/g, ' ');
+  }
+  
+  function isConditionalComment(text) {
+    return /\[if[^]+\]/.test(text);
   }
   
   function canRemoveAttributeQuotes(value) {
@@ -187,9 +192,9 @@
           }
           if (options.removeCDATASectionsFromCDATA) {
             text = text
-              // /* <![[CDATA */ or // <![[CDATA
-              .replace(/^(?:\s*\/\*\s*<!\[\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[\[CDATA\[.*)/, '')
-              // /* ]]> */ or // ]]>
+              // "/* <![CDATA[ */" or "// <![CDATA["
+              .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
+              // "/* ]]> */" or "// ]]>"
               .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
           }
         }
@@ -205,7 +210,13 @@
         buffer.push(text);
       },
       comment: function( text ) {
-        buffer.push(options.removeComments ? '' : ('<!--' + text + '-->'));
+        if (options.removeComments && !isConditionalComment(text)) {
+          text = '';
+        }
+        else {
+          text = '<!--' + text + '-->';
+        }
+        buffer.push(text);
       },
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
