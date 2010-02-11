@@ -313,6 +313,17 @@
           output = '<div>hello<span>world</span></div>';
           equals(minify(input, { removeEmptyElements: true }), output);
         });
+        
+        test('collapsing boolean attributes', function(){
+          input = '<input disabled="disabled">';
+          equals(minify(input, { collapseBooleanAttributes: true }), '<input disabled>');
+          
+          input = '<input CHECKED = "checked" readonly="readonly">';
+          equals(minify(input, { collapseBooleanAttributes: true }), '<input checked readonly>');
+          
+          input = '<option name="blah" selected="selected">moo</option>';
+          equals(minify(input, { collapseBooleanAttributes: true }), '<option name="blah" selected>moo</option>');
+        });
       })(this);
     </script>
   </body>
