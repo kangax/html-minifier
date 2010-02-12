@@ -21,6 +21,7 @@
       removeEmptyAttributes:        byId('remove-empty-attributes').checked,
       removeEmptyElements:          byId('remove-empty-elements').checked,
       removeOptionalTags:           byId('remove-optional-tags').checked,
+      lint:                         byId('use-htmllint').checked ? new HTMLLint() : null
     };
   }
   
@@ -33,8 +34,10 @@
   
   byId('convert-btn').onclick = function() {
     try {
-      var originalValue = byId('input').value,
-          minifiedValue = minify(originalValue, getOptions()),
+      var options = getOptions(),
+          lint = options.lint,
+          originalValue = byId('input').value,
+          minifiedValue = minify(originalValue, options),
           diff = originalValue.length - minifiedValue.length,
           savings = originalValue.length ? ((100 * diff) / originalValue.length).toFixed(2) : 0;
 
@@ -46,6 +49,10 @@
           '. Minified size: <strong>' + commify(minifiedValue.length) + '</strong>' +
           '. Savings: <strong>' + commify(diff) + ' (' + savings + '%)</strong>.' +
         '</span>';
+      
+      if (lint) {
+        lint.populate(byId('report'));
+      }
     }
     catch(err) {
       byId('output').value = '';

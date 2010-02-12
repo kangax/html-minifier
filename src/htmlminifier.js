@@ -1,5 +1,5 @@
 /*!
- * HTML Minifier v0.3
+ * HTMLMinifier v0.3
  * http://kangax.github.com/html-minifier/
  *
  * Copyright (c) 2010 Juriy "kangax" Zaytsev
@@ -30,6 +30,10 @@
   
   function isConditionalComment(text) {
     return (/\[if[^\]]+\]/).test(text);
+  }
+  
+  function isEventAttribute(attrName) {
+    return (/^on[a-z]+/).test(attrName);
   }
   
   function canRemoveAttributeQuotes(value) {
@@ -77,11 +81,10 @@
   }
   
   function cleanAttributeValue(tag, attrName, attrValue) {
-    if (/^on[a-z]+/.test(attrName)) {
+    if (isEventAttribute(attrName)) {
       return trimWhitespace(attrValue.replace(/^\s*javascript:\s*/i, ''));
     }
     if (attrName === 'class') {
-      // trim and collapse whitesapce
       return collapseWhitespace(trimWhitespace(attrValue));
     }
     return attrValue;
@@ -172,7 +175,8 @@
         buffer = [ ],
         currentChars = '',
         currentTag = '',
-        t = new Date();
+        lint = options.lint,
+        t = new Date()
     
     HTMLParser(value, {
       start: function( tag, attrs, unary ) {
@@ -183,6 +187,7 @@
         buffer.push('<', tag);
         
         for ( var i = 0, len = attrs.length; i < len; i++ ) {
+          lint && lint.test(tag, attrs[i].name.toLowerCase());
           buffer.push(normalizeAttribute(attrs[i], attrs, tag, options));
         }
         
@@ -235,12 +240,9 @@
       }
     });  
     
-    results.push.apply(results, buffer);
-    
+    results.push.apply(results, buffer)    
     var str = results.join('');
-
     log('minified in: ' + (new Date() - t) + 'ms');
-
     return str;
   }
   
