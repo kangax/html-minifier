@@ -1,5 +1,5 @@
 /*!
- * HTML Minifier v0.2
+ * HTML Minifier v0.3
  * http://kangax.github.com/html-minifier/
  *
  * Copyright (c) 2010 Juriy "kangax" Zaytsev
@@ -117,6 +117,10 @@
     return tag !== 'textarea';
   }
   
+  function isOptionalTag(tag) {
+    return (/^(?:body|html)$/).test(tag);
+  }
+  
   function canCollapseWhitespace(tag) {
     return !(/^(?:script|style|pre|textarea)$/.test(tag));
   }
@@ -186,7 +190,8 @@
       },
       end: function( tag ) {
         var isElementEmpty = currentChars === '' && tag === currentTag;
-        if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag)) {
+        if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag)) ||
+            (options.removeOptionalTags && isOptionalTag(tag))) {
           // noop
         }
         else {

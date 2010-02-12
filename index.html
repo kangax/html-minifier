@@ -11,90 +11,103 @@
   <body>
     <div>
       <div id="wrapper">
-        <h1>HTML Minifier <span style="font-size:0.6em">(ver. 0.2)</span></h1>
+        <h1>HTML Minifier <span style="font-size:0.6em">(ver. 0.3)</span></h1>
         <textarea rows="8" cols="40" id="input"></textarea>
-        <div id="options">
-          <ul>
-            <li>
-              <input type="checkbox" id="remove-comments" checked>
-              <label for="remove-comments">Remove comments (</label>
-              <input type="checkbox" id="remove-comments-from-cdata" checked>
-              <label for="remove-comments-from-cdata">also from scripts and styles )</label>
-              <span class="quiet short" style="margin-left:1.5em">
-                Conditional comments are left intact.
-              </span>
-            </li>
-            <li>
-              <input type="checkbox" id="remove-cdata-sections-from-cdata" checked>
-              <label for="remove-cdata-sections-from-cdata">Remove CDATA sections from scripts and styles</label>
-            </li>
-            <li>
-              <input type="checkbox" id="collapse-whitespace" checked>
-              <label for="collapse-whitespace">Collapse whitespace</label>
-            </li>
-            <li>
-              <input type="checkbox" id="collapse-boolean-attributes" checked>
-              <label for="collapse-boolean-attributes">
-                Collapse boolean attributes
-                <br>
-                <span class="quiet short">
-                  (e.g. <code>&lt;... disabled="disabled"&gt; &rarr; &lt;... disabled&gt;</code>)
-                </span>
-              </label>
-            </li>
-            <li>
-              <input type="checkbox" id="remove-attribute-quotes" checked>
-              <label for="remove-attribute-quotes">
-                Remove attribute quotes
-                <br>
-                <span class="quiet">
-                  (e.g. <code>&lt;p class="foo"&gt; &rarr; &lt;p class=foo&gt;</code>)
-                </span>
-              </label>
-            </li>
-            <li>
-              <input type="checkbox" id="remove-redundant-attributes" checked>
-              <label for="remove-redundant-attributes">Remove redundant attributes/values</label>
-              <div class="quiet">
-                <code>&lt;script language="Javascript" ...&gt;</code><br>
-                <code>&lt;form method="get" ...&gt;</code><br>
-                <code>&lt;input type="text" ...&gt;</code><br>
-                <code>&lt;script src="..." charset="..."&gt;</code><br>
-                <code>&lt;a id="..." name="..."&gt;</code><br>
-                <code>&lt;... onclick="javascript:..." ...&gt;</code>
-              </div>
-            </li>
-            <li>
-              <input type="checkbox" id="use-short-doctype" checked>
-              <label for="use-short-doctype" title="i.e. <!DOCTYPE html>">
-                Use short doctype
-              </label>
-            </li>
-            <li>
-              <input type="checkbox" id="remove-empty-attributes" checked>
-              <label for="remove-empty-attributes">
-                Remove empty (or blank) attributes
-                <br>
-                <span class="quiet short">
-                  Valid attributes are: class, id, style, title, lang, dir, event attributes
-                </span>
-              </label>
-            </li>
-            <li>
-              <input type="checkbox" id="remove-empty-elements">
-              <label for="remove-empty-elements">
-                Remove empty elements
-                <br>
-                <span class="quiet short">
-                  All except <code>textarea</code>
-                </span>
-              </label>
-            </li>
-          </ul>
-        </div>
+        <p style="width:65%">
+          <button type="button" id="convert-btn">Convert</button>
+        </p>
+        <textarea rows="8" cols="40" id="output" readonly></textarea>
       </div>
-      <p><button type="button" id="convert-btn">Convert</button></p>
-      <textarea rows="8" cols="40" id="output" readonly></textarea>
+      <div id="options">
+        <ul>
+          <li>
+            <input type="checkbox" id="remove-comments" checked>
+            <label for="remove-comments">Remove comments (</label>
+            <input type="checkbox" id="remove-comments-from-cdata" checked>
+            <label for="remove-comments-from-cdata">also from scripts and styles )</label>
+            <span class="quiet short" style="margin-left:1.5em">
+              Conditional comments are left intact.
+            </span>
+          </li>
+          <li>
+            <input type="checkbox" id="remove-cdata-sections-from-cdata" checked>
+            <label for="remove-cdata-sections-from-cdata">Remove CDATA sections from scripts and styles</label>
+          </li>
+          <li>
+            <input type="checkbox" id="collapse-whitespace" checked>
+            <label for="collapse-whitespace">Collapse whitespace</label>
+          </li>
+          <li>
+            <input type="checkbox" id="collapse-boolean-attributes" checked>
+            <label for="collapse-boolean-attributes">
+              Collapse boolean attributes
+              <br>
+              <span class="quiet short">
+                (e.g. <code>&lt;... disabled="disabled"&gt; &rarr; &lt;... disabled&gt;</code>)
+              </span>
+            </label>
+          </li>
+          <li>
+            <input type="checkbox" id="remove-attribute-quotes" checked>
+            <label for="remove-attribute-quotes">
+              Remove attribute quotes
+              <br>
+              <span class="quiet">
+                (e.g. <code>&lt;p class="foo"&gt; &rarr; &lt;p class=foo&gt;</code>)
+              </span>
+            </label>
+          </li>
+          <li>
+            <input type="checkbox" id="remove-redundant-attributes" checked>
+            <label for="remove-redundant-attributes">Remove redundant attributes/values</label>
+            <div class="quiet">
+              <code>&lt;script language="Javascript" ...&gt;</code><br>
+              <code>&lt;form method="get" ...&gt;</code><br>
+              <code>&lt;input type="text" ...&gt;</code><br>
+              <code>&lt;script src="..." charset="..."&gt;</code><br>
+              <code>&lt;a id="..." name="..."&gt;</code><br>
+              <code>&lt;... onclick="javascript:..." ...&gt;</code>
+            </div>
+          </li>
+          <li>
+            <input type="checkbox" id="use-short-doctype" checked>
+            <label for="use-short-doctype" title="i.e. <!DOCTYPE html>">
+              Use short doctype
+            </label>
+          </li>
+          <li>
+            <input type="checkbox" id="remove-empty-attributes" checked>
+            <label for="remove-empty-attributes">
+              Remove empty (or blank) attributes
+              <br>
+              <span class="quiet short">
+                Valid attributes are: class, id, style, title, lang, dir, event attributes
+              </span>
+            </label>
+          </li>
+          <li>
+            <input type="checkbox" id="remove-optional-tags" checked>
+            <label for="remove-optional-tags">
+              Remove optional tags
+              <br>
+              <span class="quiet short">
+                Currently, only <code>&lt;/html></code> and <code>&lt;/body></code>
+              </span>
+            </label>
+          </li>
+          <li>
+            <input type="checkbox" id="remove-empty-elements">
+            <label for="remove-empty-elements">
+              Remove empty elements
+              <br>
+              <span class="quiet short">
+                All except <code>textarea</code>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </div>
+      
       <p id="stats"></p>
       <p id="warning">
         Minifier is <strong>very draft</strong> and is <strong>not yet thoroughly tested</strong>. Use at your own risk. 

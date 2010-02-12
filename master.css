@@ -3,17 +3,17 @@ textarea { height: 30em; }
 h1 { margin-top: 0.5em; font-size: 1.25em; }
 button { font-weight: bold; width: 100px; }
 
-#wrapper { overflow: hidden; min-width: 900px; }
-#input { width: 65%; }
-#output { width: 100%; height: 18em; margin-bottom: 2em; }
-#options { float: right; width: 33%; padding-left: 1em; }
+#wrapper { overflow: hidden; width: 65%; float: left; }
+#input { width: 99%; height: 18em; }
+#output { width: 99%; height: 18em; margin-bottom: 2em; }
+#options { float: right; width: 33%; padding-left: 1em; margin-top: 2.5em; min-height: 50em; }
 #options ul { list-style: none; padding: 0.5em; overflow: hidden; background: #ffe; margin-top: 0; }
 #options ul li { float: left; clear: both; padding-bottom: 0.5em; }
 #options ul li div { margin-left: 1.75em; }
 #options label, #options input { float: left; }
 #options input { margin-right: 0.5em; }
 #stats { margin-bottom: 2em; }
-#todo { font-family: monospace; }
+#todo { font-family: monospace; margin-bottom: 2em; }
 #warning { background: #fcc; padding: 0.25em; display: inline-block; }
 
 .success { color: green; }

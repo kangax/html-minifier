@@ -324,6 +324,14 @@
           input = '<option name="blah" selected="selected">moo</option>';
           equals(minify(input, { collapseBooleanAttributes: true }), '<option name="blah" selected>moo</option>');
         });
+        
+        test('removing optional tags', function(){
+          input = '<html><body><head><title>hello</title></head><p>foo<span>bar</span></p></body></html>';
+          output = '<html><body><head><title>hello</title></head><p>foo<span>bar</span></p>';
+          equals(minify(input, { removeOptionalTags: true }), output);
+          equals(minify(input), input);
+        });
+        
       })(this);
     </script>
   </body>

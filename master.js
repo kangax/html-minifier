@@ -19,7 +19,8 @@
       removeRedundantAttributes:    byId('remove-redundant-attributes').checked,
       useShortDoctype:              byId('use-short-doctype').checked,
       removeEmptyAttributes:        byId('remove-empty-attributes').checked,
-      removeEmptyElements:          byId('remove-empty-elements').checked
+      removeEmptyElements:          byId('remove-empty-elements').checked,
+      removeOptionalTags:           byId('remove-optional-tags').checked,
     };
   }
   
