@@ -17,6 +17,9 @@
   function isEventAttribute(attrName) {
     return (/^on[a-z]+/).test(attrName);
   }
+  function isStyleAttribute(attrName) {
+    return ('style' === attrName.toLowerCase());
+  }
   function isDeprecatedAttribute(tag, attrName) {
     return (
       (attrName === 'align' && 
@@ -80,7 +83,11 @@
     else if (isDeprecatedAttribute(tag, attrName)) {
       this.log.push(
         '<li>Warning: found <span class="deprecated-attribute">deprecated attribute</span> (<strong>', 
-        attrName, '</strong> on ', tag, ' element)</li>');
+        attrName, '</strong> on <code>', tag, '</code> element)</li>');
+    }
+    else if (isStyleAttribute(attrName)) {
+      this.log.push(
+        '<li>Warning: found <span class="style-attribute">style attribute</span> (on <code>', tag, '</code> element)</li>');
     }
   };
   
