@@ -291,6 +291,10 @@
           input = '<script>alert("foo     bar")    <\/script>';
           output = '<script>alert("foo     bar")<\/script>';
           equals(minify(input, { collapseWhitespace: true }), output);
+          
+          input = '<style>alert("foo     bar")    <\/style>';
+          output = '<style>alert("foo     bar")<\/style>';
+          equals(minify(input, { collapseWhitespace: true }), output);
         });
         
         test('removing empty elements', function() {
