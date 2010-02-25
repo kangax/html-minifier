@@ -160,6 +160,9 @@
           
           input = '<input value="" name="foo">';
           equals(minify(input, { removeEmptyAttributes: true }), '<input name="foo">');
+          
+          input = '<img src="" alt="">';
+          equals(minify(input, { removeEmptyAttributes: true }), '<img src="" alt="">');
         });
         
         test('cleaning attributes', function(){
