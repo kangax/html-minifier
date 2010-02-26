@@ -337,6 +337,11 @@
           output = '<html><head><title>hello</title><body><p>foo<span>bar</span></p>';
           equals(minify(input, { removeOptionalTags: true }), output);
           equals(minify(input), input);
+          
+          input = '<table><thead><tr></tr></thead><tfoot><tr></tr></tfoot><tbody><tr></tr></tbody></table>';
+          output = '<table><thead><tr></tr><tfoot><tr></tr><tbody><tr></tr></table>';
+          equals(minify(input, { removeOptionalTags: true }), output);
+          equals(minify(input), input);
         });
         
       })(this);

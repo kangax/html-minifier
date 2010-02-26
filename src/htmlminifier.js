@@ -121,7 +121,7 @@
   }
   
   function isOptionalTag(tag) {
-    return (/^(?:html|body|head)$/).test(tag);
+    return (/^(?:html|t?body|t?head|tfoot)$/).test(tag);
   }
   
   function canCollapseWhitespace(tag) {
