@@ -32,7 +32,7 @@
       .split('').reverse().join('');
   }
   
-  byId('convert-btn').onclick = function() {
+  byId('minify-btn').onclick = function() {
     try {
       var options = getOptions(),
           lint = options.lint,
