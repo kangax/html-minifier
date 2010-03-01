@@ -301,6 +301,7 @@
         });
         
         test('removing empty elements', function() {
+          
           equals(minify('<p>x</p>', { removeEmptyElements: true }), '<p>x</p>');
           equals(minify('<p></p>', { removeEmptyElements: true }), '');
           
@@ -318,6 +319,21 @@
           
           input = '<div>hello<span>world</span></div>';
           output = '<div>hello<span>world</span></div>';
+          equals(minify(input, { removeEmptyElements: true }), output);
+          
+          input = '<p>x<span title="<" class="blah-moo"></span></p>';
+          output = '<p>x</p>';
+          equals(minify(input, { removeEmptyElements: true }), output);
+          
+          input = '<div>x<div>y <div>blah</div><div></div>foo</div>z</div>';
+          output = '<div>x<div>y <div>blah</div>foo</div>z</div>';
+          equals(minify(input, { removeEmptyElements: true }), output);
+          
+          input = '<img src="">';
+          equals(minify(input, { removeEmptyElements: true }), input);
+          
+          input = '<p><!-- x --></p>';
+          output = '';
           equals(minify(input, { removeEmptyElements: true }), output);
         });
         

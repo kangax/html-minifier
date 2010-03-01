@@ -21,7 +21,12 @@
   }
   
   function trimWhitespace(str) {
-    return (str.trim ? str.trim() : str.replace(/^\s+/, '').replace(/\s+$/, ''));
+    return str.replace(/^\s+/, '').replace(/\s+$/, '');
+  }
+  if (String.prototype.trim) {
+    trimWhitespace = function(str) {
+      return str.trim();
+    };
   }
   
   function collapseWhitespace(str) {
@@ -183,6 +188,7 @@
         
         tag = tag.toLowerCase();
         currentTag = tag;
+        currentChars = '';
         
         buffer.push('<', tag);
         
@@ -195,14 +201,20 @@
       },
       end: function( tag ) {
         var isElementEmpty = currentChars === '' && tag === currentTag;
-        if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag)) ||
-            (options.removeOptionalTags && isOptionalTag(tag))) {
-          // noop
+        if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag))) {
+          // remove last "element" from buffer, return
+          buffer.splice(buffer.lastIndexOf('<'));
+          return;
+        }
+        else if (options.removeOptionalTags && isOptionalTag(tag)) {
+          // noop, leave start tag in buffer
         }
         else {
+          // push end tag to buffer
           buffer.push('</', tag.toLowerCase(), '>');
           results.push.apply(results, buffer);
         }
+        // flush buffer
         buffer.length = 0;
         currentChars = '';
       },
