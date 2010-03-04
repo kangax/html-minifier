@@ -353,9 +353,22 @@
           output = '<html><head><title>hello</title><body><p>foo<span>bar</span></p>';
           equals(minify(input, { removeOptionalTags: true }), output);
           equals(minify(input), input);
+        });
+        
+        test('removing optional tags in tables', function(){
           
-          input = '<table><thead><tr></tr></thead><tfoot><tr></tr></tfoot><tbody><tr></tr></tbody></table>';
-          output = '<table><thead><tr></tr><tfoot><tr></tr><tbody><tr></tr></table>';
+          input = '<table>'+
+                    '<thead><tr><th>foo</th><th>bar</th></tr></thead>'+
+                    '<tfoot><tr><th>baz</th><th>qux</th></tr></tfoot>'+
+                    '<tbody><tr><td>boo</td><td>moo</td></tr></tbody>'+
+                  '</table>';
+                  
+          output = '<table>'+
+                    '<thead><tr><th>foo</th><th>bar</th>'+
+                    '<tfoot><tr><th>baz</th><th>qux</th>'+
+                    '<tbody><tr><td>boo</td><td>moo</td>'+
+                   '</table>';
+                    
           equals(minify(input, { removeOptionalTags: true }), output);
           equals(minify(input), input);
         });
