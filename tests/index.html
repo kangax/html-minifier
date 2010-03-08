@@ -38,6 +38,10 @@
           equals(minify('<script>alert(\'<!--\')<\/script>'), '<script>alert(\'<!--\')<\/script>');
           equals(minify('<script>alert(\'<!-- foo -->\')<\/script>'), '<script>alert(\'<!-- foo -->\')<\/script>');
           equals(minify('<script>alert(\'-->\')<\/script>'), '<script>alert(\'-->\')<\/script>');
+          
+          equals(minify('<a title="x"href=" ">foo</a>'), '<a title="x" href=" ">foo</a>');
+          equals(minify('<p id=""class=""title="">x'), '<p id="" class="" title="">x</p>');
+          equals(minify('<p x="x\'"">x</p>'), '<p x="x\'">x</p>', 'trailing quote should be ignored');
         });
         
         test('`minifiy` exists', function() {

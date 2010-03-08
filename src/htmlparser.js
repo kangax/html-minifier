@@ -27,7 +27,7 @@
 (function(){
 
   // Regular Expressions for parsing tags and attributes
-  var startTag = /^<(\w+)((?:\s+[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
+  var startTag = /^<(\w+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
       endTag = /^<\/(\w+)[^>]*>/,
       attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
       doctype = /^<!DOCTYPE [^>]+>/i;
@@ -166,7 +166,6 @@
             arguments[3] ? arguments[3] :
             arguments[4] ? arguments[4] :
             fillAttrs[name] ? name : "";
-          
           attrs.push({
             name: name,
             value: value,

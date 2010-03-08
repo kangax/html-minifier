@@ -107,6 +107,10 @@
     return text.replace(/^\s*<!--/, '').replace(/-->\s*$/, '');
   }
   
+  function isOptionalTag(tag) {
+    return (/^(?:html|t?body|t?head|tfoot|tr)$/).test(tag);
+  }
+  
   var reEmptyAttribute = new RegExp(
     '^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(' +
       '?:down|up|over|move|out)|key(?:press|down|up)))$');
@@ -123,10 +127,6 @@
   
   function canRemoveElement(tag) {
     return tag !== 'textarea';
-  }
-  
-  function isOptionalTag(tag) {
-    return (/^(?:html|t?body|t?head|tfoot|tr)$/).test(tag);
   }
   
   function canCollapseWhitespace(tag) {
@@ -185,7 +185,6 @@
     
     HTMLParser(value, {
       start: function( tag, attrs, unary ) {
-        
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
@@ -200,6 +199,7 @@
         buffer.push('>');
       },
       end: function( tag ) {
+        
         var isElementEmpty = currentChars === '' && tag === currentTag;
         if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag))) {
           // remove last "element" from buffer, return
