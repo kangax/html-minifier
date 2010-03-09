@@ -103,8 +103,12 @@
       .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
   }
   
-  function removeComments(text) {
-    return text.replace(/^\s*<!--/, '').replace(/-->\s*$/, '');
+  var reStartDelimiter = {
+    'script': /^\s*<!--.*\n?/,
+    'style': /^\s*<!--\s*/
+  };
+  function removeComments(text, tag) {
+    return text.replace(reStartDelimiter[tag], '').replace(/\s*-->\s*$/, '');
   }
   
   function isOptionalTag(tag) {
@@ -221,7 +225,7 @@
       chars: function( text ) {
         if (currentTag === 'script' || currentTag === 'style') {
           if (options.removeCommentsFromCDATA) {
-            text = removeComments(text);
+            text = removeComments(text, currentTag);
           }
           if (options.removeCDATASectionsFromCDATA) {
             text = removeCDATASections(text);

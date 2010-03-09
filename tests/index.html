@@ -114,18 +114,27 @@
           equals(minify(input, { removeComments: true }), input);
         });
         
-        test('remove comments from scripts/styles', function(){
+        test('remove comments from scripts', function(){
           input = '<script><!--alert(1)--><\/script>';
-          output = '<script>alert(1)<\/script>';
+          output = '<script><\/script>';
           equals(minify(input, { removeCommentsFromCDATA: true }), output);
           
+          input = '<script><!--alert(1)<\/script>';
+          output = '<script><\/script>';
+          equals(minify(input, { removeCommentsFromCDATA: true }), output);
+          
+          input = '<script type="text/javascript"> <!--\nalert("-->"); -->\n\n   <\/script>';
+          output = '<script type="text/javascript">alert("-->");<\/script>';
+          equals(minify(input, { removeCommentsFromCDATA: true }), output);
+        });
+        
+        test('remove comments from styles', function(){
           input = '<style type="text/css"><!-- p { color: red } --><\/style>';
-          output = '<style type="text/css"> p { color: red } <\/style>';
+          output = '<style type="text/css">p { color: red }<\/style>';
           equals(minify(input, { removeCommentsFromCDATA: true }), output);
           
-          input = '<script type="text/javascript">  <!-- alert("-->"); -->\n\n   <\/script>';
-          output = '<script type="text/javascript"> alert("-->"); <\/script>';
-          equals(minify(input, { removeCommentsFromCDATA: true }), output);
+          input = '<style type="text/css">p::before { content: "<!--" }<\/style>';
+          equals(minify(input, { removeCommentsFromCDATA: true }), input);
         });
         
         test('remove CDATA sections from scripts/styles', function(){
