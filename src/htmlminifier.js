@@ -104,11 +104,16 @@
   }
   
   var reStartDelimiter = {
-    'script': /^\s*<!--.*\n?/,
+    // account for js + html comments (e.g.: //<!--)
+    'script': /^\s*(?:\/\/)?\s*<!--.*\n?/,
     'style': /^\s*<!--\s*/
   };
+  var reEndDelimiter = {
+    'script': /\s*(?:\/\/)?\s*-->\s*$/,
+    'style': /\s*-->\s*$/
+  };
   function removeComments(text, tag) {
-    return text.replace(reStartDelimiter[tag], '').replace(/\s*-->\s*$/, '');
+    return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
   }
   
   function isOptionalTag(tag) {

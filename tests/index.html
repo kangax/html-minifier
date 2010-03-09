@@ -126,6 +126,10 @@
           input = '<script type="text/javascript"> <!--\nalert("-->"); -->\n\n   <\/script>';
           output = '<script type="text/javascript">alert("-->");<\/script>';
           equals(minify(input, { removeCommentsFromCDATA: true }), output);
+          
+          input = '<script> //   <!--   \n  alert(1)   //  --> <\/script>';
+          output = '<script>  alert(1)<\/script>';
+          equals(minify(input, { removeCommentsFromCDATA: true }), output);
         });
         
         test('remove comments from styles', function(){
