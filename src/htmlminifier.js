@@ -117,7 +117,7 @@
   }
   
   function isOptionalTag(tag) {
-    return (/^(?:html|t?body|t?head|tfoot|tr)$/).test(tag);
+    return (/^(?:html|t?body|t?head|tfoot|tr|option)$/).test(tag);
   }
   
   var reEmptyAttribute = new RegExp(
@@ -208,7 +208,6 @@
         buffer.push('>');
       },
       end: function( tag ) {
-        
         var isElementEmpty = currentChars === '' && tag === currentTag;
         if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag))) {
           // remove last "element" from buffer, return
@@ -217,6 +216,7 @@
         }
         else if (options.removeOptionalTags && isOptionalTag(tag)) {
           // noop, leave start tag in buffer
+          return;
         }
         else {
           // push end tag to buffer

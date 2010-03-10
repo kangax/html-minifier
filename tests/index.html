@@ -390,6 +390,12 @@
           equals(minify(input), input);
         });
         
+        test('removing optional tags in options', function(){
+          input = '<select><option>foo</option><option>bar</option></select>';
+          output = '<select><option>foo<option>bar</select>';
+          equals(minify(input, { removeOptionalTags: true }), output);
+        });
+        
       })(this);
     </script>
   </body>
