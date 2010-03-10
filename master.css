@@ -26,4 +26,4 @@ button { font-weight: bold; width: 100px; }
 .short { display: inline-block; width: 20em; margin-top: 0.25em; }
 
 .deprecated-element, .deprecated-attribute { color: red; }
-.presentational-element, .presentational-attribute { color: #FF8C00; }
+.presentational-element, .presentational-attribute, .inaccessible-attribute { color: #FF8C00; }

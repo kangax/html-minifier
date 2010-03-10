@@ -56,12 +56,18 @@
       (attrName === 'width' && (/^(?:hr|td|th|applet|pre)$/).test(tag))
     );
   }
+  function isInaccessibleAttribute(attrName, attrValue) {
+    return (
+      attrName === 'href' && 
+      (/^\s*javascript\s*:\s*void\s*(\s+0|\(\s*0\s*\))\s*$/i).test(attrValue)
+    );
+  }
   
   function Lint() {
     this.log = [ ];
   }
   
-  Lint.prototype._testElement = function(tag, attrName) {
+  Lint.prototype.testElement = function(tag) {
     if (isDeprecatedElement(tag)) {
       this.log.push(
         '<li>Warning: found <span class="deprecated-element">deprecated element</span> (<strong>', 
@@ -74,7 +80,7 @@
     }
   };
   
-  Lint.prototype._testAttribute = function(tag, attrName) {
+  Lint.prototype.testAttribute = function(tag, attrName, attrValue) {
     if (isEventAttribute(attrName)) {
       this.log.push(
         '<li>Warning: found <span class="event-attribute">event attribute</span> (<strong>', 
@@ -83,17 +89,22 @@
     else if (isDeprecatedAttribute(tag, attrName)) {
       this.log.push(
         '<li>Warning: found <span class="deprecated-attribute">deprecated attribute</span> (<strong>', 
-        attrName, '</strong> on <code>', tag, '</code> element)</li>');
+        attrName, '</strong> on <code>&lt;', tag, '&gt;</code> element)</li>');
     }
     else if (isStyleAttribute(attrName)) {
       this.log.push(
-        '<li>Warning: found <span class="style-attribute">style attribute</span> (on <code>', tag, '</code> element)</li>');
+        '<li>Warning: found <span class="style-attribute">style attribute</span> (on <code>&lt;', tag, '&gt;</code> element)</li>');
+    }
+    else if (isInaccessibleAttribute(attrName, attrValue)) {
+      this.log.push(
+        '<li>Warning: found <span class="inaccessible-attribute">inaccessible attribute</span> '+
+          '(on <code>&lt;', tag, '&gt;</code> element)</li>');
     }
   };
   
-  Lint.prototype.test = function(tag, attrName) {
-    this._testElement(tag, attrName);
-    this._testAttribute(tag, attrName);
+  Lint.prototype.test = function(tag, attrName, attrValue) {
+    this.testElement(tag);
+    this.testAttribute(tag, attrName, attrValue);
   };
   
   Lint.prototype.populate = function(writeToElement) {

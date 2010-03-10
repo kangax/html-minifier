@@ -200,8 +200,10 @@
         
         buffer.push('<', tag);
         
+        lint && lint.testElement(tag);
+        
         for ( var i = 0, len = attrs.length; i < len; i++ ) {
-          lint && lint.test(tag, attrs[i].name.toLowerCase());
+          lint && lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
           buffer.push(normalizeAttribute(attrs[i], attrs, tag, options));
         }
         
