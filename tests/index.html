@@ -394,6 +394,27 @@
           input = '<select><option>foo</option><option>bar</option></select>';
           output = '<select><option>foo<option>bar</select>';
           equals(minify(input, { removeOptionalTags: true }), output);
+          
+          // example from htmldog.com
+          input = '<select name="catsndogs">' +
+          	        '<optgroup label="Cats">'+
+          	          '<option>Tiger</option><option>Leopard</option><option>Lynx</option>'+
+          	        '</optgroup>' +
+          	        '<optgroup label="Dogs">'+
+          	          '<option>Grey Wolf</option><option>Red Fox</option><option>Fennec</option>'+
+          	        '</optgroup>' +
+                  '</select>';
+          
+          output = '<select name="catsndogs">' +
+          	        '<optgroup label="Cats">'+
+          	          '<option>Tiger<option>Leopard<option>Lynx'+
+          	        '</optgroup>' +
+          	        '<optgroup label="Dogs">'+
+          	          '<option>Grey Wolf<option>Red Fox<option>Fennec'+
+          	        '</optgroup>' +
+                  '</select>';
+                  
+          equals(minify(input, { removeOptionalTags: true }), output);
         });
         
       })(this);
