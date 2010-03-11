@@ -95,6 +95,12 @@
     return attrValue;
   }
   
+  function cleanConditionalComment(comment) {
+    return comment
+      .replace(/^(\[[^\]]+\]>)\s*/, '$1')
+      .replace(/\s*(<!\[endif\])$/, '$1');
+  }
+  
   function removeCDATASections(text) {
     return text
       // "/* <![CDATA[ */" or "// <![CDATA["
@@ -250,8 +256,13 @@
         buffer.push(text);
       },
       comment: function( text ) {
-        if (options.removeComments && !isConditionalComment(text)) {
-          text = '';
+        if (options.removeComments) {
+          if (isConditionalComment(text)) {
+            text = '<!--' + cleanConditionalComment(text) + '-->';
+          }
+          else {
+            text = '';
+          }
         }
         else {
           text = '<!--' + text + '-->';

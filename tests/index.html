@@ -104,14 +104,35 @@
         });
         
         test('conditional comments', function(){
-          input = '<!--[if IE 6]> test <![endif]-->';
+          input = '<!--[if IE 6]>test<![endif]-->';
           equals(minify(input, { removeComments: true }), input);
           
-          input = '<!--[if lt IE 5.5]> test <![endif]-->';
+          input = '<!--[if lt IE 5.5]>test<![endif]-->';
           equals(minify(input, { removeComments: true }), input);
           
-          input = '<!--[if (gt IE 5)&(lt IE 7)]> test <![endif]-->';
+          input = '<!--[if (gt IE 5)&(lt IE 7)]>test<![endif]-->';
           equals(minify(input, { removeComments: true }), input);
+        });
+        
+        test('collapsing space in conditional comments', function(){
+          input = '<!--[if IE 7]>\n\n   \t\n   \t\t ' +
+          	        '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />\n\t' +
+                  '<![endif]-->';
+          output = '<!--[if IE 7]>'+
+                      '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />'+
+                   '<![endif]-->'
+          
+          equals(minify(input, { removeComments: true }), output);
+          
+          
+          input = '<!--[if lte IE 6]>\n    \n   \n\n\n\t' +
+          	        '<p title=" sigificant     whitespace   ">blah blah</p>' +
+                  '<![endif]-->';
+          output = '<!--[if lte IE 6]>' +
+          	        '<p title=" sigificant     whitespace   ">blah blah</p>' +
+                  '<![endif]-->';
+          
+          equals(minify(input, { removeComments: true }), output);
         });
         
         test('remove comments from scripts', function(){

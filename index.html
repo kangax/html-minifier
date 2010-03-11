@@ -26,7 +26,7 @@
               <input type="checkbox" id="remove-comments" checked>
               <label for="remove-comments">Remove comments</label>
               <span class="quiet short" style="margin-left:1.5em;float:left;clear:both;">
-                Conditional comments are left intact.
+                Conditional comments are left intact, but their inner (insignificant) whitespace is removed.
               </span>
             </li>
             <li>
@@ -98,7 +98,8 @@
                   Currently, only: 
                   <code>&lt;/html></code>, 
                   <code>&lt;/head></code>, 
-                  <code>&lt;/body></code>, 
+                  <code>&lt;/body></code>,
+                  <code>&lt;/option></code>
                   <code>&lt;/thead></code>,
                   <code>&lt;/tbody></code>,
                   <code>&lt;/tfoot></code>,
