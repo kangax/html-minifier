@@ -85,12 +85,19 @@
     return (/^(?:checked|disabled|selected|readonly)$/).test(attrName);
   }
   
+  function isUriTypeAttribute(attrName) {
+    return (/^(?:href|src|usemap|action|cite|longdesc|profile|codebase)$/).test(attrName);
+  }
+  
   function cleanAttributeValue(tag, attrName, attrValue) {
     if (isEventAttribute(attrName)) {
       return trimWhitespace(attrValue.replace(/^\s*javascript:\s*/i, ''));
     }
-    if (attrName === 'class') {
+    else if (attrName === 'class') {
       return collapseWhitespace(trimWhitespace(attrValue));
+    }
+    else if (isUriTypeAttribute(attrName)) {
+      return trimWhitespace(attrValue);
     }
     return attrValue;
   }

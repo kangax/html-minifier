@@ -39,7 +39,7 @@
           equals(minify('<script>alert(\'<!-- foo -->\')<\/script>'), '<script>alert(\'<!-- foo -->\')<\/script>');
           equals(minify('<script>alert(\'-->\')<\/script>'), '<script>alert(\'-->\')<\/script>');
           
-          equals(minify('<a title="x"href=" ">foo</a>'), '<a title="x" href=" ">foo</a>');
+          equals(minify('<a title="x"href=" ">foo</a>'), '<a title="x" href="">foo</a>');
           equals(minify('<p id=""class=""title="">x'), '<p id="" class="" title="">x</p>');
           equals(minify('<p x="x\'"">x</p>'), '<p x="x\'">x</p>', 'trailing quote should be ignored');
         });
@@ -203,7 +203,7 @@
           equals(minify(input, { removeEmptyAttributes: true }), '<img src="" alt="">');
         });
         
-        test('cleaning attributes', function(){
+        test('cleaning class attributes', function(){
           input = '<p class=" foo bar  ">foo bar baz</p>', output;
           equals(minify(input, { cleanAttributes: true }), '<p class="foo bar">foo bar baz</p>');
           
@@ -216,7 +216,43 @@
           
           input = '<p class="\n  \n foo   \n\n\t  \t\n  class1 class-23 ">foo bar baz</p>';
           equals(minify(input, { cleanAttributes: true }), '<p class="foo class1 class-23">foo bar baz</p>');
+        });
+        
+        test('cleaning URI-based attributes', function(){
+          input = '<a href="   http://example.com  ">x</a>';
+          output = '<a href="http://example.com">x</a>';
+          equals(minify(input, { cleanAttributes: true }), output);
           
+          input = '<a href="  \t\t  \n \t  ">x</a>';
+          output = '<a href="">x</a>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<img src="   http://example.com  " title="bleh   " longdesc="  http://example.com/longdesc \n\n   \t ">';
+          output = '<img src="http://example.com" title="bleh   " longdesc="http://example.com/longdesc">';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<img src="" usemap="   http://example.com  ">';
+          output = '<img src="" usemap="http://example.com">';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<form action="  somePath/someSubPath/someAction?foo=bar&baz=qux     "></form>';
+          output = '<form action="somePath/someSubPath/someAction?foo=bar&baz=qux"></form>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<BLOCKQUOTE cite=" \n\n\n http://www.mycom.com/tolkien/twotowers.html     "><P>foobar</P></BLOCKQUOTE>';
+          output = '<blockquote cite="http://www.mycom.com/tolkien/twotowers.html"><p>foobar</p></blockquote>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<head profile="       http://gmpg.org/xfn/11    "></head>';
+          output = '<head profile="http://gmpg.org/xfn/11"></head>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<object codebase="   http://example.com  "></object>';
+          output = '<object codebase="http://example.com"></object>';
+          equals(minify(input, { cleanAttributes: true }), output);
+        });
+        
+        test('cleaning other attributes', function() {
           input = '<a href="#" onclick="  window.prompt(\'boo\'); " onmouseover=" \n\n alert(123);  \t \n\t  ">blah</a>';
           output = '<a href="#" onclick="window.prompt(\'boo\');" onmouseover="alert(123);">blah</a>';
           equals(minify(input, { cleanAttributes: true }), output);
