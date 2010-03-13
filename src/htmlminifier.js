@@ -85,8 +85,31 @@
     return (/^(?:checked|disabled|selected|readonly)$/).test(attrName);
   }
   
-  function isUriTypeAttribute(attrName) {
-    return (/^(?:href|src|usemap|action|cite|longdesc|profile|codebase)$/).test(attrName);
+  function isUriTypeAttribute(attrName, tag) {
+    return (
+      ((/^(?:a|area|link|base)$/).test(tag) && attrName === 'href') ||
+      (tag === 'img' && (/^(?:src|longdesc|usemap)$/).test(attrName)) ||
+      (tag === 'object' && (/^(?:classid|codebase|data|usemap)$/).test(attrName)) ||
+      (tag === 'q' && attrName === 'cite') ||
+      (tag === 'blockquote' && attrName === 'cite') ||
+      ((tag === 'ins' || tag === 'del') && attrName === 'cite') ||
+      (tag === 'form' && attrName === 'action') ||
+      (tag === 'input' && (attrName === 'src' || attrName === 'usemap')) ||
+      (tag === 'head' && attrName === 'profile') ||
+      (tag === 'script' && (attrName === 'src' || attrName === 'for'))
+    );
+  }
+  
+  function isNumberTypeAttribute(attrName, tag) {
+    return (
+      ((/^(?:a|area|object|button)$/).test(tag) && attrName === 'tabindex') ||
+      (tag === 'input' && (attrName === 'maxlength' || attrName === 'tabindex')) ||
+      (tag === 'select' && (attrName === 'size' || attrName === 'tabindex')) ||
+      (tag === 'textarea' && (/^(?:rows|cols|tabindex)$/).test(attrName)) ||
+      (tag === 'colgroup' && attrName === 'span') ||
+      (tag === 'col' && attrName === 'span') ||
+      ((tag === 'th' || tag == 'td') && (attrName === 'rowspan' || attrName === 'colspan'))  
+    );
   }
   
   function cleanAttributeValue(tag, attrName, attrValue) {
@@ -96,7 +119,9 @@
     else if (attrName === 'class') {
       return collapseWhitespace(trimWhitespace(attrValue));
     }
-    else if (isUriTypeAttribute(attrName) || attrName === 'style') {
+    else if (isUriTypeAttribute(attrName, tag)
+          || isNumberTypeAttribute(attrName, tag) 
+          || attrName === 'style') {
       return trimWhitespace(attrValue);
     }
     return attrValue;

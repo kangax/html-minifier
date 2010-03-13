@@ -256,6 +256,38 @@
           input = '<object codebase="   http://example.com  "></object>';
           output = '<object codebase="http://example.com"></object>';
           equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<span profile="   1, 2, 3  ">foo</span>';
+          equals(minify(input, { cleanAttributes: true }), input);
+          
+          input = '<div action="  foo-bar-baz ">blah</div>';
+          equals(minify(input, { cleanAttributes: true }), input);
+        });
+        
+        test('cleaning Number-based attributes', function() {
+          input = '<a href="#" tabindex="   1  ">x</a><button tabindex="   2  ">y</button>';
+          output = '<a href="#" tabindex="1">x</a><button tabindex="2">y</button>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<input value="" maxlength="     5 ">';
+          output = '<input value="" maxlength="5">';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<select size="  10   \t\t "><option>x</option></select>';
+          output = '<select size="10"><option>x</option></select>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<textarea rows="   20  " cols="  30      "></textarea>';
+          output = '<textarea rows="20" cols="30"></textarea>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<COLGROUP span="   40  "><COL span="  39 "></COLGROUP>';
+          output = '<colgroup span="40"><col span="39"></colgroup>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<tr><td colspan="    2   ">x</td><td rowspan="   3 "></td></tr>';
+          output = '<tr><td colspan="2">x</td><td rowspan="3"></td></tr>';
+          equals(minify(input, { cleanAttributes: true }), output);
         });
         
         test('cleaning other attributes', function() {
