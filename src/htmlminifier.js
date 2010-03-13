@@ -91,12 +91,12 @@
   
   function cleanAttributeValue(tag, attrName, attrValue) {
     if (isEventAttribute(attrName)) {
-      return trimWhitespace(attrValue.replace(/^\s*javascript:\s*/i, ''));
+      return trimWhitespace(attrValue).replace(/^javascript:\s*/i, '');
     }
     else if (attrName === 'class') {
       return collapseWhitespace(trimWhitespace(attrValue));
     }
-    else if (isUriTypeAttribute(attrName)) {
+    else if (isUriTypeAttribute(attrName) || attrName === 'style') {
       return trimWhitespace(attrValue);
     }
     return attrValue;

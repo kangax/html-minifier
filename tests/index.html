@@ -203,7 +203,7 @@
           equals(minify(input, { removeEmptyAttributes: true }), '<img src="" alt="">');
         });
         
-        test('cleaning class attributes', function(){
+        test('cleaning class/style attributes', function(){
           input = '<p class=" foo bar  ">foo bar baz</p>', output;
           equals(minify(input, { cleanAttributes: true }), '<p class="foo bar">foo bar baz</p>');
           
@@ -212,10 +212,16 @@
           equals(minify(input, { cleanAttributes: true, removeAttributeQuotes: true }), '<p class=foo>foo bar baz</p>');
           
           input = '<p class="\n  \n foo   \n\n\t  \t\n   ">foo bar baz</p>';
-          equals(minify(input, { cleanAttributes: true }), '<p class="foo">foo bar baz</p>');
+          output = '<p class="foo">foo bar baz</p>';
+          equals(minify(input, { cleanAttributes: true }), output);
           
           input = '<p class="\n  \n foo   \n\n\t  \t\n  class1 class-23 ">foo bar baz</p>';
-          equals(minify(input, { cleanAttributes: true }), '<p class="foo class1 class-23">foo bar baz</p>');
+          output = '<p class="foo class1 class-23">foo bar baz</p>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<p style="    color: red; background-color: rgb(100, 75, 200);  "></p>';
+          output = '<p style="color: red; background-color: rgb(100, 75, 200);"></p>';
+          equals(minify(input, { cleanAttributes: true }), output);
         });
         
         test('cleaning URI-based attributes', function(){
@@ -255,6 +261,10 @@
         test('cleaning other attributes', function() {
           input = '<a href="#" onclick="  window.prompt(\'boo\'); " onmouseover=" \n\n alert(123);  \t \n\t  ">blah</a>';
           output = '<a href="#" onclick="window.prompt(\'boo\');" onmouseover="alert(123);">blah</a>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<body onload="  foo();   bar()   "><p>x</body>';
+          output = '<body onload="foo();   bar()"><p>x</p></body>';
           equals(minify(input, { cleanAttributes: true }), output);
         });
         
