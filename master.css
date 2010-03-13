@@ -25,5 +25,9 @@ button { font-weight: bold; width: 100px; }
 .quiet { font-size: 0.85em; color: #888; }
 .short { display: inline-block; width: 20em; margin-top: 0.25em; }
 
+.controls span { margin-right: 0.5em; margin-left: 1em; }
+.controls a { margin-left: 0.1em; }
+.controls a:focus, .controls a:hover { text-decoration: none; }
+
 .deprecated-element, .deprecated-attribute { color: red; }
 .presentational-element, .presentational-attribute, .inaccessible-attribute { color: #FF8C00; }

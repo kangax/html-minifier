@@ -60,6 +60,29 @@
     }
   };
   
+  function setCheckedAttrOnCheckboxes(attrValue) {
+    var checkboxes = byId('options').getElementsByTagName('input');
+    for (var i = checkboxes.length; i--; ) {
+      checkboxes[i].checked = attrValue;
+    }
+  }
+  
+  byId('select-all').onclick = function() {
+    setCheckedAttrOnCheckboxes(true);
+    return false;
+  };
+  
+  byId('select-none').onclick = function() {
+    setCheckedAttrOnCheckboxes(false);
+    return false;
+  };
+  
+  byId('select-safe').onclick = function() {
+    setCheckedAttrOnCheckboxes(true);
+    byId('options').getElementsByTagName('input')[10].checked = false;
+    return false;
+  };
+  
 })();
 
 var _gaq = _gaq || [];
