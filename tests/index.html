@@ -354,6 +354,12 @@
           equals(minify(input, { removeRedundantAttributes: true }), '<script>x=2,y=4<\/script>');
         });
         
+        test('removing redundant attributes (&lt;area shape="rect" ...>)', function(){
+          input = '<area shape="rect" coords="696,25,958,47" href="#" title="foo">';
+          output = '<area coords="696,25,958,47" href="#" title="foo">';
+          equals(minify(input, { removeRedundantAttributes: true }), output);
+        });
+        
         test('removing redundant attributes (&lt;... = "javascript: ..." ...>)', function(){
           input = '<p onclick="javascript:alert(1)">x</p>';
           equals(minify(input, { cleanAttributes: true }), '<p onclick="alert(1)">x</p>');

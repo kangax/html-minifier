@@ -77,7 +77,11 @@
         
         (tag === 'a' &&
         attrName === 'name' &&
-        attributesInclude(attrs, 'id'))
+        attributesInclude(attrs, 'id')) ||
+        
+        (tag === 'area' &&
+        attrName === 'shape' &&
+        attrValue === 'rect')
     );
   }
   
