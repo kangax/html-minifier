@@ -123,10 +123,11 @@
     else if (attrName === 'class') {
       return collapseWhitespace(trimWhitespace(attrValue));
     }
-    else if (isUriTypeAttribute(attrName, tag)
-          || isNumberTypeAttribute(attrName, tag) 
-          || attrName === 'style') {
+    else if (isUriTypeAttribute(attrName, tag) || isNumberTypeAttribute(attrName, tag)) {
       return trimWhitespace(attrValue);
+    }
+    else if (attrName === 'style') {
+      return trimWhitespace(attrValue).replace(/\s*;\s*$/, '');
     }
     return attrValue;
   }

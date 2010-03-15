@@ -220,7 +220,11 @@
           equals(minify(input, { cleanAttributes: true }), output);
           
           input = '<p style="    color: red; background-color: rgb(100, 75, 200);  "></p>';
-          output = '<p style="color: red; background-color: rgb(100, 75, 200);"></p>';
+          output = '<p style="color: red; background-color: rgb(100, 75, 200)"></p>';
+          equals(minify(input, { cleanAttributes: true }), output);
+          
+          input = '<p style="font-weight: bold  ; "></p>';
+          output = '<p style="font-weight: bold"></p>';
           equals(minify(input, { cleanAttributes: true }), output);
         });
         
