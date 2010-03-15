@@ -295,11 +295,11 @@
         });
         
         test('cleaning other attributes', function() {
-          input = '<a href="#" onclick="  window.prompt(\'boo\'); " onmouseover=" \n\n alert(123);  \t \n\t  ">blah</a>';
-          output = '<a href="#" onclick="window.prompt(\'boo\');" onmouseover="alert(123);">blah</a>';
+          input = '<a href="#" onclick="  window.prompt(\'boo\'); " onmouseover=" \n\n alert(123)  \t \n\t  ">blah</a>';
+          output = '<a href="#" onclick="window.prompt(\'boo\')" onmouseover="alert(123)">blah</a>';
           equals(minify(input, { cleanAttributes: true }), output);
           
-          input = '<body onload="  foo();   bar()   "><p>x</body>';
+          input = '<body onload="  foo();   bar() ;  "><p>x</body>';
           output = '<body onload="foo();   bar()"><p>x</p></body>';
           equals(minify(input, { cleanAttributes: true }), output);
         });

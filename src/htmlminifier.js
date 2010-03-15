@@ -118,7 +118,7 @@
   
   function cleanAttributeValue(tag, attrName, attrValue) {
     if (isEventAttribute(attrName)) {
-      return trimWhitespace(attrValue).replace(/^javascript:\s*/i, '');
+      return trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
     }
     else if (attrName === 'class') {
       return collapseWhitespace(trimWhitespace(attrValue));
