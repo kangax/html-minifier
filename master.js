@@ -21,6 +21,7 @@
       removeEmptyAttributes:        byId('remove-empty-attributes').checked,
       removeEmptyElements:          byId('remove-empty-elements').checked,
       removeOptionalTags:           byId('remove-optional-tags').checked,
+      removeScriptTypeAttributes:   byId('remove-script-type-attributes').checked,
       lint:                         byId('use-htmllint').checked ? new HTMLLint() : null
     };
   }
@@ -79,7 +80,9 @@
   
   byId('select-safe').onclick = function() {
     setCheckedAttrOnCheckboxes(true);
-    byId('options').getElementsByTagName('input')[10].checked = false;
+    var inputEls = byId('options').getElementsByTagName('input');
+    inputEls[10].checked = false;
+    inputEls[11].checked = false;
     return false;
   };
   

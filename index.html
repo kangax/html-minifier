@@ -10,7 +10,7 @@
     <div>
       <div id="outer-wrapper">
         <div id="wrapper">
-          <h1>HTML Minifier <span style="font-size:0.6em">(ver. 0.4)</span></h1>
+          <h1>HTML Minifier <span style="font-size:0.6em">(ver. 0.41)</span></h1>
           <p id="warning">
             Minifier is <strong>very draft</strong> and is <strong>not yet thoroughly tested</strong>. Use at your own risk. 
           </p>
@@ -110,11 +110,21 @@
             </li>
             <li>
               <input type="checkbox" id="remove-empty-elements">
-              <label for="remove-empty-elements">
+              <label for="remove-empty-elements" class="unsafe">
                 Remove empty elements
                 <br>
                 <span class="quiet short">
                   All except <code>textarea</code>
+                </span>
+              </label>
+            </li>
+            <li>
+              <input type="checkbox" id="remove-script-type-attributes">
+              <label for="remove-script-type-attributes" class="unsafe">
+                Remove <code>type="text/javascript"</code> from <code>script</code>'s
+                <br>
+                <span class="quiet short">
+                  Values other than "text/javascript" (e.g. "text/vbscript") are left intact.
                 </span>
               </label>
             </li>

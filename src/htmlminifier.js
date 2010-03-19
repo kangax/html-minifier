@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v0.4
+ * HTMLMinifier v0.41
  * http://kangax.github.com/html-minifier/
  *
  * Copyright (c) 2010 Juriy "kangax" Zaytsev
@@ -82,6 +82,14 @@
         (tag === 'area' &&
         attrName === 'shape' &&
         attrValue === 'rect')
+    );
+  }
+  
+  function isScriptTypeAttribute(tag, attrName, attrValue) {
+    return (
+      tag === 'script' && 
+      attrName === 'type' && 
+      trimWhitespace(attrValue.toLowerCase()) === 'text/javascript'
     );
   }
   
@@ -195,8 +203,11 @@
         attrValue = attr.escaped,
         attrFragment;
     
-    if (options.removeRedundantAttributes && 
-        isAttributeRedundant(tag, attrName, attrValue, attrs)) {
+    if ((options.removeRedundantAttributes && 
+      isAttributeRedundant(tag, attrName, attrValue, attrs)) 
+      ||
+      (options.removeScriptTypeAttributes && 
+      isScriptTypeAttribute(tag, attrName, attrValue))) {
       return '';
     }
     

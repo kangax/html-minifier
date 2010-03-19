@@ -31,3 +31,5 @@ button { font-weight: bold; width: 100px; }
 
 .deprecated-element, .deprecated-attribute { color: red; }
 .presentational-element, .presentational-attribute, .inaccessible-attribute { color: #FF8C00; }
+
+.unsafe { color: #f33; }
