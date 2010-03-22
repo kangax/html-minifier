@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v0.41
+ * HTMLMinifier v0.42
  * http://kangax.github.com/html-minifier/
  *
  * Copyright (c) 2010 Juriy "kangax" Zaytsev
@@ -301,6 +301,7 @@
           }
         }
         currentChars = text;
+        lint && lint.testChars(text);
         buffer.push(text);
       },
       comment: function( text ) {
