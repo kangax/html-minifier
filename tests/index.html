@@ -401,6 +401,33 @@
           equals(minify(input, { removeScriptTypeAttributes: true }), output);
         });
         
+        test('removing type="text/css" attributes', function(){
+          input = '<style type="text/css">.foo { color: red }<\/style>';
+          output = '<style>.foo { color: red }<\/style>';
+          
+          equals(minify(input, { removeStyleLinkTypeAttributes: true }), output);
+          equals(minify(input, { removeStyleLinkTypeAttributes: false }), input);
+          
+          input = '<STYLE TYPE = "  text/CSS ">body { font-size: 1.75em }<\/style>';
+          output = '<style>body { font-size: 1.75em }<\/style>';
+          
+          equals(minify(input, { removeStyleLinkTypeAttributes: true }), output);
+          
+          input = '<style type="text/plain">.foo { background: green }<\/style>';
+          output = '<style type="text/plain">.foo { background: green }<\/style>';
+          
+          equals(minify(input, { removeStyleLinkTypeAttributes: true }), output);
+          
+          input = '<link rel="stylesheet" type="text/css" href="http://example.com">';
+          output = '<link rel="stylesheet" href="http://example.com">';
+          
+          equals(minify(input, { removeStyleLinkTypeAttributes: true }), output);
+          
+          input = '<link rel="alternate" type="application/atom+xml" href="data.xml">';
+          
+          equals(minify(input, { removeStyleLinkTypeAttributes: true }), input);
+        });
+        
         test('removing attribute quotes', function(){
           input = '<p title="blah" class="a23B-foo.bar_baz:qux" id="moo">foo</p>';
           equals(minify(input, { removeAttributeQuotes: true }), '<p title=blah class=a23B-foo.bar_baz:qux id=moo>foo</p>');

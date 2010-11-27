@@ -10,7 +10,7 @@
     <div>
       <div id="outer-wrapper">
         <div id="wrapper">
-          <h1>HTML Minifier <span style="font-size:0.6em">(ver. 0.42)</span></h1>
+          <h1>HTML Minifier <span style="font-size:0.6em">(ver. 0.43)</span></h1>
           <p id="warning">
             Minifier is <strong>very draft</strong> and is <strong>not yet thoroughly tested</strong>. Use at your own risk. 
           </p>
@@ -125,6 +125,16 @@
                 <br>
                 <span class="quiet short">
                   Values other than "text/javascript" (e.g. "text/vbscript") are left intact.
+                </span>
+              </label>
+            </li>
+            <li>
+              <input type="checkbox" id="remove-style-link-type-attributes">
+              <label for="remove-style-link-type-attributes" class="unsafe">
+                Remove <code>type="text/css"</code> from <code>style</code>'s and <code>link</code>'s
+                <br>
+                <span class="quiet short">
+                  Values other than "text/css" (e.g. "text/plain" or "application/atom+xml") are left intact.
                 </span>
               </label>
             </li>

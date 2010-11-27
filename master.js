@@ -10,19 +10,20 @@
   
   function getOptions() {
     return {
-      removeComments:               byId('remove-comments').checked,
-      removeCommentsFromCDATA:      byId('remove-comments-from-cdata').checked,
-      removeCDATASectionsFromCDATA: byId('remove-cdata-sections-from-cdata').checked,
-      collapseWhitespace:           byId('collapse-whitespace').checked,
-      collapseBooleanAttributes:    byId('collapse-boolean-attributes').checked,
-      removeAttributeQuotes:        byId('remove-attribute-quotes').checked,  
-      removeRedundantAttributes:    byId('remove-redundant-attributes').checked,
-      useShortDoctype:              byId('use-short-doctype').checked,
-      removeEmptyAttributes:        byId('remove-empty-attributes').checked,
-      removeEmptyElements:          byId('remove-empty-elements').checked,
-      removeOptionalTags:           byId('remove-optional-tags').checked,
-      removeScriptTypeAttributes:   byId('remove-script-type-attributes').checked,
-      lint:                         byId('use-htmllint').checked ? new HTMLLint() : null
+      removeComments:                 byId('remove-comments').checked,
+      removeCommentsFromCDATA:        byId('remove-comments-from-cdata').checked,
+      removeCDATASectionsFromCDATA:   byId('remove-cdata-sections-from-cdata').checked,
+      collapseWhitespace:             byId('collapse-whitespace').checked,
+      collapseBooleanAttributes:      byId('collapse-boolean-attributes').checked,
+      removeAttributeQuotes:          byId('remove-attribute-quotes').checked,  
+      removeRedundantAttributes:      byId('remove-redundant-attributes').checked,
+      useShortDoctype:                byId('use-short-doctype').checked,
+      removeEmptyAttributes:          byId('remove-empty-attributes').checked,
+      removeEmptyElements:            byId('remove-empty-elements').checked,
+      removeOptionalTags:             byId('remove-optional-tags').checked,
+      removeScriptTypeAttributes:     byId('remove-script-type-attributes').checked,
+      removeStyleLinkTypeAttributes:  byId('remove-style-link-type-attributes').checked,
+      lint:                           byId('use-htmllint').checked ? new HTMLLint() : null
     };
   }
   
