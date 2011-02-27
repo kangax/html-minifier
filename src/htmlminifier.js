@@ -254,6 +254,8 @@
         buffer = [ ],
         currentChars = '',
         currentTag = '',
+        stackNoTrimWhitespace = [],
+        stackNoCollapseWhitespace = [],
         lint = options.lint,
         t = new Date()
     
@@ -262,6 +264,16 @@
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
+        
+        // set whitespace flags for nested tags (eg. <code> within a <pre>)
+        if (options.collapseWhitespace) {
+          if (!canTrimWhitespace(tag)) {
+            stackNoTrimWhitespace.push(tag);
+          }
+          if (!canCollapseWhitespace(tag)) {
+            stackNoCollapseWhitespace.push(tag);
+          }
+        }
         
         buffer.push('<', tag);
         
@@ -275,6 +287,18 @@
         buffer.push('>');
       },
       end: function( tag ) {
+        // check if current tag is in a whitespace stack
+        if (options.collapseWhitespace) {
+          if (stackNoTrimWhitespace.length &&
+            tag == stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
+            stackNoTrimWhitespace.pop();
+          }
+          if (stackNoCollapseWhitespace.length &&
+            tag == stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
+            stackNoCollapseWhitespace.pop();
+          }
+        }
+        
         var isElementEmpty = currentChars === '' && tag === currentTag;
         if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag))) {
           // remove last "element" from buffer, return
@@ -304,10 +328,10 @@
           }
         }
         if (options.collapseWhitespace) {
-          if (canTrimWhitespace(currentTag)) {
+          if (!stackNoTrimWhitespace.length && canTrimWhitespace(currentTag)) {
             text = trimWhitespace(text);
           }
-          if (canCollapseWhitespace(currentTag)) {
+          if (!stackNoCollapseWhitespace.length && canCollapseWhitespace(currentTag)) {
             text = collapseWhitespace(text);
           }
         }

@@ -467,6 +467,10 @@
           output = '<pre title="some title...">   hello     world </pre>';
           equals(minify(input, { collapseWhitespace: true }), output);
           
+          input = '<pre title="some title..."><code>   hello     world </code></pre>';
+          output = '<pre title="some title..."><code>   hello     world </code></pre>';
+          equals(minify(input, { collapseWhitespace: true }), output);
+          
           input = '<script>alert("foo     bar")    <\/script>';
           output = '<script>alert("foo     bar")<\/script>';
           equals(minify(input, { collapseWhitespace: true }), output);
