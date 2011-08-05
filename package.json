@@ -1,0 +1,35 @@
+{
+  "name": "html-minifier",
+  "version": "0.43",
+  "description": "HTMLMinifier is a Javascript-based HTML minifier with lint-like capabilities.",
+  "keywords": ["html", "minifier", "lint"],
+  "maintainers": [{
+    "name": "Juriy Zaytsev",
+    "email": "kangax@gmail.com",
+    "web": "http://perfectionkills.com"
+  }],
+  "contributors": [{
+    "name": "Gilmore Davidson",
+    "web": "https://github.com/gilmoreorless"
+  },
+  {
+    "name": "Hugo Wetterberg",
+    "email": "hugo@wetterberg.nu"
+  }],
+  "licenses": [{
+    "type": "MIT",
+    "url": "https://github.com/hugowetterberg/html-minifier/blob/gh-pages/src/license.txt"
+  }],
+  "repositories": [{
+    "type": "git",
+    "url": "git://github.com/hugowetterberg/html-minifier.git"
+  }],
+  "engines": {
+    "node": ">=0.4.8"
+  },
+  "directories": {
+    "src": "./src"
+  },
+  "main": "./src/htmlminifier.js"
+}
+
