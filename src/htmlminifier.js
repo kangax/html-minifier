@@ -9,7 +9,7 @@
  
 (function(global){
   
-  var log;
+  var log, HTMLParser;
   if (global.console && global.console.log) {
     log = function(message) {
       // "preserving" `this`
@@ -20,6 +20,13 @@
     log = function(){ };
   }
   
+  if (global.HTMLParser) {
+    HTMLParser = global.HTMLParser;
+  }
+  else if (typeof require === 'function') {
+    HTMLParser = require('./htmlparser').HTMLParser;
+  }
+
   function trimWhitespace(str) {
     return str.replace(/^\s+/, '').replace(/\s+$/, '');
   }
@@ -367,4 +374,4 @@
   // export
   global.minify = minify;
   
-})(this);
+})(typeof exports === 'undefined' ? window : exports);

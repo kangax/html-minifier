@@ -24,7 +24,7 @@
  *
  */
 
-(function(){
+(function(global){
 
   // Regular Expressions for parsing tags and attributes
   var startTag = /^<(\w+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
@@ -53,7 +53,7 @@
   
   var reCache = { }, stackedTag, re;
 
-  var HTMLParser = this.HTMLParser = function( html, handler ) {
+  var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html;
     stack.last = function(){
       return this[ this.length - 1 ];
@@ -201,7 +201,7 @@
     }
   };
   
-  this.HTMLtoXML = function( html ) {
+  global.HTMLtoXML = function( html ) {
     var results = "";
     
     HTMLParser(html, {
@@ -227,7 +227,7 @@
     return results;
   };
   
-  this.HTMLtoDOM = function( html, doc ) {
+  global.HTMLtoDOM = function( html, doc ) {
     // There can be only one of these elements
     var one = makeMap("html,head,body,title");
     
@@ -324,4 +324,4 @@
     }
     return obj;
   }
-})();
+})(typeof exports === 'undefined' ? window : exports);
