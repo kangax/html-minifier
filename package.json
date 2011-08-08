@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "HTML minifier with lint-like capabilities.",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "keywords": ["html", "minifier", "lint"],
   "url" : "http://github.com/kangax/html-minifier",
   "maintainers": [{
