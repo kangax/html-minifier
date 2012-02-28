@@ -579,7 +579,12 @@
                   
           equals(minify(input, { removeOptionalTags: true }), output);
         });
-        
+
+        test('preserving whitespace in labels', function(){
+          input = '<label>label: <input></label>';
+          equals(minify(input, { collapseWhitespace: true }), input);
+        });
+
       })(this);
     </script>
   </body>
