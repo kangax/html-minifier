@@ -251,33 +251,58 @@
     
     return (' ' + attrFragment);
   }
+
+
+  function setDefaultTesters(options) {
+
+    var defaultTesters = ['canCollapseWhitespace','canTrimWhitespace'];
+
+    for (var i = 0, len = defaultTesters.length; i < len; i++) {
+      if (!options[defaultTesters[i]]) {
+        options[defaultTesters[i]] = function() {
+          return false;
+        }
+      }
+    }
+  }
   
   function minify(value, options) {
     
     options = options || { };
     value = trimWhitespace(value);
+    setDefaultTesters(options);
     
     var results = [ ],
         buffer = [ ],
         currentChars = '',
         currentTag = '',
+        currentAttrs = [],
         stackNoTrimWhitespace = [],
         stackNoCollapseWhitespace = [],
         lint = options.lint,
         t = new Date()
+
+    function _canCollapseWhitespace(tag, attrs) {
+      return canCollapseWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
+    }
+
+    function _canTrimWhitespace(tag, attrs) {
+      return canTrimWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
+    }
     
     HTMLParser(value, {
       start: function( tag, attrs, unary ) {
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
+        currentAttrs = attrs;
         
         // set whitespace flags for nested tags (eg. <code> within a <pre>)
         if (options.collapseWhitespace) {
-          if (!canTrimWhitespace(tag)) {
+          if (!_canTrimWhitespace(tag, attrs)) {
             stackNoTrimWhitespace.push(tag);
           }
-          if (!canCollapseWhitespace(tag)) {
+          if (!_canCollapseWhitespace(tag, attrs)) {
             stackNoCollapseWhitespace.push(tag);
           }
         }
@@ -335,10 +360,10 @@
           }
         }
         if (options.collapseWhitespace) {
-          if (!stackNoTrimWhitespace.length && canTrimWhitespace(currentTag)) {
+          if (!stackNoTrimWhitespace.length && _canTrimWhitespace(currentTag, currentAttrs)) {
             text = trimWhitespace(text);
           }
-          if (!stackNoCollapseWhitespace.length && canCollapseWhitespace(currentTag)) {
+          if (!stackNoCollapseWhitespace.length && _canCollapseWhitespace(currentTag, currentAttrs)) {
             text = collapseWhitespace(text);
           }
         }
