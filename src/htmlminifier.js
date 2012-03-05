@@ -209,7 +209,7 @@
   }
   
   function canTrimWhitespace(tag) {
-    return !(/^(?:pre|textarea)$/.test(tag));
+    return !(/^(?:pre|textarea|label)$/.test(tag));
   }
   
   function normalizeAttribute(attr, attrs, tag, options) {
