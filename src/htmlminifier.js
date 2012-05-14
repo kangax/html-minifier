@@ -395,8 +395,12 @@
     log('minified in: ' + (new Date() - t) + 'ms');
     return str;
   }
-  
-  // export
-  global.minify = minify;
-  
-})(typeof exports === 'undefined' ? window : exports);
+
+  // for CommonJS enviroments, export everything
+  if ( typeof exports !== "undefined" ) {
+    exports.minify = minify;
+  } else {
+    global.minify = minify;
+  }
+
+}(this));
