@@ -147,4 +147,4 @@
   
   global.HTMLLint = Lint;
   
-})(typeof exports === 'undefined' ? window : exports);
+})(typeof exports === 'undefined' ? this : exports);
