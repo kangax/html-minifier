@@ -1,7 +1,7 @@
 (function(global){
   
   var minify, QUnit, 
-    test, equals, ok,
+    test, equal, ok,
     input, output, HTMLLint, lint;
 
   if (typeof require === 'function') {
@@ -15,7 +15,7 @@
   }
 
   test = QUnit.test;
-  equals = QUnit.equals;
+  equal = QUnit.equal;
   ok = QUnit.ok;
 
   QUnit.module('', {
@@ -33,11 +33,11 @@
   });
   
   test('lint API', function() {
-    equals(0, lint.log.length, '`log` property exists');
-    equals("function", typeof lint.populate, '`populate` method exists');
-    equals("function", typeof lint.test, '`test` method exists');
-    equals("function", typeof lint.testElement, '`testElement` method exists');
-    equals("function", typeof lint.testAttribute, '`testAttribute` method exists');
+    equal(0, lint.log.length, '`log` property exists');
+    equal("function", typeof lint.populate, '`populate` method exists');
+    equal("function", typeof lint.test, '`test` method exists');
+    equal("function", typeof lint.testElement, '`testElement` method exists');
+    equal("function", typeof lint.testAttribute, '`testAttribute` method exists');
   });
   
   test('deprecated element (font)', function(){
