@@ -173,13 +173,14 @@
 		}
 
 		function parseEndTag( tag, tagName ) {
+			var pos;
 			// If no tag name is provided, clean shop
 			if ( !tagName )
-				var pos = 0;
+				pos = 0;
 				
 			// Find the closest opened tag of the same type
 			else
-				for ( var pos = stack.length - 1; pos >= 0; pos-- )
+				for ( pos = stack.length - 1; pos >= 0; pos-- )
 					if ( stack[ pos ] == tagName )
 						break;
 			
