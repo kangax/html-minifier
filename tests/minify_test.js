@@ -574,4 +574,10 @@
     equal(minify(input, { removeOptionalTags: true }), output);
   });
 
+  test('minify html with some comments in tags', function(){
+    input = '<div <!-- HTML COMMENT --> class="one-class"></div>';
+    output = '<div <!-- HTML COMMENT --> class="one-class"></div>';
+    equal(minify(input), output);
+  });
+
 }(this));
