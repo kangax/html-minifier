@@ -36,6 +36,9 @@
     equal(minify('<a title="x"href=" ">foo</a>'), '<a title="x" href="">foo</a>');
     equal(minify('<p id=""class=""title="">x'), '<p id="" class="" title="">x</p>');
     equal(minify('<p x="x\'"">x</p>'), '<p x="x\'">x</p>', 'trailing quote should be ignored');
+
+    equal(minify('<ng-include src="x"></ng-include>'), '<ng-include src="x"></ng-include>');
+    equal(minify('<ng:include src="x"></ng:include>'), '<ng:include src="x"></ng:include>');
   });
   
   test('`minifiy` exists', function() {
