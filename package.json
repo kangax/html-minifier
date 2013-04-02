@@ -19,7 +19,7 @@
   }],
   "licenses": [{
     "type": "MIT",
-    "url": "https://github.com/kangax/html-minifier/blob/gh-pages/src/license.txt"
+    "url": "https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE"
   }],
   "repository": "git://github.com/kangax/html-minifier",
   "engines": {
@@ -36,5 +36,5 @@
     "jshint": "1.1.x",
     "uglify-js": "2.2.x"
   },
-  "main": "./src/htmlminifier.js"
+  "main": "./dist/all.js"
 }
