@@ -41,7 +41,7 @@
   }
   
   function isConditionalComment(text) {
-    return (/\[if[^\]]+\]/).test(text);
+    return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
   }
   
   function isEventAttribute(attrName) {
