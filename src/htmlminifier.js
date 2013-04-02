@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v0.5
+ * HTMLMinifier v0.5.0
  * http://kangax.github.com/html-minifier/
  *
  * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
