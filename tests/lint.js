@@ -1,12 +1,10 @@
 (function(global){
 
-  var minify = global.minify, input, output, lint;
-
-  module('', {
-    setup: function() {
+  var minify = global.minify || require('../dist/all.js').minify,
+      HTMLLint = HTMLLint || require('../dist/all.js').HTMLLint,
+      input,
+      output,
       lint = new HTMLLint();
-    }
-  });
 
   test('lint exists', function() {
     ok(typeof lint !== 'undefined');
@@ -17,11 +15,11 @@
   });
 
   test('lint API', function() {
-    equals(0, lint.log.length, '`log` property exists');
-    equals("function", typeof lint.populate, '`populate` method exists');
-    equals("function", typeof lint.test, '`test` method exists');
-    equals("function", typeof lint.testElement, '`testElement` method exists');
-    equals("function", typeof lint.testAttribute, '`testAttribute` method exists');
+    equal(0, lint.log.length, '`log` property exists');
+    equal("function", typeof lint.populate, '`populate` method exists');
+    equal("function", typeof lint.test, '`test` method exists');
+    equal("function", typeof lint.testElement, '`testElement` method exists');
+    equal("function", typeof lint.testAttribute, '`testAttribute` method exists');
   });
 
   test('deprecated element (font)', function(){
@@ -29,7 +27,7 @@
     var log = lint.log.join('');
 
     ok(log.indexOf('font') > -1);
-    ok(log.indexOf('deprecated element') > -1);
+    ok(log.indexOf('deprecated') > -1);
   });
 
-})(this);
+})(typeof exports === 'undefined' ? window : exports);

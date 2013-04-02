@@ -9,6 +9,7 @@ testrunner.run({
   code: './src/htmlminifier.js',
   tests: [
     './tests/minifier.js',
+    './tests/lint.js',
   ]
 }, function(err, report) {
   if(report.failed > 0){
