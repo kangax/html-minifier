@@ -1,14 +1,14 @@
 /*!
- * HTMLMinifier v0.4.4
+ * HTMLMinifier v0.5
  * http://kangax.github.com/html-minifier/
  *
- * Copyright (c) 2010 Juriy "kangax" Zaytsev
+ * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
  * Licensed under the MIT license.
  *
  */
- 
+
 (function(global){
-  
+
   var log, HTMLParser;
   if (global.console && global.console.log) {
     log = function(message) {
@@ -19,7 +19,7 @@
   else {
     log = function(){ };
   }
-  
+
   if (global.HTMLParser) {
     HTMLParser = global.HTMLParser;
   }
@@ -35,25 +35,25 @@
       return str.trim();
     };
   }
-  
+
   function collapseWhitespace(str) {
     return str.replace(/\s+/g, ' ');
   }
-  
+
   function isConditionalComment(text) {
     return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
   }
-  
+
   function isEventAttribute(attrName) {
     return (/^on[a-z]+/).test(attrName);
   }
-  
+
   function canRemoveAttributeQuotes(value) {
     // http://www.w3.org/TR/html4/intro/sgmltut.html#attributes
     // avoid \w, which could match unicode in some implementations
     return (/^[a-zA-Z0-9-._:]+$/).test(value);
   }
-  
+
   function attributesInclude(attributes, attribute) {
     for (var i = attributes.length; i--; ) {
       if (attributes[i].name.toLowerCase() === attribute) {
@@ -62,44 +62,44 @@
     }
     return false;
   }
-  
+
   function isAttributeRedundant(tag, attrName, attrValue, attrs) {
     attrValue = trimWhitespace(attrValue.toLowerCase());
     return (
-        (tag === 'script' && 
-        attrName === 'language' && 
+        (tag === 'script' &&
+        attrName === 'language' &&
         attrValue === 'javascript') ||
-        
-        (tag === 'form' && 
-        attrName === 'method' && 
+
+        (tag === 'form' &&
+        attrName === 'method' &&
         attrValue === 'get') ||
-        
-        (tag === 'input' && 
+
+        (tag === 'input' &&
         attrName === 'type' &&
         attrValue === 'text') ||
-        
+
         (tag === 'script' &&
         attrName === 'charset' &&
         !attributesInclude(attrs, 'src')) ||
-        
+
         (tag === 'a' &&
         attrName === 'name' &&
         attributesInclude(attrs, 'id')) ||
-        
+
         (tag === 'area' &&
         attrName === 'shape' &&
         attrValue === 'rect')
     );
   }
-  
+
   function isScriptTypeAttribute(tag, attrName, attrValue) {
     return (
-      tag === 'script' && 
-      attrName === 'type' && 
+      tag === 'script' &&
+      attrName === 'type' &&
       trimWhitespace(attrValue.toLowerCase()) === 'text/javascript'
     );
   }
-  
+
   function isStyleLinkTypeAttribute(tag, attrName, attrValue) {
     return (
       (tag === 'style' || tag === 'link') &&
@@ -107,11 +107,11 @@
       trimWhitespace(attrValue.toLowerCase()) === 'text/css'
     );
   }
-  
+
   function isBooleanAttribute(attrName) {
     return (/^(?:checked|disabled|selected|readonly)$/).test(attrName);
   }
-  
+
   function isUriTypeAttribute(attrName, tag) {
     return (
       ((/^(?:a|area|link|base)$/).test(tag) && attrName === 'href') ||
@@ -126,7 +126,7 @@
       (tag === 'script' && (attrName === 'src' || attrName === 'for'))
     );
   }
-  
+
   function isNumberTypeAttribute(attrName, tag) {
     return (
       ((/^(?:a|area|object|button)$/).test(tag) && attrName === 'tabindex') ||
@@ -135,10 +135,10 @@
       (tag === 'textarea' && (/^(?:rows|cols|tabindex)$/).test(attrName)) ||
       (tag === 'colgroup' && attrName === 'span') ||
       (tag === 'col' && attrName === 'span') ||
-      ((tag === 'th' || tag == 'td') && (attrName === 'rowspan' || attrName === 'colspan'))  
+      ((tag === 'th' || tag == 'td') && (attrName === 'rowspan' || attrName === 'colspan'))
     );
   }
-  
+
   function cleanAttributeValue(tag, attrName, attrValue) {
     if (isEventAttribute(attrName)) {
       return trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
@@ -154,13 +154,13 @@
     }
     return attrValue;
   }
-  
+
   function cleanConditionalComment(comment) {
     return comment
       .replace(/^(\[[^\]]+\]>)\s*/, '$1')
       .replace(/\s*(<!\[endif\])$/, '$1');
   }
-  
+
   function removeCDATASections(text) {
     return text
       // "/* <![CDATA[ */" or "// <![CDATA["
@@ -168,7 +168,7 @@
       // "/* ]]> */" or "// ]]>"
       .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
   }
-  
+
   var reStartDelimiter = {
     // account for js + html comments (e.g.: //<!--)
     'script': /^\s*(?:\/\/)?\s*<!--.*\n?/,
@@ -181,15 +181,15 @@
   function removeComments(text, tag) {
     return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
   }
-  
+
   function isOptionalTag(tag) {
     return (/^(?:html|t?body|t?head|tfoot|tr|option)$/).test(tag);
   }
-  
+
   var reEmptyAttribute = new RegExp(
     '^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(' +
       '?:down|up|over|move|out)|key(?:press|down|up)))$');
-      
+
   function canDeleteEmptyAttribute(tag, attrName, attrValue) {
     var isValueEmpty = /^(["'])?\s*\1$/.test(attrValue);
     if (isValueEmpty) {
@@ -199,56 +199,56 @@
     }
     return false;
   }
-  
+
   function canRemoveElement(tag) {
     return tag !== 'textarea';
   }
-  
+
   function canCollapseWhitespace(tag) {
     return !(/^(?:script|style|pre|textarea)$/.test(tag));
   }
-  
+
   function canTrimWhitespace(tag) {
     return !(/^(?:pre|textarea)$/.test(tag));
   }
-  
+
   function normalizeAttribute(attr, attrs, tag, options) {
-    
+
     var attrName = attr.name.toLowerCase(),
         attrValue = attr.escaped,
         attrFragment;
-    
-    if ((options.removeRedundantAttributes && 
-      isAttributeRedundant(tag, attrName, attrValue, attrs)) 
+
+    if ((options.removeRedundantAttributes &&
+      isAttributeRedundant(tag, attrName, attrValue, attrs))
       ||
-      (options.removeScriptTypeAttributes && 
+      (options.removeScriptTypeAttributes &&
       isScriptTypeAttribute(tag, attrName, attrValue))
       ||
       (options.removeStyleLinkTypeAttributes &&
       isStyleLinkTypeAttribute(tag, attrName, attrValue))) {
       return '';
     }
-    
+
     attrValue = cleanAttributeValue(tag, attrName, attrValue);
-    
-    if (!options.removeAttributeQuotes || 
+
+    if (!options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue)) {
       attrValue = '"' + attrValue + '"';
     }
-    
+
     if (options.removeEmptyAttributes &&
         canDeleteEmptyAttribute(tag, attrName, attrValue)) {
       return '';
     }
 
-    if (options.collapseBooleanAttributes && 
+    if (options.collapseBooleanAttributes &&
         isBooleanAttribute(attrName)) {
       attrFragment = attrName;
     }
     else {
       attrFragment = attrName + '=' + attrValue;
     }
-    
+
     return (' ' + attrFragment);
   }
 
@@ -265,13 +265,13 @@
       }
     }
   }
-  
+
   function minify(value, options) {
-    
+
     options = options || { };
     value = trimWhitespace(value);
     setDefaultTesters(options);
-    
+
     var results = [ ],
         buffer = [ ],
         currentChars = '',
@@ -289,14 +289,14 @@
     function _canTrimWhitespace(tag, attrs) {
       return canTrimWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
     }
-    
+
     HTMLParser(value, {
       start: function( tag, attrs, unary ) {
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
         currentAttrs = attrs;
-        
+
         // set whitespace flags for nested tags (eg. <code> within a <pre>)
         if (options.collapseWhitespace) {
           if (!_canTrimWhitespace(tag, attrs)) {
@@ -306,16 +306,16 @@
             stackNoCollapseWhitespace.push(tag);
           }
         }
-        
+
         buffer.push('<', tag);
-        
+
         lint && lint.testElement(tag);
-        
+
         for ( var i = 0, len = attrs.length; i < len; i++ ) {
           lint && lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
           buffer.push(normalizeAttribute(attrs[i], attrs, tag, options));
         }
-        
+
         buffer.push('>');
       },
       end: function( tag ) {
@@ -330,7 +330,7 @@
             stackNoCollapseWhitespace.pop();
           }
         }
-        
+
         var isElementEmpty = currentChars === '' && tag === currentTag;
         if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag))) {
           // remove last "element" from buffer, return
@@ -388,9 +388,9 @@
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
       }
-    });  
-    
-    results.push.apply(results, buffer)    
+    });
+
+    results.push.apply(results, buffer)
     var str = results.join('');
     log('minified in: ' + (new Date() - t) + 'ms');
     return str;

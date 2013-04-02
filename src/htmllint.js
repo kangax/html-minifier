@@ -1,16 +1,16 @@
 /*!
  * HTMLLint (to be used in conjunction with HTMLMinifier)
  *
- * Copyright (c) 2010 Juriy "kangax" Zaytsev
+ * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
  * Licensed under the MIT license.
  *
  */
- 
-(function(global){
-  
+
+(function(global) {
+
   function isPresentationalElement(tag) {
     return (/^(?:b|i|big|small|hr|blink|marquee)$/).test(tag);
-  }  
+  }
   function isDeprecatedElement(tag) {
     return (/^(?:applet|basefont|center|dir|font|isindex|menu|s|strike|u)$/).test(tag);
   }
@@ -22,7 +22,7 @@
   }
   function isDeprecatedAttribute(tag, attrName) {
     return (
-      (attrName === 'align' && 
+      (attrName === 'align' &&
       (/^(?:caption|applet|iframe|img|imput|object|legend|table|hr|div|h[1-6]|p)$/).test(tag)) ||
       (attrName === 'alink' && tag === 'body') ||
       (attrName === 'alt' && tag === 'applet') ||
@@ -58,33 +58,33 @@
   }
   function isInaccessibleAttribute(attrName, attrValue) {
     return (
-      attrName === 'href' && 
+      attrName === 'href' &&
       (/^\s*javascript\s*:\s*void\s*(\s+0|\(\s*0\s*\))\s*$/i).test(attrValue)
     );
   }
-  
+
   function Lint() {
     this.log = [ ];
     this._lastElement = null;
     this._isElementRepeated = false;
   }
-  
+
   Lint.prototype.testElement = function(tag) {
     if (isDeprecatedElement(tag)) {
       this.log.push(
-        '<li>Found <span class="deprecated-element">deprecated</span> <strong><code>&lt;' + 
+        '<li>Found <span class="deprecated-element">deprecated</span> <strong><code>&lt;' +
           tag + '&gt;</code></strong> element</li>');
     }
     else if (isPresentationalElement(tag)) {
       this.log.push(
-        '<li>Found <span class="presentational-element">presentational</span> <strong><code>&lt;' + 
+        '<li>Found <span class="presentational-element">presentational</span> <strong><code>&lt;' +
           tag + '&gt;</code></strong> element</li>');
     }
     else {
       this.checkRepeatingElement(tag);
     }
   };
-  
+
   Lint.prototype.checkRepeatingElement = function(tag) {
     if (tag === 'br' && this._lastElement === 'br') {
       this._isElementRepeated = true;
@@ -95,20 +95,20 @@
     }
     this._lastElement = tag;
   };
-  
+
   Lint.prototype._reportRepeatingElement = function() {
     this.log.push('<li>Found <code>&lt;br></code> sequence. Try replacing it with styling.</li>');
   };
-  
+
   Lint.prototype.testAttribute = function(tag, attrName, attrValue) {
     if (isEventAttribute(attrName)) {
       this.log.push(
-        '<li>Found <span class="event-attribute">event attribute</span> (<strong>', 
+        '<li>Found <span class="event-attribute">event attribute</span> (<strong>',
         attrName, '</strong>) on <strong><code>&lt;' + tag + '&gt;</code></strong> element</li>');
     }
     else if (isDeprecatedAttribute(tag, attrName)) {
       this.log.push(
-        '<li>Found <span class="deprecated-attribute">deprecated</span> <strong>' + 
+        '<li>Found <span class="deprecated-attribute">deprecated</span> <strong>' +
           attrName + '</strong> attribute on <strong><code>&lt;', tag, '&gt;</code></strong> element</li>');
     }
     else if (isStyleAttribute(attrName)) {
@@ -121,19 +121,19 @@
           '(on <strong><code>&lt;', tag, '&gt;</code></strong> element)</li>');
     }
   };
-  
+
   Lint.prototype.testChars = function(chars) {
     this._lastElement = '';
     if (/(&nbsp;\s*){2,}/.test(chars)) {
       this.log.push('<li>Found repeating <strong><code>&amp;nbsp;</code></strong> sequence. Try replacing it with styling.</li>');
     }
   };
-  
+
   Lint.prototype.test = function(tag, attrName, attrValue) {
     this.testElement(tag);
     this.testAttribute(tag, attrName, attrValue);
   };
-  
+
   Lint.prototype.populate = function(writeToElement) {
     if (this._isElementRepeated) {
       this._reportRepeatingElement();
@@ -144,7 +144,7 @@
       writeToElement.innerHTML = report;
     }
   };
-  
+
   global.HTMLLint = Lint;
-  
+
 })(typeof exports === 'undefined' ? this : exports);

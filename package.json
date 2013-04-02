@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "HTML minifier with lint-like capabilities.",
-  "version": "0.4.5",
+  "version": "0.5",
   "keywords": ["html", "minifier", "lint"],
   "url" : "http://github.com/kangax/html-minifier",
   "maintainers": [{
@@ -28,6 +28,13 @@
   "directories": {
     "src": "./src"
   },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "qunit": "0.5.x",
+    "jshint": "1.1.x",
+    "uglify-js": "2.2.x"
+  },
   "main": "./src/htmlminifier.js"
 }
-
