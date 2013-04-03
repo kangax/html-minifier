@@ -54,7 +54,7 @@
   var reCache = { }, stackedTag, re;
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
-    var index, chars, match, stack = [], last = html;
+    var index, chars, match, stack = [], last = html, prevTag, nextTag;
     stack.last = function(){
       return this[ this.length - 1 ];
     };
@@ -89,28 +89,43 @@
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( endTag, parseEndTag );
+            prevTag = '/'+match[1];
             chars = false;
           }
   
         // start tag
         } else if ( html.indexOf("<") === 0 ) {
           match = html.match( startTag );
-  
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( startTag, parseStartTag );
+            prevTag = match[1];
             chars = false;
           }
         }
-
+        
         if ( chars ) {
           index = html.indexOf("<");
           
           var text = index < 0 ? html : html.substring( 0, index );
           html = index < 0 ? "" : html.substring( index );
           
+          // next tag
+          tagMatch = html.match( startTag );
+          if (tagMatch) {
+	        nextTag = tagMatch[1];
+          } else {
+	        tagMatch = html.match( endTag );
+	        if (tagMatch) {
+	          nextTag = '/'+tagMatch[1];
+	        } else {
+		      nextTag = '';
+	        }
+          }
+          
           if ( handler.chars )
-            handler.chars( text );
+	        handler.chars(text, prevTag, nextTag);
+          
         }
 
       } else {

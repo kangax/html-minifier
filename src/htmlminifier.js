@@ -40,6 +40,27 @@
     return str.replace(/\s+/g, ' ');
   }
   
+  function collapseWhitespaceSmart(str, prevTag, nextTag) {
+  	// array of tags that will maintain space outside of them if children of each other
+  	var tags = ['a', 'b', 'big', 'button', 'em', 'font','i',  'img', 'mark', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u'];
+  	
+  	if (prevTag && (prevTag.substr(0,1) !== '/' // open tag
+  		|| ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
+	  	str = str.replace(/^\s+/, '');
+  	}
+  	
+  	if (nextTag && (nextTag.substr(0,1) === '/' // closed tag
+  		|| ( nextTag.substr(0,1) !== '/' && tags.indexOf(nextTag) === -1))) {
+  		str = str.replace(/\s+$/, '');
+  	} 
+  	
+  	if (prevTag && nextTag) {
+	  	return collapseWhitespace(str);
+  	}
+  	
+    return str;
+  }
+  
   function isConditionalComment(text) {
     return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
   }
@@ -350,7 +371,7 @@
         buffer.length = 0;
         currentChars = '';
       },
-      chars: function( text ) {
+      chars: function( text, prevTag, nextTag ) {
         if (currentTag === 'script' || currentTag === 'style') {
           if (options.removeCommentsFromCDATA) {
             text = removeComments(text, currentTag);
@@ -361,7 +382,7 @@
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length && _canTrimWhitespace(currentTag, currentAttrs)) {
-            text = trimWhitespace(text);
+            text = (prevTag || nextTag) ? collapseWhitespaceSmart(text, prevTag, nextTag) : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length && _canCollapseWhitespace(currentTag, currentAttrs)) {
             text = collapseWhitespace(text);
