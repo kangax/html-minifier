@@ -29,7 +29,7 @@
     "src": "./src"
   },
   "scripts": {
-    "test": "node test.js"
+    "test": "jshint src/htmlminifier.js src/htmllint.js && node test.js"
   },
   "devDependencies": {
     "qunit": "0.5.x",

@@ -27,9 +27,9 @@
     HTMLParser = require('./htmlparser').HTMLParser;
   }
 
-  function trimWhitespace(str) {
+  var trimWhitespace = function(str) {
     return str.replace(/^\s+/, '').replace(/\s+$/, '');
-  }
+  };
   if (String.prototype.trim) {
     trimWhitespace = function(str) {
       return str.trim();
@@ -135,7 +135,7 @@
       (tag === 'textarea' && (/^(?:rows|cols|tabindex)$/).test(attrName)) ||
       (tag === 'colgroup' && attrName === 'span') ||
       (tag === 'col' && attrName === 'span') ||
-      ((tag === 'th' || tag == 'td') && (attrName === 'rowspan' || attrName === 'colspan'))
+      ((tag === 'th' || tag === 'td') && (attrName === 'rowspan' || attrName === 'colspan'))
     );
   }
 
@@ -261,7 +261,7 @@
       if (!options[defaultTesters[i]]) {
         options[defaultTesters[i]] = function() {
           return false;
-        }
+        };
       }
     }
   }
@@ -280,7 +280,7 @@
         stackNoTrimWhitespace = [],
         stackNoCollapseWhitespace = [],
         lint = options.lint,
-        t = new Date()
+        t = new Date();
 
     function _canCollapseWhitespace(tag, attrs) {
       return canCollapseWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
@@ -291,7 +291,7 @@
     }
 
     HTMLParser(value, {
-      start: function( tag, attrs, unary ) {
+      start: function( tag, attrs ) {
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
@@ -322,11 +322,11 @@
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
           if (stackNoTrimWhitespace.length &&
-            tag == stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
+            tag === stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
             stackNoTrimWhitespace.pop();
           }
           if (stackNoCollapseWhitespace.length &&
-            tag == stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
+            tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
             stackNoCollapseWhitespace.pop();
           }
         }
@@ -390,7 +390,7 @@
       }
     });
 
-    results.push.apply(results, buffer)
+    results.push.apply(results, buffer);
     var str = results.join('');
     log('minified in: ' + (new Date() - t) + 'ms');
     return str;
