@@ -436,9 +436,9 @@
     input = '<p> foo    bar</p>';
     output = '<p>foo bar</p>';
     equal(minify(input, { collapseWhitespace: true }), output);
-
-    input = '<p> foo    <span>  blah    22 </span> bar <img src=""></p>';
-    output = '<p>foo<span>blah 22</span>bar<img src=""></p>';
+    
+    input = '<p> foo    <span>  blah     <i>   22</i>    </span> bar <img src=""></p>';
+    output = '<p>foo <span>blah <i>22</i></span> bar <img src=""></p>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
     input = '<textarea> foo bar     baz \n\n   x \t    y </textarea>';
