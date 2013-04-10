@@ -28,7 +28,7 @@
 
   // Regular Expressions for parsing tags and attributes
   var startTag = /^<([\w:-]+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
-      endTag = /^<\/(\w+)[^>]*>/,
+      endTag = /^<\/([\w:-]+)[^>]*>/,
       attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
       doctype = /^<!DOCTYPE [^>]+>/i;
     
