@@ -562,4 +562,40 @@
     equal(minify(input, { removeOptionalTags: true }), output);
   });
 
+  test('custom components', function(){
+    input = '<custom-component>Oh, my.</custom-component>';
+    output = '<custom-component>Oh, my.</custom-component>';
+
+    equal(minify(input), output);
+  });
+
+  test('HTML5: anchor with block elements', function(){
+    input = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
+    output = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
+
+    equal(minify(input), output);
+  });
+
+  test('HTML5: anchor with mixed inline and block elements', function(){
+    input = '<a href="#">' +
+              '<section>' +
+                '<h1>Shoes for Puppies</h1>' +
+                '<p>' +
+                  'Only the finest pupwear, for irresistible prices!' +
+                '</p>' +
+              '</section>' +
+            '</a>';
+
+    output = '<a href="#">' +
+              '<section>' +
+                '<h1>Shoes for Puppies</h1>' +
+                '<p>' +
+                  'Only the finest pupwear, for irresistible prices!' +
+                '</p>' +
+              '</section>' +
+            '</a>';
+
+    equal(minify(input), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);

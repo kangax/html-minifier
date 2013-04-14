@@ -27,7 +27,7 @@
 (function(global){
 
   // Regular Expressions for parsing tags and attributes
-  var startTag = /^<(\w+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
+  var startTag = /^<([\w:-]+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
       endTag = /^<\/(\w+)[^>]*>/,
       attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
       doctype = /^<!DOCTYPE [^>]+>/i;
@@ -35,11 +35,14 @@
   // Empty Elements - HTML 4.01
   var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
 
-  // Block Elements - HTML 4.01
-  var block = makeMap("address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul");
+  // Block Elements
+  var block = makeMap("address,applet,article,aside,audio,blockquote,button,canvas,center,dd,del,dir,div,dl,dt,fieldset,figcaption,figure,footer,form,frameset,header,hgroup,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,ol,output,p,pre,section,script,table,tbody,td,tfoot,th,thead,tr,ul,video");
 
-  // Inline Elements - HTML 4.01
-  var inline = makeMap("a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,textarea,tt,u,var");
+  // Inline Elements
+  var inline = makeMap("a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,command,datalist,del,details,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,mark,meter,nav,object,q,s,samp,script,select,small,source,span,strike,strong,sub,summary,sup,textarea,time,tt,u,var");
+
+  // Flow Elements which can contain block elements
+  var flow = makeMap("a,abbr,address,article,aside,audio,b,bdo,blockquote,br,button,canvas,cite,code,command,datalist,del,details,dfn,div,dl,em,embed,fieldset,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,i,iframe,img,input,ins,kbd,keygen,label,map,mark,math,menu,meter,nav,noscript,object,ol,output,p,pre,progress,q,ruby,samp,script,section,select,small,span,strong,sub,sup,svg,table,textarea,time,ul,var,video,wbr");
 
   // Elements that you can, intentionally, leave open
   // (and which close themselves)
@@ -54,7 +57,7 @@
   var reCache = { }, stackedTag, re;
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
-    var index, chars, match, stack = [], last = html;
+    var index, chars, match, stack = [], last = html, prevTag, nextTag;
     stack.last = function(){
       return this[ this.length - 1 ];
     };
@@ -89,6 +92,7 @@
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( endTag, parseEndTag );
+            prevTag = '/'+match[1];
             chars = false;
           }
 
@@ -99,6 +103,7 @@
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( startTag, parseStartTag );
+            prevTag = match[1];
             chars = false;
           }
         }
@@ -109,8 +114,22 @@
           var text = index < 0 ? html : html.substring( 0, index );
           html = index < 0 ? "" : html.substring( index );
 
+          // next tag
+          tagMatch = html.match( startTag );
+          if (tagMatch) {
+            nextTag = tagMatch[1];
+          } else {
+            tagMatch = html.match( endTag );
+            if (tagMatch) {
+              nextTag = '/'+tagMatch[1];
+            } else {
+            nextTag = '';
+            }
+          }
+
           if ( handler.chars )
-            handler.chars( text );
+            handler.chars(text, prevTag, nextTag);
+
         }
 
       } else {
@@ -144,7 +163,7 @@
 
     function parseStartTag( tag, tagName, rest, unary ) {
       if ( block[ tagName ] ) {
-        while ( stack.last() && inline[ stack.last() ] ) {
+        while ( stack.last() && inline[ stack.last() ] && !flow[ stack.last() ]) {
           parseEndTag( "", stack.last() );
         }
       }
@@ -324,11 +343,13 @@
     }
     return obj;
   }
-})(typeof exports === 'undefined' ? window : exports);/*!
- * HTMLMinifier v0.4.4
+})(typeof exports === 'undefined' ? this : exports);
+
+/*!
+ * HTMLMinifier v0.5.0
  * http://kangax.github.com/html-minifier/
  *
- * Copyright (c) 2010 Juriy "kangax" Zaytsev
+ * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
  * Licensed under the MIT license.
  *
  */
@@ -353,9 +374,9 @@
     HTMLParser = require('./htmlparser').HTMLParser;
   }
 
-  function trimWhitespace(str) {
+  var trimWhitespace = function(str) {
     return str.replace(/^\s+/, '').replace(/\s+$/, '');
-  }
+  };
   if (String.prototype.trim) {
     trimWhitespace = function(str) {
       return str.trim();
@@ -365,9 +386,31 @@
   function collapseWhitespace(str) {
     return str.replace(/\s+/g, ' ');
   }
+  
+  function collapseWhitespaceSmart(str, prevTag, nextTag) {
+    // array of tags that will maintain a single space outside of them
+    var tags = ['a', 'b', 'big', 'button', 'em', 'font','i',  'img', 'mark', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u'];
+    
+    if (prevTag && (prevTag.substr(0,1) !== '/'
+      || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
+      str = str.replace(/^\s+/, '');
+    }
+    
+    if (nextTag && (nextTag.substr(0,1) === '/'
+      || ( nextTag.substr(0,1) !== '/' && tags.indexOf(nextTag) === -1))) {
+      str = str.replace(/\s+$/, '');
+    } 
+    
+    if (prevTag && nextTag) {
+      // strip non space whitespace then compress spaces to one
+      return str.replace(/[\t\n\r]+/g, '').replace(/[ ]+/g, ' ');
+    }
+    
+    return str;
+  }
 
   function isConditionalComment(text) {
-    return (/\[if[^\]]+\]/).test(text);
+    return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
   }
 
   function isEventAttribute(attrName) {
@@ -461,7 +504,7 @@
       (tag === 'textarea' && (/^(?:rows|cols|tabindex)$/).test(attrName)) ||
       (tag === 'colgroup' && attrName === 'span') ||
       (tag === 'col' && attrName === 'span') ||
-      ((tag === 'th' || tag == 'td') && (attrName === 'rowspan' || attrName === 'colspan'))
+      ((tag === 'th' || tag === 'td') && (attrName === 'rowspan' || attrName === 'colspan'))
     );
   }
 
@@ -587,7 +630,7 @@
       if (!options[defaultTesters[i]]) {
         options[defaultTesters[i]] = function() {
           return false;
-        }
+        };
       }
     }
   }
@@ -606,7 +649,7 @@
         stackNoTrimWhitespace = [],
         stackNoCollapseWhitespace = [],
         lint = options.lint,
-        t = new Date()
+        t = new Date();
 
     function _canCollapseWhitespace(tag, attrs) {
       return canCollapseWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
@@ -617,7 +660,7 @@
     }
 
     HTMLParser(value, {
-      start: function( tag, attrs, unary ) {
+      start: function( tag, attrs ) {
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
@@ -648,11 +691,11 @@
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
           if (stackNoTrimWhitespace.length &&
-            tag == stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
+            tag === stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
             stackNoTrimWhitespace.pop();
           }
           if (stackNoCollapseWhitespace.length &&
-            tag == stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
+            tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
             stackNoCollapseWhitespace.pop();
           }
         }
@@ -676,7 +719,7 @@
         buffer.length = 0;
         currentChars = '';
       },
-      chars: function( text ) {
+      chars: function( text, prevTag, nextTag ) {
         if (currentTag === 'script' || currentTag === 'style') {
           if (options.removeCommentsFromCDATA) {
             text = removeComments(text, currentTag);
@@ -687,7 +730,7 @@
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length && _canTrimWhitespace(currentTag, currentAttrs)) {
-            text = trimWhitespace(text);
+            text = (prevTag || nextTag) ? collapseWhitespaceSmart(text, prevTag, nextTag) : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length && _canCollapseWhitespace(currentTag, currentAttrs)) {
             text = collapseWhitespace(text);
@@ -716,19 +759,24 @@
       }
     });
 
-    results.push.apply(results, buffer)
+    results.push.apply(results, buffer);
     var str = results.join('');
     log('minified in: ' + (new Date() - t) + 'ms');
     return str;
   }
 
-  // export
-  global.minify = minify;
+  // for CommonJS enviroments, export everything
+  if ( typeof exports !== "undefined" ) {
+    exports.minify = minify;
+  } else {
+    global.minify = minify;
+  }
 
-})(typeof exports === 'undefined' ? window : exports);/*!
+}(this));
+/*!
  * HTMLLint (to be used in conjunction with HTMLMinifier)
  *
- * Copyright (c) 2010 Juriy "kangax" Zaytsev
+ * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
  * Licensed under the MIT license.
  *
  */
@@ -874,4 +922,4 @@
 
   global.HTMLLint = Lint;
 
-})(typeof exports === 'undefined' ? window : exports);
+})(typeof exports === 'undefined' ? this : exports);
