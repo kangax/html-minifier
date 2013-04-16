@@ -163,8 +163,10 @@
 
     function parseStartTag( tag, tagName, rest, unary ) {
       if ( block[ tagName ] ) {
-        while ( stack.last() && inline[ stack.last() ] && !flow[ stack.last() ]) {
-          parseEndTag( "", stack.last() );
+        if ( !handler.html5 || !flow[ stack.last() ] ) {
+          while ( stack.last() && inline[ stack.last() ]) {
+            parseEndTag( "", stack.last() );
+          }
         }
       }
 
@@ -386,26 +388,26 @@
   function collapseWhitespace(str) {
     return str.replace(/\s+/g, ' ');
   }
-  
+
   function collapseWhitespaceSmart(str, prevTag, nextTag) {
     // array of tags that will maintain a single space outside of them
     var tags = ['a', 'b', 'big', 'button', 'em', 'font','i',  'img', 'mark', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u'];
-    
+
     if (prevTag && (prevTag.substr(0,1) !== '/'
-      || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
-      str = str.replace(/^\s+/, '');
+        || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
+        str = str.replace(/^\s+/, '');
     }
-    
+
     if (nextTag && (nextTag.substr(0,1) === '/'
-      || ( nextTag.substr(0,1) !== '/' && tags.indexOf(nextTag) === -1))) {
-      str = str.replace(/\s+$/, '');
-    } 
-    
-    if (prevTag && nextTag) {
-      // strip non space whitespace then compress spaces to one
-      return str.replace(/[\t\n\r]+/g, '').replace(/[ ]+/g, ' ');
+        || ( nextTag.substr(0,1) !== '/' && tags.indexOf(nextTag) === -1))) {
+        str = str.replace(/\s+$/, '');
     }
-    
+
+    if (prevTag && nextTag) {
+        // strip non space whitespace then compress spaces to one
+        return str.replace(/[\t\n\r]+/g, '').replace(/[ ]+/g, ' ');
+    }
+
     return str;
   }
 
@@ -660,6 +662,8 @@
     }
 
     HTMLParser(value, {
+      html5: options.html5,
+
       start: function( tag, attrs ) {
         tag = tag.toLowerCase();
         currentTag = tag;
@@ -773,6 +777,7 @@
   }
 
 }(this));
+
 /*!
  * HTMLLint (to be used in conjunction with HTMLMinifier)
  *

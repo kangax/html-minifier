@@ -163,8 +163,10 @@
 
     function parseStartTag( tag, tagName, rest, unary ) {
       if ( block[ tagName ] ) {
-        while ( stack.last() && inline[ stack.last() ] && !flow[ stack.last() ]) {
-          parseEndTag( "", stack.last() );
+        if ( !handler.html5 || !flow[ stack.last() ] ) {
+          while ( stack.last() && inline[ stack.last() ]) {
+            parseEndTag( "", stack.last() );
+          }
         }
       }
 

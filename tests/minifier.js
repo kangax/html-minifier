@@ -436,7 +436,7 @@
     input = '<p> foo    bar</p>';
     output = '<p>foo bar</p>';
     equal(minify(input, { collapseWhitespace: true }), output);
-    
+
     input = '<p> foo    <span>  blah     <i>   22</i>    </span> bar <img src=""></p>';
     output = '<p>foo <span>blah <i>22</i></span> bar <img src=""></p>';
     equal(minify(input, { collapseWhitespace: true }), output);
@@ -573,7 +573,7 @@
     input = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
     output = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
 
-    equal(minify(input), output);
+    equal(minify(input, { html5: true }), output);
   });
 
   test('HTML5: anchor with mixed inline and block elements', function(){
@@ -595,7 +595,7 @@
               '</section>' +
             '</a>';
 
-    equal(minify(input), output);
+    equal(minify(input, { html5: true }), output);
   });
 
 })(typeof exports === 'undefined' ? window : exports);
