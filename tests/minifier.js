@@ -24,6 +24,7 @@
     equal(minify('<a title="x"href=" ">foo</a>'), '<a title="x" href="">foo</a>');
     equal(minify('<p id=""class=""title="">x'), '<p id="" class="" title="">x</p>');
     equal(minify('<p x="x\'"">x</p>'), '<p x="x\'">x</p>', 'trailing quote should be ignored');
+	equal(minify('<a href="#"><p>Click me</p></a>'), '<a href="#"><p>Click me</p></a>'); 
   });
 
   test('`minifiy` exists', function() {
