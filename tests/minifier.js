@@ -34,8 +34,12 @@
     equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view></div>'),
       '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>');
 
+    // https://github.com/kangax/html-minifier/issues/41
     equal(minify('<some-tag-1></some-tag-1><some-tag-2></some-tag-2>'),
       '<some-tag-1></some-tag-1><some-tag-2></some-tag-2>');
+
+    // https://github.com/kangax/html-minifier/issues/40
+    equal(minify('[\']["]'), '[\']["]');
   });
 
   test('`minifiy` exists', function() {
