@@ -40,6 +40,9 @@
 
     // https://github.com/kangax/html-minifier/issues/40
     equal(minify('[\']["]'), '[\']["]');
+
+    // https://github.com/kangax/html-minifier/issues/21
+    equal(minify('<a href="test.html"><div>hey</div></a>'), '<a href="test.html"><div>hey</div></a>');
   });
 
   test('`minifiy` exists', function() {
