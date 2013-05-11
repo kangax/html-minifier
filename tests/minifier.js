@@ -26,10 +26,16 @@
     equal(minify('<p x="x\'"">x</p>'), '<p x="x\'">x</p>', 'trailing quote should be ignored');
     equal(minify('<a href="#"><p>Click me</p></a>'), '<a href="#"><p>Click me</p></a>');
     equal(minify('<span><button>Hit me</button></span>'), '<span><button>Hit me</button></span>');
+    equal(minify('<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>'),
+      '<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>');
 
     equal(minify('<ng-include src="x"></ng-include>'), '<ng-include src="x"></ng-include>');
     equal(minify('<ng:include src="x"></ng:include>'), '<ng:include src="x"></ng:include>');
-    equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view></div>'), '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>');
+    equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view></div>'),
+      '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>');
+
+    equal(minify('<some-tag-1></some-tag-1><some-tag-2></some-tag-2>'),
+      '<some-tag-1></some-tag-1><some-tag-2></some-tag-2>');
   });
 
   test('`minifiy` exists', function() {
