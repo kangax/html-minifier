@@ -24,7 +24,9 @@
     equal(minify('<a title="x"href=" ">foo</a>'), '<a title="x" href="">foo</a>');
     equal(minify('<p id=""class=""title="">x'), '<p id="" class="" title="">x</p>');
     equal(minify('<p x="x\'"">x</p>'), '<p x="x\'">x</p>', 'trailing quote should be ignored');
-    
+    equal(minify('<a href="#"><p>Click me</p></a>'), '<a href="#"><p>Click me</p></a>');
+    equal(minify('<span><button>Hit me</button></span>'), '<span><button>Hit me</button></span>');
+
     equal(minify('<ng-include src="x"></ng-include>'), '<ng-include src="x"></ng-include>');
     equal(minify('<ng:include src="x"></ng:include>'), '<ng:include src="x"></ng:include>');
     equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view></div>'), '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>');
@@ -440,7 +442,7 @@
     input = '<p> foo    bar</p>';
     output = '<p>foo bar</p>';
     equal(minify(input, { collapseWhitespace: true }), output);
-    
+
     input = '<p> foo    <span>  blah     <i>   22</i>    </span> bar <img src=""></p>';
     output = '<p>foo <span>blah <i>22</i></span> bar <img src=""></p>';
     equal(minify(input, { collapseWhitespace: true }), output);
