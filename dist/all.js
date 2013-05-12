@@ -778,7 +778,7 @@
     return (/^(?:b|i|big|small|hr|blink|marquee)$/).test(tag);
   }
   function isDeprecatedElement(tag) {
-    return (/^(?:applet|basefont|center|dir|font|isindex|menu|s|strike|u)$/).test(tag);
+    return (/^(?:applet|basefont|center|dir|font|isindex|s|strike|u)$/).test(tag);
   }
   function isEventAttribute(attrName) {
     return (/^on[a-z]+/).test(attrName);
