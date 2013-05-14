@@ -160,6 +160,10 @@
 
     function parseStartTag( tag, tagName, rest, unary ) {
 
+      while ( !handler.html5 && stack.last() && inline[ stack.last() ]) {
+        parseEndTag( "", stack.last() );
+      }
+
       if ( closeSelf[ tagName ] && stack.last() == tagName ) {
         parseEndTag( "", tagName );
       }
@@ -651,6 +655,8 @@
     }
 
     HTMLParser(value, {
+      html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
+
       start: function( tag, attrs ) {
         tag = tag.toLowerCase();
         currentTag = tag;
