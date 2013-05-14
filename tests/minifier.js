@@ -584,4 +584,31 @@
     equal(minify(input, { removeOptionalTags: true }), output);
   });
 
+ test('custom components', function(){
+    input = '<custom-component>Oh, my.</custom-component>';
+    output = '<custom-component>Oh, my.</custom-component>';
+
+    equal(minify(input), output);
+  });
+
+  test('HTML4: anchor with block elements', function(){
+    input = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
+    output = '<a href="#"></a><div>Well, look at me! I\'m a div!</div>';
+
+    equal(minify(input, { html5: false }), output);
+  });
+
+  test('HTML5: anchor with block elements', function(){
+    input = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
+    output = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
+
+    equal(minify(input, { html5: true }), output);
+  });
+
+  test('HTML5: enabled by default', function(){
+    input = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
+
+    equal(minify(input, { html5: true }), minify(input));
+  });
+
 })(typeof exports === 'undefined' ? window : exports);

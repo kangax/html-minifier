@@ -313,6 +313,8 @@
     }
 
     HTMLParser(value, {
+      html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
+
       start: function( tag, attrs ) {
         tag = tag.toLowerCase();
         currentTag = tag;
