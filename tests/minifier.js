@@ -76,6 +76,13 @@
 
   test('space normalization around text', function(){
     equal(minify('   <p>blah</p>\n\n\n   '), '<p>blah</p>');
+    // tags from collapseWhitespaceSmart()
+    ['a', 'b', 'big', 'button', 'code', 'em', 'font', 'i', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u'].forEach(function(el){
+      equal(minify('<p>foo <'+el+'>baz</'+el+'> bar</p>'), '<p>foo<'+el+'>baz</'+el+'> bar</p>');
+      equal(minify('<p>foo<'+el+'>baz</'+el+'>bar</p>'), '<p>foo<'+el+'>baz</'+el+'>bar</p>');
+    })   
+    equal(minify('<p>foo <img> bar</p>'), '<p>foo <img> bar</p>');
+    equal(minify('<p>foo<img>bar</p>'), '<p>foo<img>bar</p>');
   });
 
   test('doctype normalization', function() {
