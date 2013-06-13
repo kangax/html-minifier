@@ -413,9 +413,8 @@
   }
 
   function canRemoveAttributeQuotes(value) {
-    // http://www.w3.org/TR/html4/intro/sgmltut.html#attributes
-    // avoid \w, which could match unicode in some implementations
-    return (/^[a-zA-Z0-9-._:]+$/).test(value);
+    // http://mathiasbynens.be/notes/unquoted-attribute-values
+    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value);
   }
 
   function attributesInclude(attributes, attribute) {
