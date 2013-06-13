@@ -384,14 +384,14 @@
 
   function collapseWhitespaceSmart(str, prevTag, nextTag) {
     // array of tags that will maintain a single space outside of them
-    var tags = ['a', 'b', 'big', 'button', 'em', 'font','i',  'img', 'mark', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u'];
+    var tags = ['a', 'b', 'big', 'button', 'code', 'em', 'font', 'i', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u'];
 
-    if (prevTag && (prevTag.substr(0,1) !== '/'
+    if (prevTag && prevTag !== 'img' && (prevTag.substr(0,1) !== '/'
       || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
       str = str.replace(/^\s+/, '');
     }
 
-    if (nextTag && (nextTag.substr(0,1) === '/'
+    if (nextTag && nextTag !== 'img' && (nextTag.substr(0,1) === '/'
       || ( nextTag.substr(0,1) !== '/' && tags.indexOf(nextTag) === -1))) {
       str = str.replace(/\s+$/, '');
     }
@@ -413,9 +413,8 @@
   }
 
   function canRemoveAttributeQuotes(value) {
-    // http://www.w3.org/TR/html4/intro/sgmltut.html#attributes
-    // avoid \w, which could match unicode in some implementations
-    return (/^[a-zA-Z0-9-._:]+$/).test(value);
+    // http://mathiasbynens.be/notes/unquoted-attribute-values
+    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value);
   }
 
   function attributesInclude(attributes, attribute) {
