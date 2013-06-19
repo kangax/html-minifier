@@ -86,7 +86,7 @@
       equal(minify('<p>foo<'+el+'> baz </'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'>bar</p>');
       equal(minify('<p>foo <'+el+'> baz </'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo <'+el+'>baz</'+el+'>bar</p>');
       equal(minify('<p>foo<'+el+'> baz </'+el+'> bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'> bar</p>');
-    })   
+    })
     equal(minify('<p>foo <img> bar</p>', {collapseWhitespace: true}), '<p>foo <img> bar</p>');
     equal(minify('<p>foo<img>bar</p>', {collapseWhitespace: true}), '<p>foo<img>bar</p>');
     equal(minify('<p>foo <img>bar</p>', {collapseWhitespace: true}), '<p>foo <img>bar</p>');
@@ -548,6 +548,15 @@
 
     input = '<option name="blah" selected="selected">moo</option>';
     equal(minify(input, { collapseBooleanAttributes: true }), '<option name="blah" selected>moo</option>');
+
+    input = '<input autofocus="autofocus">';
+    equal(minify(input, { collapseBooleanAttributes: true }), '<input autofocus>');
+
+    input = '<input required="required">';
+    equal(minify(input, { collapseBooleanAttributes: true }), '<input required>');
+
+    input = '<input multiple="multiple">';
+    equal(minify(input, { collapseBooleanAttributes: true }), '<input multiple>');
   });
 
   test('removing optional tags', function(){

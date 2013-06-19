@@ -341,7 +341,7 @@
   }
 })(typeof exports === 'undefined' ? this : exports);
 /*!
- * HTMLMinifier v0.5.2
+ * HTMLMinifier v0.5.3
  * http://kangax.github.com/html-minifier/
  *
  * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
@@ -472,7 +472,7 @@
   }
 
   function isBooleanAttribute(attrName) {
-    return (/^(?:checked|disabled|selected|readonly)$/).test(attrName);
+    return (/^(?:allowfullscreen|async|autofocus|checked|compact|declare|default|defer|disabled|formnovalidate|hidden|inert|ismap|itemscope|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|readonly|required|reversed|seamless|selected|sortable|truespeed|typemustmatch)$/).test(attrName);
   }
 
   function isUriTypeAttribute(attrName, tag) {
