@@ -36,7 +36,7 @@
   var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
 
   // Block Elements - HTML 4.01
-  var block = makeMap("address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul");
+  // var block = makeMap("address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul");
 
   // Inline Elements - HTML 4.01
   var inline = makeMap("a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,textarea,tt,u,var");
@@ -51,7 +51,7 @@
   // Special Elements (can contain anything)
   var special = makeMap("script,style");
 
-  var reCache = { }, stackedTag, re;
+  var reCache = { }, stackedTag, reStackedTag, tagMatch;
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html, prevTag, nextTag;
@@ -76,7 +76,7 @@
             chars = false;
           }
         }
-        else if ( match = doctype.exec( html )) {
+        else if ( (match = doctype.exec( html )) ) {
           if ( handler.doctype )
             handler.doctype( match[0] );
           html = html.substring( match[0].length );
@@ -114,18 +114,18 @@
           // next tag
           tagMatch = html.match( startTag );
           if (tagMatch) {
-	        nextTag = tagMatch[1];
+          nextTag = tagMatch[1];
           } else {
-	        tagMatch = html.match( endTag );
-	        if (tagMatch) {
-	          nextTag = '/'+tagMatch[1];
-	        } else {
-		      nextTag = '';
-	        }
+          tagMatch = html.match( endTag );
+          if (tagMatch) {
+            nextTag = '/'+tagMatch[1];
+          } else {
+          nextTag = '';
+          }
           }
 
           if ( handler.chars )
-	        handler.chars(text, prevTag, nextTag);
+          handler.chars(text, prevTag, nextTag);
 
         }
 
@@ -150,7 +150,7 @@
         parseEndTag( "", stackedTag );
       }
 
-      if ( html == last )
+      if ( html === last )
         throw "Parse Error: " + html;
       last = html;
     }
@@ -164,7 +164,7 @@
         parseEndTag( "", stack.last() );
       }
 
-      if ( closeSelf[ tagName ] && stack.last() == tagName ) {
+      if ( closeSelf[ tagName ] && stack.last() === tagName ) {
         parseEndTag( "", tagName );
       }
 
@@ -194,14 +194,16 @@
     }
 
     function parseEndTag( tag, tagName ) {
+      var pos;
+
       // If no tag name is provided, clean shop
       if ( !tagName )
-        var pos = 0;
+        pos = 0;
 
       // Find the closest opened tag of the same type
       else
-        for ( var pos = stack.length - 1; pos >= 0; pos-- )
-          if ( stack[ pos ] == tagName )
+        for ( pos = stack.length - 1; pos >= 0; pos-- )
+          if ( stack[ pos ] === tagName )
             break;
 
       if ( pos >= 0 ) {
@@ -253,11 +255,11 @@
     };
 
     if ( !doc ) {
-      if ( typeof DOMDocument != "undefined" )
+      if ( typeof DOMDocument !== "undefined" )
         doc = new DOMDocument();
-      else if ( typeof document != "undefined" && document.implementation && document.implementation.createDocument )
+      else if ( typeof document !== "undefined" && document.implementation && document.implementation.createDocument )
         doc = document.implementation.createDocument("", "", null);
-      else if ( typeof ActiveX != "undefined" )
+      else if ( typeof ActiveX !== "undefined" )
         doc = new ActiveXObject("Msxml.DOMDocument");
 
     } else
@@ -303,7 +305,7 @@
         for ( var attr in attrs )
           elem.setAttribute( attrs[ attr ].name, attrs[ attr ].value );
 
-        if ( structure[ tagName ] && typeof one[ structure[ tagName ] ] != "boolean" )
+        if ( structure[ tagName ] && typeof one[ structure[ tagName ] ] !== "boolean" )
           one[ structure[ tagName ] ].appendChild( elem );
 
         else if ( curParentNode && curParentNode.appendChild )
@@ -314,7 +316,7 @@
           curParentNode = elem;
         }
       },
-      end: function( tag ) {
+      end: function( /* tag */ ) {
         elems.length -= 1;
 
         // Init the new parentNode
@@ -323,7 +325,7 @@
       chars: function( text ) {
         curParentNode.appendChild( doc.createTextNode( text ) );
       },
-      comment: function( text ) {
+      comment: function( /*text*/ ) {
         // create comment node
       }
     });

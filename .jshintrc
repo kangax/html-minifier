@@ -1,4 +1,8 @@
 {
+  "globals":    {
+    "DOMDocument": true,
+    "ActiveXObject": true
+  },
   "node":       true,
   "es5":        false,
   "browser":    true,
