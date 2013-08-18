@@ -122,6 +122,35 @@
     equal(minify(input, { removeComments: true }), '<style><!-- alert(1) --><\/style>');
   });
 
+  test('ignoring comments', function(){
+    input = '<!--! test -->';
+    equal(minify(input, { removeComments: true }), input);
+    equal(minify(input, { removeComments: false }), input);
+
+    input = '<!--! foo --><div>baz</div><!--! bar\n\n moo -->';
+    equal(minify(input, { removeComments: true }), input);
+    equal(minify(input, { removeComments: false }), input);
+
+    input = '<!--! foo --><div>baz</div><!-- bar\n\n moo -->';
+    equal(minify(input, { removeComments: true }), '<!--! foo --><div>baz</div>');
+    equal(minify(input, { removeComments: false }), input);
+
+    input = '<!-- ! test -->';
+    equal(minify(input, { removeComments: true }), '');
+    equal(minify(input, { removeComments: false }), input);
+
+    input = '<div>\n\n   \t<div><div>\n\n<p>\n\n<!--!      \t\n\nbar\n\n moo         -->      \n\n</p>\n\n        </div>  </div></div>';
+    output = '<div><div><div><p><!--!      \t\n\nbar\n\n moo         --></p></div></div></div>';
+    equal(minify(input, { removeComments: true }), input);
+    equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
+    equal(minify(input, { removeComments: false }), input);
+    equal(minify(input, { removeComments: false, collapseWhitespace: true }), output);
+
+    input = '<p rel="<!-- comment in attribute -->" title="<!--! ignored comment in attribute -->">foo</p>';
+    output = '<p rel="" title="<!--! ignored comment in attribute -->">foo</p>';
+    equal(minify(input, { removeComments: true }), input);
+  });
+
   test('conditional comments', function(){
     input = '<!--[if IE 6]>test<![endif]-->';
     equal(minify(input, { removeComments: true }), input);

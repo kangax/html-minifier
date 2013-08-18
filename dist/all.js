@@ -386,7 +386,7 @@
 
   function collapseWhitespaceSmart(str, prevTag, nextTag) {
     // array of tags that will maintain a single space outside of them
-    var tags = ['a', 'b', 'big', 'button', 'code', 'em', 'font', 'i', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u'];
+    var tags = ['a', 'abbr', 'acronym', 'b', 'big', 'button', 'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u', 'var'];
 
     if (prevTag && prevTag !== 'img' && (prevTag.substr(0,1) !== '/'
       || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
@@ -408,6 +408,10 @@
 
   function isConditionalComment(text) {
     return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
+  }
+
+  function isIgnoredComment(text) {
+    return (/^!/).test(text);
   }
 
   function isEventAttribute(attrName) {
@@ -742,6 +746,8 @@
         if (options.removeComments) {
           if (isConditionalComment(text)) {
             text = '<!--' + cleanConditionalComment(text) + '-->';
+          } else if (isIgnoredComment(text)) {
+            text = '<!--' + text + '-->';
           }
           else {
             text = '';
