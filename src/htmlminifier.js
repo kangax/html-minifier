@@ -66,6 +66,10 @@
     return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
   }
 
+  function isIgnoredComment(text) {
+    return (/^!/).test(text);
+  }
+
   function isEventAttribute(attrName) {
     return (/^on[a-z]+/).test(attrName);
   }
@@ -398,6 +402,8 @@
         if (options.removeComments) {
           if (isConditionalComment(text)) {
             text = '<!--' + cleanConditionalComment(text) + '-->';
+          } else if (isIgnoredComment(text)) {
+            text = '<!--' + text + '-->';
           }
           else {
             text = '';
