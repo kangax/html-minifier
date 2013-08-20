@@ -731,10 +731,10 @@
           }
         }
         if (options.collapseWhitespace) {
-          if (!stackNoTrimWhitespace.length && _canTrimWhitespace(currentTag, currentAttrs)) {
+          if (!stackNoTrimWhitespace.length) {
             text = (prevTag || nextTag) ? collapseWhitespaceSmart(text, prevTag, nextTag) : trimWhitespace(text);
           }
-          if (!stackNoCollapseWhitespace.length && _canCollapseWhitespace(currentTag, currentAttrs)) {
+          if (!stackNoCollapseWhitespace.length) {
             text = collapseWhitespace(text);
           }
         }
