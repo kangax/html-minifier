@@ -513,6 +513,10 @@
     output = '<textarea> foo bar     baz \n\n   x \t    y </textarea>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
+    input = '<div><textarea></textarea>    </div>';
+    output = '<div><textarea></textarea></div>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+
     input = '<pre title="some title...">   hello     world </pre>';
     output = '<pre title="some title...">   hello     world </pre>';
     equal(minify(input, { collapseWhitespace: true }), output);
