@@ -147,7 +147,6 @@
     equal(minify(input, { removeComments: false, collapseWhitespace: true }), output);
 
     input = '<p rel="<!-- comment in attribute -->" title="<!--! ignored comment in attribute -->">foo</p>';
-    output = '<p rel="" title="<!--! ignored comment in attribute -->">foo</p>';
     equal(minify(input, { removeComments: true }), input);
   });
 
