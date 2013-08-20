@@ -168,9 +168,7 @@
     output = '<!--[if IE 7]>'+
                 '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />'+
              '<![endif]-->'
-
     equal(minify(input, { removeComments: true }), output);
-
 
     input = '<!--[if lte IE 6]>\n    \n   \n\n\n\t' +
               '<p title=" sigificant     whitespace   ">blah blah</p>' +
@@ -178,7 +176,6 @@
     output = '<!--[if lte IE 6]>' +
               '<p title=" sigificant     whitespace   ">blah blah</p>' +
             '<![endif]-->';
-
     equal(minify(input, { removeComments: true }), output);
   });
 
@@ -515,6 +512,28 @@
 
     input = '<div><textarea></textarea>    </div>';
     output = '<div><textarea></textarea></div>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+
+    input = '<div><pre> $foo = "baz"; </pre>    </div>';
+    output = '<div><pre> $foo = "baz"; </pre></div>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+
+     input = '<script type=\"text\/javascript\">var = \"hello\";<\/script>\r\n\r\n\r\n'              +
+             '<style type=\"text\/css\">#foo { color: red;        }          <\/style>\r\n\r\n\r\n'  +
+             '<div>\r\n  <div>\r\n    <div><!-- hello -->\r\n      <div>'                            +
+             '<!--! hello -->\r\n        <div>\r\n          <div class=\"\">\r\n\r\n            '    +
+             '<textarea disabled=\"disabled\">     this is a textarea <\/textarea>\r\n          '    +
+             '<\/div>\r\n        <\/div>\r\n      <\/div>\r\n    <\/div>\r\n  <\/div>\r\n<\/div>'    +
+             '<pre>       \r\nxxxx<\/pre><span>x<\/span> <span>Hello<\/span> <b>billy<\/b>     \r\n' +
+             '<input type=\"text\">\r\n<textarea><\/textarea>\r\n<pre><\/pre>';
+    output = '<script type="text/javascript">var = "hello";</script>'                                +
+             '<style type="text/css">#foo { color: red;        }</style>'                            +
+             '<div><div><div>'                                                                       +
+             '<!-- hello --><div><!--! hello --><div><div class="">'                                 +
+             '<textarea disabled="disabled">     this is a textarea </textarea>'                     +
+             '</div></div></div></div></div></div>'                                                  +
+             '<pre>       \r\nxxxx</pre><span>x</span> <span>Hello</span> <b>billy</b>'              +
+             '<input type="text"><textarea></textarea><pre></pre>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
     input = '<pre title="some title...">   hello     world </pre>';
