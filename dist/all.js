@@ -54,7 +54,7 @@
   var reCache = { }, stackedTag, reStackedTag, tagMatch;
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
-    var index, chars, match, stack = [], last = html, prevTag, nextTag;
+    var index, chars, ignored = [], match, stack = [], last = html, prevTag, nextTag;
     stack.last = function(){
       return this[ this.length - 1 ];
     };
@@ -76,6 +76,17 @@
             chars = false;
           }
         }
+
+        // Ignored elements?
+        else if ((ignored[1] = (html.indexOf('<%') === 0)) || (ignored[2] = (html.indexOf('<?') === 0))) { // Determine "kind".
+          index = html.indexOf(ignored[1] ? '%>' : '?>'); // Find closing tag.
+          if (index >= 0) { // Found?
+            handler.ignore && handler.ignore(html.substring(0, index + 2)); // Return ignored string if callback exists.
+            html = html.substring(index + 2); // Next starting point for parser.
+            chars = false; // Chars flag.
+          }
+        }
+
         else if ( (match = doctype.exec( html )) ) {
           if ( handler.doctype )
             handler.doctype( match[0] );
@@ -238,6 +249,9 @@
       },
       comment: function( text ) {
         results += "<!--" + text + "-->";
+      },
+      ignore: function(text) {
+        // Need to test this.
       }
     });
 
@@ -327,6 +341,9 @@
       },
       comment: function( /*text*/ ) {
         // create comment node
+      },
+      ignore: function(text) {
+        // Need to test this.
       }
     });
 
@@ -757,6 +774,10 @@
           text = '<!--' + text + '-->';
         }
         buffer.push(text);
+      },
+      ignore: function(text) {
+        // `text` === strings that start with `<?` or `<%` and end with `?>` or `%>`.
+        buffer.push(options.removeIgnored ? '' : trimWhitespace(text)); // `text` allowed by default.
       },
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
