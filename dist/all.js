@@ -56,7 +56,7 @@
   var reCache = { }, stackedTag, reStackedTag, tagMatch;
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
-    var index, chars, ignored = [], match, stack = [], last = html, prevTag, nextTag;
+    var index, chars, match, stack = [], last = html, prevTag, nextTag;
     stack.last = function(){
       return this[ this.length - 1 ];
     };
@@ -67,7 +67,7 @@
       // Make sure we're not in a script or style element
       if ( !stack.last() || !special[ stack.last() ] ) {
 
-        // Comment
+        // Comment:
         if ( html.indexOf("<!--") === 0 ) {
           index = html.indexOf("-->");
 
@@ -89,14 +89,16 @@
           }
         }
 
+        // Doctype:
         else if ( (match = doctype.exec( html )) ) {
           if ( handler.doctype )
             handler.doctype( match[0] );
           html = html.substring( match[0].length );
           chars = false;
+        }
 
-        // end tag
-        } else if ( html.indexOf("</") === 0 ) {
+        // End tag:
+        else if ( html.indexOf("</") === 0 ) {
           match = html.match( endTag );
 
           if ( match ) {
@@ -106,7 +108,7 @@
             chars = false;
           }
 
-        // start tag
+        // Start tag:
         } else if ( html.indexOf("<") === 0 ) {
           match = html.match( startTag );
 
