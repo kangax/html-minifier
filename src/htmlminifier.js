@@ -416,7 +416,7 @@
       },
       ignore: function(text) {
         // `text` === strings that start with `<?` or `<%` and end with `?>` or `%>`.
-        buffer.push(options.removeIgnored ? '' : trimWhitespace(text)); // `text` allowed by default.
+        buffer.push(options.removeIgnored ? '' : text); // `text` allowed by default.
       },
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));

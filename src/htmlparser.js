@@ -30,7 +30,9 @@
   var startTag = /^<([\w:-]+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
       attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
-      doctype = /^<!DOCTYPE [^>]+>/i;
+      doctype = /^<!DOCTYPE [^>]+>/i,
+      startIgnore = /<(%|\?)/;
+      endIgnore = /(%|\?)>/;
 
   // Empty Elements - HTML 4.01
   var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
@@ -78,8 +80,8 @@
         }
 
         // Ignored elements?
-        else if ((ignored[1] = (html.indexOf('<%') === 0)) || (ignored[2] = (html.indexOf('<?') === 0))) { // Determine "kind".
-          index = html.indexOf(ignored[1] ? '%>' : '?>'); // Find closing tag.
+        else if (html.search(startIgnore) === 0) {
+          index = html.search(endIgnore); // Find closing tag.
           if (index >= 0) { // Found?
             handler.ignore && handler.ignore(html.substring(0, index + 2)); // Return ignored string if callback exists.
             html = html.substring(index + 2); // Next starting point for parser.
