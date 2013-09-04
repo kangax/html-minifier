@@ -30,7 +30,9 @@
   var startTag = /^<([\w:-]+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
       attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
-      doctype = /^<!DOCTYPE [^>]+>/i;
+      doctype = /^<!DOCTYPE [^>]+>/i,
+      startIgnore = /<(%|\?)/;
+      endIgnore = /(%|\?)>/;
 
   // Empty Elements - HTML 4.01
   var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
@@ -65,7 +67,7 @@
       // Make sure we're not in a script or style element
       if ( !stack.last() || !special[ stack.last() ] ) {
 
-        // Comment
+        // Comment:
         if ( html.indexOf("<!--") === 0 ) {
           index = html.indexOf("-->");
 
@@ -76,14 +78,28 @@
             chars = false;
           }
         }
+
+        // Ignored elements?
+        else if (html.search(startIgnore) === 0) {
+          index = html.search(endIgnore); // Find closing tag.
+          if (index >= 0) { // Found?
+            // @TODO: Pass matched open/close tags back to handler.
+            handler.ignore && handler.ignore(html.substring(0, index + 2)); // Return ignored string if callback exists.
+            html = html.substring(index + 2); // Next starting point for parser.
+            chars = false; // Chars flag.
+          }
+        }
+
+        // Doctype:
         else if ( (match = doctype.exec( html )) ) {
           if ( handler.doctype )
             handler.doctype( match[0] );
           html = html.substring( match[0].length );
           chars = false;
+        }
 
-        // end tag
-        } else if ( html.indexOf("</") === 0 ) {
+        // End tag:
+        else if ( html.indexOf("</") === 0 ) {
           match = html.match( endTag );
 
           if ( match ) {
@@ -93,7 +109,7 @@
             chars = false;
           }
 
-        // start tag
+        // Start tag:
         } else if ( html.indexOf("<") === 0 ) {
           match = html.match( startTag );
 
@@ -238,6 +254,9 @@
       },
       comment: function( text ) {
         results += "<!--" + text + "-->";
+      },
+      ignore: function(text) {
+        results += text;
       }
     });
 
@@ -327,6 +346,9 @@
       },
       comment: function( /*text*/ ) {
         // create comment node
+      },
+      ignore: function( /* text */ ) {
+        // What to do here?
       }
     });
 
