@@ -83,6 +83,7 @@
         else if (html.search(startIgnore) === 0) {
           index = html.search(endIgnore); // Find closing tag.
           if (index >= 0) { // Found?
+            // @TODO: Pass matched open/close tags back to handler.
             handler.ignore && handler.ignore(html.substring(0, index + 2)); // Return ignored string if callback exists.
             html = html.substring(index + 2); // Next starting point for parser.
             chars = false; // Chars flag.
@@ -255,7 +256,7 @@
         results += "<!--" + text + "-->";
       },
       ignore: function(text) {
-        // Need to test this.
+        results += text;
       }
     });
 
@@ -346,8 +347,8 @@
       comment: function( /*text*/ ) {
         // create comment node
       },
-      ignore: function(text) {
-        // Need to test this.
+      ignore: function( /* text */ ) {
+        // What to do here?
       }
     });
 
