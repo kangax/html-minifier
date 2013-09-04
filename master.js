@@ -10,6 +10,7 @@
   
   function getOptions() {
     return {
+      removeIgnored:                  byId('remove-ignored').checked,
       removeComments:                 byId('remove-comments').checked,
       removeCommentsFromCDATA:        byId('remove-comments-from-cdata').checked,
       removeCDATASectionsFromCDATA:   byId('remove-cdata-sections-from-cdata').checked,
