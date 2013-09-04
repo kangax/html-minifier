@@ -365,7 +365,7 @@
   }
 })(typeof exports === 'undefined' ? this : exports);
 /*!
- * HTMLMinifier v0.5.3
+ * HTMLMinifier v0.5.4
  * http://kangax.github.com/html-minifier/
  *
  * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
