@@ -56,7 +56,7 @@
 
     if (prevTag && nextTag) {
       // strip non space whitespace then compress spaces to one
-      return str.replace(/[\t\n\r]+/g, '').replace(/[ ]+/g, ' ');
+      return str.replace(/[\t\n\r]+/g, ' ').replace(/[ ]+/g, ' ');
     }
 
     return str;
