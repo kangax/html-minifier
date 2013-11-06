@@ -77,7 +77,7 @@
   test('space normalization around text', function(){
     equal(minify('   <p>blah</p>\n\n\n   '), '<p>blah</p>');
     // tags from collapseWhitespaceSmart()
-    ['a', 'b', 'big', 'button', 'code', 'em', 'font', 'i', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'tt', 'u'].forEach(function(el){
+    ['a', 'b', 'big', 'button', 'code', 'em', 'font', 'i', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'time', 'tt', 'u'].forEach(function(el){
       equal(minify('<p>foo <'+el+'>baz</'+el+'> bar</p>', {collapseWhitespace: true}), '<p>foo <'+el+'>baz</'+el+'> bar</p>');
       equal(minify('<p>foo<'+el+'>baz</'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'>bar</p>');
       equal(minify('<p>foo <'+el+'>baz</'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo <'+el+'>baz</'+el+'>bar</p>');
@@ -695,21 +695,21 @@
 
   // https://github.com/kangax/html-minifier/issues/10
   test('Ignored tags: enabled by default', function() {
-    
+
     input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
     output = 'This is the start.<% ... %><%= ... %><? ... ?>No comment, but middle.<?= ... ?><?php ... ?><?xml ... ?>Hello, this is the end!';
     equal(minify(input, {}), input);
     equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
     output = 'This is the start.No comment, but middle.Hello, this is the end!';
     equal(minify(input, { removeComments: true, collapseWhitespace: true, removeIgnored: true }), output);
-    
+
     input = '<% if foo? %>\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n<% end %>';
     output = '<% if foo? %><div class="bar">...</div><% end %>';
     equal(minify(input, {}), input);
     equal(minify(input, { collapseWhitespace: true }), output);
     output = '<div class="bar">...</div>';
     equal(minify(input, { collapseWhitespace: true, removeIgnored: true }), output);
-    
+
   });
 
 })(typeof exports === 'undefined' ? window : exports);
