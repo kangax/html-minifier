@@ -76,7 +76,9 @@
 
   function canRemoveAttributeQuotes(value) {
     // http://mathiasbynens.be/notes/unquoted-attribute-values
-    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value);
+    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value) &&
+    // make sure trailing slash is not interpreted as HTML self-closing tag
+        !(/\/$/).test(value);
   }
 
   function attributesInclude(attributes, attribute) {
