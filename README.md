@@ -15,3 +15,5 @@ Building distribution:
 Testing locally:
 
     > npm test
+    
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
