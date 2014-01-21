@@ -365,7 +365,7 @@
   }
 })(typeof exports === 'undefined' ? this : exports);
 /*!
- * HTMLMinifier v0.5.4
+ * HTMLMinifier v0.5.5
  * http://kangax.github.com/html-minifier/
  *
  * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
@@ -408,7 +408,7 @@
 
   function collapseWhitespaceSmart(str, prevTag, nextTag) {
     // array of tags that will maintain a single space outside of them
-    var tags = ['a', 'abbr', 'acronym', 'b', 'big', 'button', 'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'time', 'tt', 'u', 'var'];
+    var tags = ['a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite', 'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'time', 'tt', 'u', 'var'];
 
     if (prevTag && prevTag !== 'img' && (prevTag.substr(0,1) !== '/'
       || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
@@ -442,7 +442,9 @@
 
   function canRemoveAttributeQuotes(value) {
     // http://mathiasbynens.be/notes/unquoted-attribute-values
-    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value);
+    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value) && !(/\/$/ ).test(value) &&
+    // make sure trailing slash is not interpreted as HTML self-closing tag
+        !(/\/$/).test(value);
   }
 
   function attributesInclude(attributes, attribute) {
