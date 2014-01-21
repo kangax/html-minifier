@@ -715,4 +715,16 @@
 
   });
 
+  test('bootstrap\'s span > button > span', function() {
+    input = '<span class="input-group-btn">' +
+      '\n  <button class="btn btn-default" type="button">' +
+        '\n    <span class="glyphicon glyphicon-search"></span>' +
+      '\n  </button>' +
+    '</span>';
+
+    output = '<span class=input-group-btn><button class="btn btn-default" type=button><span class="glyphicon glyphicon-search"></span></button></span>';
+
+    equal(minify(input, { collapseWhitespace: true, removeAttributeQuotes: true }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
