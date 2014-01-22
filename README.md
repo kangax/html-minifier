@@ -8,12 +8,16 @@ Installing with [npm](https://github.com/isaacs/npm):
 
     npm install html-minifier
 
+Linting:
+
+    > npm run-script lint
+
 Building distribution:
 
-    > cat src/htmlparser.js src/htmlminifier.js src/htmllint.js > dist/all.js
+    > npm run-script build
 
 Testing locally:
 
     > npm test
-    
+
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

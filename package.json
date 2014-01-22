@@ -29,7 +29,9 @@
     "src": "./src"
   },
   "scripts": {
-    "test": "jshint src/htmlminifier.js src/htmllint.js && cat src/htmlparser.js src/htmlminifier.js src/htmllint.js > dist/all.js && node test.js"
+    "test": "npm run-script lint && npm run-script build && node test.js",
+    "build": "cat src/htmlparser.js src/htmlminifier.js src/htmllint.js > dist/all.js",
+    "lint": "jshint src/htmlminifier.js src/htmllint.js"
   },
   "devDependencies": {
     "qunit": "0.5.x",
