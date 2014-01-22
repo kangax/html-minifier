@@ -1,5 +1,6 @@
 .jshintrc
 .travis.yml
+_config.yml
 index.html
 master.css
 master.js
