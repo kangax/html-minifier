@@ -31,7 +31,9 @@
   "scripts": {
     "test": "npm run-script lint && npm run-script build && node test.js",
     "build": "cat src/htmlparser.js src/htmlminifier.js src/htmllint.js > dist/all.js",
-    "lint": "jshint src/htmlminifier.js src/htmllint.js"
+    "minify": "uglifyjs --output dist/all.min.js dist/all.js",
+    "lint": "jshint src/htmlminifier.js src/htmllint.js",
+    "dist": "npm run-script build && npm run-script minify"
   },
   "devDependencies": {
     "qunit": "0.5.x",
