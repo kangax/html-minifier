@@ -1,7 +1,9 @@
-tests
-v8
+.jshintrc
 .travis.yml
 index.html
 master.css
 master.js
 test.js
+src
+tests
+v8
