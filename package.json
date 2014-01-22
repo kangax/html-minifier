@@ -44,9 +44,9 @@
     "dist": "npm run build && npm run minify"
   },
   "devDependencies": {
+    "jshint": "2.4.x",
     "qunit": "0.5.x",
-    "jshint": "1.1.x",
-    "uglify-js": "2.2.x"
+    "uglify-js": "2.4.x"
   },
   "main": "./dist/all.js"
 }
