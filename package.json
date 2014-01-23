@@ -37,11 +37,11 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "npm run lint && npm run build && node test.js",
     "build": "cat src/htmlparser.js src/htmlminifier.js src/htmllint.js > dist/all.js",
-    "minify": "uglifyjs --output dist/all.min.js dist/all.js",
+    "dist": "npm run build && npm run minify",
     "lint": "jshint src/htmlminifier.js src/htmllint.js",
-    "dist": "npm run build && npm run minify"
+    "minify": "uglifyjs --output dist/all.min.js dist/all.js",
+    "test": "npm run lint && npm run build && node test.js"
   },
   "devDependencies": {
     "jshint": "2.4.x",
