@@ -8,6 +8,8 @@ See [corresponding blog post](http://perfectionkills.com/experimenting-with-html
 
 [Test suite is available online](http://kangax.github.io/html-minifier/tests/).
 
+Also see corresponding [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin).
+
 Installing with [npm](https://github.com/isaacs/npm):
 
 ```
