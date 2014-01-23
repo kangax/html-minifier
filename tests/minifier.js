@@ -1,6 +1,6 @@
 (function(global){
 
-  var minify = global.minify || require('../dist/all.js').minify,
+  var minify = global.minify || require('../dist/all.min.js').minify,
       input,
       output;
 
