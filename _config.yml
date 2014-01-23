@@ -1,0 +1,8 @@
+exclude:
+- "node_modules"
+- "src"
+- "v8"
+- "package.json"
+- "README.md"
+- "test.js"
+

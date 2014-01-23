@@ -1,38 +1,19 @@
 {
-  "globals":    {
-    "DOMDocument": true,
-    "ActiveXObject": true
-  },
-  "node":       true,
-  "es5":        false,
   "browser":    true,
-
-  "boss":       false,
   "curly":      false,
-  "debug":      false,
-  "devel":      false,
   "eqeqeq":     true,
   "eqnull":     true,
-  "evil":       true,
   "expr":       true,
-  "forin":      false,
   "immed":      true,
   "laxbreak":   true,
   "loopfunc":   true,
-  "multistr":   true,
-  "newcap":     true,
-  "noarg":      true,
-  "noempty":    false,
-  "nonew":      false,
-  "nomen":      false,
-  "onevar":     false,
-  "plusplus":   false,
-  "regexp":     false,
-  "undef":      true,
-  "sub":        true,
+  "newcap":     false,
+  "node":       true,
   "strict":     false,
-  "white":      false,
+  "undef":      true,
   "unused":     true,
-  "lastsemic":  true,
-  "newcap":     false
+  "globals":    {
+    "ActiveXObject": true,
+    "DOMDocument": true
+  }
 }

@@ -2,43 +2,51 @@
   "name": "html-minifier",
   "description": "HTML minifier with lint-like capabilities.",
   "version": "0.5.5",
-  "keywords": ["html", "minifier", "lint"],
-  "url" : "http://github.com/kangax/html-minifier",
-  "maintainers": [{
-    "name": "Juriy Zaytsev",
-    "email": "kangax@gmail.com",
-    "web": "http://perfectionkills.com"
-  }],
-  "contributors": [{
-    "name": "Gilmore Davidson",
-    "web": "https://github.com/gilmoreorless"
+  "keywords": [
+    "html",
+    "minifier",
+    "lint"
+  ],
+  "url": "http://github.com/kangax/html-minifier",
+  "homepage": "http://kangax.github.io/html-minifier/",
+  "author": "Juriy Zaytsev <kangax@gmail.com> (http://perfectionkills.com)",
+  "maintainers": [
+    "Juriy Zaytsev <kangax@gmail.com> (http://perfectionkills.com)"
+  ],
+  "contributors": [
+    "Gilmore Davidson (https://github.com/gilmoreorless)",
+    "Hugo Wetterberg <hugo@wetterberg.nu>"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kangax/html-minifier"
   },
-  {
-    "name": "Hugo Wetterberg",
-    "email": "hugo@wetterberg.nu"
-  }],
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE"
-  }],
-  "repository": "git://github.com/kangax/html-minifier",
+  "bugs": {
+    "url": "https://github.com/kangax/html-minifier/issues"
+  },
   "engines": {
     "node": ">=0.4.8"
   },
   "directories": {
-    "src": "./src"
+    "test": "tests"
   },
   "scripts": {
-    "test": "npm run-script lint && npm run-script build && node test.js",
+    "test": "npm run lint && npm run build && node test.js",
     "build": "cat src/htmlparser.js src/htmlminifier.js src/htmllint.js > dist/all.js",
     "minify": "uglifyjs --output dist/all.min.js dist/all.js",
     "lint": "jshint src/htmlminifier.js src/htmllint.js",
-    "dist": "npm run-script build && npm run-script minify"
+    "dist": "npm run build && npm run minify"
   },
   "devDependencies": {
+    "jshint": "2.4.x",
     "qunit": "0.5.x",
-    "jshint": "1.1.x",
-    "uglify-js": "2.2.x"
+    "uglify-js": "2.4.x"
   },
   "main": "./dist/all.js"
 }
