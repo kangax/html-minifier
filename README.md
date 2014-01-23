@@ -1,7 +1,5 @@
-[![Build Status](https://secure.travis-ci.org/kangax/html-minifier.png?branch=master)](http://travis-ci.org/#!/kangax/html-minifier)
-
-[![devDependency Status](https://david-dm.org/kangax/html-minifier/dev-status.png?theme=shields.io)](https://david-dm.org/
-kangax/html-minifier#info=devDependencies)
+[![Build Status](https://travis-ci.org/kangax/html-minifier.png)](https://travis-ci.org/kangax/html-minifier)
+[![devDependency Status](https://david-dm.org/kangax/html-minifier/dev-status.png?theme=shields.io)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
 
 [HTMLMinifier](http://kangax.github.io/html-minifier/) is a Javascript-based HTML minifier (duh), with lint-like capabilities.
 
@@ -30,13 +28,13 @@ npm run build
 Minifiying distribution:
 
 ```
-npm run-script minify
+npm run minify
 ```
 
 Building & minifying distrubution:
 
 ```
-npm run-script dist
+npm run dist
 ```
 
 Testing locally:
