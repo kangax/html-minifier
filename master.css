@@ -33,3 +33,5 @@ button { font-weight: bold; width: 100px; }
 .presentational-element, .presentational-attribute, .inaccessible-attribute { color: #FF8C00; }
 
 .unsafe { color: #f33; }
+
+iframe { position: absolute; top: 10px; right: 10px; }
