@@ -737,4 +737,20 @@
     equal(minify(input, { caseSensitive: true }), caseSensitiveOutput);
   });
 
+  test('source', function() {
+
+    input = '<audio controls="controls">'+
+              '<source src="foo.wav">'+
+              '<source src="far.wav">'+
+              '<source src="foobar.wav">'+
+            '</audio>';
+    output = '<audio controls="controls">'+
+              '<source src="foo.wav">'+
+              '<source src="far.wav">'+
+              '<source src="foobar.wav">'+
+            '</audio>';
+
+    equal(minify(input, { removeOptionalTags: true }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
