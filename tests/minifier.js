@@ -633,9 +633,9 @@
             '</table>';
 
     output = '<table>'+
-              '<thead><tr><th>foo</th><th>bar</th>'+
-              '<tfoot><tr><th>baz</th><th>qux</th>'+
-              '<tbody><tr><td>boo</td><td>moo</td>'+
+              '<thead><tr><th>foo<th>bar'+
+              '<tfoot><tr><th>baz<th>qux'+
+              '<tbody><tr><td>boo<td>moo'+
              '</table>';
 
     equal(minify(input, { removeOptionalTags: true }), output);
