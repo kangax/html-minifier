@@ -727,4 +727,14 @@
     equal(minify(input, { collapseWhitespace: true, removeAttributeQuotes: true }), output);
   });
 
+  test('caseSensitive', function() {
+    input = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewBox="0 0 100 100"></svg>';
+
+    var caseSensitiveOutput = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewBox="0 0 100 100"></svg>';
+    var caseInSensitiveOutput = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewbox="0 0 100 100"></svg>';
+
+    equal(minify(input), caseInSensitiveOutput);
+    equal(minify(input, { caseSensitive: true }), caseSensitiveOutput);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);

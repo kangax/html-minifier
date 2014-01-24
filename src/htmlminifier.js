@@ -241,7 +241,7 @@
 
   function normalizeAttribute(attr, attrs, tag, options) {
 
-    var attrName = attr.name.toLowerCase(),
+    var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = attr.escaped,
         attrFragment;
 

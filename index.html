@@ -18,6 +18,12 @@
             <button type="button" id="minify-btn">Minify</button>
           </p>
           <textarea rows="8" cols="40" id="output" readonly></textarea>
+
+          <p id="stats"></p>
+          <div id="lint-report">
+            LINT REPORT:
+            <div id="report"></div>
+          </div>
         </div>
         <div id="options">
           <ul>
@@ -151,6 +157,16 @@
               </label>
             </li>
             <li>
+              <input type="checkbox" id="case-sensitive">
+              <label for="case-sensitive">
+                Case-sensitive attributes
+                <br>
+                <span class="quiet short">
+                  Useful when minifying SVG
+                </span>
+              </label>
+            </li>
+            <li>
               <input type="checkbox" id="use-htmllint" checked>
               <label for="use-htmllint">
                 Validate input through HTML lint
@@ -164,11 +180,6 @@
             <a href="#" id="select-safe">Safe</a>
           </div>
         </div>
-      </div>
-      <p id="stats"></p>
-      <div id="lint-report">
-        LINT REPORT:
-        <div id="report"></div>
       </div>
       <p class="quiet" style="font-style:italic;">
         HTMLMinifier is made by <a href="http://perfectionkills.com/">kangax</a>,

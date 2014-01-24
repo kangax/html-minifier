@@ -1,4 +1,4 @@
-/*
+/*!
  * HTML Parser By John Resig (ejohn.org)
  * Modified by Juriy "kangax" Zaytsev
  * Original code by Erik Arvidsson, Mozilla Public License
@@ -607,7 +607,7 @@
 
   function normalizeAttribute(attr, attrs, tag, options) {
 
-    var attrName = attr.name.toLowerCase(),
+    var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = attr.escaped,
         attrFragment;
 
