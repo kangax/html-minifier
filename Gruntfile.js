@@ -2,8 +2,14 @@
 
 module.exports = function(grunt) {
 
-    // Project configuration.
     grunt.initConfig({
+
+    pkg: grunt.file.readJSON('package.json'),
+    banner: '/*!\n' +
+            ' * HTMLMinifier v<%= pkg.version %> (<%= pkg.homepage %>)\n' +
+            ' * Copyright 2010-<%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
+            ' * Licensed under <%= _.pluck(pkg.licenses, "type") %> (<%= _.pluck(pkg.licenses, "url") %>)\n' +
+            ' */\n',
 
         jshint: {
             options: {
@@ -24,6 +30,9 @@ module.exports = function(grunt) {
         },
 
         concat: {
+            options: {
+                banner: '<%= banner %>'
+            },
             js: {
                 src: ['src/htmlparser.js',
                       'src/htmlminifier.js',
@@ -34,6 +43,7 @@ module.exports = function(grunt) {
 
         uglify: {
             options: {
+                banner: '<%= banner %>',
                 compress: true,
                 mangle: true,
                 preserveComments: false,

@@ -1,4 +1,9 @@
 /*!
+ * HTMLMinifier v0.5.5 (http://kangax.github.io/html-minifier/)
+ * Copyright 2010-2014 Juriy "kangax" Zaytsev
+ * Licensed under MIT (https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE)
+ */
+/*!
  * HTML Parser By John Resig (ejohn.org)
  * Modified by Juriy "kangax" Zaytsev
  * Original code by Erik Arvidsson, Mozilla Public License
