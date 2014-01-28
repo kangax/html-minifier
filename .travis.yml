@@ -7,5 +7,7 @@ node_js:
 branches:
   only:
     - gh-pages
+before_script:
+  - npm install -g grunt-cli
 before_install:
  - '[ "${TRAVIS_NODE_VERSION}" = "0.6" ] && npm conf set strict-ssl false || true'

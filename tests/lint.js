@@ -1,7 +1,7 @@
 (function(global){
 
-  var minify = global.minify || require('../dist/all.js').minify,
-      HTMLLint = HTMLLint || require('../dist/all.js').HTMLLint,
+  var minify = global.minify || require('../dist/htmlminifier.js').minify,
+      HTMLLint = HTMLLint || require('../dist/htmlminifier.js').HTMLLint,
       input,
       output,
       lint = new HTMLLint();

@@ -27,34 +27,6 @@ Installing with [npm](https://github.com/isaacs/npm):
 npm install html-minifier
 ```
 
-Linting:
-
-```
-npm run lint
-```
-
-Building distribution:
-
-```
-npm run build
-```
-
-Minifiying distribution:
-
-```
-npm run minify
-```
-
-Building & minifying distrubution:
-
-```
-npm run dist
-```
-
-Testing locally:
-
-```
-npm test
-```
+**TO BE FILLED**
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

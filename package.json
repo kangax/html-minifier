@@ -37,16 +37,17 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "cat src/htmlparser.js src/htmlminifier.js src/htmllint.js > dist/all.js",
-    "dist": "npm run build && npm run minify",
-    "lint": "jshint src/htmlminifier.js src/htmllint.js",
-    "minify": "uglifyjs --output dist/all.min.js dist/all.js",
-    "test": "npm run lint && npm run build && node test.js"
+    "test": "grunt test && node test.js"
   },
   "devDependencies": {
-    "jshint": "2.4.x",
+    "grunt": "0.4.x",
+    "grunt-contrib-concat": "0.3.x",
+    "grunt-contrib-jshint": "0.8.x",
+    "grunt-contrib-qunit": "0.4.x",
+    "grunt-contrib-uglify": "0.3.x",
+    "load-grunt-tasks": "0.3.x",
     "qunit": "0.5.x",
-    "uglify-js": "2.4.x"
+    "time-grunt": "0.2.x"
   },
-  "main": "./dist/all.js"
+  "main": "./dist/htmlminifier.js"
 }
