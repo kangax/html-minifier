@@ -86,7 +86,7 @@
       equal(minify('<p>foo<'+el+'> baz </'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'>bar</p>');
       equal(minify('<p>foo <'+el+'> baz </'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo <'+el+'>baz</'+el+'>bar</p>');
       equal(minify('<p>foo<'+el+'> baz </'+el+'> bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'> bar</p>');
-    })
+    });
     equal(minify('<p>foo <img> bar</p>', {collapseWhitespace: true}), '<p>foo <img> bar</p>');
     equal(minify('<p>foo<img>bar</p>', {collapseWhitespace: true}), '<p>foo<img>bar</p>');
     equal(minify('<p>foo <img>bar</p>', {collapseWhitespace: true}), '<p>foo <img>bar</p>');
@@ -167,7 +167,7 @@
             '<![endif]-->';
     output = '<!--[if IE 7]>'+
                 '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />'+
-             '<![endif]-->'
+             '<![endif]-->';
     equal(minify(input, { removeComments: true }), output);
 
     input = '<!--[if lte IE 6]>\n    \n   \n\n\n\t' +
