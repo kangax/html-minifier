@@ -753,4 +753,10 @@
     equal(minify(input, { removeOptionalTags: true }), output);
   });
 
+  test('nested quotes', function() {
+    input = '<p ng-class=\'"test"\'></p>';
+    output = '<p ng-class="&quot;test&quot;"></p>';
+    equal(minify(input), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
