@@ -31,7 +31,7 @@
       endTag = /^<\/([\w:-]+)[^>]*>/,
       attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
       doctype = /^<!DOCTYPE [^>]+>/i,
-      startIgnore = /<(%|\?)/;
+      startIgnore = /<(%|\?)/,
       endIgnore = /(%|\?)>/;
 
   // Empty Elements - HTML 4.01
