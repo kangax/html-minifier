@@ -69,8 +69,10 @@
 
   test('space normalization between attributes', function() {
     equal(minify('<p title="bar">foo</p>'), '<p title="bar">foo</p>');
+    equal(minify('<img src="test"/>'), '<img src="test">')
     equal(minify('<p title = "bar">foo</p>'), '<p title="bar">foo</p>');
     equal(minify('<p title\n\n\t  =\n     "bar">foo</p>'), '<p title="bar">foo</p>');
+    equal(minify('<img src="test" \n\t />'), '<img src="test">')
     equal(minify('<input title="bar"       id="boo"    value="hello world">'), '<input title="bar" id="boo" value="hello world">');
   });
 
@@ -615,6 +617,10 @@
 
     input = '<input multiple="multiple">';
     equal(minify(input, { collapseBooleanAttributes: true }), '<input multiple>');
+  });
+
+  test('keeping trailing slashes in tags', function(){
+    equal(minify('<img src="test"/>', { keepClosingSlash: true }), '<img src="test"/>');
   });
 
   test('removing optional tags', function(){

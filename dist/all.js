@@ -29,6 +29,7 @@
   // Regular Expressions for parsing tags and attributes
   var startTag = /^<([\w:-]+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
+      endingSlash = /\/>$/,
       attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
       doctype = /^<!DOCTYPE [^>]+>/i,
       startIgnore = /<(%|\?)/,
@@ -175,6 +176,7 @@
     parseEndTag();
 
     function parseStartTag( tag, tagName, rest, unary ) {
+      var unarySlash = false;
 
       while ( !handler.html5 && stack.last() && inline[ stack.last() ]) {
         parseEndTag( "", stack.last() );
@@ -186,8 +188,11 @@
 
       unary = empty[ tagName ] || !!unary;
 
-      if ( !unary )
+      if ( !unary ) {
         stack.push( tagName );
+      } else {
+        unarySlash = tag.match( endingSlash );
+      }
 
       if ( handler.start ) {
         var attrs = [];
@@ -205,7 +210,7 @@
         });
 
         if ( handler.start )
-          handler.start( tagName, attrs, unary );
+          handler.start( tagName, attrs, unary, unarySlash );
       }
     }
 
@@ -686,7 +691,7 @@
     HTMLParser(value, {
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
-      start: function( tag, attrs ) {
+      start: function( tag, attrs, unary, unarySlash ) {
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
@@ -710,8 +715,7 @@
           lint && lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
           buffer.push(normalizeAttribute(attrs[i], attrs, tag, options));
         }
-
-        buffer.push('>');
+        buffer.push(((unarySlash && options.keepClosingSlash) ? '/' : '') + '>');
       },
       end: function( tag ) {
         // check if current tag is in a whitespace stack

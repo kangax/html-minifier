@@ -320,7 +320,7 @@
     HTMLParser(value, {
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
-      start: function( tag, attrs ) {
+      start: function( tag, attrs, unary, unarySlash ) {
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
@@ -344,8 +344,7 @@
           lint && lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
           buffer.push(normalizeAttribute(attrs[i], attrs, tag, options));
         }
-
-        buffer.push('>');
+        buffer.push(((unarySlash && options.keepClosingSlash) ? '/' : '') + '>');
       },
       end: function( tag ) {
         // check if current tag is in a whitespace stack
