@@ -10,6 +10,15 @@ See [corresponding blog post](http://perfectionkills.com/experimenting-with-html
 
 Also see corresponding [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin).
 
+
+| Site          | Original size | HTMLMinifier  | Will Peavy  |
+| ------------- |:-------------:| -------------:| -----------:|
+| Wikipedia     | 401.4KB       | 385.5KB       |   396.3KB   |
+| Stackoverflow | ...           |   ...         |   ...       |
+| Amazon        | ...           |    ..         |   ...       |
+| ES6 table     | ...           |    ..         |   ...       |
+
+
 Installing with [npm](https://github.com/isaacs/npm):
 
 ```
