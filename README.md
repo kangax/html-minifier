@@ -14,9 +14,9 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 
 | Site          | Original size | HTMLMinifier  | Will Peavy  |
 | ------------- |:-------------:| -------------:| -----------:|
-| Wikipedia     | 401.4KB       | 385.5KB       |   396.3KB   |
-| Stackoverflow | 200.4KB       | 165.3KB       |   168.3KB   |
-| Amazon        | 245.9KB       | 237.1KB       |   225KB     |
+| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)     | 401.4KB       | 385.5KB       |   396.3KB   |
+| [Stackoverflow](http://stackoverflow.com) | 200.4KB       | 165.3KB       |   168.3KB   |
+| [Amazon](http://amazon.com)        | 245.9KB       | 237.1KB       |   225KB     |
 | [ES6 table](kangax.github.io/es5-compat-table/es6/)     | 117.9KB       | 82KB          |   92KB      |
 
 
