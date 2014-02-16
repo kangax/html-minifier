@@ -10,13 +10,14 @@ See [corresponding blog post](http://perfectionkills.com/experimenting-with-html
 
 Also see corresponding [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin).
 
+How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/minifier/) — HTML Minifier from Will Peavy (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier))?
 
 | Site          | Original size | HTMLMinifier  | Will Peavy  |
 | ------------- |:-------------:| -------------:| -----------:|
 | Wikipedia     | 401.4KB       | 385.5KB       |   396.3KB   |
-| Stackoverflow | ...           |   ...         |   ...       |
-| Amazon        | ...           |    ..         |   ...       |
-| ES6 table     | ...           |    ..         |   ...       |
+| Stackoverflow | 200.4KB       | 165.3KB       |   168.3KB   |
+| Amazon        | 245.9KB       | 237.1KB       |   225KB     |
+| [ES6 table](kangax.github.io/es5-compat-table/es6/)     | 117.9KB       | 82KB          |   92KB      |
 
 
 Installing with [npm](https://github.com/isaacs/npm):
