@@ -17,7 +17,7 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)     | 401.4       | <b>385.5</b>       |   396.3   |
 | [Stackoverflow](http://stackoverflow.com) | 200.4       | <b>165.3</b>       |   168.3   |
 | [Amazon](http://amazon.com)        | 245.9       | 237.1       |   <b>225</b>     |
-| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)     | 117.9       | <b>82</b>          |   92KB      |
+| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)     | 117.9       | <b>82</b>          |   92      |
 | [HTMLMinifier page](https://github.com/kangax/html-minifier)     | 48.8       | <b>41.3</b>          |   43.3      |
 
 
