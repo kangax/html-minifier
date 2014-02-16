@@ -14,11 +14,11 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 
 | Site          | Original size | HTMLMinifier  | Will Peavy  |
 | ------------- |:-------------:| -------------:| -----------:|
-| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)     | 401.4KB       | <b>385.5KB</b>       |   396.3KB   |
-| [Stackoverflow](http://stackoverflow.com) | 200.4KB       | <b>165.3KB</b>       |   168.3KB   |
-| [Amazon](http://amazon.com)        | 245.9KB       | 237.1KB       |   <b>225KB</b>     |
-| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)     | 117.9KB       | <b>82KB</b>          |   92KB      |
-| [HTMLMinifier page](https://github.com/kangax/html-minifier)     | 48.8KB       | <b>41.3KB</b>          |   43.3KB      |
+| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)     | 401.4KB       | <b>385.5</b>KB       |   396.3KB   |
+| [Stackoverflow](http://stackoverflow.com) | 200.4KB       | <b>165.3</b>KB       |   168.3KB   |
+| [Amazon](http://amazon.com)        | 245.9KB       | 237.1KB       |   <b>225</b>KB     |
+| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)     | 117.9KB       | <b>82</b>KB          |   92KB      |
+| [HTMLMinifier page](https://github.com/kangax/html-minifier)     | 48.8KB       | <b>41.3</b>KB          |   43.3KB      |
 
 
 Installing with [npm](https://github.com/isaacs/npm):
