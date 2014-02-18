@@ -30,7 +30,7 @@
  * HTMLtoDOM(htmlString, document.body);
  *
  */
- 
+
  /* global ActiveXObject, DOMDocument */
 
 (function(global){

@@ -12,9 +12,5 @@
   "node":       true,
   "strict":     false,
   "undef":      true,
-  "unused":     true,
-  "globals":    {
-    "ActiveXObject": true,
-    "DOMDocument": true
-  }
+  "unused":     true
 }

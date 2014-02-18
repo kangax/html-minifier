@@ -26,6 +26,8 @@
  *
  */
 
+ /* global ActiveXObject, DOMDocument */
+
 (function(global){
 
   // Regular Expressions for parsing tags and attributes
