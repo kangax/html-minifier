@@ -15,10 +15,10 @@
 
   test('lint API', function() {
     equal(0, lint.log.length, '`log` property exists');
-    equal("function", typeof lint.populate, '`populate` method exists');
-    equal("function", typeof lint.test, '`test` method exists');
-    equal("function", typeof lint.testElement, '`testElement` method exists');
-    equal("function", typeof lint.testAttribute, '`testAttribute` method exists');
+    equal('function', typeof lint.populate, '`populate` method exists');
+    equal('function', typeof lint.test, '`test` method exists');
+    equal('function', typeof lint.testElement, '`testElement` method exists');
+    equal('function', typeof lint.testAttribute, '`testAttribute` method exists');
   });
 
   test('deprecated element (font)', function(){
