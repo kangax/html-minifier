@@ -1,6 +1,5 @@
-'use strict';
-
 module.exports = function(grunt) {
+    'use strict';
 
     grunt.initConfig({
 
@@ -19,13 +18,13 @@ module.exports = function(grunt) {
                 src: 'Gruntfile.js'
             },
             src: {
-                src: ['src/**/*.js']
+                src: 'src/**/*.js'
             },
             tests: {
-                src: ['tests/*.js']
+                src: 'tests/*.js'
             },
             web: {
-                src: ['master.js']
+                src: 'master.js'
             }
         },
 
@@ -33,7 +32,7 @@ module.exports = function(grunt) {
             options: {
                 banner: '<%= banner %>'
             },
-            js: {
+            dist: {
                 src: ['src/htmlparser.js',
                       'src/htmlminifier.js',
                       'src/htmllint.js'],
@@ -51,7 +50,7 @@ module.exports = function(grunt) {
             },
             minify: {
                 files: {
-                    'dist/htmlminifier.min.js': '<%= concat.js.dest %>'
+                    'dist/htmlminifier.min.js': '<%= concat.dist.dest %>'
                 }
             }
         }
