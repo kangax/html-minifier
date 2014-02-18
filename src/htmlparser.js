@@ -133,18 +133,18 @@
           // next tag
           tagMatch = html.match( startTag );
           if (tagMatch) {
-          nextTag = tagMatch[1];
+            nextTag = tagMatch[1];
           } else {
-          tagMatch = html.match( endTag );
-          if (tagMatch) {
-            nextTag = '/'+tagMatch[1];
-          } else {
-          nextTag = '';
-          }
+            tagMatch = html.match( endTag );
+            if (tagMatch) {
+              nextTag = '/'+tagMatch[1];
+            } else {
+              nextTag = '';
+            }
           }
 
           if ( handler.chars )
-          handler.chars(text, prevTag, nextTag);
+            handler.chars(text, prevTag, nextTag);
 
         }
 
@@ -299,14 +299,16 @@
 
     // If we're dealing with an empty document then we
     // need to pre-populate it with the HTML document structure
-    if ( !documentElement && doc.createElement ) (function(){
-      var html = doc.createElement("html");
-      var head = doc.createElement("head");
-      head.appendChild( doc.createElement("title") );
-      html.appendChild( head );
-      html.appendChild( doc.createElement("body") );
-      doc.appendChild( html );
-    })();
+    if ( !documentElement && doc.createElement ) {
+      (function(){
+        var html = doc.createElement("html");
+        var head = doc.createElement("head");
+        head.appendChild( doc.createElement("title") );
+        html.appendChild( head );
+        html.appendChild( doc.createElement("body") );
+        doc.appendChild( html );
+      })();
+    }
 
     // Find all the unique elements
     if ( doc.getElementsByTagName )

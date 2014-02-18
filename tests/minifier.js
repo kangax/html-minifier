@@ -528,7 +528,7 @@
     output = '<div><pre> $foo = "baz"; </pre></div>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
-     input = '<script type=\"text\/javascript\">var = \"hello\";<\/script>\r\n\r\n\r\n'              +
+    input = '<script type=\"text\/javascript\">var = \"hello\";<\/script>\r\n\r\n\r\n'               +
              '<style type=\"text\/css\">#foo { color: red;        }          <\/style>\r\n\r\n\r\n'  +
              '<div>\r\n  <div>\r\n    <div><!-- hello -->\r\n      <div>'                            +
              '<!--! hello -->\r\n        <div>\r\n          <div class=\"\">\r\n\r\n            '    +
@@ -676,7 +676,7 @@
     equal(minify(input, { removeOptionalTags: true }), output);
   });
 
- test('custom components', function(){
+  test('custom components', function(){
     input = '<custom-component>Oh, my.</custom-component>';
     output = '<custom-component>Oh, my.</custom-component>';
 

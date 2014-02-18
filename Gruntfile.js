@@ -3,12 +3,12 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
-  pkg: grunt.file.readJSON('package.json'),
-  banner: '/*!\n' +
-          ' * HTMLMinifier v<%= pkg.version %> (<%= pkg.homepage %>)\n' +
-          ' * Copyright 2010-<%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
-          ' * Licensed under <%= pkg.license.type %> (<%= pkg.license.url %>)\n' +
-          ' */\n',
+    pkg: grunt.file.readJSON('package.json'),
+    banner: '/*!\n' +
+            ' * HTMLMinifier v<%= pkg.version %> (<%= pkg.homepage %>)\n' +
+            ' * Copyright 2010-<%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
+            ' * Licensed under <%= pkg.license.type %> (<%= pkg.license.url %>)\n' +
+            ' */\n',
 
     jshint: {
       options: {
