@@ -422,7 +422,7 @@
   }
 
   // for CommonJS enviroments, export everything
-  if ( typeof exports !== "undefined" ) {
+  if ( typeof exports !== 'undefined' ) {
     exports.minify = minify;
   } else {
     global.minify = minify;

@@ -10,6 +10,7 @@
   "loopfunc":   true,
   "newcap":     false,
   "node":       true,
+  "quotmark":   "single",
   "strict":     false,
   "undef":      true,
   "unused":     true
