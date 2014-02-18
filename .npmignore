@@ -1,6 +1,7 @@
 .jshintrc
 .travis.yml
 _config.yml
+Gruntfile.js
 index.html
 master.css
 master.js
