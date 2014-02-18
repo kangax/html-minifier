@@ -17,12 +17,10 @@
     "Gilmore Davidson (https://github.com/gilmoreorless)",
     "Hugo Wetterberg <hugo@wetterberg.nu>"
   ],
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE"
-    }
-  ],
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/kangax/html-minifier"
