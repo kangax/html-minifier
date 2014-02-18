@@ -3,7 +3,9 @@
  * Modified by Juriy "kangax" Zaytsev
  * Original code by Erik Arvidsson, Mozilla Public License
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
- *
+ */
+
+/*
  * // Use like so:
  * HTMLParser(htmlString, {
  *     start: function(tag, attrs, unary) {},

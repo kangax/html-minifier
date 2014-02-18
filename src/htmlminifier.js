@@ -1,12 +1,3 @@
-/*!
- * HTMLMinifier v0.5.5
- * http://kangax.github.com/html-minifier/
- *
- * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
- * Licensed under the MIT license.
- *
- */
-
 (function(global){
 
   var log, HTMLParser;

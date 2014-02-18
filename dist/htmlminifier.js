@@ -8,7 +8,9 @@
  * Modified by Juriy "kangax" Zaytsev
  * Original code by Erik Arvidsson, Mozilla Public License
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
- *
+ */
+
+/*
  * // Use like so:
  * HTMLParser(htmlString, {
  *     start: function(tag, attrs, unary) {},
@@ -374,15 +376,6 @@
     return obj;
   }
 })(typeof exports === 'undefined' ? this : exports);
-
-/*!
- * HTMLMinifier v0.5.5
- * http://kangax.github.com/html-minifier/
- *
- * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
- * Licensed under the MIT license.
- *
- */
 
 (function(global){
 
