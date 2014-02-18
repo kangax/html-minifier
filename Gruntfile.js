@@ -21,12 +21,12 @@ module.exports = function(grunt) {
             src: {
                 src: ['src/**/*.js']
             },
-            //tests: {
-            //    src: ['tests/**/*.js']
-            //},
-            //web: {
-            //    src: ['master.js']
-            //}
+            tests: {
+                src: ['tests/*.js']
+            },
+            web: {
+                src: ['master.js']
+            }
         },
 
         concat: {

@@ -1,9 +1,8 @@
+/* global test, ok, equal */
 (function(global){
 
   var minify = global.minify || require('../dist/htmlminifier.js').minify,
       HTMLLint = HTMLLint || require('../dist/htmlminifier.js').HTMLLint,
-      input,
-      output,
       lint = new HTMLLint();
 
   test('lint exists', function() {
