@@ -1,3 +1,4 @@
+/* global HTMLLint, minify */
 (function(){
 
   function byId(id) {
@@ -91,6 +92,8 @@
 
 })();
 
+/* jshint ignore:start */
+
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-1128111-22']);
 _gaq.push(['_trackPageview']);
@@ -102,3 +105,5 @@ _gaq.push(['_trackPageview']);
   ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
   document.getElementsByTagName('head')[0].appendChild(ga);
 })();
+
+/* jshint ignore:end */

@@ -5,15 +5,12 @@
   "eqnull":     true,
   "expr":       true,
   "immed":      true,
+  "indent":     2,
   "laxbreak":   true,
   "loopfunc":   true,
   "newcap":     false,
   "node":       true,
   "strict":     false,
   "undef":      true,
-  "unused":     true,
-  "globals":    {
-    "ActiveXObject": true,
-    "DOMDocument": true
-  }
+  "unused":     true
 }
