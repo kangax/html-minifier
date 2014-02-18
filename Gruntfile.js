@@ -28,6 +28,12 @@ module.exports = function(grunt) {
       }
     },
 
+    exec: {
+      test: {
+        command: 'node ./test.js'
+      }
+    },
+
     concat: {
       options: {
         banner: '<%= banner %>'
@@ -72,7 +78,8 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', [
     'concat',
-    'jshint'
+    'jshint',
+    'exec'
   ]);
 
   grunt.registerTask('default', 'test');
