@@ -687,7 +687,7 @@
         t = new Date();
 
     function _canCollapseWhitespace(tag, attrs) {
-      return canCollapseWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
+      return canCollapseWhitespace(tag) || options.canCollapseWhitespace(tag, attrs);
     }
 
     function _canTrimWhitespace(tag, attrs) {
