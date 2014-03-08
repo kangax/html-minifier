@@ -246,7 +246,7 @@
   global.HTMLtoXML = function( html ) {
     var results = '';
 
-    HTMLParser(html, {
+    new HTMLParser(html, {
       start: function( tag, attrs, unary ) {
         results += '<' + tag;
 
@@ -321,7 +321,7 @@
     // the body element
     var curParentNode = one.body;
 
-    HTMLParser( html, {
+    new HTMLParser( html, {
       start: function( tagName, attrs, unary ) {
         // If it's a pre-built element, then we can ignore
         // its construction

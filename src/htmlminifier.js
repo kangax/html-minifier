@@ -308,7 +308,7 @@
       return canTrimWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
     }
 
-    HTMLParser(value, {
+    new HTMLParser(value, {
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
       start: function( tag, attrs, unary, unarySlash ) {
