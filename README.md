@@ -27,6 +27,4 @@ Installing with [npm](https://github.com/isaacs/npm):
 npm install html-minifier
 ```
 
-**TO BE FILLED**
-
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
