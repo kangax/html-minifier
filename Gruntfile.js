@@ -21,7 +21,7 @@ module.exports = function(grunt) {
         src: 'src/**/*.js'
       },
       tests: {
-        src: 'tests/*.js'
+        src: ['tests/*.js', 'test/js']
       },
       web: {
         src: 'master.js'
