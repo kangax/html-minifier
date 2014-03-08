@@ -29,6 +29,7 @@
  /* global ActiveXObject, DOMDocument */
 
 (function(global){
+  'use strict';
 
   // Regular Expressions for parsing tags and attributes
   var startTag = /^<([\w:-]+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,

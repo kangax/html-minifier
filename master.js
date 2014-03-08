@@ -1,5 +1,6 @@
 /* global HTMLLint, minify */
 (function(){
+  'use strict';
 
   function byId(id) {
     return document.getElementById(id);

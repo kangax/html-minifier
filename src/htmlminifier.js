@@ -1,4 +1,5 @@
 (function(global){
+  'use strict';
 
   var log, HTMLParser;
   if (global.console && global.console.log) {

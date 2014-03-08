@@ -7,6 +7,7 @@
  */
 
 (function(global) {
+  'use strict';
 
   function isPresentationalElement(tag) {
     return (/^(?:b|i|big|small|hr|blink|marquee)$/).test(tag);

@@ -10,7 +10,7 @@
   "newcap":     true,
   "node":       true,
   "quotmark":   "single",
-  "strict":     false,
+  "strict":     true,
   "undef":      true,
   "unused":     true
 }
