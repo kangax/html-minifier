@@ -28,6 +28,24 @@ module.exports = function(grunt) {
       }
     },
 
+    jscs: {
+      options: {
+        config: '.jscsrc'
+      },
+      grunt: {
+        src: '<%= jshint.gruntfile.src %>'
+      },
+      src: {
+        src: '<%= jshint.src.src %>'
+      },
+      tests: {
+        src: '<%= jshint.tests.src %>'
+      },
+      web: {
+        src: '<%= jshint.web.src %>'
+      }
+    },
+
     exec: {
       test: {
         command: 'node ./test.js'
@@ -79,6 +97,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test', [
     'concat',
     'jshint',
+    'jscs',
     'exec'
   ]);
 
