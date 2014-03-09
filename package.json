@@ -49,5 +49,9 @@
     "qunit": "0.6.x",
     "time-grunt": "0.2.x"
   },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
   "main": "./dist/htmlminifier.js"
 }
