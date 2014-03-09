@@ -1,6 +1,7 @@
 {
   "browser":    true,
   "eqeqeq":     true,
+  "es3":        true,
   "expr":       true,
   "laxbreak":   true,
   "loopfunc":   true,
