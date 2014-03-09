@@ -1,5 +1,5 @@
 /* global HTMLLint, minify */
-(function(){
+(function() {
   'use strict';
 
   function byId(id) {

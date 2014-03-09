@@ -1,4 +1,4 @@
-(function(global){
+(function(global) {
   'use strict';
 
   var log, HTMLParser;
@@ -9,7 +9,7 @@
     };
   }
   else {
-    log = function(){ };
+    log = function() {};
   }
 
   if (global.HTMLParser) {
@@ -286,7 +286,7 @@
 
   function minify(value, options) {
 
-    options = options || { };
+    options = options || {};
     value = trimWhitespace(value);
     setDefaultTesters(options);
 

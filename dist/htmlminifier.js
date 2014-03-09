@@ -33,7 +33,7 @@
 
  /* global ActiveXObject, DOMDocument */
 
-(function(global){
+(function(global) {
   'use strict';
 
   // Regular Expressions for parsing tags and attributes
@@ -64,11 +64,11 @@
   // Special Elements (can contain anything)
   var special = makeMap('script,style');
 
-  var reCache = { }, stackedTag, reStackedTag, tagMatch;
+  var reCache = {}, stackedTag, reStackedTag, tagMatch;
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html, prevTag, nextTag;
-    stack.last = function(){
+    stack.last = function() {
       return this[ this.length - 1 ];
     };
 
@@ -329,7 +329,7 @@
     // If we're dealing with an empty document then we
     // need to pre-populate it with the HTML document structure
     if ( !documentElement && doc.createElement ) {
-      (function(){
+      (function() {
         var html = doc.createElement('html');
         var head = doc.createElement('head');
         head.appendChild( doc.createElement('title') );
@@ -397,7 +397,7 @@
     return doc;
   };
 
-  function makeMap(str){
+  function makeMap(str) {
     var obj = {}, items = str.split(',');
     for ( var i = 0; i < items.length; i++ ) {
       obj[ items[i] ] = true;
@@ -407,7 +407,7 @@
   }
 })(typeof exports === 'undefined' ? this : exports);
 
-(function(global){
+(function(global) {
   'use strict';
 
   var log, HTMLParser;
@@ -418,7 +418,7 @@
     };
   }
   else {
-    log = function(){ };
+    log = function() {};
   }
 
   if (global.HTMLParser) {
@@ -695,7 +695,7 @@
 
   function minify(value, options) {
 
-    options = options || { };
+    options = options || {};
     value = trimWhitespace(value);
     setDefaultTesters(options);
 
