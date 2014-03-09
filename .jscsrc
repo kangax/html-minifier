@@ -20,8 +20,8 @@
     "disallowQuotedKeysInObjects": "allButReserved",
     "disallowSpaceAfterObjectKeys": true,
 
+    "disallowSpaceAfterPrefixUnaryOperators": ["++", "--", "+", "-", "~", "!"],
     "disallowSpaceBeforePostfixUnaryOperators": ["++", "--"],
-    "disallowSpaceAfterPrefixUnaryOperators": ["++", "--"],
 
     "disallowKeywords": ["with"],
     "disallowMixedSpacesAndTabs": true,
