@@ -74,12 +74,14 @@
     if (isDeprecatedElement(tag)) {
       this.log.push(
         '<li>Found <span class="deprecated-element">deprecated</span> <strong><code>&lt;' +
-          tag + '&gt;</code></strong> element</li>');
+          tag + '&gt;</code></strong> element</li>'
+      );
     }
     else if (isPresentationalElement(tag)) {
       this.log.push(
         '<li>Found <span class="presentational-element">presentational</span> <strong><code>&lt;' +
-          tag + '&gt;</code></strong> element</li>');
+          tag + '&gt;</code></strong> element</li>'
+      );
     }
     else {
       this.checkRepeatingElement(tag);
@@ -105,21 +107,25 @@
     if (isEventAttribute(attrName)) {
       this.log.push(
         '<li>Found <span class="event-attribute">event attribute</span> (<strong>',
-        attrName, '</strong>) on <strong><code>&lt;' + tag + '&gt;</code></strong> element</li>');
+        attrName, '</strong>) on <strong><code>&lt;' + tag + '&gt;</code></strong> element</li>'
+      );
     }
     else if (isDeprecatedAttribute(tag, attrName)) {
       this.log.push(
         '<li>Found <span class="deprecated-attribute">deprecated</span> <strong>' +
-          attrName + '</strong> attribute on <strong><code>&lt;', tag, '&gt;</code></strong> element</li>');
+          attrName + '</strong> attribute on <strong><code>&lt;', tag, '&gt;</code></strong> element</li>'
+      );
     }
     else if (isStyleAttribute(attrName)) {
       this.log.push(
-        '<li>Found <span class="style-attribute">style attribute</span> on <strong><code>&lt;', tag, '&gt;</code></strong> element</li>');
+        '<li>Found <span class="style-attribute">style attribute</span> on <strong><code>&lt;', tag, '&gt;</code></strong> element</li>'
+      );
     }
     else if (isInaccessibleAttribute(attrName, attrValue)) {
       this.log.push(
-        '<li>Found <span class="inaccessible-attribute">inaccessible attribute</span> '+
-          '(on <strong><code>&lt;', tag, '&gt;</code></strong> element)</li>');
+        '<li>Found <span class="inaccessible-attribute">inaccessible attribute</span> ' +
+          '(on <strong><code>&lt;', tag, '&gt;</code></strong> element)</li>'
+      );
     }
   };
 

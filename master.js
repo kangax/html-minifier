@@ -60,7 +60,7 @@
         lint.populate(byId('report'));
       }
     }
-    catch(err) {
+    catch (err) {
       byId('output').value = '';
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
     }

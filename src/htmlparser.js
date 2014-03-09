@@ -113,12 +113,13 @@
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( endTag, parseEndTag );
-            prevTag = '/'+match[1];
+            prevTag = '/' + match[1];
             chars = false;
           }
 
         // Start tag:
-        } else if ( html.indexOf('<') === 0 ) {
+        }
+        else if ( html.indexOf('<') === 0 ) {
           match = html.match( startTag );
 
           if ( match ) {
@@ -139,11 +140,13 @@
           tagMatch = html.match( startTag );
           if (tagMatch) {
             nextTag = tagMatch[1];
-          } else {
+          }
+          else {
             tagMatch = html.match( endTag );
             if (tagMatch) {
-              nextTag = '/'+tagMatch[1];
-            } else {
+              nextTag = '/' + tagMatch[1];
+            }
+            else {
               nextTag = '';
             }
           }
@@ -154,7 +157,8 @@
 
         }
 
-      } else {
+      }
+      else {
 
         stackedTag = stack.last().toLowerCase();
         reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
@@ -200,7 +204,8 @@
 
       if ( !unary ) {
         stack.push( tagName );
-      } else {
+      }
+      else {
         unarySlash = tag.match( endingSlash );
       }
 
@@ -231,7 +236,8 @@
       // If no tag name is provided, clean shop
       if ( !tagName ) {
         pos = 0;
-      } else {      // Find the closest opened tag of the same type
+      }
+      else {      // Find the closest opened tag of the same type
         for ( pos = stack.length - 1; pos >= 0; pos-- ) {
           if ( stack[ pos ] === tagName ) {
             break;
@@ -296,13 +302,16 @@
     if ( !doc ) {
       if ( typeof DOMDocument !== 'undefined' ) {
         doc = new DOMDocument();
-      } else if ( typeof document !== 'undefined' && document.implementation && document.implementation.createDocument ) {
+      }
+      else if ( typeof document !== 'undefined' && document.implementation && document.implementation.createDocument ) {
         doc = document.implementation.createDocument('', '', null);
-      } else if ( typeof ActiveX !== 'undefined' ) {
+      }
+      else if ( typeof ActiveX !== 'undefined' ) {
         doc = new ActiveXObject('Msxml.DOMDocument');
       }
 
-    } else {
+    }
+    else {
       doc = doc.ownerDocument ||
         doc.getOwnerDocument && doc.getOwnerDocument() ||
         doc;
@@ -353,7 +362,8 @@
 
         if ( structure[ tagName ] && typeof one[ structure[ tagName ] ] !== 'boolean' ) {
           one[ structure[ tagName ] ].appendChild( elem );
-        } else if ( curParentNode && curParentNode.appendChild ) {
+        }
+        else if ( curParentNode && curParentNode.appendChild ) {
           curParentNode.appendChild( elem );
         }
 

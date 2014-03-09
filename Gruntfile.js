@@ -60,9 +60,7 @@ module.exports = function(grunt) {
         banner: '<%= banner %>'
       },
       dist: {
-        src: ['src/htmlparser.js',
-              'src/htmlminifier.js',
-              'src/htmllint.js'],
+        src: ['src/htmlparser.js', 'src/htmlminifier.js', 'src/htmllint.js'],
         dest: 'dist/htmlminifier.js'
       }
     },
@@ -81,7 +79,6 @@ module.exports = function(grunt) {
         }
       }
     }
-
 
   });
 

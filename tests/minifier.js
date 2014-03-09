@@ -13,8 +13,8 @@
     equal(minify('<p foo-bar=baz>xxx</p>'), '<p foo-bar="baz">xxx</p>');
     equal(minify('<p foo:bar=baz>xxx</p>'), '<p foo:bar="baz">xxx</p>');
 
-    input = '<div><div><div><div><div><div><div><div><div><div>'+
-                  'i\'m 10 levels deep'+
+    input = '<div><div><div><div><div><div><div><div><div><div>' +
+                  'i\'m 10 levels deep' +
                 '</div></div></div></div></div></div></div></div></div></div>';
 
     equal(minify(input), input);
@@ -29,16 +29,19 @@
     equal(minify('<a href="#"><p>Click me</p></a>'), '<a href="#"><p>Click me</p></a>');
     equal(minify('<span><button>Hit me</button></span>'), '<span><button>Hit me</button></span>');
     equal(minify('<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>'),
-      '<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>');
+      '<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>'
+    );
 
     equal(minify('<ng-include src="x"></ng-include>'), '<ng-include src="x"></ng-include>');
     equal(minify('<ng:include src="x"></ng:include>'), '<ng:include src="x"></ng:include>');
     equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view></div>'),
-      '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>');
+      '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>'
+    );
 
     // https://github.com/kangax/html-minifier/issues/41
     equal(minify('<some-tag-1></some-tag-1><some-tag-2></some-tag-2>'),
-      '<some-tag-1></some-tag-1><some-tag-2></some-tag-2>');
+      '<some-tag-1></some-tag-1><some-tag-2></some-tag-2>'
+    );
 
     // https://github.com/kangax/html-minifier/issues/40
     equal(minify('[\']["]'), '[\']["]');
@@ -82,19 +85,19 @@
     equal(minify('   <p>blah</p>\n\n\n   '), '<p>blah</p>');
     // tags from collapseWhitespaceSmart()
     ['a', 'b', 'big', 'button', 'code', 'em', 'font', 'i', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'time', 'tt', 'u'].forEach(function(el){
-      equal(minify('<p>foo <'+el+'>baz</'+el+'> bar</p>', {collapseWhitespace: true}), '<p>foo <'+el+'>baz</'+el+'> bar</p>');
-      equal(minify('<p>foo<'+el+'>baz</'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'>bar</p>');
-      equal(minify('<p>foo <'+el+'>baz</'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo <'+el+'>baz</'+el+'>bar</p>');
-      equal(minify('<p>foo<'+el+'>baz</'+el+'> bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'> bar</p>');
-      equal(minify('<p>foo <'+el+'> baz </'+el+'> bar</p>', {collapseWhitespace: true}), '<p>foo <'+el+'>baz</'+el+'> bar</p>');
-      equal(minify('<p>foo<'+el+'> baz </'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'>bar</p>');
-      equal(minify('<p>foo <'+el+'> baz </'+el+'>bar</p>', {collapseWhitespace: true}), '<p>foo <'+el+'>baz</'+el+'>bar</p>');
-      equal(minify('<p>foo<'+el+'> baz </'+el+'> bar</p>', {collapseWhitespace: true}), '<p>foo<'+el+'>baz</'+el+'> bar</p>');
+      equal(minify('<p>foo <' + el + '>baz</' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '> bar</p>');
+      equal(minify('<p>foo<' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '>bar</p>');
+      equal(minify('<p>foo <' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '>bar</p>');
+      equal(minify('<p>foo<' + el + '>baz</' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '> bar</p>');
+      equal(minify('<p>foo <' + el + '> baz </' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '> bar</p>');
+      equal(minify('<p>foo<' + el + '> baz </' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '>bar</p>');
+      equal(minify('<p>foo <' + el + '> baz </' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '>bar</p>');
+      equal(minify('<p>foo<' + el + '> baz </' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '> bar</p>');
     });
-    equal(minify('<p>foo <img> bar</p>', {collapseWhitespace: true}), '<p>foo <img> bar</p>');
-    equal(minify('<p>foo<img>bar</p>', {collapseWhitespace: true}), '<p>foo<img>bar</p>');
-    equal(minify('<p>foo <img>bar</p>', {collapseWhitespace: true}), '<p>foo <img>bar</p>');
-    equal(minify('<p>foo<img> bar</p>', {collapseWhitespace: true}), '<p>foo<img> bar</p>');
+    equal(minify('<p>foo <img> bar</p>', { collapseWhitespace: true }), '<p>foo <img> bar</p>');
+    equal(minify('<p>foo<img>bar</p>', { collapseWhitespace: true }), '<p>foo<img>bar</p>');
+    equal(minify('<p>foo <img>bar</p>', { collapseWhitespace: true }), '<p>foo <img>bar</p>');
+    equal(minify('<p>foo<img> bar</p>', { collapseWhitespace: true }), '<p>foo<img> bar</p>');
   });
 
   test('doctype normalization', function() {
@@ -169,8 +172,8 @@
     input = '<!--[if IE 7]>\n\n   \t\n   \t\t ' +
               '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />\n\t' +
             '<![endif]-->';
-    output = '<!--[if IE 7]>'+
-                '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />'+
+    output = '<!--[if IE 7]>' +
+                '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />' +
              '<![endif]-->';
     equal(minify(input, { removeComments: true }), output);
 
@@ -237,7 +240,7 @@
     input = '<p id="" class="" STYLE=" " title="\n" lang="" dir="">x</p>';
     equal(minify(input, { removeEmptyAttributes: true }), '<p>x</p>');
 
-    input = '<p onclick=""   ondblclick=" " onmousedown="" ONMOUSEUP="" onmouseover=" " onmousemove="" onmouseout="" '+
+    input = '<p onclick=""   ondblclick=" " onmousedown="" ONMOUSEUP="" onmouseover=" " onmousemove="" onmouseout="" ' +
             'onkeypress=\n\n  "\n     " onkeydown=\n"" onkeyup\n="">x</p>';
     equal(minify(input, { removeEmptyAttributes: true }), '<p>x</p>');
 
@@ -634,16 +637,16 @@
 
   test('removing optional tags in tables', function(){
 
-    input = '<table>'+
-              '<thead><tr><th>foo</th><th>bar</th></tr></thead>'+
-              '<tfoot><tr><th>baz</th><th>qux</th></tr></tfoot>'+
-              '<tbody><tr><td>boo</td><td>moo</td></tr></tbody>'+
+    input = '<table>' +
+              '<thead><tr><th>foo</th><th>bar</th></tr></thead>' +
+              '<tfoot><tr><th>baz</th><th>qux</th></tr></tfoot>' +
+              '<tbody><tr><td>boo</td><td>moo</td></tr></tbody>' +
             '</table>';
 
-    output = '<table>'+
-              '<thead><tr><th>foo<th>bar'+
-              '<tfoot><tr><th>baz<th>qux'+
-              '<tbody><tr><td>boo<td>moo'+
+    output = '<table>' +
+              '<thead><tr><th>foo<th>bar' +
+              '<tfoot><tr><th>baz<th>qux' +
+              '<tbody><tr><td>boo<td>moo' +
              '</table>';
 
     equal(minify(input, { removeOptionalTags: true }), output);
@@ -657,20 +660,20 @@
 
     // example from htmldog.com
     input = '<select name="catsndogs">' +
-              '<optgroup label="Cats">'+
-                '<option>Tiger</option><option>Leopard</option><option>Lynx</option>'+
+              '<optgroup label="Cats">' +
+                '<option>Tiger</option><option>Leopard</option><option>Lynx</option>' +
               '</optgroup>' +
-              '<optgroup label="Dogs">'+
-                '<option>Grey Wolf</option><option>Red Fox</option><option>Fennec</option>'+
+              '<optgroup label="Dogs">' +
+                '<option>Grey Wolf</option><option>Red Fox</option><option>Fennec</option>' +
               '</optgroup>' +
             '</select>';
 
     output = '<select name="catsndogs">' +
-              '<optgroup label="Cats">'+
-                '<option>Tiger<option>Leopard<option>Lynx'+
+              '<optgroup label="Cats">' +
+                '<option>Tiger<option>Leopard<option>Lynx' +
               '</optgroup>' +
-              '<optgroup label="Dogs">'+
-                '<option>Grey Wolf<option>Red Fox<option>Fennec'+
+              '<optgroup label="Dogs">' +
+                '<option>Grey Wolf<option>Red Fox<option>Fennec' +
               '</optgroup>' +
             '</select>';
 
@@ -747,15 +750,15 @@
 
   test('source', function() {
 
-    input = '<audio controls="controls">'+
-              '<source src="foo.wav">'+
-              '<source src="far.wav">'+
-              '<source src="foobar.wav">'+
+    input = '<audio controls="controls">' +
+              '<source src="foo.wav">' +
+              '<source src="far.wav">' +
+              '<source src="foobar.wav">' +
             '</audio>';
-    output = '<audio controls="controls">'+
-              '<source src="foo.wav">'+
-              '<source src="far.wav">'+
-              '<source src="foobar.wav">'+
+    output = '<audio controls="controls">' +
+              '<source src="foo.wav">' +
+              '<source src="far.wav">' +
+              '<source src="foobar.wav">' +
             '</audio>';
 
     equal(minify(input, { removeOptionalTags: true }), output);

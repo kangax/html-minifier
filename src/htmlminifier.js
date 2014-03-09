@@ -190,12 +190,12 @@
 
   var reStartDelimiter = {
     // account for js + html comments (e.g.: //<!--)
-    'script': /^\s*(?:\/\/)?\s*<!--.*\n?/,
-    'style': /^\s*<!--\s*/
+    script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
+    style: /^\s*<!--\s*/
   };
   var reEndDelimiter = {
-    'script': /\s*(?:\/\/)?\s*-->\s*$/,
-    'style': /\s*-->\s*$/
+    script: /\s*(?:\/\/)?\s*-->\s*$/,
+    style: /\s*-->\s*$/
   };
   function removeComments(text, tag) {
     return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
@@ -270,7 +270,6 @@
 
     return (' ' + attrFragment);
   }
-
 
   function setDefaultTesters(options) {
 
@@ -395,7 +394,8 @@
         if (options.removeComments) {
           if (isConditionalComment(text)) {
             text = '<!--' + cleanConditionalComment(text) + '-->';
-          } else if (isIgnoredComment(text)) {
+          }
+          else if (isIgnoredComment(text)) {
             text = '<!--' + text + '-->';
           }
           else {
@@ -425,7 +425,8 @@
   // for CommonJS enviroments, export everything
   if ( typeof exports !== 'undefined' ) {
     exports.minify = minify;
-  } else {
+  }
+  else {
     global.minify = minify;
   }
 
