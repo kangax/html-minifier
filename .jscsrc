@@ -14,7 +14,6 @@
     "requireLineFeedAtFileEnd": true,
     "requireCapitalizedConstructors": true,
     "requireDotNotation": true,
-    "requireMultipleVarDecl": true,
 
     "disallowEmptyBlocks": true,
     "disallowQuotedKeysInObjects": "allButReserved",
