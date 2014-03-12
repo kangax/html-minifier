@@ -1,5 +1,6 @@
 /* global HTMLLint, minify */
-(function(){
+(function() {
+  'use strict';
 
   function byId(id) {
     return document.getElementById(id);
@@ -59,7 +60,7 @@
         lint.populate(byId('report'));
       }
     }
-    catch(err) {
+    catch (err) {
       byId('output').value = '';
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
     }

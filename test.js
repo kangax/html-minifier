@@ -12,7 +12,7 @@ testrunner.run({
     './tests/lint.js',
   ]
 }, function(err, report) {
-  if(report.failed > 0){
+  if(report.failed > 0) {
     process.on('exit', function() {
       process.exit(1);
     });

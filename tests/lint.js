@@ -1,5 +1,6 @@
 /* global test, ok, equal */
-(function(global){
+(function(global) {
+  'use strict';
 
   var minify = global.minify || require('../dist/htmlminifier.js').minify,
       HTMLLint = HTMLLint || require('../dist/htmlminifier.js').HTMLLint,
@@ -21,7 +22,7 @@
     equal('function', typeof lint.testAttribute, '`testAttribute` method exists');
   });
 
-  test('deprecated element (font)', function(){
+  test('deprecated element (font)', function() {
     minify('<font>foo</font>', { lint: lint });
     var log = lint.log.join('');
 

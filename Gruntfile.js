@@ -1,6 +1,9 @@
 module.exports = function(grunt) {
   'use strict';
 
+  // Force use of Unix newlines
+  grunt.util.linefeed = '\n';
+
   grunt.initConfig({
 
     pkg: grunt.file.readJSON('package.json'),
@@ -21,10 +24,28 @@ module.exports = function(grunt) {
         src: 'src/**/*.js'
       },
       tests: {
-        src: 'tests/*.js'
+        src: ['tests/*.js', 'test/js']
       },
       web: {
         src: 'master.js'
+      }
+    },
+
+    jscs: {
+      options: {
+        config: '.jscsrc'
+      },
+      grunt: {
+        src: '<%= jshint.gruntfile.src %>'
+      },
+      src: {
+        src: '<%= jshint.src.src %>'
+      },
+      tests: {
+        src: '<%= jshint.tests.src %>'
+      },
+      web: {
+        src: '<%= jshint.web.src %>'
       }
     },
 
@@ -39,9 +60,7 @@ module.exports = function(grunt) {
         banner: '<%= banner %>'
       },
       dist: {
-        src: ['src/htmlparser.js',
-              'src/htmlminifier.js',
-              'src/htmllint.js'],
+        src: ['src/htmlparser.js', 'src/htmlminifier.js', 'src/htmllint.js'],
         dest: 'dist/htmlminifier.js'
       }
     },
@@ -61,7 +80,6 @@ module.exports = function(grunt) {
       }
     }
 
-
   });
 
   require('load-grunt-tasks')(grunt, { scope: 'devDependencies' });
@@ -77,8 +95,9 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('test', [
-    'concat',
+    'dist',
     'jshint',
+    'jscs',
     'exec'
   ]);
 

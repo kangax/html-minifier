@@ -1,4 +1,5 @@
-(function(global){
+(function(global) {
+  'use strict';
 
   var log, HTMLParser;
   if (global.console && global.console.log) {
@@ -8,7 +9,7 @@
     };
   }
   else {
-    log = function(){ };
+    log = function() {};
   }
 
   if (global.HTMLParser) {
@@ -189,12 +190,12 @@
 
   var reStartDelimiter = {
     // account for js + html comments (e.g.: //<!--)
-    'script': /^\s*(?:\/\/)?\s*<!--.*\n?/,
-    'style': /^\s*<!--\s*/
+    script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
+    style: /^\s*<!--\s*/
   };
   var reEndDelimiter = {
-    'script': /\s*(?:\/\/)?\s*-->\s*$/,
-    'style': /\s*-->\s*$/
+    script: /\s*(?:\/\/)?\s*-->\s*$/,
+    style: /\s*-->\s*$/
   };
   function removeComments(text, tag) {
     return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
@@ -270,7 +271,6 @@
     return (' ' + attrFragment);
   }
 
-
   function setDefaultTesters(options) {
 
     var defaultTesters = ['canCollapseWhitespace','canTrimWhitespace'];
@@ -286,7 +286,7 @@
 
   function minify(value, options) {
 
-    options = options || { };
+    options = options || {};
     value = trimWhitespace(value);
     setDefaultTesters(options);
 
@@ -308,7 +308,7 @@
       return canTrimWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
     }
 
-    HTMLParser(value, {
+    new HTMLParser(value, {
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
       start: function( tag, attrs, unary, unarySlash ) {
@@ -394,7 +394,8 @@
         if (options.removeComments) {
           if (isConditionalComment(text)) {
             text = '<!--' + cleanConditionalComment(text) + '-->';
-          } else if (isIgnoredComment(text)) {
+          }
+          else if (isIgnoredComment(text)) {
             text = '<!--' + text + '-->';
           }
           else {
@@ -424,7 +425,8 @@
   // for CommonJS enviroments, export everything
   if ( typeof exports !== 'undefined' ) {
     exports.minify = minify;
-  } else {
+  }
+  else {
     global.minify = minify;
   }
 
