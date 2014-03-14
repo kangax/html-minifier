@@ -73,14 +73,14 @@
   Lint.prototype.testElement = function(tag) {
     if (isDeprecatedElement(tag)) {
       this.log.push(
-        '<li>Found <span class="deprecated-element">deprecated</span> <strong><code>&lt;' +
-          tag + '&gt;</code></strong> element</li>'
+        'Found <span class="deprecated-element">deprecated</span> <strong><code>&lt;' +
+          tag + '&gt;</code></strong> element'
       );
     }
     else if (isPresentationalElement(tag)) {
       this.log.push(
-        '<li>Found <span class="presentational-element">presentational</span> <strong><code>&lt;' +
-          tag + '&gt;</code></strong> element</li>'
+        'Found <span class="presentational-element">presentational</span> <strong><code>&lt;' +
+          tag + '&gt;</code></strong> element'
       );
     }
     else {
@@ -100,31 +100,32 @@
   };
 
   Lint.prototype._reportRepeatingElement = function() {
-    this.log.push('<li>Found <code>&lt;br></code> sequence. Try replacing it with styling.</li>');
+    this.log.push('Found <code>&lt;br></code> sequence. Try replacing it with styling.');
   };
 
   Lint.prototype.testAttribute = function(tag, attrName, attrValue) {
     if (isEventAttribute(attrName)) {
       this.log.push(
-        '<li>Found <span class="event-attribute">event attribute</span> (<strong>',
-        attrName, '</strong>) on <strong><code>&lt;' + tag + '&gt;</code></strong> element</li>'
+        'Found <span class="event-attribute">event attribute</span> (<strong>' +
+        attrName + '</strong>) on <strong><code>&lt;' + tag + '&gt;</code></strong> element.'
       );
     }
     else if (isDeprecatedAttribute(tag, attrName)) {
       this.log.push(
-        '<li>Found <span class="deprecated-attribute">deprecated</span> <strong>' +
-          attrName + '</strong> attribute on <strong><code>&lt;', tag, '&gt;</code></strong> element</li>'
+        'Found <span class="deprecated-attribute">deprecated</span> <strong>' +
+          attrName + '</strong> attribute on <strong><code>&lt;' + tag + '&gt;</code></strong> element.'
       );
     }
     else if (isStyleAttribute(attrName)) {
       this.log.push(
-        '<li>Found <span class="style-attribute">style attribute</span> on <strong><code>&lt;', tag, '&gt;</code></strong> element</li>'
+        'Found <span class="style-attribute">style attribute</span> on <strong><code>&lt;' +
+          tag + '&gt;</code></strong> element.'
       );
     }
     else if (isInaccessibleAttribute(attrName, attrValue)) {
       this.log.push(
-        '<li>Found <span class="inaccessible-attribute">inaccessible attribute</span> ' +
-          '(on <strong><code>&lt;', tag, '&gt;</code></strong> element)</li>'
+        'Found <span class="inaccessible-attribute">inaccessible attribute</span> ' +
+          '(on <strong><code>&lt;' + tag + '&gt;</code></strong> element).'
       );
     }
   };
@@ -132,7 +133,7 @@
   Lint.prototype.testChars = function(chars) {
     this._lastElement = '';
     if (/(&nbsp;\s*){2,}/.test(chars)) {
-      this.log.push('<li>Found repeating <strong><code>&amp;nbsp;</code></strong> sequence. Try replacing it with styling.</li>');
+      this.log.push('Found repeating <strong><code>&amp;nbsp;</code></strong> sequence. Try replacing it with styling.');
     }
   };
 
@@ -145,10 +146,20 @@
     if (this._isElementRepeated) {
       this._reportRepeatingElement();
     }
-    var report;
-    if (this.log.length && writeToElement) {
-      report = '<ol>' + this.log.join('') + '</ol>';
-      writeToElement.innerHTML = report;
+
+    if (this.log.length) {
+      if (writeToElement) {
+        writeToElement.innerHTML = '<ol><li>' + this.log.join('<li>') + '</ol>';
+      }
+      else {
+        var output = ' - ' +
+          this.log.join('\n - ')
+          .replace(/(<([^>]+)>)/ig, '')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>');
+
+        console.log(output);
+      }
     }
   };
 
