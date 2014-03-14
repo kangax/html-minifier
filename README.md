@@ -12,13 +12,14 @@ Also see corresponding [Grunt plugin](https://github.com/gruntjs/grunt-contrib-h
 
 How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/minifier/) — HTML Minifier from Will Peavy (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier))?
 
-| Site          | Original size _(KB)_ | HTMLMinifier _(KB)_  | Will Peavy _(KB)_  |
-| ------------- |:-------------:| -------------:| -----------:|
-| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)     | 401.4       | <b>385.5</b>       |   396.3   |
-| [Stackoverflow](http://stackoverflow.com) | 200.4       | <b>165.3</b>       |   168.3   |
-| [Amazon](http://amazon.com)        | 245.9       | 237.1       |   <b>225</b>     |
-| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)     | 117.9       | <b>82</b>          |   92      |
-| [HTMLMinifier page](https://github.com/kangax/html-minifier)     | 48.8       | <b>41.3</b>          |   43.3      |
+| Site  | Original size _(KB)_ | HTMLMinifier _(KB)_  | Will Peavy _(KB)_  |
+| --------------------------------------------------------------------------- |:-----------:| ----------------:| ------------:|
+| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>385.5</b>     |   396.3      |
+| [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>165.3</b>     |   168.3      |
+| [MSN](http://msn.com)                                                       | 160         | <b>141</b>       |   145        |
+| [Amazon](http://amazon.com)                                                 | 245.9       | 237.1            |   <b>225</b> |
+| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>82</b>        |   92         |
+| [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>41.3</b>      |   43.3       |
 
 
 Installing with [npm](https://github.com/isaacs/npm):
