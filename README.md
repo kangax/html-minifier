@@ -43,6 +43,7 @@ npm install html-minifier
 | `removeEmptyAttributes`        | [Remove all attributes with whitespace-only values](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_or_blank_attributes)          | `false` |
 | `removeOptionalTags`           | [Remove unrequired tags](http://perfectionkills.com/experimenting-with-html-minifier/#remove_optional_tags)                                                 | `false` |
 | `removeEmptyElements`          | [Remove all elements with empty contents](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_elements)                               | `false` |
+| `keepClosingSlash`             | [Keep the trailing slash on singleton elements](http://perfectionkills.com/experimenting-with-html-minifier/#keep_closing_slash)                               | `false` |
 | `lint`                         | [Toggle linting](http://perfectionkills.com/experimenting-with-html-minifier/#validate_input_through_html_lint)                                             | `false` |
 
 
