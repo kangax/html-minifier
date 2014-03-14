@@ -611,7 +611,7 @@
   }
 
   function isOptionalTag(tag) {
-    return (/^(?:html|t?body|t?head|tfoot|tr|td|th|option|source)$/).test(tag);
+    return (/^(?:html|t?body|t?head|tfoot|tr|td|th|dt|dd|option|colgroup|source)$/).test(tag);
   }
 
   var reEmptyAttribute = new RegExp(
