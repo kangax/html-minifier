@@ -20,6 +20,7 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | [Amazon](http://amazon.com)                                                 | 245.9       | 237.1            |   <b>225</b> |
 | [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>82</b>        |   92         |
 | [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>41.3</b>      |   43.3       |
+| [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 890         | <b>860</b>       |   872        |
 
 
 Installing with [npm](https://github.com/isaacs/npm):
