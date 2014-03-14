@@ -8,7 +8,7 @@ See [corresponding blog post](http://perfectionkills.com/experimenting-with-html
 
 [Test suite is available online](http://kangax.github.io/html-minifier/tests/).
 
-Also see corresponding [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin).
+Also see corresponding [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin) & [Ruby wrapper](https://github.com/stereobooster/html_minifier).
 
 How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/minifier/) — HTML Minifier from Will Peavy (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier))?
 
