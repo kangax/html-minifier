@@ -47,7 +47,8 @@
     "grunt-jscs-checker": "0.4.x",
     "load-grunt-tasks": "0.3.x",
     "qunit": "0.5.x",
-    "time-grunt": "0.2.x"
+    "time-grunt": "0.2.x",
+    "uglify-js": "2.4.x"
   },
   "files": [
     "dist",
