@@ -27,6 +27,7 @@
       removeScriptTypeAttributes:     byId('remove-script-type-attributes').checked,
       removeStyleLinkTypeAttributes:  byId('remove-style-link-type-attributes').checked,
       caseSensitive:                  byId('case-sensitive').checked,
+      minifyJS:                       byId('minify-js').checked,
       lint:                           byId('use-htmllint').checked ? new HTMLLint() : null
     };
   }

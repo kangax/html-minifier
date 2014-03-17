@@ -41,9 +41,6 @@ module.exports = function(grunt) {
       src: {
         src: '<%= jshint.src.src %>'
       },
-      tests: {
-        src: '<%= jshint.tests.src %>'
-      },
       web: {
         src: '<%= jshint.web.src %>'
       }

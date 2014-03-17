@@ -5,7 +5,6 @@
     "requireSpaceBeforeBinaryOperators": ["+", "-", "/", "*", "=", "==", "===", "!=", "!==", ">", "<", ">=", "<="],
     "requireSpacesInFunctionExpression": { "beforeOpeningCurlyBrace": true },
 
-    "requireCamelCaseOrUpperCaseIdentifiers": true,
     "requireCapitalizedConstructors": true,
     "requireCommaBeforeLineBreak": true,
     "requireDotNotation": true,

@@ -693,6 +693,50 @@
     }
   }
 
+  function minifyJS(text) {
+    try {
+      // try to get global reference first
+      var __UglifyJS = global.UglifyJS;
+
+      if (typeof __UglifyJS === 'undefined' && typeof require === 'function') {
+        __UglifyJS = require('uglify-js');
+      }
+
+      // noop
+      if (!__UglifyJS) {
+        return text;
+      }
+
+      if (__UglifyJS.minify) {
+        return __UglifyJS.minify(text, { fromString: true }).code;
+      }
+      else if (__UglifyJS.parse) {
+
+        var ast = __UglifyJS.parse(text);
+        ast.figure_out_scope();
+
+        var compressor = __UglifyJS.Compressor();
+        var compressedAst = ast.transform(compressor);
+
+        compressedAst.figure_out_scope();
+        compressedAst.compute_char_frequency();
+        compressedAst.mangle_names();
+
+        var stream = __UglifyJS.OutputStream();
+        compressedAst.print(stream);
+
+        return stream.toString();
+      }
+      else {
+        return text;
+      }
+    }
+    catch (err) {
+      console.log(err);
+      return text;
+    }
+  }
+
   function minify(value, options) {
 
     options = options || {};
@@ -785,6 +829,9 @@
           }
           if (options.removeCDATASectionsFromCDATA) {
             text = removeCDATASections(text);
+          }
+          if (options.minifyJS) {
+            text = minifyJS(text);
           }
         }
         if (options.collapseWhitespace) {

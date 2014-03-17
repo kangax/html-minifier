@@ -770,4 +770,33 @@
     equal(minify(input), output);
   });
 
+  test('script minification', function() {
+    input = '<script>(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
+    output = '<script>!function(){var a=1,n=2;alert(a+" "+n)}();</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-67NT');</script>";
+    output = '<script>!function(e,t,a,n,r){e[n]=e[n]||[],e[n].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var g=t.getElementsByTagName(a)[0],m=t.createElement(a),s="dataLayer"!=n?"&l="+n:"";m.async=!0,m.src="//www.googletagmanager.com/gtm.js?id="+r+s,g.parentNode.insertBefore(m,g)}(window,document,"script","dataLayer","GTM-67NT");</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    // input = '<script>' +
+    //         '  <!--' +
+    //         '    Platform.Mobile.Bootstrap.init(function () {' +
+    //         '      Platform.Mobile.Core.Navigation.go("Login", {' +
+    //         '        "error": ""' +
+    //         '      });' +
+    //         '    });' +
+    //         '  //-->' +
+    //         '</script>';
+
+    // output = '<script>Platform.Mobile.Bootstrap.init(function(){Platform.Mobile.Core.Navigation.go("Login",{error:""})});</script>';
+
+    // equal(minify(input, {
+    //   removeCommentsFromCDATA: true,
+    //   minifyJS: true
+    // }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
