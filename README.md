@@ -45,9 +45,10 @@ npm install html-minifier
 | `removeEmptyAttributes`        | [Remove all attributes with whitespace-only values](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_or_blank_attributes)          | `false` |
 | `removeOptionalTags`           | [Remove unrequired tags](http://perfectionkills.com/experimenting-with-html-minifier/#remove_optional_tags)                                                 | `false` |
 | `removeEmptyElements`          | [Remove all elements with empty contents](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_elements)                               | `false` |
-| `keepClosingSlash`             | Keep the trailing slash on singleton elements                               | `false` |
-| `minifyJS`             | Minify Javascript in script elements                               | `false` |
 | `lint`                         | [Toggle linting](http://perfectionkills.com/experimenting-with-html-minifier/#validate_input_through_html_lint)                                             | `false` |
+| `keepClosingSlash`             | Keep the trailing slash on singleton elements                               | `false` |
+| `caseSensitive`             | Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)                               | `false` |
+| `minifyJS`             | Minify Javascript in script elements                               | `false` |
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
