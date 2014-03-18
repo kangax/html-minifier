@@ -26,8 +26,7 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 Installing with [npm](https://github.com/isaacs/npm):
 
 ```
-npm install html-minifier
-```
+npm install html-minifier```
 
 
 ## Options Quick Reference
@@ -48,7 +47,8 @@ npm install html-minifier
 | `lint`                         | [Toggle linting](http://perfectionkills.com/experimenting-with-html-minifier/#validate_input_through_html_lint)                                             | `false` |
 | `keepClosingSlash`             | Keep the trailing slash on singleton elements                               | `false` |
 | `caseSensitive`             | Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)                               | `false` |
-| `minifyJS`             | Minify Javascript in script elements                               | `false` |
+| `minifyJS`             | Minify Javascript in script elements (uses [UglifyJS](https://github.com/mishoo/UglifyJS2))                               | `false` |
+| `minifyCSS`            | Minify CSS in style elements (uses [CSSO](https://github.com/css/csso))                               | `false` |
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

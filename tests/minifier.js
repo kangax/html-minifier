@@ -799,4 +799,17 @@
     // }), output);
   });
 
+  test('style minification', function() {
+    input = '<style>div#foo { background-color: red; color: white }</style>';
+    output = '<style>div#foo{background-color:red;color:#fff}</style>';
+
+    equal(minify(input), input);
+    equal(minify(input, { minifyCSS: true }), output);
+
+    input = '<style>div > p.foo + span { border: 10px solid black }</style>';
+    output = '<style>div>p.foo+span{border:10px solid #000}</style>';
+
+    equal(minify(input, { minifyCSS: true }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);

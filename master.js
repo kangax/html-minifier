@@ -28,6 +28,7 @@
       removeStyleLinkTypeAttributes:  byId('remove-style-link-type-attributes').checked,
       caseSensitive:                  byId('case-sensitive').checked,
       minifyJS:                       byId('minify-js').checked,
+      minifyCSS:                      byId('minify-css').checked,
       lint:                           byId('use-htmllint').checked ? new HTMLLint() : null
     };
   }

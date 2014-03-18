@@ -737,6 +737,27 @@
     }
   }
 
+  function minifyCSS(text) {
+    try {
+      var csso;
+
+      if (typeof require === 'function' && (csso = require('csso'))) {
+        return csso.justDoIt(text);
+      }
+      else if (typeof CSSOCompressor !== 'undefined' &&
+               typeof CSSOTranslator !== 'undefined') {
+
+        var compressor = new CSSOCompressor(),
+            translator = new CSSOTranslator();
+
+        return translator.translate(cleanInfo(compressor.compress(srcToCSSP(text, 'stylesheet', true))));
+      }
+    }
+    catch (err) { }
+
+    return text;
+  }
+
   function minify(value, options) {
 
     options = options || {};
@@ -830,9 +851,12 @@
           if (options.removeCDATASectionsFromCDATA) {
             text = removeCDATASections(text);
           }
-          if (options.minifyJS) {
-            text = minifyJS(text);
-          }
+        }
+        if (currentTag === 'script' && options.minifyJS) {
+          text = minifyJS(text);
+        }
+        if (currentTag === 'style' && options.minifyCSS) {
+          text = minifyCSS(text);
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {
