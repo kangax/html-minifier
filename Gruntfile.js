@@ -17,7 +17,7 @@ module.exports = function(grunt) {
       options: {
         jshintrc: '.jshintrc'
       },
-      gruntfile: {
+      grunt: {
         src: 'Gruntfile.js'
       },
       src: {
@@ -36,11 +36,14 @@ module.exports = function(grunt) {
         config: '.jscsrc'
       },
       grunt: {
-        src: '<%= jshint.gruntfile.src %>'
+        src: '<%= jshint.grunt.src %>'
       },
       src: {
         src: '<%= jshint.src.src %>'
       },
+      /*tests: {
+        src: '<%= jshint.tests.src %>'
+      },*/
       web: {
         src: '<%= jshint.web.src %>'
       }

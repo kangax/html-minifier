@@ -407,6 +407,8 @@
   }
 })(typeof exports === 'undefined' ? this : exports);
 
+/* global CSSOCompressor: true, CSSOTranslator: true, cleanInfo: true, srcToCSSP: true */
+
 (function(global) {
   'use strict';
 

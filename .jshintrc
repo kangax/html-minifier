@@ -1,10 +1,4 @@
 {
-  "globals":    {
-    "CSSOCompressor": true,
-    "CSSOTranslator": true,
-    "cleanInfo": true,
-    "srcToCSSP": true
-  },
   "browser":    true,
   "eqeqeq":     true,
   "es3":        true,

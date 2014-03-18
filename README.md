@@ -1,5 +1,6 @@
 [![NPM version](https://badge.fury.io/js/html-minifier.png)](http://badge.fury.io/js/html-minifier)
 [![Build Status](https://travis-ci.org/kangax/html-minifier.png)](https://travis-ci.org/kangax/html-minifier)
+[![Dependency Status](https://david-dm.org/kangax/html-minifier.png?theme=shields.io)](https://david-dm.org/kangax/html-minifier)
 [![devDependency Status](https://david-dm.org/kangax/html-minifier/dev-status.png?theme=shields.io)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
 
 [HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly __configurable__, __well-tested__, Javascript-based HTML minifier, with lint-like capabilities.
@@ -26,7 +27,8 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 Installing with [npm](https://github.com/isaacs/npm):
 
 ```
-npm install html-minifier```
+npm install html-minifier
+```
 
 
 ## Options Quick Reference
