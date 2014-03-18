@@ -28,7 +28,7 @@
     "url": "https://github.com/kangax/html-minifier/issues"
   },
   "engines": {
-    "node": ">=0.8.0"
+    "node": ">=0.10.0"
   },
   "directories": {
     "test": "tests"
@@ -43,13 +43,13 @@
   "devDependencies": {
     "grunt": "0.4.x",
     "grunt-contrib-concat": "0.3.x",
-    "grunt-contrib-jshint": "0.8.x",
+    "grunt-contrib-jshint": "0.9.x",
     "grunt-contrib-qunit": "0.4.x",
-    "grunt-contrib-uglify": "0.3.x",
+    "grunt-contrib-uglify": "0.4.x",
     "grunt-exec": "0.4.x",
     "grunt-jscs-checker": "0.4.x",
-    "load-grunt-tasks": "0.3.x",
-    "qunit": "0.5.x",
+    "load-grunt-tasks": "0.4.x",
+    "qunit": "0.6.x",
     "time-grunt": "0.2.x"
   },
   "files": [
