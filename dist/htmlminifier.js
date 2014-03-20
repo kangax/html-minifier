@@ -407,6 +407,8 @@
   }
 })(typeof exports === 'undefined' ? this : exports);
 
+/* global CleanCSS */
+
 (function(global) {
   'use strict';
 
@@ -732,24 +734,24 @@
       }
     }
     catch (err) {
-      console.log(err);
-      return text;
+      log(err);
     }
+    return text;
   }
 
   function minifyCSS(text) {
     try {
-      var CleanCSS;
-
-      if (typeof require === 'function' && (CleanCSS = require('clean-css'))) {
+      if (typeof CleanCSS !== 'undefined') {
         return new CleanCSS().minify(text);
       }
-      else if (typeof CleanCSS !== 'undefined') {
-        return new CleanCSS().minify(text);
+      else if (typeof require === 'function') {
+        var CleanCSSModule = require('clean-css');
+        return new CleanCSSModule().minify(text);
       }
     }
-    catch (err) { }
-
+    catch (err) {
+      log(err);
+    }
     return text;
   }
 
