@@ -1,5 +1,3 @@
-/* global CSSOCompressor: true, CSSOTranslator: true, cleanInfo: true, srcToCSSP: true */
-
 (function(global) {
   'use strict';
 
@@ -332,18 +330,13 @@
 
   function minifyCSS(text) {
     try {
-      var csso;
+      var CleanCSS;
 
-      if (typeof require === 'function' && (csso = require('csso'))) {
-        return csso.justDoIt(text);
+      if (typeof require === 'function' && (CleanCSS = require('clean-css'))) {
+        return new CleanCSS().minify(text);
       }
-      else if (typeof CSSOCompressor !== 'undefined' &&
-               typeof CSSOTranslator !== 'undefined') {
-
-        var compressor = new CSSOCompressor(),
-            translator = new CSSOTranslator();
-
-        return translator.translate(cleanInfo(compressor.compress(srcToCSSP(text, 'stylesheet', true))));
+      else if (typeof CleanCSS !== 'undefined') {
+        return new CleanCSS().minify(text);
       }
     }
     catch (err) { }

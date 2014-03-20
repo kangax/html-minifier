@@ -47,10 +47,10 @@ npm install html-minifier
 | `removeOptionalTags`           | [Remove unrequired tags](http://perfectionkills.com/experimenting-with-html-minifier/#remove_optional_tags)                                                 | `false` |
 | `removeEmptyElements`          | [Remove all elements with empty contents](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_elements)                               | `false` |
 | `lint`                         | [Toggle linting](http://perfectionkills.com/experimenting-with-html-minifier/#validate_input_through_html_lint)                                             | `false` |
-| `keepClosingSlash`             | Keep the trailing slash on singleton elements                               | `false` |
-| `caseSensitive`             | Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)                               | `false` |
-| `minifyJS`             | Minify Javascript in script elements (uses [UglifyJS](https://github.com/mishoo/UglifyJS2))                               | `false` |
-| `minifyCSS`            | Minify CSS in style elements (uses [CSSO](https://github.com/css/csso))                               | `false` |
+| `keepClosingSlash`             | Keep the trailing slash on singleton elements                                                                                                               | `false` |
+| `caseSensitive`                | Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)                                                                                    | `false` |
+| `minifyJS`                     | Minify Javascript in script elements (uses [UglifyJS](https://github.com/mishoo/UglifyJS2))                                                                 | `false` |
+| `minifyCSS`                    | Minify CSS in style elements (uses [clean-css](https://github.com/GoalSmashers/clean-css))                                                                  | `false` |
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
