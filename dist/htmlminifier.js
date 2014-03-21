@@ -591,7 +591,11 @@
       return trimWhitespace(attrValue);
     }
     else if (attrName === 'style') {
-      return trimWhitespace(attrValue).replace(/\s*;\s*$/, '');
+      attrValue = trimWhitespace(attrValue).replace(/\s*;\s*$/, '');
+      if (options.minifyCSS) {
+        return minifyCSS(attrValue);
+      }
+      return attrValue;
     }
     return attrValue;
   }

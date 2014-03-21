@@ -839,4 +839,11 @@
     equal(minify(input, { minifyCSS: true }), output);
   });
 
+  test('style attribute minification', function() {
+    input = '<div style="color: red; background-color: yellow; font-family: Verdana, Arial, sans-serif;"></div>';
+    output = '<div style="color:red;background-color:#ff0;font-family:Verdana,Arial,sans-serif"></div>';
+
+    equal(minify(input, { minifyCSS: true }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
