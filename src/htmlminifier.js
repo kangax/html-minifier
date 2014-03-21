@@ -165,9 +165,15 @@
     );
   }
 
-  function cleanAttributeValue(tag, attrName, attrValue) {
+  function cleanAttributeValue(tag, attrName, attrValue, options) {
     if (isEventAttribute(attrName)) {
-      return trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
+      attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
+      if (options.minifyJS) {
+        var wrappedCode = '(function(){' + attrValue + '})()';
+        var minified = minifyJS(wrappedCode);
+        return minified.slice(12, minified.length - 4);
+      }
+      return attrValue;
     }
     else if (attrName === 'class') {
       return collapseWhitespace(trimWhitespace(attrValue));
@@ -255,7 +261,7 @@
       return '';
     }
 
-    attrValue = cleanAttributeValue(tag, attrName, attrValue);
+    attrValue = cleanAttributeValue(tag, attrName, attrValue, options);
 
     if (!options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue)) {

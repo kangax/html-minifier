@@ -799,6 +799,33 @@
     // }), output);
   });
 
+  test('on* minification', function() {
+    input = '<div onclick="alert(a + b)"></div>';
+    output = '<div onclick="alert(a+b)"></div>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<a href="/" onclick="this.href = getUpdatedURL (this.href);return true;">test</a>';
+    output = '<a href="/" onclick="return this.href=getUpdatedURL(this.href),!0">test</a>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = "<a onclick=\"try{ dcsMultiTrack('DCS.dcsuri','USPS','WT.ti') }catch(e){}\"> foobar</a>";
+    output = "<a onclick=\"try{dcsMultiTrack(\"DCS.dcsuri\",\"USPS\",\"WT.ti\")}catch(c){}\"> foobar</a>";
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<a onClick="_gaq.push([\'_trackEvent\', \'FGF\', \'banner_click\']);"></a>';
+    output = '<a onclick="_gaq.push(["_trackEvent","FGF","banner_click"])"></a>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<button type="button" onclick=";return false;" id="appbar-guide-button"></button>';
+    output = '<button type="button" onclick="return!1" id="appbar-guide-button"></button>';
+
+    equal(minify(input, { minifyJS: true }), output);
+  });
+
   test('style minification', function() {
     input = '<style>div#foo { background-color: red; color: white }</style>';
     output = '<style>div#foo{background-color:red;color:#fff}</style>';
