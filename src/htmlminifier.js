@@ -267,7 +267,7 @@
 
     attrValue = cleanAttributeValue(tag, attrName, attrValue, options);
 
-    if (!options.removeAttributeQuotes ||
+    if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue)) {
       attrValue = '"' + attrValue + '"';
     }
@@ -277,8 +277,8 @@
       return '';
     }
 
-    if (options.collapseBooleanAttributes &&
-        isBooleanAttribute(attrName)) {
+    if (attrValue === undefined || (options.collapseBooleanAttributes &&
+        isBooleanAttribute(attrName))) {
       attrFragment = attrName;
     }
     else {

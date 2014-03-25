@@ -35,7 +35,7 @@
     equal(minify('<ng-include src="x"></ng-include>'), '<ng-include src="x"></ng-include>');
     equal(minify('<ng:include src="x"></ng:include>'), '<ng:include src="x"></ng:include>');
     equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view></div>'),
-      '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>'
+      '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view></div>'
     );
 
     // https://github.com/kangax/html-minifier/issues/41

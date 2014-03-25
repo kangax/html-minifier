@@ -216,11 +216,11 @@
           var value = arguments[2] ? arguments[2] :
             arguments[3] ? arguments[3] :
             arguments[4] ? arguments[4] :
-            fillAttrs[name] ? name : '';
+            fillAttrs[name] ? name : arguments[2];
           attrs.push({
             name: name,
             value: value,
-            escaped: value.replace(/(^|[^\\])"/g, '$1&quot;') //"
+            escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;') //"
           });
         });
 
