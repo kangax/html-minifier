@@ -348,11 +348,11 @@
   function minifyCSS(text) {
     try {
       if (typeof CleanCSS !== 'undefined') {
-        return new CleanCSS().minify(text);
+        return new CleanCSS({ noAdvanced: true }).minify(text);
       }
       else if (typeof require === 'function') {
         var CleanCSSModule = require('clean-css');
-        return new CleanCSSModule().minify(text);
+        return new CleanCSSModule({ noAdvanced: true }).minify(text);
       }
     }
     catch (err) {
