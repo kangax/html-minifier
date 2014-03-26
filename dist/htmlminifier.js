@@ -579,7 +579,7 @@
       attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
       if (options.minifyJS) {
         var wrappedCode = '(function(){' + attrValue + '})()';
-        var minified = minifyJS(wrappedCode);
+        var minified = minifyJS(wrappedCode, options.minifyJS);
         return minified.slice(12, minified.length - 4);
       }
       return attrValue;
@@ -593,7 +593,7 @@
     else if (attrName === 'style') {
       attrValue = trimWhitespace(attrValue).replace(/\s*;\s*$/, '');
       if (options.minifyCSS) {
-        return minifyCSS(attrValue);
+        return minifyCSS(attrValue, options.minifyCSS);
       }
       return attrValue;
     }
@@ -710,7 +710,13 @@
     }
   }
 
-  function minifyJS(text) {
+  function minifyJS(text, options) {
+    if (typeof options !== 'object') {
+      options = { };
+    }
+    options.fromString = true;
+    options.output = { inline_script: true };
+
     try {
       // try to get global reference first
       var __UglifyJS = global.UglifyJS;
@@ -725,10 +731,7 @@
       }
 
       if (__UglifyJS.minify) {
-        return __UglifyJS.minify(text, {
-          fromString: true,
-          output: { inline_script: true }
-        }).code;
+        return __UglifyJS.minify(text, options).code;
       }
       else if (__UglifyJS.parse) {
 
@@ -742,9 +745,7 @@
         compressedAst.compute_char_frequency();
         compressedAst.mangle_names();
 
-        var stream = __UglifyJS.OutputStream({
-          inline_script: true
-        });
+        var stream = __UglifyJS.OutputStream(options.output);
         compressedAst.print(stream);
 
         return stream.toString();
@@ -759,14 +760,20 @@
     return text;
   }
 
-  function minifyCSS(text) {
+  function minifyCSS(text, options) {
+    if (typeof options !== 'object') {
+      options = { };
+    }
+    if (typeof options.noAdvanced === 'undefined') {
+      options.noAdvanced = true;
+    }
     try {
       if (typeof CleanCSS !== 'undefined') {
-        return new CleanCSS({ noAdvanced: true }).minify(text);
+        return new CleanCSS(options).minify(text);
       }
       else if (typeof require === 'function') {
         var CleanCSSModule = require('clean-css');
-        return new CleanCSSModule({ noAdvanced: true }).minify(text);
+        return new CleanCSSModule(options).minify(text);
       }
     }
     catch (err) {
@@ -870,10 +877,10 @@
           }
         }
         if (currentTag === 'script' && options.minifyJS) {
-          text = minifyJS(text);
+          text = minifyJS(text, options.minifyJS);
         }
         if (currentTag === 'style' && options.minifyCSS) {
-          text = minifyCSS(text);
+          text = minifyCSS(text, options.minifyCSS);
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {
