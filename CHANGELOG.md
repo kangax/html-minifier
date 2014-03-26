@@ -1,7 +1,7 @@
 [Current](https://github.com/kangax/html-minifier/compare/v0.5.5...gh-pages)
 ==================
 
-* Escape closing script tag [#142]
+* Escape closing script tag [#142](https://github.com/kangax/html-minifier/issues/142)
 * Don't add empty string value to valueless attributes
 * Add support for minifying CSS (minifyCSS)
 * Add support for JS minification (minifyJS)
