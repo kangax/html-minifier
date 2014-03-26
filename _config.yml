@@ -1,8 +1,6 @@
 exclude:
 - "node_modules"
 - "src"
-- "v8"
 - "Gruntfile.js"
 - "package.json"
 - "README.md"
-- "test.js"
