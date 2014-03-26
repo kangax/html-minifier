@@ -54,6 +54,7 @@
   },
   "files": [
     "dist",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "main": "./dist/htmlminifier.js"
