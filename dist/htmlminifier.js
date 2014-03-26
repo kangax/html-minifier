@@ -221,11 +221,11 @@
           var value = arguments[2] ? arguments[2] :
             arguments[3] ? arguments[3] :
             arguments[4] ? arguments[4] :
-            fillAttrs[name] ? name : '';
+            fillAttrs[name] ? name : arguments[2];
           attrs.push({
             name: name,
             value: value,
-            escaped: value.replace(/(^|[^\\])"/g, '$1&quot;') //"
+            escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;') //"
           });
         });
 
@@ -676,7 +676,7 @@
 
     attrValue = cleanAttributeValue(tag, attrName, attrValue, options);
 
-    if (!options.removeAttributeQuotes ||
+    if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue)) {
       attrValue = '"' + attrValue + '"';
     }
@@ -686,8 +686,8 @@
       return '';
     }
 
-    if (options.collapseBooleanAttributes &&
-        isBooleanAttribute(attrName)) {
+    if (attrValue === undefined || (options.collapseBooleanAttributes &&
+        isBooleanAttribute(attrName))) {
       attrFragment = attrName;
     }
     else {
