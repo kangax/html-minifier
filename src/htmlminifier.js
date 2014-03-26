@@ -316,7 +316,10 @@
       }
 
       if (__UglifyJS.minify) {
-        return __UglifyJS.minify(text, { fromString: true }).code;
+        return __UglifyJS.minify(text, {
+          fromString: true,
+          output: { inline_script: true }
+        }).code;
       }
       else if (__UglifyJS.parse) {
 
@@ -330,7 +333,9 @@
         compressedAst.compute_char_frequency();
         compressedAst.mangle_names();
 
-        var stream = __UglifyJS.OutputStream();
+        var stream = __UglifyJS.OutputStream({
+          inline_script: true
+        });
         compressedAst.print(stream);
 
         return stream.toString();

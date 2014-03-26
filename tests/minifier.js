@@ -846,4 +846,11 @@
     equal(minify(input, { minifyCSS: true }), output);
   });
 
+  test('escaping closing script tag', function() {
+    var input = '<script>window.jQuery || document.write(\'<script src="jquery.js"><\\/script>\')</script>';
+    var output = '<script>window.jQuery||document.write(\'<script src="jquery.js"><\\/script>\');</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
