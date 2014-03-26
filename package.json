@@ -50,7 +50,7 @@
     "grunt-jscs-checker": "0.4.x",
     "load-grunt-tasks": "0.4.x",
     "qunit": "0.6.x",
-    "time-grunt": "0.2.x"
+    "time-grunt": "0.3.x"
   },
   "files": [
     "dist",
