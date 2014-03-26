@@ -777,9 +777,9 @@
     equal(minify(input, { minifyJS: true }), output);
 
     input = "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-67NT');</script>";
-    output = '<script>!function(e,t,a,n,r){e[n]=e[n]||[],e[n].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var g=t.getElementsByTagName(a)[0],m=t.createElement(a),s="dataLayer"!=n?"&l="+n:"";m.async=!0,m.src="//www.googletagmanager.com/gtm.js?id="+r+s,g.parentNode.insertBefore(m,g)}(window,document,"script","dataLayer","GTM-67NT");</script>';
+    output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl="dataLayer"!=l?"&l="+l:"";j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id="+i+dl,f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer","GTM-67NT");</script>';
 
-    equal(minify(input, { minifyJS: true }), output);
+    equal(minify(input, { minifyJS: { mangle: false } }), output);
 
     // input = '<script>' +
     //         '  <!--' +
@@ -811,9 +811,9 @@
     equal(minify(input, { minifyJS: true }), output);
 
     input = "<a onclick=\"try{ dcsMultiTrack('DCS.dcsuri','USPS','WT.ti') }catch(e){}\"> foobar</a>";
-    output = "<a onclick=\"try{dcsMultiTrack(\"DCS.dcsuri\",\"USPS\",\"WT.ti\")}catch(c){}\"> foobar</a>";
+    output = "<a onclick=\"try{dcsMultiTrack(\"DCS.dcsuri\",\"USPS\",\"WT.ti\")}catch(e){}\"> foobar</a>";
 
-    equal(minify(input, { minifyJS: true }), output);
+    equal(minify(input, { minifyJS: { mangle: false } }), output);
 
     input = '<a onClick="_gaq.push([\'_trackEvent\', \'FGF\', \'banner_click\']);"></a>';
     output = '<a onclick="_gaq.push(["_trackEvent","FGF","banner_click"])"></a>';
@@ -822,6 +822,13 @@
 
     input = '<button type="button" onclick=";return false;" id="appbar-guide-button"></button>';
     output = '<button type="button" onclick="return!1" id="appbar-guide-button"></button>';
+
+    equal(minify(input, { minifyJS: true }), output);
+  });
+
+  test('escaping closing script tag', function() {
+    var input = '<script>window.jQuery || document.write(\'<script src="jquery.js"><\\/script>\')</script>';
+    var output = '<script>window.jQuery||document.write(\'<script src="jquery.js"><\\/script>\');</script>';
 
     equal(minify(input, { minifyJS: true }), output);
   });
@@ -844,13 +851,6 @@
     output = '<div style="color:red;background-color:#ff0;font-family:Verdana,Arial,sans-serif"></div>';
 
     equal(minify(input, { minifyCSS: true }), output);
-  });
-
-  test('escaping closing script tag', function() {
-    var input = '<script>window.jQuery || document.write(\'<script src="jquery.js"><\\/script>\')</script>';
-    var output = '<script>window.jQuery||document.write(\'<script src="jquery.js"><\\/script>\');</script>';
-
-    equal(minify(input, { minifyJS: true }), output);
   });
 
 })(typeof exports === 'undefined' ? window : exports);
