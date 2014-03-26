@@ -1,4 +1,4 @@
-[Current / 2014-03-12](https://github.com/kangax/html-minifier/compare/v0.5.5...gh-pages)
+[Current](https://github.com/kangax/html-minifier/compare/v0.5.5...gh-pages)
 ==================
 
 * Escape closing script tag [#142]
