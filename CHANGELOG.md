@@ -1,3 +1,14 @@
+[Current / 2014-03-12](https://github.com/kangax/html-minifier/compare/v0.5.5...gh-pages)
+==================
+
+* Escape closing script tag [#142]
+* Don't add empty string value to valueless attributes
+* Add support for minifying CSS (minifyCSS)
+* Add support for JS minification (minifyJS)
+* Add more boolean attributes
+* No more tags in lint output (Node friendly)
+* Add more optional tags
+
 [0.5.6 / 2014-03-12](https://github.com/kangax/html-minifier/compare/v0.5.5...v0.5.6)
 ==================
 
