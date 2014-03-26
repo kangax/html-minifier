@@ -1,16 +1,15 @@
-[Current](https://github.com/kangax/html-minifier/compare/v0.5.5...gh-pages)
-==================
+## [Current](https://github.com/kangax/html-minifier/compare/v0.5.6...gh-pages)
 
 * Escape closing script tag [#142](https://github.com/kangax/html-minifier/issues/142)
+* Add support for minifying CSS (`minifyCSS`)
+* Add support for minifying JS (`minifyJS`)
 * Don't add empty string value to valueless attributes
-* Add support for minifying CSS (minifyCSS)
-* Add support for JS minification (minifyJS)
 * Add more boolean attributes
 * No more tags in lint output (Node friendly)
 * Add more optional tags
+* Node.js v0.10 is needed for development
 
-[0.5.6 / 2014-03-12](https://github.com/kangax/html-minifier/compare/v0.5.5...v0.5.6)
-==================
+## [0.5.6 / 2014-03-12](https://github.com/kangax/html-minifier/compare/v0.5.5...v0.5.6)
 
 * Fixed issue [#76](https://github.com/kangax/html-minifier/issues/76) - Add an option to keep closing slash in singleton tags
 * Fixed issue [#92](https://github.com/kangax/html-minifier/issues/92) - Make `</source>` tag optional
