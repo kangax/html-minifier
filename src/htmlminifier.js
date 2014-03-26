@@ -334,7 +334,10 @@
 
         compressedAst.figure_out_scope();
         compressedAst.compute_char_frequency();
-        compressedAst.mangle_names();
+
+        if (options.mangle !== false) {
+          compressedAst.mangle_names();
+        }
 
         var stream = __UglifyJS.OutputStream(options.output);
         compressedAst.print(stream);
