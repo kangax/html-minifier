@@ -10,8 +10,6 @@ module.exports = _dereq_('./lib/clean');
  * Copyright (C) 2011-2014 GoalSmashers.com
  */
 
-/* jshint latedef: false */
-
 var ColorShortener = _dereq_('./colors/shortener');
 var ColorHSLToHex = _dereq_('./colors/hsl-to-hex');
 var ColorRGBToHex = _dereq_('./colors/rgb-to-hex');
@@ -822,7 +820,7 @@ module.exports = function Inliner(context, options) {
         break;
       }
 
-      shared.done.push(data.substring(cursor, nextStart));
+      shared.done.push(data.substring(0, nextStart));
       shared.left.unshift([data.substring(nextEnd + 1), options]);
 
       return afterContent(nextStart) ?
@@ -3115,8 +3113,6 @@ module.exports = function Optimizer(data, context, options) {
 };
 
 },{"../properties/optimizer":10,"./tokenizer":19}],19:[function(_dereq_,module,exports){
-/* jshint latedef: false */
-
 module.exports = function Tokenizer(data, minifyContext) {
   var chunker = new Chunker(data, 128);
   var chunk = chunker.next();
