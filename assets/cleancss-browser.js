@@ -3007,6 +3007,7 @@ module.exports = function Optimizer(data, context, options) {
   var _reduceSelector = function(tokens, selector, data, options) {
     var bodies = [];
     var joinsAt = [];
+    var splitBodies = [];
     var processedTokens = [];
 
     for (var j = data.length - 1, m = 0; j >= 0; j--) {
@@ -3017,12 +3018,13 @@ module.exports = function Optimizer(data, context, options) {
       var token = tokens[where];
       var body = token.body;
       bodies.push(body);
+      splitBodies.push(body.split(';'));
       processedTokens.push(where);
     }
 
     for (j = 0, m = bodies.length; j < m; j++) {
       if (bodies[j].length > 0)
-        joinsAt.push((joinsAt[j - 1] || 0) + bodies[j].split(';').length);
+        joinsAt.push((joinsAt[j - 1] || 0) + splitBodies[j].length);
     }
 
     var optimizedBody = propertyOptimizer.process(bodies.join(';'), joinsAt, true);
@@ -3033,7 +3035,7 @@ module.exports = function Optimizer(data, context, options) {
     var tokenIdx = processedCount - 1;
 
     while (tokenIdx >= 0) {
-      if ((tokenIdx === 0 || bodies[tokenIdx].indexOf(optimizedProperties[propertyIdx]) > -1) && propertyIdx > -1) {
+      if ((tokenIdx === 0 || splitBodies[tokenIdx].indexOf(optimizedProperties[propertyIdx]) > -1) && propertyIdx > -1) {
         propertyIdx--;
         continue;
       }
@@ -5853,6 +5855,13 @@ process.browser = true;
 process.env = {};
 process.argv = [];
 
+function noop() {}
+
+process.on = noop;
+process.once = noop;
+process.off = noop;
+process.emit = noop;
+
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
 }
@@ -6985,7 +6994,60 @@ Stream.prototype.pipe = function(dest, options) {
 };
 
 },{"./duplex.js":44,"./passthrough.js":47,"./readable.js":48,"./transform.js":49,"./writable.js":50,"events":31,"inherits":37}],46:[function(_dereq_,module,exports){
-module.exports=_dereq_(38)
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
 },{}],47:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
