@@ -853,4 +853,9 @@
     equal(minify(input, { minifyCSS: true }), output);
   });
 
+  test('valueless attributes', function() {
+    input = '<br foo>';
+    equal(minify(input), input);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);

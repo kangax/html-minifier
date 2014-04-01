@@ -499,7 +499,8 @@
   }
 
   function isAttributeRedundant(tag, attrName, attrValue, attrs) {
-    attrValue = trimWhitespace(attrValue.toLowerCase());
+    attrValue = attrValue ? trimWhitespace(attrValue.toLowerCase()) : '';
+
     return (
         (tag === 'script' &&
         attrName === 'language' &&
