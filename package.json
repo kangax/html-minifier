@@ -42,8 +42,8 @@
   },
   "devDependencies": {
     "grunt": "0.4.x",
-    "grunt-contrib-concat": "0.3.x",
-    "grunt-contrib-jshint": "0.9.x",
+    "grunt-contrib-concat": "0.4.x",
+    "grunt-contrib-jshint": "0.10.x",
     "grunt-contrib-qunit": "0.4.x",
     "grunt-contrib-uglify": "0.4.x",
     "grunt-exec": "0.4.x",
