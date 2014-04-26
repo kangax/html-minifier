@@ -34,8 +34,9 @@
     return str.replace(/\s+/g, ' ');
   }
 
-  function collapseWhitespaceSmart(str, prevTag, nextTag) {
-    // array of tags that will maintain a single space outside of them
+  function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
+
+    // array of non-empty element tags that will maintain a single space outside of them
     var tags = [
       'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
       'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q',
@@ -43,14 +44,14 @@
       'sub', 'sup', 'time', 'tt', 'u', 'var'
     ];
 
-    if (prevTag && prevTag !== 'img' && (prevTag.substr(0,1) !== '/'
+    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.substr(0,1) !== '/'
       || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
-      str = str.replace(/^\s+/, '');
+      str = str.replace(/^\s+/, options.conservativeCollapse ? ' ' : '');
     }
 
-    if (nextTag && nextTag !== 'img' && (nextTag.substr(0,1) === '/'
+    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.substr(0,1) === '/'
       || ( nextTag.substr(0,1) !== '/' && tags.indexOf(nextTag) === -1))) {
-      str = str.replace(/\s+$/, '');
+      str = str.replace(/\s+$/, options.conservativeCollapse ? ' ' : '');
     }
 
     if (prevTag && nextTag) {
@@ -479,7 +480,9 @@
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {
-            text = (prevTag || nextTag) ? collapseWhitespaceSmart(text, prevTag, nextTag) : trimWhitespace(text);
+            text = (prevTag || nextTag) ?
+              collapseWhitespaceSmart(text, prevTag, nextTag, options)
+              : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length) {
             text = collapseWhitespace(text);

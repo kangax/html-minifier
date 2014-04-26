@@ -546,7 +546,7 @@
              '<!-- hello --><div><!--! hello --><div><div class="">'                                 +
              '<textarea disabled="disabled">     this is a textarea </textarea>'                     +
              '</div></div></div></div></div></div>'                                                  +
-             '<pre>       \r\nxxxx</pre><span>x</span> <span>Hello</span> <b>billy</b>'              +
+             '<pre>       \r\nxxxx</pre><span>x</span> <span>Hello</span> <b>billy</b> '             +
              '<input type="text"><textarea></textarea><pre></pre>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
@@ -856,6 +856,18 @@
   test('valueless attributes', function() {
     input = '<br foo>';
     equal(minify(input), input);
+  });
+
+  test('newlines becoming whitespaces', function() {
+    input = 'test\n\n<input>\n\ntest';
+    output = 'test <input> test';
+    equal(minify(input, { collapseWhitespace: true }), output);
+  });
+
+  test('conservative collapse', function() {
+    input = '<b>   foo \n\n</b>';
+    output = '<b> foo </b>';
+    equal(minify(input, { collapseWhitespace: true, conservativeCollapse: true }), output);
   });
 
 })(typeof exports === 'undefined' ? window : exports);
