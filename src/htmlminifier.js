@@ -66,8 +66,20 @@
     return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
   }
 
-  function isIgnoredComment(text) {
-    return (/^!/).test(text);
+  function isIgnoredComment(text, options) {
+    if ((/^!/).test(text)) {
+      return true;
+    }
+
+    if (options.ignoreCustomComments) {
+      for (var i = 0, len = options.ignoreCustomComments.length; i < len; i++) {
+        if (options.ignoreCustomComments[i].test(text)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   function isEventAttribute(attrName) {
@@ -497,7 +509,7 @@
           if (isConditionalComment(text)) {
             text = '<!--' + cleanConditionalComment(text) + '-->';
           }
-          else if (isIgnoredComment(text)) {
+          else if (isIgnoredComment(text, options)) {
             text = '<!--' + text + '-->';
           }
           else {

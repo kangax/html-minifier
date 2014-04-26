@@ -867,7 +867,33 @@
   test('conservative collapse', function() {
     input = '<b>   foo \n\n</b>';
     output = '<b> foo </b>';
-    equal(minify(input, { collapseWhitespace: true, conservativeCollapse: true }), output);
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true
+    }), output);
+  });
+
+  test('ignore custom comments', function() {
+    input = '<!-- ko if: someExpressionGoesHere --><li>test</li><!-- /ko -->';
+
+    equal(minify(input, {
+      removeComments: true,
+      // ignore knockout comments
+      ignoreCustomComments: [
+        /^\s+ko/,
+        /\/ko\s+$/
+      ]
+    }), input);
+
+    input = '<!--#include virtual="/cgi-bin/counter.pl" -->';
+
+    equal(minify(input, {
+      removeComments: true,
+      // ignore Apache SSI includes
+      ignoreCustomComments: [
+        /^\s*#/
+      ]
+    }), input);
   });
 
 })(typeof exports === 'undefined' ? window : exports);
