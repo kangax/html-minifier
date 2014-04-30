@@ -55,5 +55,7 @@ npm install html-minifier
 | `ignoreCustomComments`             | Array of regex'es that allow to ignore certain comments, when matched  | [ ] |
 | `processScripts`                   | Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.) | [ ] |
 
+Chunks of markup could be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
+
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

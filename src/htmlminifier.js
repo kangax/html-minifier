@@ -271,6 +271,14 @@
     return !(/^(?:pre|textarea)$/.test(tag));
   }
 
+  function attrsToMarkup(attrs) {
+    var markup = '';
+    for (var i = 0, len = attrs.length; i < len; i++) {
+      markup += (' ' + attrs[i].name + (isBooleanAttribute(attrs[i].value) ? '' : ('="' + attrs[i].value + '"')));
+    }
+    return markup;
+  }
+
   function normalizeAttribute(attr, attrs, tag, options) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
@@ -413,6 +421,7 @@
         stackNoTrimWhitespace = [],
         stackNoCollapseWhitespace = [],
         lint = options.lint,
+        isIgnoring = false,
         t = new Date();
 
     function _canCollapseWhitespace(tag, attrs) {
@@ -427,6 +436,12 @@
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
       start: function( tag, attrs, unary, unarySlash ) {
+
+        if (isIgnoring) {
+          buffer.push('<', tag, attrsToMarkup(attrs), unarySlash ? '/' : '', '>');
+          return;
+        }
+
         tag = tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
@@ -453,6 +468,12 @@
         buffer.push(((unarySlash && options.keepClosingSlash) ? '/' : '') + '>');
       },
       end: function( tag ) {
+
+        if (isIgnoring) {
+          buffer.push('</', tag, '>');
+          return;
+        }
+
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
           if (stackNoTrimWhitespace.length &&
@@ -485,6 +506,11 @@
         currentChars = '';
       },
       chars: function( text, prevTag, nextTag ) {
+        if (isIgnoring) {
+          buffer.push(text);
+          return;
+        }
+
         if (currentTag === 'script' || currentTag === 'style') {
           if (options.removeCommentsFromCDATA) {
             text = removeComments(text, currentTag);
@@ -517,6 +543,11 @@
         buffer.push(text);
       },
       comment: function( text ) {
+        if (/^\s*htmlmin:ignore/.test(text)) {
+          isIgnoring = !isIgnoring;
+          buffer.push('<!--' + text + '-->');
+          return;
+        }
         if (options.removeComments) {
           if (isConditionalComment(text)) {
             text = '<!--' + cleanConditionalComment(text) + '-->';

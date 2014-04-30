@@ -907,4 +907,15 @@
     }), output);
   });
 
+  test('ignore', function() {
+
+    input = '<!-- htmlmin:ignore --><div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div><!-- htmlmin:ignore -->' +
+            '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
+
+    output = '<!-- htmlmin:ignore --><div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div><!-- htmlmin:ignore -->' +
+            '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
+
+    equal(minify(input, { collapseWhitespace: true }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
