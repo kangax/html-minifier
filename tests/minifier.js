@@ -896,4 +896,15 @@
     }), input);
   });
 
+  test('processScripts', function() {
+    input = '<script type="text/ng-template"><!--test--><div>   <span> foobar </span> \n\n</div></script>';
+    output = '<script type="text/ng-template"><div><span>foobar</span></div></script>';
+
+    equal(minify(input, {
+      collapseWhitespace: true,
+      removeComments: true,
+      processScripts: [ 'text/ng-template' ]
+    }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);

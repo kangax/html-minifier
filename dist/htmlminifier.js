@@ -628,6 +628,15 @@
       .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
   }
 
+  function processScript(text, options, currentAttrs) {
+    for (var i = 0, len = currentAttrs.length; i < len; i++) {
+      if (currentAttrs[i].name.toLowerCase() === 'type' &&
+          options.processScripts.indexOf(currentAttrs[i].value) > -1) {
+        return minify(text, options);
+      }
+    }
+  }
+
   var reStartDelimiter = {
     // account for js + html comments (e.g.: //<!--)
     script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
@@ -891,6 +900,9 @@
           }
           if (options.removeCDATASectionsFromCDATA) {
             text = removeCDATASections(text);
+          }
+          if (options.processScripts) {
+            text = processScript(text, options, currentAttrs);
           }
         }
         if (currentTag === 'script' && options.minifyJS) {
