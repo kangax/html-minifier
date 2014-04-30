@@ -52,10 +52,10 @@ npm install html-minifier
 | `caseSensitive`                | Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox) | `false` |
 | `minifyJS`                     | Minify Javascript in script elements and on* attributes (uses [UglifyJS](https://github.com/mishoo/UglifyJS2)) | `false` (could be `true`, `false`, `Object` (options)) |
 | `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/GoalSmashers/clean-css))  | `false` (could be `true`, `false`, `Object` (options)) |
-| `ignoreCustomComments`             | Array of regex'es that allow to ignore certain comments, when matched  | [ ] |
-| `processScripts`                   | Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.) | [ ] |
+| `ignoreCustomComments`             | Array of regex'es that allow to ignore certain comments, when matched  | `[ ]` |
+| `processScripts`                   | Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.) | `[ ]` |
 
-Chunks of markup could be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
+Chunks of markup can be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
