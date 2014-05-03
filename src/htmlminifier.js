@@ -185,7 +185,7 @@
       if (options.minifyJS) {
         var wrappedCode = '(function(){' + attrValue + '})()';
         var minified = minifyJS(wrappedCode, options.minifyJS);
-        return minified.slice(12, minified.length - 4);
+        return minified.slice(12, minified.length - 4).replace(/"/g, '&quot;');
       }
       return attrValue;
     }

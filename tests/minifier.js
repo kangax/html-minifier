@@ -811,12 +811,12 @@
     equal(minify(input, { minifyJS: true }), output);
 
     input = "<a onclick=\"try{ dcsMultiTrack('DCS.dcsuri','USPS','WT.ti') }catch(e){}\"> foobar</a>";
-    output = "<a onclick=\"try{dcsMultiTrack(\"DCS.dcsuri\",\"USPS\",\"WT.ti\")}catch(e){}\"> foobar</a>";
+    output = "<a onclick=\"try{dcsMultiTrack(&quot;DCS.dcsuri&quot;,&quot;USPS&quot;,&quot;WT.ti&quot;)}catch(e){}\"> foobar</a>";
 
     equal(minify(input, { minifyJS: { mangle: false } }), output);
 
     input = '<a onClick="_gaq.push([\'_trackEvent\', \'FGF\', \'banner_click\']);"></a>';
-    output = '<a onclick="_gaq.push(["_trackEvent","FGF","banner_click"])"></a>';
+    output = '<a onclick="_gaq.push([&quot;_trackEvent&quot;,&quot;FGF&quot;,&quot;banner_click&quot;])"></a>';
 
     equal(minify(input, { minifyJS: true }), output);
 
