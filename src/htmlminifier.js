@@ -179,7 +179,7 @@
     );
   }
 
-  function cleanAttributeValue(tag, attrName, attrValue, options) {
+  function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
     if (isEventAttribute(attrName)) {
       attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
       if (options.minifyJS) {
@@ -202,7 +202,21 @@
       }
       return attrValue;
     }
+    else if (isMetaViewport(tag, attrs) && attrName === 'content') {
+      attrValue = attrValue.replace(/1\.0/g, '1').replace(/\s+/g, '');
+    }
     return attrValue;
+  }
+
+  function isMetaViewport(tag, attrs) {
+    if (tag !== 'meta') {
+      return false;
+    }
+    for (var i = 0, len = attrs.length; i < len; i++) {
+      if (attrs[i].name === 'name' && attrs[i].value === 'viewport') {
+        return true;
+      }
+    }
   }
 
   function cleanConditionalComment(comment) {
@@ -296,7 +310,7 @@
       return '';
     }
 
-    attrValue = cleanAttributeValue(tag, attrName, attrValue, options);
+    attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue)) {

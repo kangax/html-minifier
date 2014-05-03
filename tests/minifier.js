@@ -918,4 +918,22 @@
     equal(minify(input, { collapseWhitespace: true }), output);
   });
 
+  test('meta viewport', function() {
+
+    input = '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+    output = '<meta name="viewport" content="width=device-width,initial-scale=1">';
+
+    equal(minify(input), output);
+
+    input = '<meta name="viewport" content="initial-scale=1, maximum-scale=1.0">';
+    output = '<meta name="viewport" content="initial-scale=1,maximum-scale=1">';
+
+    equal(minify(input), output);
+
+    input = '<meta name="viewport" content="width= 500 ,  initial-scale=1">';
+    output = '<meta name="viewport" content="width=500,initial-scale=1">';
+
+    equal(minify(input), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
