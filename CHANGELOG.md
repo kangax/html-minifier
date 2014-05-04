@@ -51,4 +51,9 @@
 
 * Fix NPM package
 
-## [0.5.1 / 2013-05-12](https://github.com/kangax/html-minifier/compare/v0.5.1...v0.5.2)
+## [0.5.1 / 2013-05-12](https://github.com/kangax/html-minifier/compare/v0.5.0...v0.5.1)
+
+* Menu is no longer deprecated in HTML5 [#23](https://github.com/kangax/html-minifier/issues/23)
+* Make parser ignore block elements in inline elements (allowed in HTML5). [#51](https://github.com/kangax/html-minifier/issues/51) [#52](https://github.com/kangax/html-minifier/issues/52) [#54](https://github.com/kangax/html-minifier/issues/54)
+* Fix issue with closing tags
+* Smarter collapseWhitespace (preserve space around inline tags)
