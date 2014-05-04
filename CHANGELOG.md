@@ -46,3 +46,9 @@
 * Make sure code, kbd, quote tags have space around them
 * Improve `canRemoveAttributeQuotes`
 * Add html5 option (supports custom elements, block elements in inline)
+
+## [0.5.2 / 2013-05-13](https://github.com/kangax/html-minifier/compare/v0.5.1...v0.5.2)
+
+* Fix NPM package
+
+## [0.5.1 / 2013-05-12](https://github.com/kangax/html-minifier/compare/v0.5.1...v0.5.2)
