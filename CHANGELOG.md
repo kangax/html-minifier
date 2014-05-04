@@ -1,10 +1,10 @@
 ## [0.6.0](https://github.com/kangax/html-minifier/compare/v0.5.6...0.6.0)
 
 * Minify meta viewport value [#159](https://github.com/kangax/html-minifier/issues/159)
-* Add support for ignoring markup via <!-- htmlmin:ignore --> [#89](https://github.com/kangax/html-minifier/issues/89)
-* Add support for processScripts [#139](https://github.com/kangax/html-minifier/issues/139)
-* Add support for ignoreCustomComments [#145](https://github.com/kangax/html-minifier/issues/145)
-* Add conservativeCollapse option
+* Add support for ignoring markup via `<!-- htmlmin:ignore -->` [#89](https://github.com/kangax/html-minifier/issues/89)
+* Add support for `processScripts` [#139](https://github.com/kangax/html-minifier/issues/139)
+* Add support for `ignoreCustomComments` [#145](https://github.com/kangax/html-minifier/issues/145)
+* Add `conservativeCollapse` option
 * Fix handling of valueless attributes [#150](https://github.com/kangax/html-minifier/issues/150)
 * Escape closing script tag [#142](https://github.com/kangax/html-minifier/issues/142)
 * Add support for minifying CSS (`minifyCSS`)
@@ -35,15 +35,15 @@
 
 ## [0.5.4 / 2013-09-04](https://github.com/kangax/html-minifier/compare/v0.5.3...v0.5.4)
 
-* Add support for ignoring <%...%> and <?...?>
-* Fix space after textarea
-* Add support for ignored comments (<!--!)
-* Add more tags to collapseWhitespaceSmart whitelist
+* Add support for ignoring `<%...%>` and `<?...?>`
+* Fix space after `textarea`
+* Add support for ignored comments (`<!--!`)
+* Add more tags to `collapseWhitespaceSmart` whitelist
 
 ## [0.5.3 / 2013-06-19](https://github.com/kangax/html-minifier/compare/v0.5.2...v0.5.3)
 
 * Better support for boolean attributes [#63](https://github.com/kangax/html-minifier/issues/76)
-* Make sure code, kbd, quote tags have space around them
+* Make sure `code`, `kbd` and `quote` tags have space around them
 * Improve `canRemoveAttributeQuotes`
 * Add html5 option (supports custom elements, block elements in inline)
 
@@ -56,4 +56,4 @@
 * Menu is no longer deprecated in HTML5 [#23](https://github.com/kangax/html-minifier/issues/23)
 * Make parser ignore block elements in inline elements (allowed in HTML5). [#51](https://github.com/kangax/html-minifier/issues/51) [#52](https://github.com/kangax/html-minifier/issues/52) [#54](https://github.com/kangax/html-minifier/issues/54)
 * Fix issue with closing tags
-* Smarter collapseWhitespace (preserve space around inline tags)
+* Smarter `collapseWhitespace` (preserve space around inline tags)
