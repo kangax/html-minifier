@@ -39,3 +39,10 @@
 * Fix space after textarea
 * Add support for ignored comments (<!--!)
 * Add more tags to collapseWhitespaceSmart whitelist
+
+## [0.5.3 / 2013-06-19](https://github.com/kangax/html-minifier/compare/v0.5.2...v0.5.3)
+
+* Better support for boolean attributes [#63](https://github.com/kangax/html-minifier/issues/76)
+* Make sure code, kbd, quote tags have space around them
+* Improve `canRemoveAttributeQuotes`
+* Add html5 option (supports custom elements, block elements in inline)
