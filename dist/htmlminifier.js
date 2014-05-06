@@ -431,10 +431,16 @@
   }
 
   var trimWhitespace = function(str) {
+    if (typeof str !== 'string') {
+      return str;
+    }
     return str.replace(/^\s+/, '').replace(/\s+$/, '');
   };
   if (String.prototype.trim) {
     trimWhitespace = function(str) {
+      if (typeof str !== 'string') {
+        return str;
+      }
       return str.trim();
     };
   }

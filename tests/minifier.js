@@ -51,6 +51,9 @@
 
     // https://github.com/kangax/html-minifier/issues/17
     equal(minify(':) <a href="http://example.com">link</a>'), ':) <a href="http://example.com">link</a>');
+
+    // https://github.com/kangax/html-minifier/issues/169
+    equal(minify('<a href>ok</a>'), '<a href>ok</a>');
   });
 
   test('`minifiy` exists', function() {
