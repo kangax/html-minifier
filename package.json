@@ -14,12 +14,14 @@
   ],
   "contributors": [
     "Gilmore Davidson (https://github.com/gilmoreorless)",
-    "Hugo Wetterberg <hugo@wetterberg.nu>"
+    "Hugo Wetterberg <hugo@wetterberg.nu>",
+    "Zoltan Frombach <tssajo@gmail.com>"
   ],
   "license": {
     "type": "MIT",
     "url": "https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE"
   },
+  "bin": "./cli.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/kangax/html-minifier"
@@ -38,7 +40,9 @@
   },
   "dependencies": {
     "clean-css": "2.1.x",
-    "uglify-js": "2.4.x"
+    "uglify-js": "2.4.x",
+    "cli": "~0.6.2",
+    "change-case": "~2.1.1"
   },
   "devDependencies": {
     "grunt": "0.4.x",
