@@ -57,5 +57,29 @@ npm install html-minifier
 
 Chunks of markup can be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
 
+Installation Instructions
+----------------------------
+
+From NPM for use as a command line app:
+```
+npm install html-minifier -g
+```
+
+From NPM for programmatic use:
+```
+npm install html-minifier
+```
+
+From Git:
+```
+git clone git://github.com/kangax/html-minifier.git
+cd html-minifier
+npm link .
+```
+
+Usage
+--------
+For command line usage please see `html-minifier --help`
+
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
