@@ -24,12 +24,6 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 890         | <b>860</b>       |   872        |
 
 
-Installing with [npm](https://github.com/isaacs/npm):
-
-```
-npm install html-minifier
-```
-
 
 ## Options Quick Reference
 
@@ -58,7 +52,7 @@ npm install html-minifier
 Chunks of markup can be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
 
 Installation Instructions
-----------------------------
+-------------------------
 
 From NPM for use as a command line app:
 ```

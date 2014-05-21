@@ -41,8 +41,8 @@
   "dependencies": {
     "clean-css": "2.1.x",
     "uglify-js": "2.4.x",
-    "cli": "~0.6.2",
-    "change-case": "~2.1.1"
+    "cli": "0.6.x",
+    "change-case": "2.1.x"
   },
   "devDependencies": {
     "grunt": "0.4.x",
@@ -58,6 +58,8 @@
   },
   "files": [
     "dist",
+    "cli.js",
+    "sample-cli-config-file.conf",
     "CHANGELOG.md",
     "LICENSE"
   ],
