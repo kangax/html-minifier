@@ -1,3 +1,7 @@
+## Edge
+
+* Fix error with valueless attributes (e.g. `<a href>`). [#169](https://github.com/kangax/html-minifier/issues/169)
+
 ## [0.6.0](https://github.com/kangax/html-minifier/compare/v0.5.6...0.6.0)
 
 * Minify meta viewport value [#159](https://github.com/kangax/html-minifier/issues/159)
