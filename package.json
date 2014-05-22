@@ -39,10 +39,10 @@
     "test": "grunt test"
   },
   "dependencies": {
+    "change-case": "2.1.x",
     "clean-css": "2.1.x",
-    "uglify-js": "2.4.x",
     "cli": "0.6.x",
-    "change-case": "2.1.x"
+    "uglify-js": "2.4.x"
   },
   "devDependencies": {
     "grunt": "0.4.x",
