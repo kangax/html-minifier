@@ -244,6 +244,8 @@
       if (currentAttrs[i].name.toLowerCase() === 'type' &&
           options.processScripts.indexOf(currentAttrs[i].value) > -1) {
         return minify(text, options);
+      } else {
+        return text;
       }
     }
   }
