@@ -655,6 +655,7 @@
         return minify(text, options);
       }
     }
+    return text;
   }
 
   var reStartDelimiter = {
