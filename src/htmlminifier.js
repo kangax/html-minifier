@@ -37,7 +37,7 @@
   }
 
   function collapseWhitespace(str) {
-    return str.replace(/\s+/g, ' ');
+    return str ? str.replace(/\s+/g, ' ') : str;
   }
 
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
