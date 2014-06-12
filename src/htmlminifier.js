@@ -47,7 +47,7 @@
       'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
       'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q',
       'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
-      'sub', 'sup', 'time', 'tt', 'u', 'var'
+      'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
     ];
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.substr(0,1) !== '/'
