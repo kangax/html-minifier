@@ -939,4 +939,10 @@
     equal(minify(input), output);
   });
 
+  test('downlevel-revealed conditional comments', function() {
+    input = '<![if !IE]><link href="non-ie.css" rel="stylesheet"><![endif]>';
+    equal(minify(input), input);
+    equal(minify(input, { removeComments: true }), input);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);

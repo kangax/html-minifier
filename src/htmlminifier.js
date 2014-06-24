@@ -69,7 +69,7 @@
   }
 
   function isConditionalComment(text) {
-    return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
+    return ((/\[if[^\]]+\]/).test(text) || (/\s*((?:<!)?\[endif\])$/).test(text));
   }
 
   function isIgnoredComment(text, options) {
@@ -563,7 +563,11 @@
         lint && lint.testChars(text);
         buffer.push(text);
       },
-      comment: function( text ) {
+      comment: function( text, nonStandard ) {
+
+        var prefix = nonStandard ? '<!' : '<!--';
+        var suffix = nonStandard ? '>' : '-->';
+
         if (/^\s*htmlmin:ignore/.test(text)) {
           isIgnoring = !isIgnoring;
           buffer.push('<!--' + text + '-->');
@@ -571,7 +575,7 @@
         }
         if (options.removeComments) {
           if (isConditionalComment(text)) {
-            text = '<!--' + cleanConditionalComment(text) + '-->';
+            text = prefix + cleanConditionalComment(text) + suffix;
           }
           else if (isIgnoredComment(text, options)) {
             text = '<!--' + text + '-->';
@@ -581,7 +585,7 @@
           }
         }
         else {
-          text = '<!--' + text + '-->';
+          text = prefix + text + suffix;
         }
         buffer.push(text);
       },

@@ -91,6 +91,19 @@
           }
         }
 
+        // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+        if ( html.indexOf('<![') === 0 ) {
+          index = html.indexOf(']>');
+
+          if (index >= 0) {
+            if ( handler.comment ) {
+              handler.comment( html.substring(2, index + 1 ), true /* non-standard */ );
+            }
+            html = html.substring( index + 2 );
+            chars = false;
+          }
+        }
+
         // Ignored elements?
         else if (html.search(startIgnore) === 0) {
           index = html.search(endIgnore); // Find closing tag.
@@ -478,7 +491,7 @@
   }
 
   function isConditionalComment(text) {
-    return ((/\[if[^\]]+\]/).test(text) || (/\s*(<!\[endif\])$/).test(text));
+    return ((/\[if[^\]]+\]/).test(text) || (/\s*((?:<!)?\[endif\])$/).test(text));
   }
 
   function isIgnoredComment(text, options) {
@@ -972,7 +985,11 @@
         lint && lint.testChars(text);
         buffer.push(text);
       },
-      comment: function( text ) {
+      comment: function( text, nonStandard ) {
+
+        var prefix = nonStandard ? '<!' : '<!--';
+        var suffix = nonStandard ? '>' : '-->';
+
         if (/^\s*htmlmin:ignore/.test(text)) {
           isIgnoring = !isIgnoring;
           buffer.push('<!--' + text + '-->');
@@ -980,7 +997,7 @@
         }
         if (options.removeComments) {
           if (isConditionalComment(text)) {
-            text = '<!--' + cleanConditionalComment(text) + '-->';
+            text = prefix + cleanConditionalComment(text) + suffix;
           }
           else if (isIgnoredComment(text, options)) {
             text = '<!--' + text + '-->';
@@ -990,7 +1007,7 @@
           }
         }
         else {
-          text = '<!--' + text + '-->';
+          text = prefix + text + suffix;
         }
         buffer.push(text);
       },

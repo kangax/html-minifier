@@ -86,6 +86,19 @@
           }
         }
 
+        // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+        if ( html.indexOf('<![') === 0 ) {
+          index = html.indexOf(']>');
+
+          if (index >= 0) {
+            if ( handler.comment ) {
+              handler.comment( html.substring(2, index + 1 ), true /* non-standard */ );
+            }
+            html = html.substring( index + 2 );
+            chars = false;
+          }
+        }
+
         // Ignored elements?
         else if (html.search(startIgnore) === 0) {
           index = html.search(endIgnore); // Find closing tag.
