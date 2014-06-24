@@ -77,8 +77,9 @@ For command line usage please see `html-minifier --help`
 
 Node.js
 ========
-
+```
 require('html-minifier')
+```
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
