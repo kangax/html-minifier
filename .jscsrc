@@ -28,8 +28,6 @@
     "disallowMultipleLineStrings": true,
     "disallowTrailingWhitespace": true,
 
-    "requireSpaceAfterLineComment": true,
-    "requireSpacesInConditionalExpression": true,
     "validateIndentation": 2,
     "validateLineBreaks": "LF",
     "validateQuoteMarks": "'",

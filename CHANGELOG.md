@@ -1,5 +1,17 @@
-## Edge
+## [0.6.3](https://github.com/kangax/html-minifier/compare/v0.6.2...0.6.3)
 
+* Do not treat translate attribute as boolean
+* Add svg element in inline list
+* Do not remove special spaces like &nbsp;
+* Make collapseWhitespace more resilient
+
+## [0.6.2](https://github.com/kangax/html-minifier/compare/v0.6.1...0.6.2)
+
+* Fix bug introduced by processScripts option
+
+## [0.6.1](https://github.com/kangax/html-minifier/compare/v0.6.0...0.6.1)
+
+* Add CLI
 * Fix error with valueless attributes (e.g. `<a href>`). [#169](https://github.com/kangax/html-minifier/issues/169)
 
 ## [0.6.0](https://github.com/kangax/html-minifier/compare/v0.5.6...0.6.0)
