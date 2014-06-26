@@ -10,21 +10,22 @@ function average (arr) {
 }
 
 var fileNames = [
-  'es6-draft',
+  // 'es6-draft',
   // 'eloquentjavascript',
-  // 'wikipedia',
-  // 'stackoverflow',
-  // 'amazon',
-  // 'es6-table',
-  // 'msn',
-  // 'google',
-  // 'abc',
-  // 'html-minifier'
+  'wikipedia',
+  'stackoverflow',
+  'amazon',
+  'es6-table',
+  'msn',
+  'google',
+  'newyorktimes',
+  'abc',
+  'html-minifier'
 ];
 
 var table = new Table({
   head: ['File', 'Before', 'After', 'Savings', 'Time'],
-  colWidths: [20, 20, 20, 20, 20]
+  colWidths: [20, 25, 25, 20, 20]
 });
 
 var allSavings = [];
