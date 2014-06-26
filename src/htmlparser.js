@@ -47,7 +47,7 @@
   // var block = makeMap('address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul');
 
   // Inline Elements - HTML 4.01
-  var inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var');
+  var inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var');
 
   // Elements that you can, intentionally, leave open
   // (and which close themselves)
@@ -57,7 +57,7 @@
   var fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected');
 
   // Special Elements (can contain anything)
-  var special = makeMap('script,style');
+  var special = makeMap('script,style,noscript');
 
   var reCache = {}, stackedTag, reStackedTag, tagMatch;
 
@@ -126,7 +126,7 @@
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( endTag, parseEndTag );
-            prevTag = '/' + match[1];
+            prevTag = '/' + match[1].toLowerCase();
             chars = false;
           }
 
@@ -138,7 +138,7 @@
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( startTag, parseStartTag );
-            prevTag = match[1];
+            prevTag = match[1].toLowerCase();
             chars = false;
           }
         }
@@ -177,7 +177,7 @@
         reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
 
         html = html.replace(reStackedTag, function(all, text) {
-          if (stackedTag !== 'script' && stackedTag !== 'style') {
+          if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
             text = text
               .replace(/<!--([\s\S]*?)-->/g, '$1')
               .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
@@ -252,7 +252,7 @@
       }
       else {      // Find the closest opened tag of the same type
         for ( pos = stack.length - 1; pos >= 0; pos-- ) {
-          if ( stack[ pos ] === tagName ) {
+          if ( stack[ pos ].toLowerCase() === tagName ) {
             break;
           }
         }

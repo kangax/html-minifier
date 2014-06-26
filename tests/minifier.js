@@ -945,4 +945,9 @@
     equal(minify(input, { removeComments: true }), input);
   });
 
+  test('noscript', function() {
+    input = '<SCRIPT SRC="x"></SCRIPT><NOSCRIPT>x</NOSCRIPT>';
+    equal(minify(input), '<script src="x"></script><noscript>x</noscript>');
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
