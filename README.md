@@ -13,15 +13,15 @@ Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_mini
 
 How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/minifier/) — HTML Minifier from Will Peavy (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier))?
 
-| Site  | Original size _(KB)_ | HTMLMinifier _(KB)_  | Will Peavy _(KB)_  |
-| --------------------------------------------------------------------------- |:-----------:| ----------------:| ------------:|
-| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>380.6</b>     |   396.3      |
-| [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>159.5</b>     |   168.3      |
-| [MSN](http://msn.com)                                                       | 156.6       | <b>133</b>       |   145        |
-| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     |   225 |
-| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>        |   92         |
-| [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>37.3</b>      |   43.3       |
-| [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 869.5       | <b>830</b>       |   872        |
+| Site  | Original size _(KB)_ | HTMLMinifier _(KB)_  | Will Peavy _(KB)_  | htmlcompressor.com _(KB)_  |
+| --------------------------------------------------------------------------- |:-----------:| ----------------:| ------------:| ----------------:|
+| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>380.6</b>     |   396.3      | |
+| [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>159.5</b>     |   168.3      | 163.3 |
+| [MSN](http://msn.com)                                                       | 156.6       | <b>133</b>       |   145        | |
+| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     |   225 |  |
+| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>        |   92         |  |
+| [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>37.3</b>      |   43.3       | |
+| [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 869.5       | <b>830</b>       |   872        | |
 
 
 
