@@ -1,3 +1,8 @@
+## Edge
+
+* Support IE downlevel-revealed conditional comments
+* Add support for wbr element
+
 ## [0.6.3](https://github.com/kangax/html-minifier/compare/v0.6.2...0.6.3)
 
 * Do not treat translate attribute as boolean
