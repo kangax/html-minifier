@@ -1,5 +1,6 @@
-## Edge
+## [0.6.4](https://github.com/kangax/html-minifier/compare/v0.6.3...0.6.4)
 
+* Support for mixed-case tags
 * Support IE downlevel-revealed conditional comments
 * Add support for wbr element
 
