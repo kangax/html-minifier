@@ -28,6 +28,7 @@
       removeScriptTypeAttributes:     byId('remove-script-type-attributes').checked,
       removeStyleLinkTypeAttributes:  byId('remove-style-link-type-attributes').checked,
       caseSensitive:                  byId('case-sensitive').checked,
+      keepClosingSlash:               byId('keep-closing-slash').checked,
       minifyJS:                       byId('minify-js').checked,
       minifyCSS:                      byId('minify-css').checked,
       lint:                           byId('use-htmllint').checked ? new HTMLLint() : null
