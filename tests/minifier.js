@@ -742,10 +742,10 @@
   });
 
   test('caseSensitive', function() {
-    input = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewBox="0 0 100 100"></svg>';
+    input = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewBox="0 0 100 100"><linearGradient><stop offset="0%"></stop><stop offset="50%"></stop></linearGradient></svg>';
 
-    var caseSensitiveOutput = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewBox="0 0 100 100"></svg>';
-    var caseInSensitiveOutput = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewbox="0 0 100 100"></svg>';
+    var caseSensitiveOutput = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewBox="0 0 100 100"><linearGradient><stop offset="0%"></stop><stop offset="50%"></stop></linearGradient></svg>';
+    var caseInSensitiveOutput = '<svg class="icon icon-activity-by-tag" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" viewbox="0 0 100 100"><lineargradient><stop offset="0%"></stop><stop offset="50%"></stop></lineargradient></svg>';
 
     equal(minify(input), caseInSensitiveOutput);
     equal(minify(input, { caseSensitive: true }), caseSensitiveOutput);
