@@ -502,6 +502,19 @@
     equal(minify(input, { removeAttributeQuotes: true }), '<p class=foo|bar:baz></p>');
   });
 
+  test('preserving custom attribute-wrapping markup', function() {
+    var customAttrOptions = {
+      customAttrOpen: /\{\{#if\s+\w+\}\}/,
+      customAttrClose: /\{\{\/if\}\}/
+    };
+
+    input = '<input {{#if value}}checked="checked"{{/if}}>';
+    equal(minify(input, customAttrOptions), '<input {{#if value}}checked="checked"{{/if}}>');
+
+    input = '<input checked="checked">';
+    equal(minify(input, customAttrOptions), '<input checked="checked">');
+  });
+
   test('collapsing whitespace', function() {
     input = '<script type="text/javascript">  \n\t   alert(1) \n\n\n  \t <\/script>';
     output = '<script type="text/javascript">alert(1)<\/script>';
