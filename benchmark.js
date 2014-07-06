@@ -1,3 +1,5 @@
+/* jshint strict:false */
+
 var fs = require('fs'),
     exec = require('child_process').exec,
     Table = require('cli-table'),
@@ -52,7 +54,7 @@ function test(fileName, done) {
 
     console.log('Processing...', fileName);
 
-    exec(command, function (error, output) {
+    exec(command, function () {
       fs.stat(minifedFilePath, function (err, stats) {
 
         var time = new Date() - startTime;
@@ -64,8 +66,8 @@ function test(fileName, done) {
 
         table.push([
           fileName,
-          '\033[91m' + beforeSize + '\033[0m (' + (beforeSize/1024).toFixed(2) + 'KB)',
-          '\033[92m' + stats.size + '\033[0m (' + (stats.size/1024).toFixed(2) + 'KB)',
+          '\033[91m' + beforeSize + '\033[0m (' + (beforeSize / 1024).toFixed(2) + 'KB)',
+          '\033[92m' + stats.size + '\033[0m (' + (stats.size / 1024).toFixed(2) + 'KB)',
           '\033[96m' + savingsPercent.toFixed(2) + '\033[0m% (' + savings.toFixed(2) + 'KB)',
           '\033[96m' + time + '\033[0mms'
         ]);

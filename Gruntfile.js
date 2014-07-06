@@ -28,6 +28,9 @@ module.exports = function(grunt) {
       },
       web: {
         src: 'assets/master.js'
+      },
+      other: {
+        src: 'benchmark.js'
       }
     },
 
@@ -46,6 +49,9 @@ module.exports = function(grunt) {
       },*/
       web: {
         src: '<%= jshint.web.src %>'
+      },
+      other: {
+        src: '<%= jshint.other.src %>'
       }
     },
 
