@@ -885,7 +885,7 @@
           return;
         }
 
-        tag = tag.toLowerCase();
+        tag = options.caseSensitive ? tag : tag.toLowerCase();
         currentTag = tag;
         currentChars = '';
         currentAttrs = attrs;
@@ -941,7 +941,7 @@
         }
         else {
           // push end tag to buffer
-          buffer.push('</', tag.toLowerCase(), '>');
+          buffer.push('</', options.caseSensitive ? tag : tag.toLowerCase(), '>');
           results.push.apply(results, buffer);
         }
         // flush buffer
