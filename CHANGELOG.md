@@ -1,19 +1,23 @@
+## [0.6.5](https://github.com/kangax/html-minifier/compare/v0.6.4...0.6.5)
+
+* `caseSensitive` option now applies to tags and attributes
+
 ## [0.6.4](https://github.com/kangax/html-minifier/compare/v0.6.3...0.6.4)
 
 * Support for mixed-case tags
 * Support IE downlevel-revealed conditional comments
-* Add support for wbr element
+* Add support for `wbr` element
 
 ## [0.6.3](https://github.com/kangax/html-minifier/compare/v0.6.2...0.6.3)
 
-* Do not treat translate attribute as boolean
-* Add svg element in inline list
-* Do not remove special spaces like &nbsp;
-* Make collapseWhitespace more resilient
+* Do not treat `translate` attribute as boolean
+* Add `svg` element in inline list
+* Do not remove special spaces like `&nbsp;`
+* Make `collapseWhitespace` more resilient
 
 ## [0.6.2](https://github.com/kangax/html-minifier/compare/v0.6.1...0.6.2)
 
-* Fix bug introduced by processScripts option
+* Fix bug introduced by `processScripts` option
 
 ## [0.6.1](https://github.com/kangax/html-minifier/compare/v0.6.0...0.6.1)
 
