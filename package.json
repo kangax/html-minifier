@@ -45,6 +45,7 @@
     "uglify-js": "2.4.x"
   },
   "devDependencies": {
+    "cli-table": "0.3.x",
     "grunt": "0.4.x",
     "grunt-contrib-concat": "0.4.x",
     "grunt-contrib-jshint": "0.10.x",
@@ -54,7 +55,8 @@
     "grunt-jscs": "0.6.x",
     "load-grunt-tasks": "0.6.x",
     "qunit": "0.6.x",
-    "time-grunt": "0.3.x"
+    "time-grunt": "0.3.x",
+    "underscore": "1.6.x"
   },
   "files": [
     "dist",
