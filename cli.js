@@ -53,30 +53,30 @@ usage += '    on the command line you must escape those such as --ignore-custom-
 cli.setUsage(usage);
 
 var mainOptions = {
-  'removeComments': [[false, 'Strip HTML comments'], false],
-  'removeCommentsFromCDATA': [[false, 'Strip HTML comments from scripts and styles'], false],
-  'removeCDATASectionsFromCDATA': [[false, 'Remove CDATA sections from script and style elements'], false],
-  'collapseWhitespace': [[false, 'Collapse white space that contributes to text nodes in a document tree.'], false],
-  'conservativeCollapse': [[false, 'Always collapse to 1 space (never remove it entirely)'], false],
-  'collapseBooleanAttributes': [[false, 'Omit attribute values from boolean attributes'], false],
-  'removeAttributeQuotes': [[false, 'Remove quotes around attributes when possible.'], false],
-  'removeRedundantAttributes': [[false, 'Remove attributes when value matches default.'], false],
-  'useShortDoctype': [[false, 'Replaces the doctype with the short (HTML5) doctype'], false],
-  'removeEmptyAttributes': [[false, 'Remove all attributes with whitespace-only values'], false],
-  'removeOptionalTags': [[false, 'Remove unrequired tags'], false],
-  'removeEmptyElements': [[false, 'Remove all elements with empty contents'], false],
-  'lint': [[false, 'Toggle linting'], false],
-  'keepClosingSlash': [[false, 'Keep the trailing slash on singleton elements'], false],
-  'caseSensitive': [[false, 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)'], false],
-  'minifyJS': [[false, 'Minify Javascript in script elements and on* attributes (uses UglifyJS)'], false],
-  'minifyCSS': [[false, 'Minify CSS in style elements and style attributes (uses clean-css)'], false],
-  'ignoreCustomComments': [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], true],
-  'processScripts': [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], true]
+  removeComments: [[false, 'Strip HTML comments'], false],
+  removeCommentsFromCDATA: [[false, 'Strip HTML comments from scripts and styles'], false],
+  removeCDATASectionsFromCDATA: [[false, 'Remove CDATA sections from script and style elements'], false],
+  collapseWhitespace: [[false, 'Collapse white space that contributes to text nodes in a document tree.'], false],
+  conservativeCollapse: [[false, 'Always collapse to 1 space (never remove it entirely)'], false],
+  collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes'], false],
+  removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.'], false],
+  removeRedundantAttributes: [[false, 'Remove attributes when value matches default.'], false],
+  useShortDoctype: [[false, 'Replaces the doctype with the short (HTML5) doctype'], false],
+  removeEmptyAttributes: [[false, 'Remove all attributes with whitespace-only values'], false],
+  removeOptionalTags: [[false, 'Remove unrequired tags'], false],
+  removeEmptyElements: [[false, 'Remove all elements with empty contents'], false],
+  lint: [[false, 'Toggle linting'], false],
+  keepClosingSlash: [[false, 'Keep the trailing slash on singleton elements'], false],
+  caseSensitive: [[false, 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)'], false],
+  minifyJS: [[false, 'Minify Javascript in script elements and on* attributes (uses UglifyJS)'], false],
+  minifyCSS: [[false, 'Minify CSS in style elements and style attributes (uses clean-css)'], false],
+  ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], true],
+  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], true]
 };
 
 var cliOptions = {
-  'version': ['v', 'Version information'],
-  'output': ['o', 'Specify output file (if not specified STDOUT will be used for output)', 'file'],
+  version: ['v', 'Version information'],
+  output: ['o', 'Specify output file (if not specified STDOUT will be used for output)', 'file'],
   'config-file': ['c', 'Use config file', 'file']
 };
 
@@ -97,8 +97,11 @@ cli.main(function(args, options) {
   if (options['config-file']) {
     try {
       var fileOptions = JSON.parse(fs.readFileSync(path.resolve(options['config-file']), 'utf8'));
-      if ((fileOptions !== null) && (typeof fileOptions === 'object')) minifyOptions = fileOptions;
-    } catch(e) {
+      if ((fileOptions !== null) && (typeof fileOptions === 'object')) {
+        minifyOptions = fileOptions;
+      }
+    }
+    catch (e) {
       process.stderr.write('Error: Cannot read the specified config file');
       cli.exit(1);
     }
@@ -113,22 +116,29 @@ cli.main(function(args, options) {
           var jsonArray;
           try {
             jsonArray = JSON.parse(value);
-          } catch(e) {}
+          }
+          catch (e) {}
           if (jsonArray instanceof Array) {
             minifyOptions[key] = jsonArray;
-          } else {
+          }
+          else {
             minifyOptions[key] = [value];
           }
         }
-      } else {
+      }
+      else {
         minifyOptions[key] = true;
       }
     }
   });
 
-  if (args.length) input = args;
+  if (args.length) {
+    input = args;
+  }
 
-  if (options.output) output = options.output;
+  if (options.output) {
+    output = options.output;
+  }
 
   var original = '';
   var status = 0;
@@ -138,13 +148,15 @@ cli.main(function(args, options) {
     input.forEach(function(afile) {
       try {
         original += fs.readFileSync(afile, 'utf8');
-      } catch(e) {
+      }
+      catch (e) {
         status = 2;
         process.stderr.write('Error: Cannot read file ' + afile);
       }
     });
 
-  } else { // Minifying input coming from STDIN
+  }
+  else { // Minifying input coming from STDIN
 
     var BUFSIZE = 4096;
     var buf = new Buffer(BUFSIZE);
@@ -153,29 +165,31 @@ cli.main(function(args, options) {
     while (true) { // Loop as long as stdin input is available.
       bytesRead = 0;
       try {
-          bytesRead = fs.readSync(process.stdin.fd, buf, 0, BUFSIZE);
-      } catch (e) {
-          if (e.code === 'EAGAIN') { // 'resource temporarily unavailable'
-              // Happens on OS X 10.8.3 (not Windows 7!), if there's no
-              // stdin input - typically when invoking a script without any
-              // input (for interactive stdin input).
-              // If you were to just continue, you'd create a tight loop.
-              process.stderr.write('ERROR: interactive stdin input not supported');
-              cli.exit(2);
-          } else if (e.code === 'EOF') {
-              // Happens on Windows 7, but not OS X 10.8.3:
-              // simply signals the end of *piped* stdin input.
-              break;
-          }
-          throw e; // unexpected exception
+        bytesRead = fs.readSync(process.stdin.fd, buf, 0, BUFSIZE);
+      }
+      catch (e) {
+        if (e.code === 'EAGAIN') { // 'resource temporarily unavailable'
+          // Happens on OS X 10.8.3 (not Windows 7!), if there's no
+          // stdin input - typically when invoking a script without any
+          // input (for interactive stdin input).
+          // If you were to just continue, you'd create a tight loop.
+          process.stderr.write('ERROR: interactive stdin input not supported');
+          cli.exit(2);
+        }
+        else if (e.code === 'EOF') {
+          // Happens on Windows 7, but not OS X 10.8.3:
+          // simply signals the end of *piped* stdin input.
+          break;
+        }
+        throw e; // unexpected exception
       }
       if (bytesRead === 0) {
-          // No more stdin input available.
-          // OS X 10.8.3: regardless of input method, this is how the end
-          //   of input is signaled.
-          // Windows 7: this is how the end of input is signaled for
-          //   *interactive* stdin input.
-          break;
+        // No more stdin input available.
+        // OS X 10.8.3: regardless of input method, this is how the end
+        //   of input is signaled.
+        // Windows 7: this is how the end of input is signaled for
+        //   *interactive* stdin input.
+        break;
       }
       original += buf.toString('utf8', 0, bytesRead);
     }
@@ -186,7 +200,8 @@ cli.main(function(args, options) {
   var minified = null;
   try {
     minified = minify(original, minifyOptions);
-  } catch(e) {
+  }
+  catch (e) {
     status = 3;
     process.stderr.write('Error: Minification error');
   }
@@ -196,10 +211,12 @@ cli.main(function(args, options) {
     try {
       if (output !== null) {
         fs.writeFileSync(path.resolve(output), minified);
-      } else {
+      }
+      else {
         process.stdout.write(minified);
       }
-    } catch(e) {
+    }
+    catch (e) {
       status = 4;
       process.stderr.write('Error: Cannot write to output');
     }

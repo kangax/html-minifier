@@ -8,7 +8,7 @@
     "requireCapitalizedConstructors": true,
     "requireCommaBeforeLineBreak": true,
     "requireDotNotation": true,
-    "requireKeywordsOnNewLine": ["else"],
+    "requireKeywordsOnNewLine": ["else", "catch"],
     "requireLineFeedAtFileEnd": true,
     "requireParenthesesAroundIIFE": true,
     "requireSpacesInsideObjectBrackets": "all",
@@ -24,7 +24,7 @@
 
     "disallowKeywords": ["with"],
     "disallowMixedSpacesAndTabs": true,
-    "disallowMultipleLineBreaks": true,
+    //"disallowMultipleLineBreaks": true,
     "disallowMultipleLineStrings": true,
     "disallowTrailingWhitespace": true,
 
