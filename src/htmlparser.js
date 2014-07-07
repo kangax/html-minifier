@@ -32,10 +32,12 @@
   'use strict';
 
   // Regular Expressions for parsing tags and attributes
-  var startTag = /^<([\w:-]+)((?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
+  var startTagOpen = /^<([\w:-]+)/,
+      startTagAttrs = /(?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*/,
+      startTagClose = /\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
       endingSlash = /\/>$/,
-      attr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g,
+      singleAttr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/,
       doctype = /^<!DOCTYPE [^>]+>/i,
       startIgnore = /<(%|\?)/,
       endIgnore = /(%|\?)>/;
@@ -66,6 +68,36 @@
     stack.last = function() {
       return this[ this.length - 1 ];
     };
+
+    var startTag, attr;
+    var customStartTagAttrs;
+    if (handler.customAttrOpen && handler.customAttrClose) {
+      customStartTagAttrs = new RegExp(
+        '(' +
+          '(?:' +
+            // Capture the custom attribute opening and closing markup surrounding the standard attribute rules
+            '(?:\\s*' + handler.customAttrOpen.source + startTagAttrs.source + handler.customAttrClose.source + ')' +
+            '|' +
+            // Or capture just the standard attribute rules
+            startTagAttrs.source +
+          ')*' +
+        ')'
+      );
+      attr = new RegExp(
+        '(?:' +
+          '(' + handler.customAttrOpen.source + ')' +
+          singleAttr.source +
+          '(' + handler.customAttrClose.source + ')' +
+        ')|(?:' + singleAttr.source + ')', 'g'
+      );
+    }
+    else {
+      // No custom attribute wrappers specified, so just capture the standard attribute rules
+      customStartTagAttrs = new RegExp('(' + startTagAttrs.source + ')');
+      attr = new RegExp(singleAttr.source, 'g');
+    }
+
+    startTag = new RegExp(startTagOpen.source + customStartTagAttrs.source + startTagClose.source);
 
     while ( html ) {
       chars = true;
@@ -225,15 +257,39 @@
       if ( handler.start ) {
         var attrs = [];
 
-        rest.replace(attr, function(match, name) {
-          var value = arguments[2] ? arguments[2] :
-            arguments[3] ? arguments[3] :
-            arguments[4] ? arguments[4] :
-            fillAttrs[name] ? name : arguments[2];
+        rest.replace(attr, function() {
+          var name, value, fallbackValue, customOpen, customClose;
+
+          if (arguments.length === 7) {
+            name = arguments[1];
+            fallbackValue = arguments[2];
+            value = fallbackValue
+              || arguments[3]
+              || arguments[4];
+          }
+          else {
+            name = arguments[2] || arguments[7];
+            fallbackValue = arguments[3];
+            value = fallbackValue
+              || arguments[4]
+              || arguments[5]
+              || arguments[8]
+              || arguments[9]
+              || arguments[10];
+            customOpen = arguments[1];
+            customClose = arguments[6];
+          }
+
+          if ( value === undefined ) {
+            value = fillAttrs[name] ? name : fallbackValue;
+          }
+
           attrs.push({
             name: name,
             value: value,
-            escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;')
+            escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
+            customOpen:  customOpen || '',
+            customClose: customClose || ''
           });
         });
 

@@ -337,7 +337,7 @@
       attrFragment = attrName + '=' + attrValue;
     }
 
-    return (' ' + attrFragment);
+    return (' ' + attr.customOpen + attrFragment + attr.customClose);
   }
 
   function setDefaultTesters(options) {
@@ -595,7 +595,9 @@
       },
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
-      }
+      },
+      customAttrOpen: options.customAttrOpen,
+      customAttrClose: options.customAttrClose
     });
 
     results.push.apply(results, buffer);
