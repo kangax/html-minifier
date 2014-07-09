@@ -187,7 +187,9 @@
 
   function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
     if (isEventAttribute(attrName)) {
-      attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
+      if (typeof attrValue !== 'undefined') {
+        attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
+      }
       if (options.minifyJS) {
         var wrappedCode = '(function(){' + attrValue + '})()';
         var minified = minifyJS(wrappedCode, options.minifyJS);
