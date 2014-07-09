@@ -1003,4 +1003,53 @@
     equal(minify(input), '<script src="x"></script><noscript>x</noscript>');
   });
 
+  test('max line length', function() {
+    var options = { maxLineLength: 25 };
+
+    input = '<div data-attr="foo"></div>';
+    equal(minify(input, options), '<div data-attr="foo">\n</div>');
+
+    input = '<code>    hello   world  \n    world   hello  </code>';
+    equal(minify(input, options), '<code>\n    hello   world  \n    world   hello  \n</code>');
+
+    equal(minify('<p title="</p>">x</p>'), '<p title="</p>">x</p>');
+    equal(minify('<p title=" <!-- hello world --> ">x</p>'), '<p title=" <!-- hello world --> ">x</p>');
+    equal(minify('<p title=" <![CDATA[ \n\n foobar baz ]]> ">x</p>'), '<p title=" <![CDATA[ \n\n foobar baz ]]> ">x</p>');
+    equal(minify('<p foo-bar=baz>xxx</p>'), '<p foo-bar="baz">xxx</p>');
+    equal(minify('<p foo:bar=baz>xxx</p>'), '<p foo:bar="baz">xxx</p>');
+
+    input = '<div><div><div><div><div><div><div><div><div><div>' +
+                  'i\'m 10 levels deep' +
+                '</div></div></div></div></div></div></div></div></div></div>';
+
+    equal(minify(input), input);
+
+    equal(minify('<script>alert(\'<!--\')<\/script>', options), '<script>alert(\'<!--\')\n<\/script>');
+    equal(minify('<script>alert(\'<!-- foo -->\')<\/script>', options), '<script>\nalert(\'<!-- foo -->\')\n<\/script>');
+    equal(minify('<script>alert(\'-->\')<\/script>', options), '<script>alert(\'-->\')\n<\/script>');
+
+    equal(minify('<a title="x"href=" ">foo</a>', options), '<a title="x" href="">foo\n</a>');
+    equal(minify('<p id=""class=""title="">x', options), '<p id="" class=""\n title="">x</p>');
+    equal(minify('<p x="x\'"">x</p>', options), '<p x="x\'">x</p>', 'trailing quote should be ignored');
+    equal(minify('<a href="#"><p>Click me</p></a>', options), '<a href="#"><p>Click me\n</p></a>');
+    equal(minify('<span><button>Hit me</button></span>', options), '<span><button>Hit me\n</button></span>');
+    equal(minify('<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>', options),
+      '<object\n type="image/svg+xml"\n data="image.svg"><div>\n[fallback image]</div>\n</object>'
+    );
+
+    equal(minify('<ng-include src="x"></ng-include>', options), '<ng-include src="x">\n</ng-include>');
+    equal(minify('<ng:include src="x"></ng:include>', options), '<ng:include src="x">\n</ng:include>');
+    equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>', options),
+      '<ng-include\n src="\'views/partial-notification.html\'">\n</ng-include><div\n ng-view=""></div>'
+    );
+    equal(minify('<some-tag-1></some-tag-1><some-tag-2></some-tag-2>', options),
+      '<some-tag-1>\n</some-tag-1>\n<some-tag-2>\n</some-tag-2>'
+    );
+    equal(minify('[\']["]', options), '[\']["]');
+    equal(minify('<a href="test.html"><div>hey</div></a>', options), '<a href="test.html">\n<div>hey</div></a>');
+    equal(minify(':) <a href="http://example.com">link</a>', options), ':) <a\n href="http://example.com">\nlink</a>');
+
+    equal(minify('<a href>ok</a>', options), '<a href>ok</a>');
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
