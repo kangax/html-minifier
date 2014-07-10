@@ -53,25 +53,26 @@ usage += '    on the command line you must escape those such as --ignore-custom-
 cli.setUsage(usage);
 
 var mainOptions = {
-  removeComments: [[false, 'Strip HTML comments'], false],
-  removeCommentsFromCDATA: [[false, 'Strip HTML comments from scripts and styles'], false],
-  removeCDATASectionsFromCDATA: [[false, 'Remove CDATA sections from script and style elements'], false],
-  collapseWhitespace: [[false, 'Collapse white space that contributes to text nodes in a document tree.'], false],
-  conservativeCollapse: [[false, 'Always collapse to 1 space (never remove it entirely)'], false],
-  collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes'], false],
-  removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.'], false],
-  removeRedundantAttributes: [[false, 'Remove attributes when value matches default.'], false],
-  useShortDoctype: [[false, 'Replaces the doctype with the short (HTML5) doctype'], false],
-  removeEmptyAttributes: [[false, 'Remove all attributes with whitespace-only values'], false],
-  removeOptionalTags: [[false, 'Remove unrequired tags'], false],
-  removeEmptyElements: [[false, 'Remove all elements with empty contents'], false],
-  lint: [[false, 'Toggle linting'], false],
-  keepClosingSlash: [[false, 'Keep the trailing slash on singleton elements'], false],
-  caseSensitive: [[false, 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)'], false],
-  minifyJS: [[false, 'Minify Javascript in script elements and on* attributes (uses UglifyJS)'], false],
-  minifyCSS: [[false, 'Minify CSS in style elements and style attributes (uses clean-css)'], false],
-  ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], true],
-  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], true]
+  removeComments: [[false, 'Strip HTML comments']],
+  removeCommentsFromCDATA: [[false, 'Strip HTML comments from scripts and styles']],
+  removeCDATASectionsFromCDATA: [[false, 'Remove CDATA sections from script and style elements']],
+  collapseWhitespace: [[false, 'Collapse white space that contributes to text nodes in a document tree.']],
+  conservativeCollapse: [[false, 'Always collapse to 1 space (never remove it entirely)']],
+  collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes']],
+  removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
+  removeRedundantAttributes: [[false, 'Remove attributes when value matches default.']],
+  useShortDoctype: [[false, 'Replaces the doctype with the short (HTML5) doctype']],
+  removeEmptyAttributes: [[false, 'Remove all attributes with whitespace-only values']],
+  removeOptionalTags: [[false, 'Remove unrequired tags']],
+  removeEmptyElements: [[false, 'Remove all elements with empty contents']],
+  lint: [[false, 'Toggle linting']],
+  keepClosingSlash: [[false, 'Keep the trailing slash on singleton elements']],
+  caseSensitive: [[false, 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)']],
+  minifyJS: [[false, 'Minify Javascript in script elements and on* attributes (uses UglifyJS)']],
+  minifyCSS: [[false, 'Minify CSS in style elements and style attributes (uses clean-css)']],
+  ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json'],
+  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json'],
+  maxLineLength: [[false, 'Max line length', 'number'], true]
 };
 
 var cliOptions = {
@@ -109,25 +110,17 @@ cli.main(function(args, options) {
 
   mainOptionKeys.forEach(function(key) {
     var paramKey = changeCase.paramCase(key);
+    var value = options[paramKey];
     if (options[paramKey] !== null) {
-      if (mainOptions[key][1]) {
-        var value = options[paramKey];
-        if (value !== null) {
-          var jsonArray;
-          try {
-            jsonArray = JSON.parse(value);
-          }
-          catch (e) {}
-          if (jsonArray instanceof Array) {
-            minifyOptions[key] = jsonArray;
-          }
-          else {
-            minifyOptions[key] = [value];
-          }
-        }
-      }
-      else {
-        minifyOptions[key] = true;
+      switch (mainOptions[key][1]) {
+        case 'json':
+          minifyOptions[key] = parseJSONOption(value);
+          break;
+        case true:
+          minifyOptions[key] = value;
+          break;
+        default:
+          minifyOptions[key] = true;
       }
     }
   });
@@ -194,6 +187,22 @@ cli.main(function(args, options) {
       original += buf.toString('utf8', 0, bytesRead);
     }
 
+  }
+
+  function parseJSONOption(value) {
+    if (value !== null) {
+      var jsonArray;
+      try {
+        jsonArray = JSON.parse(value);
+      }
+      catch (e) {}
+      if (jsonArray instanceof Array) {
+        return jsonArray;
+      }
+      else {
+        return [value];
+      }
+    }
   }
 
   // Run minify
