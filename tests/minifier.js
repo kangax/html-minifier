@@ -503,16 +503,54 @@
   });
 
   test('preserving custom attribute-wrapping markup', function() {
-    var customAttrOptions = {
-      customAttrOpen: /\{\{#if\s+\w+\}\}/,
-      customAttrClose: /\{\{\/if\}\}/
+    var customAttrOptions;
+
+    // With a single rule
+    customAttrOptions = {
+      customAttrSurround: [ [ /\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/ ] ]
     };
 
     input = '<input {{#if value}}checked="checked"{{/if}}>';
-    equal(minify(input, customAttrOptions), '<input {{#if value}}checked="checked"{{/if}}>');
+    equal(minify(input, customAttrOptions), input);
 
     input = '<input checked="checked">';
-    equal(minify(input, customAttrOptions), '<input checked="checked">');
+    equal(minify(input, customAttrOptions), input);
+
+    // With multiple rules
+    customAttrOptions = {
+      customAttrSurround: [
+        [ /\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/ ],
+        [ /\{\{#unless\s+\w+\}\}/, /\{\{\/unless\}\}/ ]
+      ]
+    };
+
+    input = '<input {{#if value}}checked="checked"{{/if}}>';
+    equal(minify(input, customAttrOptions), input);
+
+    input = '<input {{#unless value}}checked="checked"{{/unless}}>';
+    equal(minify(input, customAttrOptions), input);
+
+    input = '<input {{#if value1}}data-attr="example"{{/if}} {{#unless value2}}checked="checked"{{/unless}}>';
+    equal(minify(input, customAttrOptions), input);
+
+    input = '<input checked="checked">';
+    equal(minify(input, customAttrOptions), input);
+
+    // With multiple rules and richer options
+    customAttrOptions = {
+      customAttrSurround: [
+        [ /\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/ ],
+        [ /\{\{#unless\s+\w+\}\}/, /\{\{\/unless\}\}/ ]
+      ],
+      collapseBooleanAttributes: true,
+      removeAttributeQuotes: true
+    };
+
+    input = '<input {{#if value}}checked="checked"{{/if}}>';
+    equal(minify(input, customAttrOptions), '<input {{#if value}}checked{{/if}}>');
+
+    input = '<input {{#if value1}}checked="checked"{{/if}} {{#if value2}}data-attr="foo"{{/if}}>';
+    equal(minify(input, customAttrOptions), '<input {{#if value1}}checked{{/if}} {{#if value2}}data-attr=foo{{/if}}>');
   });
 
   test('collapsing whitespace', function() {

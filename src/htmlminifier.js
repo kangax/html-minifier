@@ -596,8 +596,7 @@
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
       },
-      customAttrOpen: options.customAttrOpen,
-      customAttrClose: options.customAttrClose
+      customAttrSurround: options.customAttrSurround
     });
 
     results.push.apply(results, buffer);

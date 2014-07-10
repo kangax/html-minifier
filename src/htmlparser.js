@@ -63,41 +63,62 @@
 
   var reCache = {}, stackedTag, reStackedTag, tagMatch;
 
+  function startTagForHandler( handler ) {
+    var customStartTagAttrs;
+
+    if ( handler.customAttrSurround ) {
+      var attrClauses = [];
+
+      for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
+        // Capture the custom attribute opening and closing markup surrounding the standard attribute rules
+        attrClauses[i] = '(?:\\s*'
+          + handler.customAttrSurround[i][0].source
+          + startTagAttrs.source
+          + handler.customAttrSurround[i][1].source
+          + ')';
+      }
+      attrClauses.unshift(startTagAttrs.source);
+
+      customStartTagAttrs = new RegExp(
+        '((?:' + attrClauses.join('|') + ')*)'
+      );
+    }
+    else {
+      // No custom attribute wrappers specified, so just capture the standard attribute rules
+      customStartTagAttrs = new RegExp('(' + startTagAttrs.source + ')');
+    }
+
+    return new RegExp(startTagOpen.source + customStartTagAttrs.source + startTagClose.source);
+  }
+
+  function attrForHandler( handler ) {
+    if ( handler.customAttrSurround ) {
+      var attrClauses = [];
+      for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
+        attrClauses[i] = '(?:'
+          + '(' + handler.customAttrSurround[i][0].source + ')'
+          + singleAttr.source
+          + '(' + handler.customAttrSurround[i][1].source + ')'
+          + ')';
+      }
+      attrClauses.unshift('(?:' + singleAttr.source + ')');
+
+      return new RegExp(attrClauses.join('|'), 'g');
+    }
+    else {
+      return new RegExp(singleAttr.source, 'g');
+    }
+  }
+
+
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html, prevTag, nextTag;
     stack.last = function() {
       return this[ this.length - 1 ];
     };
 
-    var startTag, attr;
-    var customStartTagAttrs;
-    if (handler.customAttrOpen && handler.customAttrClose) {
-      customStartTagAttrs = new RegExp(
-        '(' +
-          '(?:' +
-            // Capture the custom attribute opening and closing markup surrounding the standard attribute rules
-            '(?:\\s*' + handler.customAttrOpen.source + startTagAttrs.source + handler.customAttrClose.source + ')' +
-            '|' +
-            // Or capture just the standard attribute rules
-            startTagAttrs.source +
-          ')*' +
-        ')'
-      );
-      attr = new RegExp(
-        '(?:' +
-          '(' + handler.customAttrOpen.source + ')' +
-          singleAttr.source +
-          '(' + handler.customAttrClose.source + ')' +
-        ')|(?:' + singleAttr.source + ')', 'g'
-      );
-    }
-    else {
-      // No custom attribute wrappers specified, so just capture the standard attribute rules
-      customStartTagAttrs = new RegExp('(' + startTagAttrs.source + ')');
-      attr = new RegExp(singleAttr.source, 'g');
-    }
-
-    startTag = new RegExp(startTagOpen.source + customStartTagAttrs.source + startTagClose.source);
+    var startTag = startTagForHandler(handler);
+    var attr = attrForHandler(handler);
 
     while ( html ) {
       chars = true;
@@ -257,27 +278,27 @@
       if ( handler.start ) {
         var attrs = [];
 
-        rest.replace(attr, function() {
+        rest.replace(attr, function () {
           var name, value, fallbackValue, customOpen, customClose;
 
-          if (arguments.length === 7) {
-            name = arguments[1];
+          name = arguments[1];
+          if ( name ) {
             fallbackValue = arguments[2];
-            value = fallbackValue
-              || arguments[3]
-              || arguments[4];
+            value = fallbackValue || arguments[3] || arguments[4];
           }
-          else {
-            name = arguments[2] || arguments[7];
-            fallbackValue = arguments[3];
-            value = fallbackValue
-              || arguments[4]
-              || arguments[5]
-              || arguments[8]
-              || arguments[9]
-              || arguments[10];
-            customOpen = arguments[1];
-            customClose = arguments[6];
+          else if ( handler.customAttrSurround ) {
+            for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
+              name = arguments[i * 6 + 6];
+              if ( name ) {
+                fallbackValue = arguments[i * 6 + 7];
+                value = fallbackValue
+                  || arguments[i * 6 + 8]
+                  || arguments[i * 6 + 9];
+                customOpen = arguments[i * 6 + 5];
+                customClose = arguments[i * 6 + 10];
+                break;
+              }
+            }
           }
 
           if ( value === undefined ) {
