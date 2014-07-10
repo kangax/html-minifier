@@ -54,6 +54,8 @@
 
     // https://github.com/kangax/html-minifier/issues/169
     equal(minify('<a href>ok</a>'), '<a href>ok</a>');
+
+    equal(minify('<a onclick></a>'), '<a onclick></a>');
   });
 
   test('`minifiy` exists', function() {
