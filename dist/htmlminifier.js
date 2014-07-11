@@ -958,7 +958,7 @@
       start: function( tag, attrs, unary, unarySlash ) {
 
         if (isIgnoring) {
-          buffer.push('<', tag, attrsToMarkup(attrs), unarySlash ? '/' : '', '>');
+          buffer.push('<' + tag, attrsToMarkup(attrs), unarySlash ? '/' : '', '>');
           return;
         }
 
@@ -977,20 +977,30 @@
           }
         }
 
-        buffer.push('<', tag);
+        var openTag = '<' + tag;
+        var closeTag = ((unarySlash && options.keepClosingSlash) ? '/' : '') + '>';
+        if ( attrs.length === 0) {
+          openTag += closeTag;
+        }
+
+        buffer.push(openTag);
 
         lint && lint.testElement(tag);
 
+        var token;
         for ( var i = 0, len = attrs.length; i < len; i++ ) {
           lint && lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
-          buffer.push(normalizeAttribute(attrs[i], attrs, tag, options));
+          token = normalizeAttribute(attrs[i], attrs, tag, options);
+          if ( i === len - 1 ) {
+            token += closeTag;
+          }
+          buffer.push(token);
         }
-        buffer.push(((unarySlash && options.keepClosingSlash) ? '/' : '') + '>');
       },
       end: function( tag ) {
 
         if (isIgnoring) {
-          buffer.push('</', tag, '>');
+          buffer.push('</' + tag + '>');
           return;
         }
 
@@ -1009,7 +1019,12 @@
         var isElementEmpty = currentChars === '' && tag === currentTag;
         if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag))) {
           // remove last "element" from buffer, return
-          buffer.splice(buffer.lastIndexOf('<'));
+          for ( var i = buffer.length - 1; i >= 0; i-- ) {
+            if ( /^<[^\/!]/.test(buffer[i]) ) {
+              buffer.splice(i);
+              break;
+            }
+          }
           return;
         }
         else if (options.removeOptionalTags && isOptionalTag(tag)) {
@@ -1018,7 +1033,7 @@
         }
         else {
           // push end tag to buffer
-          buffer.push('</', options.caseSensitive ? tag : tag.toLowerCase(), '>');
+          buffer.push('</' + (options.caseSensitive ? tag : tag.toLowerCase()) + '>');
           results.push.apply(results, buffer);
         }
         // flush buffer
@@ -1099,8 +1114,36 @@
     });
 
     results.push.apply(results, buffer);
-    var str = results.join('');
+    var str = joinResultSegments(results, options);
     log('minified in: ' + (new Date() - t) + 'ms');
+    return str;
+  }
+
+  function joinResultSegments( results, options ) {
+    var str;
+    var maxLineLength = options.maxLineLength;
+    if ( maxLineLength ) {
+      var token;
+      var lines = [];
+      var line = '';
+      for ( var i = 0, len = results.length; i < len; i++ ) {
+        token = results[i];
+        if ( line.length + token.length < maxLineLength ) {
+          line += token;
+        }
+        else {
+          lines.push(line.replace(/^\n/, ''));
+          line = token;
+        }
+      }
+      lines.push(line);
+
+      str = lines.join('\n');
+    }
+    else {
+      str = results.join('');
+    }
+
     return str;
   }
 

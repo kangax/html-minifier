@@ -48,6 +48,7 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/GoalSmashers/clean-css))  | `false` (could be `true`, `false`, `Object` (options)) |
 | `ignoreCustomComments`             | Array of regex'es that allow to ignore certain comments, when matched  | `[ ]` |
 | `processScripts`                   | Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.) | `[ ]` |
+| `maxLineLength`                | Specify a maximum line length. Compressed output will be split by newlines at valid html split-points. |
 
 Chunks of markup can be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
 
