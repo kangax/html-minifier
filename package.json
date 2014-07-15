@@ -55,7 +55,7 @@
     "grunt-jscs": "0.6.x",
     "load-grunt-tasks": "0.6.x",
     "qunit": "0.7.x",
-    "time-grunt": "0.3.x",
+    "time-grunt": "0.4.x",
     "underscore": "1.6.x"
   },
   "files": [
