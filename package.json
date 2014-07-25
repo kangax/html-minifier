@@ -47,7 +47,7 @@
   "devDependencies": {
     "cli-table": "0.3.x",
     "grunt": "0.4.x",
-    "grunt-contrib-concat": "0.4.x",
+    "grunt-contrib-concat": "0.5.x",
     "grunt-contrib-jshint": "0.10.x",
     "grunt-contrib-qunit": "0.5.x",
     "grunt-contrib-uglify": "0.5.x",
