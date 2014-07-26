@@ -345,6 +345,7 @@
             name: name,
             value: value,
             escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
+            customAssign: customAssign || '=',
             customOpen:  customOpen || '',
             customClose: customClose || ''
           });

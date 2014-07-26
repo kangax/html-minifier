@@ -334,7 +334,7 @@
       attrFragment = attrName;
     }
     else {
-      attrFragment = attrName + '=' + attrValue;
+      attrFragment = attrName + attr.customAssign + attrValue;
     }
 
     return (' ' + attr.customOpen + attrFragment + attr.customClose);
@@ -611,6 +611,7 @@
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
       },
+      customAttrAssign: options.customAttrAssign,
       customAttrSurround: options.customAttrSurround
     });
 
