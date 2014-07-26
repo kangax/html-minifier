@@ -79,7 +79,11 @@ For command line usage please see `html-minifier --help`
 Node.js
 ========
 ```
-require('html-minifier')
+var minify = require('html-minifier').minify;
+var result = minify('<p title="blah" id="moo">foo</p>', {
+  removeAttributeQuotes: true
+});
+result; // '<p title=blah id=moo>foo</p>'
 ```
 
 
