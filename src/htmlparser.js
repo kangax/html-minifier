@@ -32,18 +32,18 @@
   'use strict';
 
   // Regular Expressions for parsing tags and attributes
-  var startTagOpen = /^<([\w:-]+)/,
-      startTagAttrs = /(?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*/,
-      startTagClose = /\s*(\/?)>/,
-      endTag = /^<\/([\w:-]+)[^>]*>/,
-      endingSlash = /\/>$/,
-      singleAttrIdentifier = /([\w:-]+)/,
+  var singleAttrIdentifier = /([\w:-]+)/,
       singleAttrAssign = /=/,
+      singleAttrAssigns = [ singleAttrAssign ],
       singleAttrValues = [
         /"((?:\\.|[^"])*)"/.source, // attr value double quotes
         /'((?:\\.|[^'])*)'/.source, // attr value, single quotes
         /([^>\s]+)/.source          // attr value, no quotes
       ],
+      startTagOpen = /^<([\w:-]+)/,
+      startTagClose = /\s*(\/?)>/,
+      endTag = /^<\/([\w:-]+)[^>]*>/,
+      endingSlash = /\/>$/,
       doctype = /^<!DOCTYPE [^>]+>/i,
       startIgnore = /<(%|\?)/,
       endIgnore = /(%|\?)>/;
@@ -71,6 +71,15 @@
 
   function startTagForHandler( handler ) {
     var customStartTagAttrs;
+
+    var startTagAttrs = new RegExp(
+        '(?:\\s*[\\w:-]+'
+      +   '(?:\\s*'
+      +     '(?:' + joinSingleAttrAssigns(handler) + ')'
+      +     '\\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\\s]+)'
+      +   ')?'
+      + ')*'
+    );
 
     if ( handler.customAttrSurround ) {
       var attrClauses = [];
@@ -101,9 +110,7 @@
     var singleAttr = new RegExp(
       singleAttrIdentifier.source
       + '(?:\\s*'
-      + '('
-      + singleAttrAssign.source
-      + ')'
+      + '(' + joinSingleAttrAssigns( handler ) + ')'
       + '\\s*'
       + '(?:'
       + singleAttrValues.join('|')
@@ -129,6 +136,13 @@
     }
   }
 
+  function joinSingleAttrAssigns( handler ) {
+    return singleAttrAssigns.concat(
+      handler.customAttrAssign || []
+    ).map(function (assign) {
+      return '(?:' + assign.source + ')';
+    }).join('|');
+  }
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html, prevTag, nextTag;
