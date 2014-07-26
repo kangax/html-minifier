@@ -37,7 +37,13 @@
       startTagClose = /\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
       endingSlash = /\/>$/,
-      singleAttr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/,
+      singleAttrIdentifier = /([\w:-]+)/,
+      singleAttrAssign = /=/,
+      singleAttrValues = [
+        /"((?:\\.|[^"])*)"/.source, // attr value double quotes
+        /'((?:\\.|[^'])*)'/.source, // attr value, single quotes
+        /([^>\s]+)/.source          // attr value, no quotes
+      ],
       doctype = /^<!DOCTYPE [^>]+>/i,
       startIgnore = /<(%|\?)/,
       endIgnore = /(%|\?)>/;
@@ -92,6 +98,17 @@
   }
 
   function attrForHandler( handler ) {
+    var singleAttr = new RegExp(
+      singleAttrIdentifier.source
+      + '(?:\\s*'
+      + singleAttrAssign.source
+      + '\\s*'
+      + '(?:'
+      + singleAttrValues.join('|')
+      + ')'
+      + ')?'
+    );
+
     if ( handler.customAttrSurround ) {
       var attrClauses = [];
       for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
