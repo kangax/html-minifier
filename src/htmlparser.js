@@ -101,7 +101,9 @@
     var singleAttr = new RegExp(
       singleAttrIdentifier.source
       + '(?:\\s*'
+      + '('
       + singleAttrAssign.source
+      + ')'
       + '\\s*'
       + '(?:'
       + singleAttrValues.join('|')
@@ -296,23 +298,26 @@
         var attrs = [];
 
         rest.replace(attr, function () {
-          var name, value, fallbackValue, customOpen, customClose;
+          var name, value, fallbackValue, customOpen, customClose, customAssign;
+          var ncp = 7; // number of captured parts, scalar
 
           name = arguments[1];
           if ( name ) {
-            fallbackValue = arguments[2];
-            value = fallbackValue || arguments[3] || arguments[4];
+            customAssign = arguments[2];
+            fallbackValue = arguments[3];
+            value = fallbackValue || arguments[4] || arguments[5];
           }
           else if ( handler.customAttrSurround ) {
             for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-              name = arguments[i * 6 + 6];
+              name = arguments[i * ncp + 7];
+              customAssign = arguments[i * ncp + 8];
               if ( name ) {
-                fallbackValue = arguments[i * 6 + 7];
+                fallbackValue = arguments[i * ncp + 9];
                 value = fallbackValue
-                  || arguments[i * 6 + 8]
-                  || arguments[i * 6 + 9];
-                customOpen = arguments[i * 6 + 5];
-                customClose = arguments[i * 6 + 10];
+                  || arguments[i * ncp + 10]
+                  || arguments[i * ncp + 11];
+                customOpen = arguments[i * ncp + 6];
+                customClose = arguments[i * ncp + 12];
                 break;
               }
             }
