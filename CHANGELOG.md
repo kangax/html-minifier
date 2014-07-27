@@ -1,3 +1,10 @@
+## [0.6.6](https://github.com/kangax/html-minifier/compare/v0.6.5...0.6.6)
+
+* Fix FF attribute bug
+* Add `customAttrAssign` option
+* Add `maxLineLength` option
+* Add `customAttrSurround` option
+
 ## [0.6.5](https://github.com/kangax/html-minifier/compare/v0.6.4...0.6.5)
 
 * `caseSensitive` option now applies to tags and attributes
