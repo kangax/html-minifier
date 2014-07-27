@@ -325,8 +325,6 @@
           var name, value, fallbackValue, customOpen, customClose, customAssign;
           var ncp = 7; // number of captured parts, scalar
 
-          console.log(attr, rest, arguments);
-
           // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
           if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
             if (arguments[3] === '') { arguments[3] = undefined; }
