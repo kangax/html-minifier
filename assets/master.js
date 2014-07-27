@@ -71,8 +71,8 @@
     }
   }
 
-  byId('max-line-length').oninput = function(){ minifyTextarea() };
-  byId('minify-btn').onclick = function(){ minifyTextarea() };
+  byId('max-line-length').oninput = function(){ minifyTextarea(); };
+  byId('minify-btn').onclick = function(){ minifyTextarea(); };
 
   function setCheckedAttrOnCheckboxes(attrValue) {
     var checkboxes = byId('options').getElementsByTagName('input');
