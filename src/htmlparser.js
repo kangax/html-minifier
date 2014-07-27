@@ -48,6 +48,11 @@
       startIgnore = /<(%|\?)/,
       endIgnore = /(%|\?)>/;
 
+  var IS_REGEX_CAPTURING_BROKEN = false;
+  'x'.replace(/x(.)?/g, function(m, g) {
+    IS_REGEX_CAPTURING_BROKEN = g === '';
+  });
+
   // Empty Elements - HTML 4.01
   var empty = makeMap('area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed,wbr');
 
@@ -314,6 +319,13 @@
         rest.replace(attr, function () {
           var name, value, fallbackValue, customOpen, customClose, customAssign;
           var ncp = 7; // number of captured parts, scalar
+
+          // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
+          if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
+            if (arguments[3] === '') { arguments[3] = undefined; }
+            if (arguments[4] === '') { arguments[4] = undefined; }
+            if (arguments[5] === '') { arguments[5] = undefined; }
+          }
 
           name = arguments[1];
           if ( name ) {
