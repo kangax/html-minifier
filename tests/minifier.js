@@ -555,6 +555,21 @@
     equal(minify(input, customAttrOptions), '<input {{#if value1}}checked{{/if}} {{#if value2}}data-attr=foo{{/if}}>');
   });
 
+  test('preserving custom attribute-joining markup', function() {
+    var polymerConditionalAttributeJoin = /\?=/;
+    var customAttrOptions = {
+      customAttrAssign: [ polymerConditionalAttributeJoin ]
+    };
+
+    input = '<div flex?="{{mode != cover}}"></div>';
+
+    equal(minify(input, customAttrOptions), input);
+
+    input = '<div flex?="{{mode != cover}}" class="foo"></div>';
+
+    equal(minify(input, customAttrOptions), input);
+  });
+
   test('collapsing whitespace', function() {
     input = '<script type="text/javascript">  \n\t   alert(1) \n\n\n  \t <\/script>';
     output = '<script type="text/javascript">alert(1)<\/script>';

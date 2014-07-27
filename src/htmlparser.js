@@ -32,12 +32,18 @@
   'use strict';
 
   // Regular Expressions for parsing tags and attributes
-  var startTagOpen = /^<([\w:-]+)/,
-      startTagAttrs = /(?:\s*[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*/,
+  var singleAttrIdentifier = /([\w:-]+)/,
+      singleAttrAssign = /=/,
+      singleAttrAssigns = [ singleAttrAssign ],
+      singleAttrValues = [
+        /"((?:\\.|[^"])*)"/.source, // attr value double quotes
+        /'((?:\\.|[^'])*)'/.source, // attr value, single quotes
+        /([^>\s]+)/.source          // attr value, no quotes
+      ],
+      startTagOpen = /^<([\w:-]+)/,
       startTagClose = /\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
       endingSlash = /\/>$/,
-      singleAttr = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/,
       doctype = /^<!DOCTYPE [^>]+>/i,
       startIgnore = /<(%|\?)/,
       endIgnore = /(%|\?)>/;
@@ -66,6 +72,15 @@
   function startTagForHandler( handler ) {
     var customStartTagAttrs;
 
+    var startTagAttrs = new RegExp(
+        '(?:\\s*[\\w:-]+'
+      +   '(?:\\s*'
+      +     '(?:' + joinSingleAttrAssigns(handler) + ')'
+      +     '\\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\\s]+)'
+      +   ')?'
+      + ')*'
+    );
+
     if ( handler.customAttrSurround ) {
       var attrClauses = [];
 
@@ -92,6 +107,17 @@
   }
 
   function attrForHandler( handler ) {
+    var singleAttr = new RegExp(
+      singleAttrIdentifier.source
+      + '(?:\\s*'
+      + '(' + joinSingleAttrAssigns( handler ) + ')'
+      + '\\s*'
+      + '(?:'
+      + singleAttrValues.join('|')
+      + ')'
+      + ')?'
+    );
+
     if ( handler.customAttrSurround ) {
       var attrClauses = [];
       for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
@@ -110,6 +136,13 @@
     }
   }
 
+  function joinSingleAttrAssigns( handler ) {
+    return singleAttrAssigns.concat(
+      handler.customAttrAssign || []
+    ).map(function (assign) {
+      return '(?:' + assign.source + ')';
+    }).join('|');
+  }
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html, prevTag, nextTag;
@@ -279,23 +312,26 @@
         var attrs = [];
 
         rest.replace(attr, function () {
-          var name, value, fallbackValue, customOpen, customClose;
+          var name, value, fallbackValue, customOpen, customClose, customAssign;
+          var ncp = 7; // number of captured parts, scalar
 
           name = arguments[1];
           if ( name ) {
-            fallbackValue = arguments[2];
-            value = fallbackValue || arguments[3] || arguments[4];
+            customAssign = arguments[2];
+            fallbackValue = arguments[3];
+            value = fallbackValue || arguments[4] || arguments[5];
           }
           else if ( handler.customAttrSurround ) {
             for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-              name = arguments[i * 6 + 6];
+              name = arguments[i * ncp + 7];
+              customAssign = arguments[i * ncp + 8];
               if ( name ) {
-                fallbackValue = arguments[i * 6 + 7];
+                fallbackValue = arguments[i * ncp + 9];
                 value = fallbackValue
-                  || arguments[i * 6 + 8]
-                  || arguments[i * 6 + 9];
-                customOpen = arguments[i * 6 + 5];
-                customClose = arguments[i * 6 + 10];
+                  || arguments[i * ncp + 10]
+                  || arguments[i * ncp + 11];
+                customOpen = arguments[i * ncp + 6];
+                customClose = arguments[i * ncp + 12];
                 break;
               }
             }
@@ -309,6 +345,7 @@
             name: name,
             value: value,
             escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
+            customAssign: customAssign || '=',
             customOpen:  customOpen || '',
             customClose: customClose || ''
           });
