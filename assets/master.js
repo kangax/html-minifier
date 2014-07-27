@@ -31,7 +31,8 @@
       keepClosingSlash:               byId('keep-closing-slash').checked,
       minifyJS:                       byId('minify-js').checked,
       minifyCSS:                      byId('minify-css').checked,
-      lint:                           byId('use-htmllint').checked ? new HTMLLint() : null
+      lint:                           byId('use-htmllint').checked ? new HTMLLint() : null,
+      maxLineLength:                  parseInt(byId('max-line-length').value, 10)
     };
   }
 
@@ -42,7 +43,7 @@
       .split('').reverse().join('');
   }
 
-  byId('minify-btn').onclick = function() {
+  function minifyTextarea() {
     try {
       var options = getOptions(),
           lint = options.lint,
@@ -68,7 +69,10 @@
       byId('output').value = '';
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
     }
-  };
+  }
+
+  byId('max-line-length').oninput = function(){ minifyTextarea() };
+  byId('minify-btn').onclick = function(){ minifyTextarea() };
 
   function setCheckedAttrOnCheckboxes(attrValue) {
     var checkboxes = byId('options').getElementsByTagName('input');
