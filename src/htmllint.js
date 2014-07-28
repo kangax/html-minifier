@@ -13,7 +13,7 @@
     return (/^(?:big|small|hr|blink|marquee)$/).test(tag);
   }
   function isDeprecatedElement(tag) {
-    return (/^(?:applet|basefont|center|dir|font|isindex|s|strike)$/).test(tag);
+    return (/^(?:applet|basefont|center|dir|font|isindex|strike)$/).test(tag);
   }
   function isEventAttribute(attrName) {
     return (/^on[a-z]+/).test(attrName);
