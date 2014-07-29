@@ -44,18 +44,22 @@ function test(fileName, done) {
   }
 
   var filePath = 'benchmarks/' + fileName + '.html';
-  var minifedFilePath = 'benchmarks/' + fileName + '.min.html';
-  var command = './cli.js ' + filePath + ' -c benchmark.conf' + ' -o ' + minifedFilePath;
+  var gzFilePath = filePath + '.gz';
+  var minifedGzFilePath = 'benchmarks/' + fileName + '.min.html.gz';
+  var command = './gzip-benchmark-minify ' + fileName;
+  console.log(command);
 
-  fs.stat(filePath, function (err, stats) {
+  var startTime = new Date();
 
-    var beforeSize = stats.size;
-    var startTime = new Date();
+  console.log('Processing...', fileName);
 
-    console.log('Processing...', fileName);
+  exec(command, function () {
 
-    exec(command, function () {
-      fs.stat(minifedFilePath, function (err, stats) {
+    fs.stat(gzFilePath, function (err, stats) {
+
+      var beforeSize = stats.size;
+
+      fs.stat(minifedGzFilePath, function (err, stats) {
 
         var time = new Date() - startTime;
         var savingsPercent = (1 - stats.size / beforeSize) * 100;
