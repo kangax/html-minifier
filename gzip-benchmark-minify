@@ -1,0 +1,9 @@
+#!/bin/bash
+[ "$1" == "" ] && echo "Use: node gzip-benchmark.js" >&2 && exit 1
+fileName=$1
+filePath=benchmarks/$fileName.html
+gzFilePath=$filePath.gz
+minifedGzFilePath=benchmarks/$fileName.min.html.gz
+gzip -9 < $filePath > $gzFilePath
+./cli.js $filePath -c benchmark.conf | gzip -9 > $minifedGzFilePath
+
