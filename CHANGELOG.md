@@ -1,6 +1,6 @@
 ## [0.6.6](https://github.com/kangax/html-minifier/compare/v0.6.5...0.6.6)
 
-* Fix FF attribute bug
+* Fix Firefox attribute bug
 * Add `customAttrAssign` option
 * Add `maxLineLength` option
 * Add `customAttrSurround` option
