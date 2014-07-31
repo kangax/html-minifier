@@ -16,10 +16,10 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | Site  | Original size _(KB)_ | HTMLMinifier _(KB)_  | Will Peavy _(KB)_  | htmlcompressor.com _(KB)_  |
 | --------------------------------------------------------------------------- |:-----------:| ----------------:| ------------:| ----------------:|
 | [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>37.3</b>      |   43.3       | 41.9 |
-| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>        |   92         | 91.9 |
+| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>      |   92         | 91.9 |
 | [MSN](http://msn.com)                                                       | 156.6       | <b>133</b>       |   145        | 138.3 |
 | [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>159.5</b>     |   168.3      | 163.3 |
-| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     |   225 |  218.5 |
+| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     |   225        |  218.5 |
 | [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>380.6</b>     |   396.3      | n/a |
 | [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 869.5       | <b>830</b>       |   872        | n/a |
 
@@ -46,42 +46,41 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | `caseSensitive`                | Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox) | `false` |
 | `minifyJS`                     | Minify Javascript in script elements and on* attributes (uses [UglifyJS](https://github.com/mishoo/UglifyJS2)) | `false` (could be `true`, `false`, `Object` (options)) |
 | `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/GoalSmashers/clean-css))  | `false` (could be `true`, `false`, `Object` (options)) |
-| `ignoreCustomComments`             | Array of regex'es that allow to ignore certain comments, when matched  | `[ ]` |
-| `processScripts`                   | Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.) | `[ ]` |
+| `ignoreCustomComments`         | Array of regex'es that allow to ignore certain comments, when matched  | `[ ]` |
+| `processScripts`               | Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.) | `[ ]` |
 | `maxLineLength`                | Specify a maximum line length. Compressed output will be split by newlines at valid html split-points. |
-| `customAttrAssign` | `[ ]` | Arrays of regex'es that allow to support custom attribute assign expressions (e.g. `'<div flex?="{{mode != cover}}"></div>'`) |
-| `customAttrSurround` | `[ ]` | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) |
+| `customAttrAssign`             | `[ ]` | Arrays of regex'es that allow to support custom attribute assign expressions (e.g. `'<div flex?="{{mode != cover}}"></div>'`) |
+| `customAttrSurround`           | `[ ]` | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) |
 
 
 Chunks of markup can be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
 
-Installation Instructions
--------------------------
+## Installation Instructions
 
 From NPM for use as a command line app:
-```
+```bash
 npm install html-minifier -g
 ```
 
 From NPM for programmatic use:
-```
+```bash
 npm install html-minifier
 ```
 
 From Git:
-```
+```bash
 git clone git://github.com/kangax/html-minifier.git
 cd html-minifier
 npm link .
 ```
 
-Usage
---------
+## Usage
+
 For command line usage please see `html-minifier --help`
 
-Node.js
-========
-```
+### Node.js
+
+```js
 var minify = require('html-minifier').minify;
 var result = minify('<p title="blah" id="moo">foo</p>', {
   removeAttributeQuotes: true
