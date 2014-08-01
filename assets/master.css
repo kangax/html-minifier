@@ -12,6 +12,7 @@ button { font-weight: bold; width: 100px; }
 #options ul li { float: left; clear: both; padding-bottom: 0.5em; }
 #options ul li div { margin-left: 1.75em; }
 #options label, #options input { float: left; }
+#options label.sub-option{ margin-left: 22px; margin-right: 5px }
 #options input { margin-right: 0.5em; }
 #stats { margin-bottom: 2em; overflow: hidden; margin-top: 0; }
 #todo { font-family: monospace; margin-bottom: 2em; }

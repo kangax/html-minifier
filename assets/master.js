@@ -30,6 +30,7 @@
       caseSensitive:                  byId('case-sensitive').checked,
       keepClosingSlash:               byId('keep-closing-slash').checked,
       minifyJS:                       byId('minify-js').checked,
+      processScripts:                 byId('minify-js-templates').checked ? byId('minify-js-templates-type').value : false,
       minifyCSS:                      byId('minify-css').checked,
       lint:                           byId('use-htmllint').checked ? new HTMLLint() : null,
       maxLineLength:                  parseInt(byId('max-line-length').value, 10)
@@ -96,6 +97,7 @@
     var inputEls = byId('options').getElementsByTagName('input');
     inputEls[10].checked = false;
     inputEls[11].checked = false;
+    inputEls[18].checked = false;
     return false;
   };
 

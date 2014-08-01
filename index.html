@@ -189,6 +189,22 @@
               </label>
             </li>
             <li>
+              <input type="checkbox" id="minify-js-templates">
+              <label for="minify-js-templates">
+                Minify JS Templates
+                <br>
+                <span class="quiet short">
+                  Minify HTML served inside script tag with a custom type attribute like "text/x-handlebars-template"
+                </span>
+              </label>
+            </li>
+            <li>
+              <label for="minify-js-templates-type" class="sub-option">
+                Template type
+              </label>
+              <input type="input" id="minify-js-templates-type">
+            </li>
+            <li>
               <input type="checkbox" id="minify-css" checked>
               <label for="minify-css">
                 Minify CSS
@@ -201,7 +217,7 @@
               </label>
             </li>
             <li>
-              <label for="max-line-length" style="margin-left: 22px; margin-right: 5px">
+              <label for="max-line-length" class="sub-option">
                 Max line length
               </label>
               <input type="number" id="max-line-length" value="0" min="0" max="10000">
