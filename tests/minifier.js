@@ -923,6 +923,13 @@
 
     equal(minify(input, { minifyCSS: true }), output);
   });
+  
+  test('url attribute minification', function() {
+    input = '<link rel="stylesheet" href="http://website.com/style.css"><form action="http://website.com/folder/folder2/index.html"><a href="http://website.com/folder/file.html">link</a></form>';
+    output = '<link rel="stylesheet" href="/style.css"><form action="folder2/"><a href="file.html">link</a></form>';
+
+    equal(minify(input, { minifyURLs: {site:"http://website.com/folder/"} }), output);
+  });
 
   test('valueless attributes', function() {
     input = '<br foo>';

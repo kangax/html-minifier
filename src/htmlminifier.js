@@ -198,7 +198,14 @@
     else if (attrName === 'class') {
       return collapseWhitespace(trimWhitespace(attrValue));
     }
-    else if (isUriTypeAttribute(attrName, tag) || isNumberTypeAttribute(attrName, tag)) {
+    else if (isUriTypeAttribute(attrName, tag)) {
+      attrValue = trimWhitespace(attrValue);
+      if (options.minifyURLs) {
+        return minifyURLs(attrValue, options.minifyURLs);
+      }
+      return attrValue;
+    }
+    else if (isNumberTypeAttribute(attrName, tag)) {
       return trimWhitespace(attrValue);
     }
     else if (attrName === 'style') {
@@ -351,6 +358,37 @@
         };
       }
     }
+  }
+
+  function minifyURLs(text, options) {
+    if (typeof options !== 'object') {
+      options = { };
+    }
+
+    try {
+      // try to get global reference first
+      var __RelateUrl = global.RelateUrl;
+
+      if (typeof __RelateUrl === 'undefined' && typeof require === 'function') {
+        __RelateUrl = require('relateurl');
+      }
+
+      // noop
+      if (!__RelateUrl) {
+        return text;
+      }
+
+      if (__RelateUrl.relate) {
+        return __RelateUrl.relate(text, options);
+      }
+      else {
+        return text;
+      }
+    }
+    catch (err) {
+      log(err);
+    }
+    return text;
   }
 
   function minifyJS(text, options) {

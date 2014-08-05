@@ -211,6 +211,22 @@
               </label>
             </li>
             <li>
+              <input type="checkbox" id="minify-urls">
+              <label for="minify-urls">
+                Minify URLs
+                <br>
+                <span class="quiet short">
+                  Convert absolute URLs to relative
+                </span>
+              </label>
+            </li>
+            <li>
+              <label for="minify-urls-siteurl" class="sub-option">
+                Site URL
+              </label>
+              <input type="input" id="minify-urls-siteurl">
+            </li>
+            <li>
               <input type="checkbox" id="use-htmllint" checked>
               <label for="use-htmllint">
                 Validate input through HTML lint
@@ -241,6 +257,7 @@
     <script src="dist/htmlminifier.min.js"></script>
     <script src="assets/uglify.js"></script>
     <script src="assets/cleancss-browser.js"></script>
+    <script src="assets/relateurl-browser.js"></script>
     <script src="assets/master.js"></script>
   </body>
 </html>

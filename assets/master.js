@@ -32,6 +32,7 @@
       minifyJS:                       byId('minify-js').checked,
       processScripts:                 byId('minify-js-templates').checked ? byId('minify-js-templates-type').value : false,
       minifyCSS:                      byId('minify-css').checked,
+      minifyURLs:                     byId('minify-urls').checked ? { site:byId('minify-urls-siteurl').value } : false,
       lint:                           byId('use-htmllint').checked ? new HTMLLint() : null,
       maxLineLength:                  parseInt(byId('max-line-length').value, 10)
     };
