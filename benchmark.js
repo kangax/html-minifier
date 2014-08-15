@@ -2,11 +2,10 @@
 
 var fs = require('fs'),
     exec = require('child_process').exec,
-    Table = require('cli-table'),
-    _ = require('underscore');
+    Table = require('cli-table');
 
 function average (arr) {
-  return _.reduce(arr, function(memo, num) {
+  return arr.reduce(function(memo, num) {
     return memo + num;
   }, 0) / arr.length;
 }
