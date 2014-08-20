@@ -4,12 +4,6 @@ var fs = require('fs'),
     exec = require('child_process').exec,
     Table = require('cli-table');
 
-function average (arr) {
-  return arr.reduce(function(memo, num) {
-    return memo + num;
-  }, 0) / arr.length;
-}
-
 var fileNames = [
   // 'es6-draft',
   // 'eloquentjavascript',
@@ -29,49 +23,83 @@ var table = new Table({
   colWidths: [20, 25, 25, 20, 20]
 });
 
-var allSavings = [];
-var allTimes = [];
-
 console.log('');
+
+function redSize(size) {
+  return '\033[91m' + size + '\033[0m (' + toKb(size) + 'KB)';
+}
+
+function greenSize(size) {
+  return '\033[92m' + size + '\033[0m (' + toKb(size) + 'KB)';
+}
+
+function toKb(size) {
+  return (size / 1024).toFixed(2);
+}
+
+function blueSavings(oldSize, newSize) {
+  var savingsPercent = (1 - newSize / oldSize) * 100;
+  var savings = (oldSize - newSize) / 1024;
+  return '\033[96m' + savingsPercent.toFixed(2) + '\033[0m% (' + savings.toFixed(2) + 'KB)';
+}
+
+function blueTime(time) {
+  return '\033[96m' + time + '\033[0mms';
+}
+
 function test(fileName, done) {
 
   if (!fileName) {
-    console.log(table.toString() + '\n');
-    console.log('Average savings: \033[96m' + average(allSavings).toFixed(2) + '\033[0m%');
-    console.log('Average time: \033[96m' + average(allTimes).toFixed(2) + '\033[0mms\n');
+    console.log(table.toString());
     return;
   }
 
+  console.log('Processing...', fileName);
+
   var filePath = 'benchmarks/' + fileName + '.html';
-  var minifedFilePath = 'benchmarks/' + fileName + '.min.html';
-  var command = './cli.js ' + filePath + ' -c benchmark.conf' + ' -o ' + minifedFilePath;
+  var minifiedFilePath = 'benchmarks/' + fileName + '.min.html';
+  var gzFilePath = filePath + '.gz';
+  var gzMinifiedFilePath = 'benchmarks/' + fileName + '.min.html.gz';
+  var command = './cli.js ' + filePath + ' -c benchmark.conf' + ' -o ' + minifiedFilePath;
 
+  // Open and read the size of the original input
   fs.stat(filePath, function (err, stats) {
+    var originalSize = stats.size;
 
-    var beforeSize = stats.size;
-    var startTime = new Date();
+    exec('gzip -k -f -9 ' + filePath + ' > ' + gzFilePath, function () {
+      // Open and read the size of the gzipped original
+      fs.stat(gzFilePath, function (err, stats) {
+        var gzOriginalSize = stats.size;
 
-    console.log('Processing...', fileName);
+        // Begin timing after gzipped fixtures have been created
+        var startTime = new Date();
+        exec(command, function () {
 
-    exec(command, function () {
-      fs.stat(minifedFilePath, function (err, stats) {
+          // Open and read the size of the minified output
+          fs.stat(minifiedFilePath, function (err, stats) {
+            var minifiedSize = stats.size;
+            var minifiedTime = new Date() - startTime;
 
-        var time = new Date() - startTime;
-        var savingsPercent = (1 - stats.size / beforeSize) * 100;
-        var savings = (beforeSize - stats.size) / 1024;
+            // Gzip the minified output
+            exec('gzip -k -f -9 ' + minifiedFilePath + ' > ' + gzMinifiedFilePath, function () {
+              // Open and read the size of the minified+gzipped output
+              fs.stat(gzMinifiedFilePath, function (err, stats) {
+                var gzMinifiedSize = stats.size;
+                var gzMinifiedTime = new Date() - startTime;
 
-        allSavings.push(savings);
-        allTimes.push(time);
+                table.push([
+                  [fileName, '+ gzipped'].join('\n'),
+                  [redSize(originalSize), redSize(gzOriginalSize)].join('\n'),
+                  [greenSize(minifiedSize), greenSize(gzMinifiedSize)].join('\n'),
+                  [blueSavings(originalSize, minifiedSize), blueSavings(gzOriginalSize, gzMinifiedSize)].join('\n'),
+                  [blueTime(minifiedTime), blueTime(gzMinifiedTime)].join('\n')
+                ]);
 
-        table.push([
-          fileName,
-          '\033[91m' + beforeSize + '\033[0m (' + (beforeSize / 1024).toFixed(2) + 'KB)',
-          '\033[92m' + stats.size + '\033[0m (' + (stats.size / 1024).toFixed(2) + 'KB)',
-          '\033[96m' + savingsPercent.toFixed(2) + '\033[0m% (' + savings.toFixed(2) + 'KB)',
-          '\033[96m' + time + '\033[0mms'
-        ]);
-
-        done();
+                done();
+              });
+            });
+          });
+        });
       });
     });
   });
