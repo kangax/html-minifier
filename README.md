@@ -98,11 +98,3 @@ Benchmarks for minified HTML:
 ```
 node benchmark.js
 ```
-
-Benchmarks for minified and gzipped HTML:
-```
-node gzip-benchmark.js
-```
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/html-minifier/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
