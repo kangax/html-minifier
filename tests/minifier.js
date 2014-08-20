@@ -56,6 +56,9 @@
     equal(minify('<a href>ok</a>'), '<a href>ok</a>');
 
     equal(minify('<a onclick></a>'), '<a onclick></a>');
+
+    // https://github.com/kangax/html-minifier/issues/229
+    equal(minify('<CUSTOM-TAG></CUSTOM-TAG><div>Hello :)</div>'), '<custom-tag></custom-tag><div>Hello :)</div>');
   });
 
   test('`minifiy` exists', function() {
