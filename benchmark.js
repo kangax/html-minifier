@@ -57,16 +57,16 @@ function test(fileName, done) {
   console.log('Processing...', fileName);
 
   var filePath = 'benchmarks/' + fileName + '.html';
-  var minifiedFilePath = 'benchmarks/' + fileName + '.min.html';
-  var gzFilePath = filePath + '.gz';
-  var gzMinifiedFilePath = 'benchmarks/' + fileName + '.min.html.gz';
+  var minifiedFilePath = 'benchmarks/generated/' + fileName + '.min.html';
+  var gzFilePath = 'benchmarks/generated/' + fileName + '.html.gz';
+  var gzMinifiedFilePath = 'benchmarks/generated/' + fileName + '.min.html.gz';
   var command = './cli.js ' + filePath + ' -c benchmark.conf' + ' -o ' + minifiedFilePath;
 
   // Open and read the size of the original input
   fs.stat(filePath, function (err, stats) {
     var originalSize = stats.size;
 
-    exec('gzip -k -f -9 ' + filePath + ' > ' + gzFilePath, function () {
+    exec('gzip --keep --force --best --stdout ' + filePath + ' > ' + gzFilePath, function () {
       // Open and read the size of the gzipped original
       fs.stat(gzFilePath, function (err, stats) {
         var gzOriginalSize = stats.size;
@@ -81,7 +81,7 @@ function test(fileName, done) {
             var minifiedTime = new Date() - startTime;
 
             // Gzip the minified output
-            exec('gzip -k -f -9 ' + minifiedFilePath + ' > ' + gzMinifiedFilePath, function () {
+            exec('gzip --keep --force --best --stdout ' + minifiedFilePath + ' > ' + gzMinifiedFilePath, function () {
               // Open and read the size of the minified+gzipped output
               fs.stat(gzMinifiedFilePath, function (err, stats) {
                 var gzMinifiedSize = stats.size;
