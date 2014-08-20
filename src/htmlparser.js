@@ -225,7 +225,6 @@
         }
         else if ( html.indexOf('<') === 0 ) {
           match = html.match( startTag );
-
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( startTag, parseStartTag );
@@ -376,9 +375,11 @@
       if ( !tagName ) {
         pos = 0;
       }
-      else {      // Find the closest opened tag of the same type
+      else {
+        // Find the closest opened tag of the same type
+        var needle = tagName.toLowerCase();
         for ( pos = stack.length - 1; pos >= 0; pos-- ) {
-          if ( stack[ pos ].toLowerCase() === tagName ) {
+          if ( stack[ pos ].toLowerCase() === needle ) {
             break;
           }
         }
