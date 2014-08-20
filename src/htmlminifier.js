@@ -307,11 +307,12 @@
     return markup;
   }
 
-  function normalizeAttribute(attr, attrs, tag, options) {
+  function normalizeAttribute(attr, attrs, tag, unarySlash, index, options) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = attr.escaped,
-        attrFragment;
+        attrFragment,
+        isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
 
     if ((options.removeRedundantAttributes &&
       isAttributeRedundant(tag, attrName, attrValue, attrs))
@@ -327,7 +328,7 @@
     attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
-        !canRemoveAttributeQuotes(attrValue)) {
+        !canRemoveAttributeQuotes(attrValue) || isTerminalOfUnarySlash) {
       attrValue = '"' + attrValue + '"';
     }
 
@@ -529,7 +530,7 @@
         var token;
         for ( var i = 0, len = attrs.length; i < len; i++ ) {
           lint && lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
-          token = normalizeAttribute(attrs[i], attrs, tag, options);
+          token = normalizeAttribute(attrs[i], attrs, tag, unarySlash, i, options);
           if ( i === len - 1 ) {
             token += closeTag;
           }
