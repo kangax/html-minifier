@@ -623,7 +623,9 @@
 
         if (/^\s*htmlmin:ignore/.test(text)) {
           isIgnoring = !isIgnoring;
-          buffer.push('<!--' + text + '-->');
+          if (!options.removeComments) {
+            buffer.push('<!--' + text + '-->');
+          }
           return;
         }
         if (options.removeComments) {

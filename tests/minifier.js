@@ -996,7 +996,16 @@
     output = '<!-- htmlmin:ignore --><div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div><!-- htmlmin:ignore -->' +
             '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
 
-    equal(minify(input, { collapseWhitespace: true }), output);
+    equal(minify(input, { collapseWhitespace: true, removeComments: false }), output);
+
+    output = '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>' +
+            '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
+
+    equal(minify(input, { collapseWhitespace: true, removeComments: true }), output);
+
+    input = '<!-- htmlmin:ignore --><!-- htmlmin:ignore -->';
+    equal(minify(input, { removeComments: true }), '');
+    equal(minify(input, { removeComments: false }), input);
   });
 
   test('meta viewport', function() {
