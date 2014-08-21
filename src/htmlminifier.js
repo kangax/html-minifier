@@ -209,7 +209,10 @@
       return trimWhitespace(attrValue);
     }
     else if (attrName === 'style') {
-      attrValue = trimWhitespace(attrValue).replace(/\s*;\s*$/, '');
+      attrValue = trimWhitespace(attrValue);
+      if (attrValue) {
+        attrValue = attrValue.replace(/\s*;\s*$/, '');
+      }
       if (options.minifyCSS) {
         return minifyCSS(attrValue, options.minifyCSS);
       }
@@ -270,7 +273,7 @@
   }
 
   function isOptionalTag(tag) {
-    return (/^(?:html|t?body|t?head|tfoot|tr|td|th|dt|dd|option|colgroup|source)$/).test(tag);
+    return (/^(?:html|t?body|t?head|tfoot|tr|td|th|dt|dd|option|colgroup|source)$/i).test(tag);
   }
 
   var reEmptyAttribute = new RegExp(
@@ -278,7 +281,7 @@
       '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
   function canDeleteEmptyAttribute(tag, attrName, attrValue) {
-    var isValueEmpty = /^(["'])?\s*\1$/.test(attrValue);
+    var isValueEmpty = !attrValue || /^(["'])?\s*\1$/.test(attrValue);
     if (isValueEmpty) {
       return (
         (tag === 'input' && attrName === 'value') ||
@@ -309,23 +312,24 @@
 
   function normalizeAttribute(attr, attrs, tag, unarySlash, index, options) {
 
-    var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
+    var lowerAttrName = attr.name.toLowerCase(),
+        attrName = options.caseSensitive ? attr.name : lowerAttrName,
         attrValue = attr.escaped,
         attrFragment,
         isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
 
     if ((options.removeRedundantAttributes &&
-      isAttributeRedundant(tag, attrName, attrValue, attrs))
+      isAttributeRedundant(tag, lowerAttrName, attrValue, attrs))
       ||
       (options.removeScriptTypeAttributes &&
-      isScriptTypeAttribute(tag, attrName, attrValue))
+      isScriptTypeAttribute(tag, lowerAttrName, attrValue))
       ||
       (options.removeStyleLinkTypeAttributes &&
-      isStyleLinkTypeAttribute(tag, attrName, attrValue))) {
+      isStyleLinkTypeAttribute(tag, lowerAttrName, attrValue))) {
       return '';
     }
 
-    attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
+    attrValue = cleanAttributeValue(tag, lowerAttrName, attrValue, options, attrs);
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue) || isTerminalOfUnarySlash) {
@@ -333,12 +337,12 @@
     }
 
     if (options.removeEmptyAttributes &&
-        canDeleteEmptyAttribute(tag, attrName, attrValue)) {
+        canDeleteEmptyAttribute(tag, lowerAttrName, attrValue)) {
       return '';
     }
 
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
-        isBooleanAttribute(attrName))) {
+        isBooleanAttribute(lowerAttrName))) {
       attrFragment = attrName;
     }
     else {

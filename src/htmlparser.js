@@ -54,23 +54,34 @@
   });
 
   // Empty Elements - HTML 4.01
-  var empty = makeMap('area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed,wbr');
+  function isEmpty (tagName) {
+    return /^(?:area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/.test(tagName);
+  }
 
   // Block Elements - HTML 4.01
   // var block = makeMap('address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul');
 
   // Inline Elements - HTML 4.01
   var inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var');
+  function isInline (pair) {
+    return pair && inline[ pair[ 1 ] ];
+  }
 
   // Elements that you can, intentionally, leave open
   // (and which close themselves)
   var closeSelf = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
+  function isSelfClosing (pair, tagName) {
+    return pair && pair[ 1 ] === tagName && closeSelf[ pair[ 1 ] ];
+  }
 
   // Attributes that have their values filled in disabled='disabled'
   var fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected');
 
   // Special Elements (can contain anything)
   var special = makeMap('script,style,noscript');
+  function isSpecial (pair) {
+    return pair && special[ pair[ 1 ] ];
+  }
 
   var reCache = {}, stackedTag, reStackedTag, tagMatch;
 
@@ -162,7 +173,7 @@
       chars = true;
 
       // Make sure we're not in a script or style element
-      if ( !stack.last() || !special[ stack.last() ] ) {
+      if ( !isSpecial(stack.last()) ) {
 
         // Comment:
         if ( html.indexOf('<!--') === 0 ) {
@@ -263,7 +274,7 @@
       }
       else {
 
-        stackedTag = stack.last().toLowerCase();
+        stackedTag = stack.last()[ 1 ];
         reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
 
         html = html.replace(reStackedTag, function(all, text) {
@@ -294,19 +305,20 @@
 
     function parseStartTag( tag, tagName, rest, unary ) {
       var unarySlash = false;
+      var lowerTagName = tagName.toLowerCase();
 
-      while ( !handler.html5 && stack.last() && inline[ stack.last() ]) {
-        parseEndTag( '', stack.last() );
+      while ( !handler.html5 && isInline(stack.last())) {
+        parseEndTag( '', stack.last()[ 1 ] );
       }
 
-      if ( closeSelf[ tagName ] && stack.last() === tagName ) {
+      if ( isSelfClosing(stack.last(), lowerTagName) ) {
         parseEndTag( '', tagName );
       }
 
-      unary = empty[ tagName ] || !!unary;
+      unary = isEmpty(lowerTagName) || !!unary;
 
       if ( !unary ) {
-        stack.push( tagName );
+        stack.push([ tagName, lowerTagName ]);
       }
       else {
         unarySlash = tag.match( endingSlash );
@@ -379,7 +391,7 @@
         // Find the closest opened tag of the same type
         var needle = tagName.toLowerCase();
         for ( pos = stack.length - 1; pos >= 0; pos-- ) {
-          if ( stack[ pos ].toLowerCase() === needle ) {
+          if ( stack[ pos ][ 1 ] === needle ) {
             break;
           }
         }
@@ -389,7 +401,7 @@
         // Close all the open elements, up the stack
         for ( var i = stack.length - 1; i >= pos; i-- ) {
           if ( handler.end ) {
-            handler.end( stack[ i ] );
+            handler.end( stack[ i ][ 0 ] );
           }
         }
 
