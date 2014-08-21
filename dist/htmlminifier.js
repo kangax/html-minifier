@@ -230,7 +230,6 @@
         }
         else if ( html.indexOf('<') === 0 ) {
           match = html.match( startTag );
-
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( startTag, parseStartTag );
@@ -381,9 +380,11 @@
       if ( !tagName ) {
         pos = 0;
       }
-      else {      // Find the closest opened tag of the same type
+      else {
+        // Find the closest opened tag of the same type
+        var needle = tagName.toLowerCase();
         for ( pos = stack.length - 1; pos >= 0; pos-- ) {
-          if ( stack[ pos ].toLowerCase() === tagName ) {
+          if ( stack[ pos ].toLowerCase() === needle ) {
             break;
           }
         }
@@ -855,11 +856,12 @@
     return markup;
   }
 
-  function normalizeAttribute(attr, attrs, tag, options) {
+  function normalizeAttribute(attr, attrs, tag, unarySlash, index, options) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = attr.escaped,
-        attrFragment;
+        attrFragment,
+        isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
 
     if ((options.removeRedundantAttributes &&
       isAttributeRedundant(tag, attrName, attrValue, attrs))
@@ -875,7 +877,7 @@
     attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
-        !canRemoveAttributeQuotes(attrValue)) {
+        !canRemoveAttributeQuotes(attrValue) || isTerminalOfUnarySlash) {
       attrValue = '"' + attrValue + '"';
     }
 
@@ -1077,7 +1079,7 @@
         var token;
         for ( var i = 0, len = attrs.length; i < len; i++ ) {
           lint && lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
-          token = normalizeAttribute(attrs[i], attrs, tag, options);
+          token = normalizeAttribute(attrs[i], attrs, tag, unarySlash, i, options);
           if ( i === len - 1 ) {
             token += closeTag;
           }
@@ -1171,7 +1173,9 @@
 
         if (/^\s*htmlmin:ignore/.test(text)) {
           isIgnoring = !isIgnoring;
-          buffer.push('<!--' + text + '-->');
+          if (!options.removeComments) {
+            buffer.push('<!--' + text + '-->');
+          }
           return;
         }
         if (options.removeComments) {
