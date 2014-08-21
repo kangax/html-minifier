@@ -135,6 +135,20 @@
 
     input = '<STYLE><!-- alert(1) --><\/STYLE>';
     equal(minify(input, { removeComments: true }), '<style><!-- alert(1) --><\/style>');
+
+    // Special elements
+    var elements = ['script', 'style', 'noscript'];
+    var element;
+    for (var i = elements.length - 1; i >= 0; i--) {
+      element = elements[i];
+      input = '<' + element + '><!-- alert(1) --></' + element + '>';
+      output = input;
+
+      equal(minify(input, { removeComments: true }), output);
+
+      input = '<' + element[0].toUpperCase() + element.slice(1) + '><!-- alert(1) --></' + element + '>';
+      equal(minify(input, { removeComments: true }), output);
+    }
   });
 
   test('ignoring comments', function() {
@@ -260,6 +274,30 @@
 
     input = '<img src="" alt="">';
     equal(minify(input, { removeEmptyAttributes: true }), '<img src="" alt="">');
+
+    var attributes = [
+      'class', 'id', 'style', 'title', 'lang', 'dir',
+      'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick',
+      'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout',
+      'onkeypress', 'onkeydown', 'onkeyup'
+    ];
+    var attribute;
+    for (var i = attributes.length - 1; i >= 0; i--) {
+      attribute = attributes[i];
+      output = '<div></div>';
+
+      // With omitted value
+      input = '<div ' + attribute + '></div>';
+      equal(minify(input, { removeEmptyAttributes: true }), output);
+
+      // With empty value
+      input = '<div ' + attribute + '=""></div>';
+      equal(minify(input, { removeEmptyAttributes: true }), output);
+
+      // With odd-casing
+      input = '<div ' + attribute[0].toUpperCase() + attribute.slice(1) + '></div>';
+      equal(minify(input, { removeEmptyAttributes: true }), output);
+    }
   });
 
   test('cleaning class/style attributes', function() {
@@ -639,6 +677,37 @@
     input = '<style>alert("foo     bar")    <\/style>';
     output = '<style>alert("foo     bar")<\/style>';
     equal(minify(input, { collapseWhitespace: true }), output);
+
+    // Collapse whitespace
+    var elements;
+    var element;
+    var i;
+
+    // Trim
+    elements = ['script', 'style'];
+    for (i = elements.length - 1; i >= 0; i--) {
+      element = elements[i];
+      input = '<' + element + '> foo </' + element + '>';
+      output = '<' + element +'>foo</' + element + '>';
+      equal(minify(input, { collapseWhitespace: true }), output);
+
+      input = '<' + element[0].toUpperCase() + element.slice(1) + '> foo </' + element + '>';
+      output = '<' + element +'>foo</' + element + '>';
+      equal(minify(input, { collapseWhitespace: true }), output);
+    }
+
+    // Collapse
+    elements = ['pre', 'textarea'];
+    for (i = elements.length - 1; i >= 0; i--) {
+      element = elements[i];
+      input = '<' + element + '> foo </' + element + '>';
+      equal(minify(input, { collapseWhitespace: true }), input);
+
+      input = '<' + element[0].toUpperCase() + element.slice(1) + '> foo </' + element + '>';
+      output = '<' + element +'> foo </' + element + '>';
+      equal(minify(input, { collapseWhitespace: true }), output);
+    }
+
   });
 
   test('removing empty elements', function() {
@@ -676,6 +745,17 @@
     input = '<p><!-- x --></p>';
     output = '';
     equal(minify(input, { removeEmptyElements: true }), output);
+
+    // Lower-case
+    input = '<area><base><basefont><br><col><frame><hr><img><input><isindex><link><meta><param><embed><wbr>';
+    output = '<area><base><basefont><br><col><frame><hr><img><input><isindex><link><meta><param><embed><wbr>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+
+    // Odd-casing
+    input = '<Area><Base><Basefont><Br><Col><Frame><Hr><Img><Input><Isindex><Link><Meta><Param><Embed><Wbr>';
+    output = '<area><base><basefont><br><col><frame><hr><img><input><isindex><link><meta><param><embed><wbr>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+
   });
 
   test('collapsing boolean attributes', function() {
@@ -696,6 +776,28 @@
 
     input = '<input multiple="multiple">';
     equal(minify(input, { collapseBooleanAttributes: true }), '<input multiple>');
+
+    var attributes = [
+      'allowfullscreen', 'async', 'autofocus', 'autoplay', 'checked',
+      'compact', 'controls', 'declare', 'default', 'defaultchecked',
+      'defaultmuted', 'defaultselected', 'defer', 'disabled', 'draggable',
+      'enabled', 'formnovalidate', 'hidden', 'indeterminate', 'inert',
+      'ismap', 'itemscope', 'loop', 'multiple', 'muted', 'nohref',
+      'noresize', 'noshade', 'novalidate', 'nowrap', 'open', 'pauseonexit',
+      'readonly', 'required', 'reversed', 'scoped', 'seamless', 'selected',
+      'sortable', 'spellcheck', 'truespeed', 'typemustmatch', 'visible'
+    ];
+    var attribute;
+
+    for (var i = attributes.length - 1; i >= 0; i--) {
+      attribute = attributes[i];
+      input = '<div ' + attribute[0].toUpperCase() + attribute.slice(1) + '=foo>';
+      output = '<div ' + attribute[0].toUpperCase() + attribute.slice(1) + '></div>';
+      equal(minify(input, {
+        collapseBooleanAttributes: true,
+        caseSensitive: true
+      }), output);
+    }
   });
 
   test('keeping trailing slashes in tags', function() {
@@ -757,6 +859,24 @@
     equal(minify(input, { removeOptionalTags: true }), output);
   });
 
+  test('removing all optional tags', function() {
+    var elements = [
+      'html', 'thead', 'head', 'tbody', 'body', 'tfoot', 'tr', 'td', 'th',
+      'dt', 'dd', 'option', 'colgroup', 'source'
+    ];
+    var element;
+
+    for (var i = elements.length - 1; i >= 0; i--) {
+      element = elements[i];
+      input = '<' + element + '></' + element + '>';
+      output = '<' + element + '>';
+      equal(minify(input, { removeOptionalTags: true }), output);
+
+      input = '<' + element[0].toUpperCase() + element.slice(1) + '></' + element + '>';
+      equal(minify(input, { removeOptionalTags: true }), output);
+    }
+  });
+
   test('custom components', function() {
     input = '<custom-component>Oh, my.</custom-component>';
     output = '<custom-component>Oh, my.</custom-component>';
@@ -769,6 +889,34 @@
     output = '<a href="#"></a><div>Well, look at me! I\'m a div!</div>';
 
     equal(minify(input, { html5: false }), output);
+
+    var elements;
+    var element;
+    var i;
+
+    // Unary
+    elements = [ 'basefont', 'br', 'img', 'input' ];
+    for (i = elements.length - 1; i >= 0; i--) {
+      element = elements[i];
+      input = '<' + element[0].toUpperCase() + element.slice(1) + '><div></div></' + element + '>';
+      output = '<' + element + '><div></div>';
+      equal(minify(input, { html5: false }), output);
+    }
+
+    // Non-unary
+    elements = [
+      'a', 'abbr', 'acronym', 'applet', 'b', 'bdo', 'big',
+      'button', 'cite', 'code', 'del', 'dfn', 'em', 'font', 'i', 'iframe',
+      'ins', 'kbd', 'label', 'map', 'noscript', 'object', 'q',
+      's', 'samp', 'script', 'select', 'small', 'span', 'strike', 'strong',
+      'sub', 'sup', 'svg', 'textarea', 'tt', 'u', 'var'
+    ];
+    for (i = elements.length - 1; i >= 0; i--) {
+      element = elements[i];
+      input = '<' + element[0].toUpperCase() + element.slice(1) + '></' + element + '><div></div></' + element + '>';
+      output = '<' + element + '></' + element + '><div></div>';
+      equal(minify(input, { html5: false }), output);
+    }
   });
 
   test('HTML5: anchor with block elements', function() {
