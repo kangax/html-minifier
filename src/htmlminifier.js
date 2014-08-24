@@ -209,7 +209,10 @@
       return trimWhitespace(attrValue);
     }
     else if (attrName === 'style') {
-      attrValue = trimWhitespace(attrValue).replace(/\s*;\s*$/, '');
+      attrValue = trimWhitespace(attrValue);
+      if (attrValue) {
+        attrValue = attrValue.replace(/\s*;\s*$/, '');
+      }
       if (options.minifyCSS) {
         return minifyCSS(attrValue, options.minifyCSS);
       }
@@ -278,7 +281,7 @@
       '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
   function canDeleteEmptyAttribute(tag, attrName, attrValue) {
-    var isValueEmpty = /^(["'])?\s*\1$/.test(attrValue);
+    var isValueEmpty = !attrValue || /^(["'])?\s*\1$/.test(attrValue);
     if (isValueEmpty) {
       return (
         (tag === 'input' && attrName === 'value') ||

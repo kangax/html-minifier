@@ -260,6 +260,11 @@
 
     input = '<img src="" alt="">';
     equal(minify(input, { removeEmptyAttributes: true }), '<img src="" alt="">');
+
+    // preserve unrecognized attribute
+    // remove recognized attrs with unspecified values
+    input = '<div data-foo class id style title lang dir onfocus onblur onchange onclick ondblclick onmousedown onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup></div>';
+    equal(minify(input, { removeEmptyAttributes: true }), '<div data-foo></div>');
   });
 
   test('cleaning class/style attributes', function() {
