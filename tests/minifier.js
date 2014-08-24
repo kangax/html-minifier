@@ -696,6 +696,18 @@
 
     input = '<input multiple="multiple">';
     equal(minify(input, { collapseBooleanAttributes: true }), '<input multiple>');
+
+    input = '<div Allowfullscreen=foo Async=foo Autofocus=foo Autoplay=foo Checked=foo Compact=foo Controls=foo ' +
+      'Declare=foo Default=foo Defaultchecked=foo Defaultmuted=foo Defaultselected=foo Defer=foo Disabled=foo ' +
+      'Draggable=foo Enabled=foo Formnovalidate=foo Hidden=foo Indeterminate=foo Inert=foo Ismap=foo Itemscope=foo ' +
+      'Loop=foo Multiple=foo Muted=foo Nohref=foo Noresize=foo Noshade=foo Novalidate=foo Nowrap=foo Open=foo ' +
+      'Pauseonexit=foo Readonly=foo Required=foo Reversed=foo Scoped=foo Seamless=foo Selected=foo Sortable=foo ' +
+      'Spellcheck=foo Truespeed=foo Typemustmatch=foo Visible=foo></div>';
+    output = '<div Allowfullscreen Async Autofocus Autoplay Checked Compact Controls Declare Default Defaultchecked ' +
+      'Defaultmuted Defaultselected Defer Disabled Draggable Enabled Formnovalidate Hidden Indeterminate Inert ' +
+      'Ismap Itemscope Loop Multiple Muted Nohref Noresize Noshade Novalidate Nowrap Open Pauseonexit Readonly ' +
+      'Required Reversed Scoped Seamless Selected Sortable Spellcheck Truespeed Typemustmatch Visible></div>';
+    equal(minify(input, { collapseBooleanAttributes: true, caseSensitive: true }), output);
   });
 
   test('keeping trailing slashes in tags', function() {
