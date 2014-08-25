@@ -946,7 +946,7 @@
 
     equal(minify(input, { minifyCSS: true }), output);
   });
-  
+
   test('url attribute minification', function() {
     input = '<link rel="stylesheet" href="http://website.com/style.css"><form action="http://website.com/folder/folder2/index.html"><a href="http://website.com/folder/file.html">link</a></form>';
     output = '<link rel="stylesheet" href="/style.css"><form action="folder2/"><a href="file.html">link</a></form>';
@@ -1104,6 +1104,44 @@
     equal(minify(':) <a href="http://example.com">link</a>', options), ':) <a\n href="http://example.com">\nlink</a>');
 
     equal(minify('<a href>ok</a>', options), '<a href>ok</a>');
+  });
+
+  test('custom attribute collapse', function() {
+    input = '<div data-bind="\n' +
+      'css: {\n' +
+        'fadeIn: selected(),\n' +
+        'fadeOut: !selected()\n' +
+      '},\n' +
+      'visible: function () {\n' +
+        'return pageWeAreOn() == \'home\';\n' +
+      '}\n' +
+    '">foo</div>';
+
+    output = '<div data-bind="css: {fadeIn: selected(),fadeOut: !selected()},visible: function () {return pageWeAreOn() == \'home\';}">foo</div>';
+
+    equal(minify(input), input);
+    equal(minify(input, { customAttrCollapse: /data\-bind/ }), output);
+
+    input = '<div style="' +
+              'color: red;' +
+              'font-size: 100em;' +
+            '">bar</div>';
+    output = '<div style="color: red;font-size: 100em">bar</div>';
+    equal(minify(input, { customAttrCollapse: /style/ }), output);
+
+    input = '<div ' +
+      'class="fragment square" ' +
+      'ng-hide="square1.hide" ' +
+      'ng-class="{ \n\n' +
+        '\'bounceInDown\': !square1.hide, ' +
+        '\'bounceOutDown\': square1.hide ' +
+      '}" ' +
+    '> ' +
+    '</div>';
+
+    output = '<div class="fragment square" ng-hide="square1.hide" ng-class="{ \'bounceInDown\': !square1.hide, \'bounceOutDown\': square1.hide }"> </div>';
+
+    equal(minify(input, { customAttrCollapse: /ng\-class/ }), output);
   });
 
 })(typeof exports === 'undefined' ? window : exports);

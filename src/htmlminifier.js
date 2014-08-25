@@ -221,6 +221,9 @@
     else if (isMetaViewport(tag, attrs) && attrName === 'content') {
       attrValue = attrValue.replace(/1\.0/g, '1').replace(/\s+/g, '');
     }
+    else if (options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
+      attrValue = attrValue.replace(/\n+/g, '');
+    }
     return attrValue;
   }
 

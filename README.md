@@ -53,8 +53,9 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | `ignoreCustomComments`         | Array of regex'es that allow to ignore certain comments, when matched  | `[ ]` |
 | `processScripts`               | Array of strings corresponding to types of script elements to process through minifier (e.g. `text/ng-template`, `text/x-handlebars-template`, etc.) | `[ ]` |
 | `maxLineLength`                | Specify a maximum line length. Compressed output will be split by newlines at valid HTML split-points. |
-| `customAttrAssign`             | `[ ]` | Arrays of regex'es that allow to support custom attribute assign expressions (e.g. `'<div flex?="{{mode != cover}}"></div>'`) |
-| `customAttrSurround`           | `[ ]` | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) |
+| `customAttrAssign`             | Arrays of regex'es that allow to support custom attribute assign expressions (e.g. `'<div flex?="{{mode != cover}}"></div>'`) | `[ ]` |
+| `customAttrSurround`           | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) | `[ ]` |
+| `customAttrCollapse`           | Regex that specifies custom attribute to strip newlines from (e.g. `/ng\-class/`) | |
 
 
 Chunks of markup can be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
