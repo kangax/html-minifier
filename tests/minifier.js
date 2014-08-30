@@ -974,6 +974,36 @@
     }), output);
   });
 
+  test('collapse preseving a line break', function() {
+    input = '\n\n\n<!DOCTYPE html>   \n<html lang="en" class="no-js">\n' +
+      '  <head>\n    <meta charset="utf-8">\n    <meta http-equiv="X-UA-Compatible" content="IE=edge">\n\n\n\n' +
+      '    <title>Carbon</title>\n\n\t<meta name="title" content="Carbon">\n\t\n\n' +
+      '\t<meta name="description" content="A front-end framework.">\n' +
+      '    <meta name="apple-mobile-web-app-capable" content="yes">\n' +
+      '    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n' +
+      '    <meta name="viewport" content="width=device-width, initial-scale=1">\n\n' +
+      '<link href="stylesheets/application.css" rel="stylesheet">\n' +
+      '    <script src="scripts/application.js"></script>\n' +
+      '    <link href="images/icn-32x32.png" rel="shortcut icon">\n' +
+      '    <link href="images/icn-152x152.png" rel="apple-touch-icon">\n  </head>\n  <body><p>   test test\n\ttest</p></body>\n</html>';
+    output = '<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
+      '<head>\n<meta charset="utf-8">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
+      '<title>Carbon</title>\n<meta name="title" content="Carbon">\n' +
+      '<meta name="description" content="A front-end framework.">\n' +
+      '<meta name="apple-mobile-web-app-capable" content="yes">\n' +
+      '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
+      '<link href="stylesheets/application.css" rel="stylesheet">\n' +
+      '<script src="scripts/application.js"></script>\n' +
+      '<link href="images/icn-32x32.png" rel="shortcut icon">\n' +
+      '<link href="images/icn-152x152.png" rel="apple-touch-icon">\n</head>\n<body><p> test test test</p></body>\n</html>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      preserveLineBreak: true
+    }), output);
+  });
+
+
   test('ignore custom comments', function() {
     input = '<!-- ko if: someExpressionGoesHere --><li>test</li><!-- /ko -->';
 
