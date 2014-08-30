@@ -597,21 +597,34 @@
       'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q',
       'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
       'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
-    ];
+    ],
+    lineBreakBefore = /^[\t ]*[\n\r]+[\t\n\r ]*/,
+    lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/,
+    preserveBefore = lineBreakBefore.test(str) ? '\n' : ' ',
+    preserveAfter = lineBreakAfter.test(str) ? '\n' : ' ',
+    lineBreakStamp = '[{htmlmin-lb}]';
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.substr(0,1) !== '/'
       || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
-      str = str.replace(/^\s+/, options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/^\s+/, options.conservativeCollapse ? ' ' : options.preserveLineBreak ? preserveBefore : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.substr(0,1) === '/'
       || ( nextTag.substr(0,1) !== '/' && tags.indexOf(nextTag) === -1))) {
-      str = str.replace(/\s+$/, options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/\s+$/, options.conservativeCollapse ? ' ' : options.preserveLineBreak ? preserveAfter : '');
     }
 
     if (prevTag && nextTag) {
+
+      if (options.preserveLineBreak) {
+        str = str
+          .replace(lineBreakBefore, lineBreakStamp)
+          .replace(lineBreakAfter, lineBreakStamp);
+      }
       // strip non space whitespace then compress spaces to one
-      return str.replace(/[\t\n\r]+/g, ' ').replace(/[ ]+/g, ' ');
+      return str
+        .replace(/[\t\n\r]+/g, ' ').replace(/[ ]+/g, ' ')
+        .replace(lineBreakStamp, '\n');
     }
 
     return str;
@@ -1165,7 +1178,7 @@
               : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length) {
-            text = collapseWhitespace(text);
+            text = !(prevTag && nextTag || nextTag === 'html') ? collapseWhitespace(text) : text;
           }
         }
         currentChars = text;
