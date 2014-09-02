@@ -305,13 +305,6 @@
 
       unary = empty[ tagName ] || !!unary;
 
-      if ( !unary ) {
-        stack.push( tagName );
-      }
-      else {
-        unarySlash = tag.match( endingSlash );
-      }
-
       var attrs = [];
 
       rest.replace(attr, function () {
@@ -360,6 +353,14 @@
           customClose: customClose || ''
         });
       });
+
+      if ( !unary ) {
+        stack.push( tagName );
+      }
+      else {
+        unarySlash = tag.match( endingSlash );
+      }
+
 
       if ( handler.start ) {
         handler.start( tagName, attrs, unary, unarySlash );
