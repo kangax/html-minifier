@@ -715,6 +715,20 @@
     equal(minify(input, { collapseBooleanAttributes: true, caseSensitive: true }), output);
   });
 
+  test('collapsing enumerated attributes', function() {
+    equal(minify('<div draggable="auto"></div>', { collapseBooleanAttributes: true }), '<div draggable></div>');
+    equal(minify('<div draggable="true"></div>', { collapseBooleanAttributes: true }), '<div draggable="true"></div>');
+    equal(minify('<div draggable="false"></div>', { collapseBooleanAttributes: true }), '<div draggable="false"></div>');
+    equal(minify('<div draggable="foo"></div>', { collapseBooleanAttributes: true }), '<div draggable></div>');
+    equal(minify('<div draggable></div>', { collapseBooleanAttributes: true }), '<div draggable></div>');
+    equal(minify('<div Draggable="auto"></div>', { collapseBooleanAttributes: true }), '<div draggable></div>');
+    equal(minify('<div Draggable="true"></div>', { collapseBooleanAttributes: true }), '<div draggable="true"></div>');
+    equal(minify('<div Draggable="false"></div>', { collapseBooleanAttributes: true }), '<div draggable="false"></div>');
+    equal(minify('<div Draggable="foo"></div>', { collapseBooleanAttributes: true }), '<div draggable></div>');
+    equal(minify('<div Draggable></div>', { collapseBooleanAttributes: true }), '<div draggable></div>');
+    equal(minify('<div draggable="Auto"></div>', { collapseBooleanAttributes: true }), '<div draggable></div>');
+  });
+
   test('keeping trailing slashes in tags', function() {
     equal(minify('<img src="test"/>', { keepClosingSlash: true }), '<img src="test"/>');
     // https://github.com/kangax/html-minifier/issues/233
