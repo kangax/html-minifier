@@ -165,7 +165,7 @@
       if ( !stack.last() || !special[ stack.last() ] ) {
 
         // Comment:
-        if ( html.indexOf('<!--') === 0 ) {
+        if ( /^<!--/.test( html ) ) {
           index = html.indexOf('-->');
 
           if ( index >= 0 ) {
@@ -178,7 +178,7 @@
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
-        if ( html.indexOf('<![') === 0 ) {
+        if ( /^<!\[/.test( html ) ) {
           index = html.indexOf(']>');
 
           if (index >= 0) {
@@ -211,7 +211,7 @@
         }
 
         // End tag:
-        else if ( html.indexOf('</') === 0 ) {
+        else if ( /^<\//.test( html ) ) {
           match = html.match( endTag );
 
           if ( match ) {
@@ -223,7 +223,7 @@
 
         // Start tag:
         }
-        else if ( html.indexOf('<') === 0 ) {
+        else if ( /^</.test( html ) ) {
           match = html.match( startTag );
           if ( match ) {
             html = html.substring( match[0].length );
