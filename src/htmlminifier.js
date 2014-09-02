@@ -306,8 +306,20 @@
     return false;
   }
 
-  function canRemoveElement(tag) {
-    return tag !== 'textarea';
+  function canRemoveElement(tag, attrs) {
+    if (tag === 'textarea') {
+      return false;
+    }
+
+    if (tag === 'script') {
+      for (var i = attrs.length - 1; i >= 0; i--) {
+        if (attrs[i].name === 'src') {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   function canCollapseWhitespace(tag) {
@@ -556,7 +568,7 @@
           buffer.push(token);
         }
       },
-      end: function( tag ) {
+      end: function( tag, attrs ) {
 
         if (isIgnoring) {
           buffer.push('</' + tag + '>');
@@ -576,7 +588,7 @@
         }
 
         var isElementEmpty = currentChars === '' && tag === currentTag;
-        if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag))) {
+        if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs))) {
           // remove last "element" from buffer, return
           for ( var i = buffer.length - 1; i >= 0; i-- ) {
             if ( /^<[^\/!]/.test(buffer[i]) ) {

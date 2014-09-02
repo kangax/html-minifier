@@ -389,7 +389,7 @@
         // Close all the open elements, up the stack
         for ( var i = stack.length - 1; i >= pos; i-- ) {
           if ( handler.end ) {
-            handler.end( stack[ i ].tag );
+            handler.end( stack[ i ].tag, stack[ i ].attrs );
           }
         }
 
