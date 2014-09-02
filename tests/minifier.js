@@ -681,6 +681,11 @@
     input = '<p><!-- x --></p>';
     output = '';
     equal(minify(input, { removeEmptyElements: true }), output);
+
+    input = '<script src="foo.js"></script>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+    input = '<script></script>';
+    equal(minify(input, { removeEmptyElements: true }), '');
   });
 
   test('collapsing boolean attributes', function() {
