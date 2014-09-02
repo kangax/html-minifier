@@ -312,59 +312,57 @@
         unarySlash = tag.match( endingSlash );
       }
 
-      if ( handler.start ) {
-        var attrs = [];
+      var attrs = [];
 
-        rest.replace(attr, function () {
-          var name, value, fallbackValue, customOpen, customClose, customAssign;
-          var ncp = 7; // number of captured parts, scalar
+      rest.replace(attr, function () {
+        var name, value, fallbackValue, customOpen, customClose, customAssign;
+        var ncp = 7; // number of captured parts, scalar
 
-          // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
-          if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
-            if (arguments[3] === '') { arguments[3] = undefined; }
-            if (arguments[4] === '') { arguments[4] = undefined; }
-            if (arguments[5] === '') { arguments[5] = undefined; }
-          }
+        // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
+        if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
+          if (arguments[3] === '') { arguments[3] = undefined; }
+          if (arguments[4] === '') { arguments[4] = undefined; }
+          if (arguments[5] === '') { arguments[5] = undefined; }
+        }
 
-          name = arguments[1];
-          if ( name ) {
-            customAssign = arguments[2];
-            fallbackValue = arguments[3];
-            value = fallbackValue || arguments[4] || arguments[5];
-          }
-          else if ( handler.customAttrSurround ) {
-            for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-              name = arguments[i * ncp + 7];
-              customAssign = arguments[i * ncp + 8];
-              if ( name ) {
-                fallbackValue = arguments[i * ncp + 9];
-                value = fallbackValue
-                  || arguments[i * ncp + 10]
-                  || arguments[i * ncp + 11];
-                customOpen = arguments[i * ncp + 6];
-                customClose = arguments[i * ncp + 12];
-                break;
-              }
+        name = arguments[1];
+        if ( name ) {
+          customAssign = arguments[2];
+          fallbackValue = arguments[3];
+          value = fallbackValue || arguments[4] || arguments[5];
+        }
+        else if ( handler.customAttrSurround ) {
+          for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
+            name = arguments[i * ncp + 7];
+            customAssign = arguments[i * ncp + 8];
+            if ( name ) {
+              fallbackValue = arguments[i * ncp + 9];
+              value = fallbackValue
+                || arguments[i * ncp + 10]
+                || arguments[i * ncp + 11];
+              customOpen = arguments[i * ncp + 6];
+              customClose = arguments[i * ncp + 12];
+              break;
             }
           }
-
-          if ( value === undefined ) {
-            value = fillAttrs[name] ? name : fallbackValue;
-          }
-
-          attrs.push({
-            name: name,
-            value: value,
-            escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
-            customAssign: customAssign || '=',
-            customOpen:  customOpen || '',
-            customClose: customClose || ''
-          });
-        });
-
-        if ( handler.start ) {
-          handler.start( tagName, attrs, unary, unarySlash );
         }
+
+        if ( value === undefined ) {
+          value = fillAttrs[name] ? name : fallbackValue;
+        }
+
+        attrs.push({
+          name: name,
+          value: value,
+          escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
+          customAssign: customAssign || '=',
+          customOpen:  customOpen || '',
+          customClose: customClose || ''
+        });
+      });
+
+      if ( handler.start ) {
+        handler.start( tagName, attrs, unary, unarySlash );
       }
     }
 
