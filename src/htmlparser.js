@@ -152,7 +152,8 @@
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html, prevTag, nextTag;
     stack.last = function() {
-      return this[ this.length - 1 ];
+      var last = this[ this.length - 1 ];
+      return last && last.tag;
     };
 
     var startTag = startTagForHandler(handler);
@@ -355,7 +356,7 @@
       });
 
       if ( !unary ) {
-        stack.push( tagName );
+        stack.push( { tag: tagName, attrs: attrs } );
       }
       else {
         unarySlash = tag.match( endingSlash );
@@ -378,7 +379,7 @@
         // Find the closest opened tag of the same type
         var needle = tagName.toLowerCase();
         for ( pos = stack.length - 1; pos >= 0; pos-- ) {
-          if ( stack[ pos ].toLowerCase() === needle ) {
+          if ( stack[ pos ].tag.toLowerCase() === needle ) {
             break;
           }
         }
@@ -388,7 +389,7 @@
         // Close all the open elements, up the stack
         for ( var i = stack.length - 1; i >= pos; i-- ) {
           if ( handler.end ) {
-            handler.end( stack[ i ] );
+            handler.end( stack[ i ].tag );
           }
         }
 
