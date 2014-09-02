@@ -1018,7 +1018,7 @@
       '<link href="images/icn-152x152.png" rel="apple-touch-icon">\n</head>\n<body><p> test test test</p></body>\n</html>';
     equal(minify(input, {
       collapseWhitespace: true,
-      preserveLineBreak: true
+      preserveLineBreaks: true
     }), output);
   });
 
