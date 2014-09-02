@@ -167,8 +167,23 @@
     );
   }
 
-  function isBooleanAttribute(attrName) {
-    return (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|spellcheck|truespeed|typemustmatch|visible)$/i).test(attrName);
+  var enumeratedAttributeValues = {
+    draggable: ['true', 'false'] // defaults to 'auto'
+  };
+
+  function isBooleanAttribute(attrName, attrValue) {
+    var isSimpleBoolean = (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|spellcheck|truespeed|typemustmatch|visible)$/i).test(attrName);
+    if (isSimpleBoolean) {
+      return true;
+    }
+
+    var attrValueEnumeration = enumeratedAttributeValues[attrName.toLowerCase()];
+    if (!attrValueEnumeration) {
+      return false;
+    }
+    else {
+      return (-1 === attrValueEnumeration.indexOf(attrValue.toLowerCase()));
+    }
   }
 
   function isUriTypeAttribute(attrName, tag) {
@@ -297,7 +312,7 @@
       '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
   function canDeleteEmptyAttribute(tag, attrName, attrValue) {
-    var isValueEmpty = !attrValue || /^(["'])?\s*\1$/.test(attrValue);
+    var isValueEmpty = !attrValue || (/^\s*$/).test(attrValue);
     if (isValueEmpty) {
       return (
         (tag === 'input' && attrName === 'value') ||
@@ -343,6 +358,7 @@
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = attr.escaped,
         attrFragment,
+        emittedAttrValue,
         isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
 
     if ((options.removeRedundantAttributes &&
@@ -360,7 +376,10 @@
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue) || isTerminalOfUnarySlash) {
-      attrValue = '"' + attrValue + '"';
+      emittedAttrValue = '"' + attrValue + '"';
+    }
+    else {
+      emittedAttrValue = attrValue;
     }
 
     if (options.removeEmptyAttributes &&
@@ -369,11 +388,11 @@
     }
 
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
-        isBooleanAttribute(attrName))) {
+        isBooleanAttribute(attrName, attrValue))) {
       attrFragment = attrName;
     }
     else {
-      attrFragment = attrName + attr.customAssign + attrValue;
+      attrFragment = attrName + attr.customAssign + emittedAttrValue;
     }
 
     return (' ' + attr.customOpen + attrFragment + attr.customClose);
