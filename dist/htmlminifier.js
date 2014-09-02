@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v0.6.6 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v0.6.7 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2014 Juriy "kangax" Zaytsev
  * Licensed under MIT (https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE)
  */
@@ -157,7 +157,8 @@
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html, prevTag, nextTag;
     stack.last = function() {
-      return this[ this.length - 1 ];
+      var last = this[ this.length - 1 ];
+      return last && last.tag;
     };
 
     var startTag = startTagForHandler(handler);
@@ -170,7 +171,7 @@
       if ( !stack.last() || !special[ stack.last() ] ) {
 
         // Comment:
-        if ( html.indexOf('<!--') === 0 ) {
+        if ( /^<!--/.test( html ) ) {
           index = html.indexOf('-->');
 
           if ( index >= 0 ) {
@@ -183,7 +184,7 @@
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
-        if ( html.indexOf('<![') === 0 ) {
+        if ( /^<!\[/.test( html ) ) {
           index = html.indexOf(']>');
 
           if (index >= 0) {
@@ -216,7 +217,7 @@
         }
 
         // End tag:
-        else if ( html.indexOf('</') === 0 ) {
+        else if ( /^<\//.test( html ) ) {
           match = html.match( endTag );
 
           if ( match ) {
@@ -228,7 +229,7 @@
 
         // Start tag:
         }
-        else if ( html.indexOf('<') === 0 ) {
+        else if ( /^</.test( html ) ) {
           match = html.match( startTag );
           if ( match ) {
             html = html.substring( match[0].length );
@@ -310,66 +311,65 @@
 
       unary = empty[ tagName ] || !!unary;
 
+      var attrs = [];
+
+      rest.replace(attr, function () {
+        var name, value, fallbackValue, customOpen, customClose, customAssign;
+        var ncp = 7; // number of captured parts, scalar
+
+        // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
+        if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
+          if (arguments[3] === '') { arguments[3] = undefined; }
+          if (arguments[4] === '') { arguments[4] = undefined; }
+          if (arguments[5] === '') { arguments[5] = undefined; }
+        }
+
+        name = arguments[1];
+        if ( name ) {
+          customAssign = arguments[2];
+          fallbackValue = arguments[3];
+          value = fallbackValue || arguments[4] || arguments[5];
+        }
+        else if ( handler.customAttrSurround ) {
+          for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
+            name = arguments[i * ncp + 7];
+            customAssign = arguments[i * ncp + 8];
+            if ( name ) {
+              fallbackValue = arguments[i * ncp + 9];
+              value = fallbackValue
+                || arguments[i * ncp + 10]
+                || arguments[i * ncp + 11];
+              customOpen = arguments[i * ncp + 6];
+              customClose = arguments[i * ncp + 12];
+              break;
+            }
+          }
+        }
+
+        if ( value === undefined ) {
+          value = fillAttrs[name] ? name : fallbackValue;
+        }
+
+        attrs.push({
+          name: name,
+          value: value,
+          escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
+          customAssign: customAssign || '=',
+          customOpen:  customOpen || '',
+          customClose: customClose || ''
+        });
+      });
+
       if ( !unary ) {
-        stack.push( tagName );
+        stack.push( { tag: tagName, attrs: attrs } );
       }
       else {
         unarySlash = tag.match( endingSlash );
       }
 
+
       if ( handler.start ) {
-        var attrs = [];
-
-        rest.replace(attr, function () {
-          var name, value, fallbackValue, customOpen, customClose, customAssign;
-          var ncp = 7; // number of captured parts, scalar
-
-          // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
-          if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
-            if (arguments[3] === '') { arguments[3] = undefined; }
-            if (arguments[4] === '') { arguments[4] = undefined; }
-            if (arguments[5] === '') { arguments[5] = undefined; }
-          }
-
-          name = arguments[1];
-          if ( name ) {
-            customAssign = arguments[2];
-            fallbackValue = arguments[3];
-            value = fallbackValue || arguments[4] || arguments[5];
-          }
-          else if ( handler.customAttrSurround ) {
-            for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-              name = arguments[i * ncp + 7];
-              customAssign = arguments[i * ncp + 8];
-              if ( name ) {
-                fallbackValue = arguments[i * ncp + 9];
-                value = fallbackValue
-                  || arguments[i * ncp + 10]
-                  || arguments[i * ncp + 11];
-                customOpen = arguments[i * ncp + 6];
-                customClose = arguments[i * ncp + 12];
-                break;
-              }
-            }
-          }
-
-          if ( value === undefined ) {
-            value = fillAttrs[name] ? name : fallbackValue;
-          }
-
-          attrs.push({
-            name: name,
-            value: value,
-            escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
-            customAssign: customAssign || '=',
-            customOpen:  customOpen || '',
-            customClose: customClose || ''
-          });
-        });
-
-        if ( handler.start ) {
-          handler.start( tagName, attrs, unary, unarySlash );
-        }
+        handler.start( tagName, attrs, unary, unarySlash );
       }
     }
 
@@ -384,7 +384,7 @@
         // Find the closest opened tag of the same type
         var needle = tagName.toLowerCase();
         for ( pos = stack.length - 1; pos >= 0; pos-- ) {
-          if ( stack[ pos ].toLowerCase() === needle ) {
+          if ( stack[ pos ].tag.toLowerCase() === needle ) {
             break;
           }
         }
@@ -394,7 +394,7 @@
         // Close all the open elements, up the stack
         for ( var i = stack.length - 1; i >= pos; i-- ) {
           if ( handler.end ) {
-            handler.end( stack[ i ] );
+            handler.end( stack[ i ].tag, stack[ i ].attrs );
           }
         }
 
@@ -716,8 +716,23 @@
     );
   }
 
-  function isBooleanAttribute(attrName) {
-    return (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|spellcheck|truespeed|typemustmatch|visible)$/i).test(attrName);
+  var enumeratedAttributeValues = {
+    draggable: ['true', 'false'] // defaults to 'auto'
+  };
+
+  function isBooleanAttribute(attrName, attrValue) {
+    var isSimpleBoolean = (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|spellcheck|truespeed|typemustmatch|visible)$/i).test(attrName);
+    if (isSimpleBoolean) {
+      return true;
+    }
+
+    var attrValueEnumeration = enumeratedAttributeValues[attrName.toLowerCase()];
+    if (!attrValueEnumeration) {
+      return false;
+    }
+    else {
+      return (-1 === attrValueEnumeration.indexOf(attrValue.toLowerCase()));
+    }
   }
 
   function isUriTypeAttribute(attrName, tag) {
@@ -846,7 +861,7 @@
       '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
   function canDeleteEmptyAttribute(tag, attrName, attrValue) {
-    var isValueEmpty = !attrValue || /^(["'])?\s*\1$/.test(attrValue);
+    var isValueEmpty = !attrValue || (/^\s*$/).test(attrValue);
     if (isValueEmpty) {
       return (
         (tag === 'input' && attrName === 'value') ||
@@ -855,8 +870,20 @@
     return false;
   }
 
-  function canRemoveElement(tag) {
-    return tag !== 'textarea';
+  function canRemoveElement(tag, attrs) {
+    if (tag === 'textarea') {
+      return false;
+    }
+
+    if (tag === 'script') {
+      for (var i = attrs.length - 1; i >= 0; i--) {
+        if (attrs[i].name === 'src') {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   function canCollapseWhitespace(tag) {
@@ -880,6 +907,7 @@
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = attr.escaped,
         attrFragment,
+        emittedAttrValue,
         isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
 
     if ((options.removeRedundantAttributes &&
@@ -897,7 +925,10 @@
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue) || isTerminalOfUnarySlash) {
-      attrValue = '"' + attrValue + '"';
+      emittedAttrValue = '"' + attrValue + '"';
+    }
+    else {
+      emittedAttrValue = attrValue;
     }
 
     if (options.removeEmptyAttributes &&
@@ -906,11 +937,11 @@
     }
 
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
-        isBooleanAttribute(attrName))) {
+        isBooleanAttribute(attrName, attrValue))) {
       attrFragment = attrName;
     }
     else {
-      attrFragment = attrName + attr.customAssign + attrValue;
+      attrFragment = attrName + attr.customAssign + emittedAttrValue;
     }
 
     return (' ' + attr.customOpen + attrFragment + attr.customClose);
@@ -1105,7 +1136,7 @@
           buffer.push(token);
         }
       },
-      end: function( tag ) {
+      end: function( tag, attrs ) {
 
         if (isIgnoring) {
           buffer.push('</' + tag + '>');
@@ -1125,7 +1156,7 @@
         }
 
         var isElementEmpty = currentChars === '' && tag === currentTag;
-        if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag))) {
+        if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs))) {
           // remove last "element" from buffer, return
           for ( var i = buffer.length - 1; i >= 0; i-- ) {
             if ( /^<[^\/!]/.test(buffer[i]) ) {

@@ -1,3 +1,18 @@
+## [0.6.7](https://github.com/kangax/html-minifier/compare/v0.6.6...0.6.7)
+
+* Preserve empty script with `src` attribute
+* Make `draggable` enumerated attribute
+* Add option to preserve a single line break on collapse
+* Do not treat draggable as a boolean attribute
+* Add support for `customAttrCollapse`
+* `collapseBoolean` is case-insensitive
+* Remove removable attrs with unspecified values
+* `removeComments` affects htmlmin:ignore comments
+* Quote terminal attribute value by unary slash
+* Closing tag search is case-insensitive
+* `s` tag has been reinstated
+* Remove `i`, `b`, `u` tags from linter as problematic
+
 ## [0.6.6](https://github.com/kangax/html-minifier/compare/v0.6.5...0.6.6)
 
 * Fix Firefox attribute bug
