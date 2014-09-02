@@ -152,7 +152,8 @@
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var index, chars, match, stack = [], last = html, prevTag, nextTag;
     stack.last = function() {
-      return this[ this.length - 1 ];
+      var last = this[ this.length - 1 ];
+      return last && last.tag;
     };
 
     var startTag = startTagForHandler(handler);
@@ -305,66 +306,65 @@
 
       unary = empty[ tagName ] || !!unary;
 
+      var attrs = [];
+
+      rest.replace(attr, function () {
+        var name, value, fallbackValue, customOpen, customClose, customAssign;
+        var ncp = 7; // number of captured parts, scalar
+
+        // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
+        if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
+          if (arguments[3] === '') { arguments[3] = undefined; }
+          if (arguments[4] === '') { arguments[4] = undefined; }
+          if (arguments[5] === '') { arguments[5] = undefined; }
+        }
+
+        name = arguments[1];
+        if ( name ) {
+          customAssign = arguments[2];
+          fallbackValue = arguments[3];
+          value = fallbackValue || arguments[4] || arguments[5];
+        }
+        else if ( handler.customAttrSurround ) {
+          for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
+            name = arguments[i * ncp + 7];
+            customAssign = arguments[i * ncp + 8];
+            if ( name ) {
+              fallbackValue = arguments[i * ncp + 9];
+              value = fallbackValue
+                || arguments[i * ncp + 10]
+                || arguments[i * ncp + 11];
+              customOpen = arguments[i * ncp + 6];
+              customClose = arguments[i * ncp + 12];
+              break;
+            }
+          }
+        }
+
+        if ( value === undefined ) {
+          value = fillAttrs[name] ? name : fallbackValue;
+        }
+
+        attrs.push({
+          name: name,
+          value: value,
+          escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
+          customAssign: customAssign || '=',
+          customOpen:  customOpen || '',
+          customClose: customClose || ''
+        });
+      });
+
       if ( !unary ) {
-        stack.push( tagName );
+        stack.push( { tag: tagName, attrs: attrs } );
       }
       else {
         unarySlash = tag.match( endingSlash );
       }
 
+
       if ( handler.start ) {
-        var attrs = [];
-
-        rest.replace(attr, function () {
-          var name, value, fallbackValue, customOpen, customClose, customAssign;
-          var ncp = 7; // number of captured parts, scalar
-
-          // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
-          if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
-            if (arguments[3] === '') { arguments[3] = undefined; }
-            if (arguments[4] === '') { arguments[4] = undefined; }
-            if (arguments[5] === '') { arguments[5] = undefined; }
-          }
-
-          name = arguments[1];
-          if ( name ) {
-            customAssign = arguments[2];
-            fallbackValue = arguments[3];
-            value = fallbackValue || arguments[4] || arguments[5];
-          }
-          else if ( handler.customAttrSurround ) {
-            for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-              name = arguments[i * ncp + 7];
-              customAssign = arguments[i * ncp + 8];
-              if ( name ) {
-                fallbackValue = arguments[i * ncp + 9];
-                value = fallbackValue
-                  || arguments[i * ncp + 10]
-                  || arguments[i * ncp + 11];
-                customOpen = arguments[i * ncp + 6];
-                customClose = arguments[i * ncp + 12];
-                break;
-              }
-            }
-          }
-
-          if ( value === undefined ) {
-            value = fillAttrs[name] ? name : fallbackValue;
-          }
-
-          attrs.push({
-            name: name,
-            value: value,
-            escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
-            customAssign: customAssign || '=',
-            customOpen:  customOpen || '',
-            customClose: customClose || ''
-          });
-        });
-
-        if ( handler.start ) {
-          handler.start( tagName, attrs, unary, unarySlash );
-        }
+        handler.start( tagName, attrs, unary, unarySlash );
       }
     }
 
@@ -379,7 +379,7 @@
         // Find the closest opened tag of the same type
         var needle = tagName.toLowerCase();
         for ( pos = stack.length - 1; pos >= 0; pos-- ) {
-          if ( stack[ pos ].toLowerCase() === needle ) {
+          if ( stack[ pos ].tag.toLowerCase() === needle ) {
             break;
           }
         }
@@ -389,7 +389,7 @@
         // Close all the open elements, up the stack
         for ( var i = stack.length - 1; i >= pos; i-- ) {
           if ( handler.end ) {
-            handler.end( stack[ i ] );
+            handler.end( stack[ i ].tag, stack[ i ].attrs );
           }
         }
 
