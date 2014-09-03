@@ -1,8 +1,10 @@
 body { font-family: "Cambria", Georgia, Times, "Times New Roman", serif; margin-top: 0; padding-top: 0; }
 textarea { height: 30em; }
 h1 { margin-top: 0.5em; font-size: 1.25em; }
+h1 span { font-size: 0.6em; }
 button { font-weight: bold; width: 100px; }
 
+.minify-button { margin: 16px 0; }
 #outer-wrapper { overflow: hidden; }
 #wrapper { width: 65%; float: left; }
 #input { width: 99%; height: 18em; }
@@ -36,3 +38,5 @@ button { font-weight: bold; width: 100px; }
 .unsafe { color: #f33; }
 
 iframe { position: absolute; top: 10px; right: 10px; }
+
+.footer p { font-style: italic; }

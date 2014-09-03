@@ -10,15 +10,15 @@
       <div id="outer-wrapper">
         <script id='fbyg2uy'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=kangax&button=compact&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=20;f.width=110;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbyg2uy');</script>
         <div id="wrapper">
-          <h1>HTML Minifier <span style="font-size: 0.6em">(v0.6.3)</span></h1>
+          <h1>HTML Minifier <span>(v0.6.8)</span></h1>
           <p id="warning">
             Minifier is <strong>in beta</strong> and could be rough around the edges.
             However, there's <a href="tests">an extensive test suite</a>.
           </p>
           <textarea rows="8" cols="40" id="input"></textarea>
-          <p style="width: 65%">
+          <div class="minify-button">
             <button type="button" id="minify-btn">Minify</button>
-          </p>
+          </div>
           <textarea rows="8" cols="40" id="output" readonly></textarea>
 
           <p id="stats"></p>
@@ -247,12 +247,16 @@
           </div>
         </div>
       </div>
-      <p class="quiet" style="font-style:italic;">
-        HTMLMinifier is made by <a href="http://perfectionkills.com/">kangax</a>,
-        using tweaked version of HTML parser by <a href="http://ejohn.org/">John Resig</a>
-        (which, in its turn, is based on work of <a href="http://erik.eae.net/">Erik Arvidsson</a>).
-        Source and bugtracker are <a href="http://github.com/kangax/html-minifier">hosted on Github</a>.
-      </p>
+
+      <div class="footer">
+        <p class="quiet">
+          HTMLMinifier is made by <a href="http://perfectionkills.com/">kangax</a>,
+          using tweaked version of HTML parser by <a href="http://ejohn.org/">John Resig</a>
+          (which, in its turn, is based on work of <a href="http://erik.eae.net/">Erik Arvidsson</a>).
+          Source and bugtracker are <a href="http://github.com/kangax/html-minifier">hosted on Github</a>.
+        </p>
+      </div>
+
     </div>
     <script src="dist/htmlminifier.min.js"></script>
     <script src="assets/uglify.js"></script>
