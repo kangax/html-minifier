@@ -1,4 +1,4 @@
-## [0.6.7](https://github.com/kangax/html-minifier/compare/v0.6.6...0.6.7)
+## [0.6.7](https://github.com/kangax/html-minifier/compare/v0.6.6...v0.6.7)
 
 * Preserve empty script with `src` attribute
 * Make `draggable` enumerated attribute
@@ -13,40 +13,40 @@
 * `s` tag has been reinstated
 * Remove `i`, `b`, `u` tags from linter as problematic
 
-## [0.6.6](https://github.com/kangax/html-minifier/compare/v0.6.5...0.6.6)
+## [0.6.6](https://github.com/kangax/html-minifier/compare/v0.6.5...v0.6.6)
 
 * Fix Firefox attribute bug
 * Add `customAttrAssign` option
 * Add `maxLineLength` option
 * Add `customAttrSurround` option
 
-## [0.6.5](https://github.com/kangax/html-minifier/compare/v0.6.4...0.6.5)
+## [0.6.5](https://github.com/kangax/html-minifier/compare/v0.6.4...v0.6.5)
 
 * `caseSensitive` option now applies to tags and attributes
 
-## [0.6.4](https://github.com/kangax/html-minifier/compare/v0.6.3...0.6.4)
+## [0.6.4](https://github.com/kangax/html-minifier/compare/v0.6.3...v0.6.4)
 
 * Support for mixed-case tags
 * Support IE downlevel-revealed conditional comments
 * Add support for `wbr` element
 
-## [0.6.3](https://github.com/kangax/html-minifier/compare/v0.6.2...0.6.3)
+## [0.6.3](https://github.com/kangax/html-minifier/compare/v0.6.2...v0.6.3)
 
 * Do not treat `translate` attribute as boolean
 * Add `svg` element in inline list
 * Do not remove special spaces like `&nbsp;`
 * Make `collapseWhitespace` more resilient
 
-## [0.6.2](https://github.com/kangax/html-minifier/compare/v0.6.1...0.6.2)
+## [0.6.2](https://github.com/kangax/html-minifier/compare/v0.6.1...v0.6.2)
 
 * Fix bug introduced by `processScripts` option
 
-## [0.6.1](https://github.com/kangax/html-minifier/compare/v0.6.0...0.6.1)
+## [0.6.1](https://github.com/kangax/html-minifier/compare/v0.6.0...v0.6.1)
 
 * Add CLI
 * Fix error with valueless attributes (e.g. `<a href>`). [#169](https://github.com/kangax/html-minifier/issues/169)
 
-## [0.6.0](https://github.com/kangax/html-minifier/compare/v0.5.6...0.6.0)
+## [0.6.0](https://github.com/kangax/html-minifier/compare/v0.5.6...v0.6.0)
 
 * Minify meta viewport value [#159](https://github.com/kangax/html-minifier/issues/159)
 * Add support for ignoring markup via `<!-- htmlmin:ignore -->` [#89](https://github.com/kangax/html-minifier/issues/89)
