@@ -996,6 +996,7 @@
   test('collapse preseving a line break', function() {
     input = '\n\n\n<!DOCTYPE html>   \n<html lang="en" class="no-js">\n' +
       '  <head>\n    <meta charset="utf-8">\n    <meta http-equiv="X-UA-Compatible" content="IE=edge">\n\n\n\n' +
+      '\t<!-- Copyright Notice -->\n' +
       '    <title>Carbon</title>\n\n\t<meta name="title" content="Carbon">\n\t\n\n' +
       '\t<meta name="description" content="A front-end framework.">\n' +
       '    <meta name="apple-mobile-web-app-capable" content="yes">\n' +
@@ -1007,6 +1008,7 @@
       '    <link href="images/icn-152x152.png" rel="apple-touch-icon">\n  </head>\n  <body><p>   test test\n\ttest</p></body>\n</html>';
     output = '<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
       '<head>\n<meta charset="utf-8">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
+      '<!-- Copyright Notice -->\n' +
       '<title>Carbon</title>\n<meta name="title" content="Carbon">\n' +
       '<meta name="description" content="A front-end framework.">\n' +
       '<meta name="apple-mobile-web-app-capable" content="yes">\n' +
