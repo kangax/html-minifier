@@ -1180,6 +1180,9 @@
         currentChars = '';
       },
       chars: function( text, prevTag, nextTag ) {
+        prevTag = prevTag === '' ? 'comment' : prevTag;
+        nextTag = nextTag === '' ? 'comment' : nextTag;
+
         if (isIgnoring) {
           buffer.push(text);
           return;
@@ -1204,7 +1207,7 @@
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {
-            text = (prevTag || nextTag) ?
+            text = ((prevTag && prevTag !== 'comment') || (nextTag && nextTag !== 'comment')) ?
               collapseWhitespaceSmart(text, prevTag, nextTag, options)
               : trimWhitespace(text);
           }
