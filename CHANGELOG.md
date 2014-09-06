@@ -4,8 +4,8 @@
 * Make `draggable` enumerated attribute
 * Add option to preserve a single line break on collapse
 * Do not treat draggable as a boolean attribute
-* Added `minifyURLs` option
-* Added `customAttrCollapse` option
+* Add `minifyURLs` option
+* Add `customAttrCollapse` option
 * `collapseBoolean` is case-insensitive
 * Remove removable attrs with unspecified values
 * `removeComments` affects htmlmin:ignore comments
