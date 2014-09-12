@@ -322,7 +322,7 @@
       var attrs = [];
 
       rest.replace(attr, function () {
-        var name, value, fallbackValue, customOpen, customClose, customAssign;
+        var name, value, fallbackValue, customOpen, customClose, customAssign, quote;
         var ncp = 7; // number of captured parts, scalar
 
         // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
@@ -337,6 +337,12 @@
           customAssign = arguments[2];
           fallbackValue = arguments[3];
           value = fallbackValue || arguments[4] || arguments[5];
+
+          if (customAssign) {
+            quote = arguments[0].charAt(name.length + customAssign.length);
+            quote = (quote === '\'' || quote === '"') ? quote : '';
+          }
+
         }
         else if ( handler.customAttrSurround ) {
           for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
@@ -366,7 +372,8 @@
           }),
           customAssign: customAssign || '=',
           customOpen:  customOpen || '',
-          customClose: customClose || ''
+          customClose: customClose || '',
+          quote: quote || ''
         });
       });
 
@@ -915,7 +922,8 @@
   function normalizeAttribute(attr, attrs, tag, unarySlash, index, options) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
-        attrValue = attr.escaped,
+        attrValue = options.preventAttributesEscaping ? attr.value : attr.escaped,
+        attrQuote = options.preventAttributesEscaping ? attr.quote : '"',
         attrFragment,
         emittedAttrValue,
         isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
@@ -935,7 +943,7 @@
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue) || isTerminalOfUnarySlash) {
-      emittedAttrValue = '"' + attrValue + '"';
+      emittedAttrValue = attrQuote + attrValue + attrQuote;
     }
     else {
       emittedAttrValue = attrValue;
