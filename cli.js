@@ -58,6 +58,7 @@ var mainOptions = {
   removeCDATASectionsFromCDATA: [[false, 'Remove CDATA sections from script and style elements']],
   collapseWhitespace: [[false, 'Collapse white space that contributes to text nodes in a document tree.']],
   conservativeCollapse: [[false, 'Always collapse to 1 space (never remove it entirely)']],
+  preserveLineBreaks: [[false, 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.']],
   collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes']],
   removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
   removeRedundantAttributes: [[false, 'Remove attributes when value matches default.']],
