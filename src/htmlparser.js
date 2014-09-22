@@ -44,9 +44,7 @@
       startTagClose = /\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
       endingSlash = /\/>$/,
-      doctype = /^<!DOCTYPE [^>]+>/i,
-      startIgnore = /<(%|\?)/,
-      endIgnore = /(%|\?)>/;
+      doctype = /^<!DOCTYPE [^>]+>/i;
 
   var IS_REGEX_CAPTURING_BROKEN = false;
   'x'.replace(/x(.)?/g, function(m, g) {
@@ -192,13 +190,23 @@
         }
 
         // Ignored elements?
-        else if (html.search(startIgnore) === 0) {
-          index = html.search(endIgnore); // Find closing tag.
-          if (index >= 0) { // Found?
-            // @TODO: Pass matched open/close tags back to handler.
-            handler.ignore && handler.ignore(html.substring(0, index + 2)); // Return ignored string if callback exists.
-            html = html.substring(index + 2); // Next starting point for parser.
-            chars = false; // Chars flag.
+        else if ( /^<\?/.test( html ) ) {
+          index = html.indexOf( '?>', 2 );
+          if ( index >= 0 ) {
+            if ( handler.chars ) {
+              handler.chars( html.substring( 0, index + 2 ) );
+            }
+            html = html.substring( index + 2 );
+          }
+        }
+
+        else if ( /^<%/.test( html ) ) {
+          index = html.indexOf( '%>', 2 );
+          if ( index >= 0 ) {
+            if ( handler.chars ) {
+              handler.chars(html.substring( 0, index + 2) );
+            }
+            html = html.substring( index + 2 );
           }
         }
 

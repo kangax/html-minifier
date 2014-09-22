@@ -827,7 +827,7 @@
     output = 'This is the start.<% ... %><%= ... %><? ... ?>No comment, but middle.<?= ... ?><?php ... ?><?xml ... ?>Hello, this is the end!';
     equal(minify(input, {}), input);
     equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
-    output = 'This is the start.No comment, but middle.Hello, this is the end!';
+    output = 'This is the start.No comment, but middle. Hello, this is the end!';
     equal(minify(input, { removeComments: true, collapseWhitespace: true, removeIgnored: true }), output);
 
     input = '<% if foo? %>\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n<% end %>';
@@ -837,6 +837,10 @@
     output = '<div class="bar">...</div>';
     equal(minify(input, { collapseWhitespace: true, removeIgnored: true }), output);
 
+    input = '<a class="<% if foo? %>bar<% end %>"></a>';
+    equal(minify(input, {}), input);
+    output = '<a class="bar"></a>';
+    equal(minify(input, { removeIgnored: true }), output);
   });
 
   test('bootstrap\'s span > button > span', function() {

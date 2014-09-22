@@ -534,6 +534,12 @@
         isIgnoring = false,
         t = new Date();
 
+    if (options.removeIgnored) {
+      value = value
+        .replace(/<\?[^\?]+\?>/g, '')
+        .replace(/<%[^%]+%>/g, '');
+    }
+
     function _canCollapseWhitespace(tag, attrs) {
       return canCollapseWhitespace(tag) || options.canCollapseWhitespace(tag, attrs);
     }
@@ -697,10 +703,6 @@
           text = prefix + text + suffix;
         }
         buffer.push(text);
-      },
-      ignore: function(text) {
-        // `text` === strings that start with `<?` or `<%` and end with `?>` or `%>`.
-        buffer.push(options.removeIgnored ? '' : text); // `text` allowed by default.
       },
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
