@@ -1195,4 +1195,11 @@
     equal(minify(input, { customAttrCollapse: /ng\-class/ }), output);
   });
 
+  test('custom attribute collapse with empty attribute value', function() {
+    input = '<div ng-some\n\n></div>';
+    output = '<div ng-some></div>';
+
+    equal(minify( input, { customAttrCollapse: /.+/ }), output);
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
