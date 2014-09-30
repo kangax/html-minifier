@@ -356,7 +356,9 @@
         attrs.push({
           name: name,
           value: value,
-          escaped: value && value.replace(/(^|[^\\])"/g, '$1&quot;'),
+          escaped: value && value.replace(/(^|.)("+)/g, function(match) {
+            return match.replace(/"/g, '&quot;');
+          }),
           customAssign: customAssign || '=',
           customOpen:  customOpen || '',
           customClose: customClose || ''

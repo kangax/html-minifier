@@ -882,8 +882,8 @@
   });
 
   test('nested quotes', function() {
-    input = '<p ng-class=\'"test"\'></p>';
-    output = '<p ng-class="&quot;test&quot;"></p>';
+    input = '<div data=\'{"test":"\\"test\\""}\'></div>';
+    output = '<div data="{&quot;test&quot;:&quot;\\&quot;test\\&quot;&quot;}"></div>';
     equal(minify(input), output);
   });
 
