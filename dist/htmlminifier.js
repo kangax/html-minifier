@@ -49,9 +49,7 @@
       startTagClose = /\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
       endingSlash = /\/>$/,
-      doctype = /^<!DOCTYPE [^>]+>/i,
-      startIgnore = /<(%|\?)/,
-      endIgnore = /(%|\?)>/;
+      doctype = /^<!DOCTYPE [^>]+>/i;
 
   var IS_REGEX_CAPTURING_BROKEN = false;
   'x'.replace(/x(.)?/g, function(m, g) {
@@ -197,13 +195,23 @@
         }
 
         // Ignored elements?
-        else if (html.search(startIgnore) === 0) {
-          index = html.search(endIgnore); // Find closing tag.
-          if (index >= 0) { // Found?
-            // @TODO: Pass matched open/close tags back to handler.
-            handler.ignore && handler.ignore(html.substring(0, index + 2)); // Return ignored string if callback exists.
-            html = html.substring(index + 2); // Next starting point for parser.
-            chars = false; // Chars flag.
+        else if ( /^<\?/.test( html ) ) {
+          index = html.indexOf( '?>', 2 );
+          if ( index >= 0 ) {
+            if ( handler.chars ) {
+              handler.chars( html.substring( 0, index + 2 ) );
+            }
+            html = html.substring( index + 2 );
+          }
+        }
+
+        else if ( /^<%/.test( html ) ) {
+          index = html.indexOf( '%>', 2 );
+          if ( index >= 0 ) {
+            if ( handler.chars ) {
+              handler.chars(html.substring( 0, index + 2) );
+            }
+            html = html.substring( index + 2 );
           }
         }
 
@@ -800,7 +808,7 @@
     else if (isMetaViewport(tag, attrs) && attrName === 'content') {
       attrValue = attrValue.replace(/1\.0/g, '1').replace(/\s+/g, '');
     }
-    else if (options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
+    else if (attrValue && options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
       attrValue = attrValue.replace(/\n+/g, '');
     }
     return attrValue;
@@ -1085,6 +1093,12 @@
         isIgnoring = false,
         t = new Date();
 
+    if (options.removeIgnored) {
+      value = value
+        .replace(/<\?[^\?]+\?>/g, '')
+        .replace(/<%[^%]+%>/g, '');
+    }
+
     function _canCollapseWhitespace(tag, attrs) {
       return canCollapseWhitespace(tag) || options.canCollapseWhitespace(tag, attrs);
     }
@@ -1248,10 +1262,6 @@
           text = prefix + text + suffix;
         }
         buffer.push(text);
-      },
-      ignore: function(text) {
-        // `text` === strings that start with `<?` or `<%` and end with `?>` or `%>`.
-        buffer.push(options.removeIgnored ? '' : text); // `text` allowed by default.
       },
       doctype: function(doctype) {
         buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
