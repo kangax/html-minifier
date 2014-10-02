@@ -12,6 +12,7 @@
     equal(minify('<p title=" <![CDATA[ \n\n foobar baz ]]> ">x</p>'), '<p title=" <![CDATA[ \n\n foobar baz ]]> ">x</p>');
     equal(minify('<p foo-bar=baz>xxx</p>'), '<p foo-bar="baz">xxx</p>');
     equal(minify('<p foo:bar=baz>xxx</p>'), '<p foo:bar="baz">xxx</p>');
+    equal(minify('<p foo.bar=baz>xxx</p>'), '<p foo.bar="baz">xxx</p>');
 
     input = '<div><div><div><div><div><div><div><div><div><div>' +
                   'i\'m 10 levels deep' +
