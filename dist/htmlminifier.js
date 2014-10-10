@@ -37,7 +37,7 @@
   'use strict';
 
   // Regular Expressions for parsing tags and attributes
-  var singleAttrIdentifier = /([\w:-]+)/,
+  var singleAttrIdentifier = /([\w:.-]+)/,
       singleAttrAssign = /=/,
       singleAttrAssigns = [ singleAttrAssign ],
       singleAttrValues = [
@@ -81,7 +81,7 @@
     var customStartTagAttrs;
 
     var startTagAttrs = new RegExp(
-        '(?:\\s*[\\w:-]+'
+        '(?:\\s*[\\w:.-]+'
       +   '(?:\\s*'
       +     '(?:' + joinSingleAttrAssigns(handler) + ')'
       +     '\\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\\s]+)'
