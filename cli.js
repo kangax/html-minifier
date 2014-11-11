@@ -34,6 +34,7 @@ var fs = require('fs');
 var appName = require('./package.json').name;
 var appVersion = require('./package.json').version;
 var minify = require('./dist/htmlminifier.min.js').minify;
+var HTMLLint = require('./dist/htmlminifier.min.js').HTMLLint;
 var minifyOptions = {};
 var input = null;
 var output = null;
@@ -126,6 +127,10 @@ cli.main(function(args, options) {
       }
     }
   });
+
+  if (minifyOptions.lint === true) {
+    minifyOptions.lint = new HTMLLint();
+  }
 
   if (args.length) {
     input = args;
