@@ -1010,7 +1010,7 @@
       '<link href="stylesheets/application.css" rel="stylesheet">\n' +
       '    <script src="scripts/application.js"></script>\n' +
       '    <link href="images/icn-32x32.png" rel="shortcut icon">\n' +
-      '    <link href="images/icn-152x152.png" rel="apple-touch-icon">\n  </head>\n  <body><p>   test test\n\ttest</p></body>\n</html>';
+      '    <link href="images/icn-152x152.png" rel="apple-touch-icon">\n  </head>\n  <body><p>\n   test test\n\ttest\n\n</p></body>\n</html>';
     output = '<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
       '<head>\n<meta charset="utf-8">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
       '<!-- Copyright Notice -->\n' +
@@ -1022,7 +1022,7 @@
       '<link href="stylesheets/application.css" rel="stylesheet">\n' +
       '<script src="scripts/application.js"></script>\n' +
       '<link href="images/icn-32x32.png" rel="shortcut icon">\n' +
-      '<link href="images/icn-152x152.png" rel="apple-touch-icon">\n</head>\n<body><p> test test test</p></body>\n</html>';
+      '<link href="images/icn-152x152.png" rel="apple-touch-icon">\n</head>\n<body><p>\ntest test test\n</p></body>\n</html>';
     equal(minify(input, {
       collapseWhitespace: true,
       preserveLineBreaks: true

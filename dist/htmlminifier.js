@@ -612,7 +612,7 @@
     lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/,
     preserveBefore = lineBreakBefore.test(str) ? '\n' : ' ',
     preserveAfter = lineBreakAfter.test(str) ? '\n' : ' ',
-    lineBreakStamp = '[{htmlmin-lb}]';
+    lineBreakStamp = 'htmlmincollapsedlinebreak';
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.substr(0,1) !== '/'
       || ( prevTag.substr(0,1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
@@ -634,7 +634,7 @@
       // strip non space whitespace then compress spaces to one
       return str
         .replace(/[\t\n\r]+/g, ' ').replace(/[ ]+/g, ' ')
-        .replace(lineBreakStamp, '\n');
+        .replace(new RegExp(lineBreakStamp, 'g'), '\n');
     }
 
     return str;
