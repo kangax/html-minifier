@@ -77,6 +77,10 @@ function test(fileName, done) {
 
           // Open and read the size of the minified output
           fs.stat(minifiedFilePath, function (err, stats) {
+            if (err) {
+              throw new Error('There was an error reading ' + minifiedFilePath);
+            }
+
             var minifiedSize = stats.size;
             var minifiedTime = new Date() - startTime;
 
