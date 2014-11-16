@@ -1,3 +1,5 @@
+'use strict';
+
 var testrunner = require('qunit');
 
 testrunner.options.log.summary = true;
@@ -9,10 +11,10 @@ testrunner.run({
   code: './src/htmlminifier.js',
   tests: [
     './tests/minifier.js',
-    './tests/lint.js',
+    './tests/lint.js'
   ]
 }, function(err, report) {
-  if(report.failed > 0) {
+  if (report.failed > 0) {
     process.on('exit', function() {
       process.exit(1);
     });

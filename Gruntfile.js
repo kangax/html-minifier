@@ -24,7 +24,7 @@ module.exports = function(grunt) {
         src: ['cli.js', 'src/**/*.js']
       },
       tests: {
-        src: ['tests/*.js', 'test/js']
+        src: ['tests/*.js', 'test.js']
       },
       web: {
         src: 'assets/master.js'
@@ -44,9 +44,9 @@ module.exports = function(grunt) {
       src: {
         src: '<%= jshint.src.src %>'
       },
-      /*tests: {
+      tests: {
         src: '<%= jshint.tests.src %>'
-      },*/
+      },
       web: {
         src: '<%= jshint.web.src %>'
       },

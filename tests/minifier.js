@@ -894,7 +894,7 @@
 
     equal(minify(input, { minifyJS: true }), output);
 
-    input = "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-67NT');</script>";
+    input = '<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({\'gtm.start\':new Date().getTime(),event:\'gtm.js\'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';j.async=true;j.src=\'//www.googletagmanager.com/gtm.js?id=\'+i+dl;f.parentNode.insertBefore(j,f);})(window,document,\'script\',\'dataLayer\',\'GTM-67NT\');</script>';
     output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl="dataLayer"!=l?"&l="+l:"";j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id="+i+dl,f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer","GTM-67NT");</script>';
 
     equal(minify(input, { minifyJS: { mangle: false } }), output);
@@ -928,8 +928,8 @@
 
     equal(minify(input, { minifyJS: true }), output);
 
-    input = "<a onclick=\"try{ dcsMultiTrack('DCS.dcsuri','USPS','WT.ti') }catch(e){}\"> foobar</a>";
-    output = "<a onclick=\"try{dcsMultiTrack(&quot;DCS.dcsuri&quot;,&quot;USPS&quot;,&quot;WT.ti&quot;)}catch(e){}\"> foobar</a>";
+    input = '<a onclick="try{ dcsMultiTrack(\'DCS.dcsuri\',\'USPS\',\'WT.ti\') }catch(e){}"> foobar</a>';
+    output = '<a onclick="try{dcsMultiTrack(&quot;DCS.dcsuri&quot;,&quot;USPS&quot;,&quot;WT.ti&quot;)}catch(e){}"> foobar</a>';
 
     equal(minify(input, { minifyJS: { mangle: false } }), output);
 
@@ -975,7 +975,7 @@
     input = '<link rel="stylesheet" href="http://website.com/style.css"><form action="http://website.com/folder/folder2/index.html"><a href="http://website.com/folder/file.html">link</a></form>';
     output = '<link rel="stylesheet" href="/style.css"><form action="folder2/"><a href="file.html">link</a></form>';
 
-    equal(minify(input, { minifyURLs: {site:"http://website.com/folder/"} }), output);
+    equal(minify(input, { minifyURLs: { site: 'http://website.com/folder/' } }), output);
   });
 
   test('valueless attributes', function() {
