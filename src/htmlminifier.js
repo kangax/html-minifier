@@ -400,7 +400,7 @@
 
   function setDefaultTesters(options) {
 
-    var defaultTesters = ['canCollapseWhitespace','canTrimWhitespace'];
+    var defaultTesters = ['canCollapseWhitespace', 'canTrimWhitespace'];
 
     for (var i = 0, len = defaultTesters.length; i < len; i++) {
       if (!options[defaultTesters[i]]) {

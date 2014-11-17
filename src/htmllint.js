@@ -19,7 +19,7 @@
     return (/^on[a-z]+/).test(attrName);
   }
   function isStyleAttribute(attrName) {
-    return ('style' === attrName.toLowerCase());
+    return (attrName.toLowerCase() === 'style');
   }
   function isDeprecatedAttribute(tag, attrName) {
     return (
