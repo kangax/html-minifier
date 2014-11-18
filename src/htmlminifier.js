@@ -711,7 +711,6 @@
       customAttrSurround: options.customAttrSurround
     });
 
-    lint && lint.populate();
     results.push.apply(results, buffer);
     var str = joinResultSegments(results, options);
     log('minified in: ' + (new Date() - t) + 'ms');
