@@ -1,6 +1,6 @@
 [![NPM version](https://badge.fury.io/js/html-minifier.svg)](http://badge.fury.io/js/html-minifier)
 [![Build Status](https://travis-ci.org/kangax/html-minifier.svg)](https://travis-ci.org/kangax/html-minifier)
-[![Dependency Status](https://david-dm.org/kangax/html-minifier.svg?theme=shields.io)](https://david-dm.org/kangax/html-minifier)
+[![Dependency Status](https://david-dm.org/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier)
 [![devDependency Status](https://david-dm.org/kangax/html-minifier/dev-status.svg?theme=shields.io)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
 
 [HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly __configurable__, __well-tested__, Javascript-based HTML minifier, with lint-like capabilities.
@@ -13,13 +13,13 @@ Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_mini
 
 How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/minifier/) — HTML Minifier from Will Peavy (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as htmlcompressor.com?
 
-| Site  | Original size _(KB)_ | HTMLMinifier _(KB)_  | Will Peavy _(KB)_  | htmlcompressor.com _(KB)_  |
+| Site | Original size _(KB)_ | HTMLMinifier _(KB)_ | Will Peavy _(KB)_ | htmlcompressor.com _(KB)_ |
 | --------------------------------------------------------------------------- |:-----------:| ----------------:| ------------:| ----------------:|
 | [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>37.3</b>      |   43.3       | 41.9 |
 | [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>      |   92         | 91.9 |
 | [MSN](http://msn.com)                                                       | 156.6       | <b>133</b>       |   145        | 138.3 |
 | [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>159.5</b>     |   168.3      | 163.3 |
-| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     |   225        |  218.5 |
+| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     |   225        | 218.5 |
 | [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>380.6</b>     |   396.3      | n/a |
 | [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 869.5       | <b>830</b>       |   872        | n/a |
 
@@ -34,7 +34,7 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | `removeCDATASectionsFromCDATA` | [Remove CDATA sections from script and style elements](http://perfectionkills.com/experimenting-with-html-minifier/#remove_cdata_sections) | `false` |
 | `collapseWhitespace`           | [Collapse white space that contributes to text nodes in a document tree.](http://perfectionkills.com/experimenting-with-html-minifier/#collapse_whitespace) | `false` |
 | `conservativeCollapse`         | Always collapse to 1 space (never remove it entirely). Must be used in conjunction with `collapseWhitespace=true` | `false` |
-| `preserveLineBreaks`            | Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break. Must be used in conjunction with `collapseWhitespace=true` | `false` |
+| `preserveLineBreaks`           | Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break. Must be used in conjunction with `collapseWhitespace=true` | `false` |
 | `collapseBooleanAttributes`    | [Omit attribute values from boolean attributes](http://perfectionkills.com/experimenting-with-html-minifier/#collapse_boolean_attributes) | `false` |
 | `removeAttributeQuotes`        | [Remove quotes around attributes when possible.](http://perfectionkills.com/experimenting-with-html-minifier/#remove_attribute_quotes) | `false` |
 | `removeRedundantAttributes`    | [Remove attributes when value matches default.](http://perfectionkills.com/experimenting-with-html-minifier/#remove_redundant_attributes) | `false` |
@@ -84,7 +84,7 @@ npm link .
 
 For command line usage please see `html-minifier --help`
 
-## Node.js
+### Node.js
 
 ```js
 var minify = require('html-minifier').minify;
@@ -94,8 +94,8 @@ var result = minify('<p title="blah" id="moo">foo</p>', {
 result; // '<p title=blah id=moo>foo</p>'
 ```
 
-Running benchmarks
-------------------
+## Running benchmarks
+
 Benchmarks for minified HTML:
 ```
 node benchmark.js
