@@ -47,7 +47,7 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | `removeEmptyElements`          | [Remove all elements with empty contents](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_elements) | `false` |
 | `lint`                         | [Toggle linting](http://perfectionkills.com/experimenting-with-html-minifier/#validate_input_through_html_lint) | `false` |
 | `keepClosingSlash`             | Keep the trailing slash on singleton elements                            | `false` |
-| `caseSensitive`                | Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox) | `false` |
+| `caseSensitive`                | Treat attributes in case sensitive manner (useful for custom html tags.) | `false` |
 | `minifyJS`                     | Minify Javascript in script elements and on* attributes (uses [UglifyJS](https://github.com/mishoo/UglifyJS2)) | `false` (could be `true`, `false`, `Object` (options)) |
 | `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/GoalSmashers/clean-css)) | `false` (could be `true`, `false`, `Object` (options)) |
 | `minifyURLs`                   | Minify URLs in various attributes (uses [relateurl](https://github.com/stevenvachon/relateurl)) | `false` (could be `Object` (options)) |
@@ -58,8 +58,15 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | `customAttrSurround`           | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) | `[ ]` |
 | `customAttrCollapse`           | Regex that specifies custom attribute to strip newlines from (e.g. `/ng\-class/`) | |
 
+## Special cases
 
-Chunks of markup can be ignored by wrapping them with `<!-- htmlmin:ignore -->`.
+### Ignoring chunks of markup.
+
+If you have chunks of markup you would like preserved, you can wrap them `<!-- htmlmin:ignore -->`.
+
+### Preserving SVG tags
+
+SVG tags are automatically recognized, and when they are minified, both case-sensitivity and closing-slashes are preserved, regardless of the minification settings used for the rest of the file.
 
 ## Installation Instructions
 
