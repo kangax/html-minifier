@@ -520,6 +520,8 @@
   function minify(value, options) {
 
     options = options || {};
+    var optionsStack = [];
+
     value = trimWhitespace(value);
     setDefaultTesters(options);
 
@@ -552,13 +554,26 @@
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
       start: function( tag, attrs, unary, unarySlash ) {
-
         if (isIgnoring) {
           buffer.push('<' + tag, attrsToMarkup(attrs), unarySlash ? '/' : '', '>');
           return;
         }
 
-        tag = options.caseSensitive ? tag : tag.toLowerCase();
+        var lowerTag = tag.toLowerCase();
+
+        if (lowerTag === 'svg') {
+          optionsStack.push(options);
+          var nextOptions = {};
+          for (var key in options) {
+            nextOptions[key] = options[key];
+          }
+          nextOptions.keepClosingSlash = true;
+          nextOptions.caseSensitive = true;
+          options = nextOptions;
+        }
+
+        tag = options.caseSensitive ? tag : lowerTag;
+
         currentTag = tag;
         currentChars = '';
         currentAttrs = attrs;
@@ -600,6 +615,11 @@
           return;
         }
 
+        var lowerTag = tag.toLowerCase();
+        if (lowerTag === 'svg') {
+          options = optionsStack.pop();
+        }
+
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
           if (stackNoTrimWhitespace.length &&
@@ -629,7 +649,7 @@
         }
         else {
           // push end tag to buffer
-          buffer.push('</' + (options.caseSensitive ? tag : tag.toLowerCase()) + '>');
+          buffer.push('</' + (options.caseSensitive ? tag : lowerTag) + '>');
           results.push.apply(results, buffer);
         }
         // flush buffer
