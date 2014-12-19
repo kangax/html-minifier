@@ -500,16 +500,16 @@
     if (typeof options !== 'object') {
       options = { };
     }
-    if (typeof options.noAdvanced === 'undefined') {
-      options.noAdvanced = true;
+    if (typeof options.advanced === 'undefined') {
+      options.advanced = false;
     }
     try {
       if (typeof CleanCSS !== 'undefined') {
-        return new CleanCSS(options).minify(text);
+        return new CleanCSS(options).minify(text).styles;
       }
       else if (typeof require === 'function') {
         var CleanCSSModule = require('clean-css');
-        return new CleanCSSModule(options).minify(text);
+        return new CleanCSSModule(options).minify(text).styles;
       }
     }
     catch (err) {
