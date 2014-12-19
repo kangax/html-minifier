@@ -63,6 +63,7 @@ var mainOptions = {
   collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes']],
   removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
   removeRedundantAttributes: [[false, 'Remove attributes when value matches default.']],
+  preventAttributesEscaping: [[false, 'Prevents the escaping of the values of attributes.']],
   useShortDoctype: [[false, 'Replaces the doctype with the short (HTML5) doctype']],
   removeEmptyAttributes: [[false, 'Remove all attributes with whitespace-only values']],
   removeOptionalTags: [[false, 'Remove unrequired tags']],

@@ -356,7 +356,8 @@
   function normalizeAttribute(attr, attrs, tag, unarySlash, index, options) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
-        attrValue = attr.escaped,
+        attrValue = options.preventAttributesEscaping ? attr.value : attr.escaped,
+        attrQuote = options.preventAttributesEscaping ? attr.quote : '"',
         attrFragment,
         emittedAttrValue,
         isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
@@ -376,7 +377,7 @@
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue) || isTerminalOfUnarySlash) {
-      emittedAttrValue = '"' + attrValue + '"';
+      emittedAttrValue = attrQuote + attrValue + attrQuote;
     }
     else {
       emittedAttrValue = attrValue;
