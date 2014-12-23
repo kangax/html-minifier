@@ -1,4 +1,5 @@
-/* global test, ok, equal */
+/* jshint qunit:true */
+
 (function(global) {
   'use strict';
 
