@@ -839,7 +839,7 @@
   }
 
   function unwrapCSS(text) {
-    var matches = text.match(/^\*\{((.*|\n)*)\}$/m);
+    var matches = text.match(/^\*\{([\s\S]*)\}$/m);
     if (matches && matches[1]) {
       return matches[1];
     }
