@@ -242,7 +242,7 @@
         attrValue = attrValue.replace(/\s*;\s*$/, '');
       }
       if (options.minifyCSS) {
-        return minifyCSS(attrValue, options.minifyCSS);
+        return minifyCSS(attrValue, options.minifyCSS, true);
       }
       return attrValue;
     }
@@ -263,6 +263,22 @@
       if (attrs[i].name === 'name' && attrs[i].value === 'viewport') {
         return true;
       }
+    }
+  }
+
+  // Wrap CSS declarations for CleanCSS > 3.x
+  // See https://github.com/jakubpawlowicz/clean-css/issues/418
+  function wrapCSS(text) {
+    return '*{' + text + '}';
+  }
+
+  function unwrapCSS(text) {
+    var matches = text.match(/^\*\{((.*|\n)*)\}$/m);
+    if (matches && matches[1]) {
+      return matches[1];
+    }
+    else {
+      return text;
     }
   }
 
@@ -496,20 +512,28 @@
     return text;
   }
 
-  function minifyCSS(text, options) {
+  function minifyCSS(text, options, inline) {
     if (typeof options !== 'object') {
       options = { };
     }
-    if (typeof options.noAdvanced === 'undefined') {
-      options.noAdvanced = true;
+    if (typeof options.advanced === 'undefined') {
+      options.advanced = false;
     }
     try {
+      var cleanCSS;
+
       if (typeof CleanCSS !== 'undefined') {
-        return new CleanCSS(options).minify(text);
+        cleanCSS = new CleanCSS(options);
       }
       else if (typeof require === 'function') {
         var CleanCSSModule = require('clean-css');
-        return new CleanCSSModule(options).minify(text);
+        cleanCSS = new CleanCSSModule(options);
+      }
+      if (inline) {
+        return unwrapCSS(cleanCSS.minify(wrapCSS(text)).styles);
+      }
+      else {
+        return cleanCSS.minify(text).styles;
       }
     }
     catch (err) {

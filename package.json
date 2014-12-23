@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "change-case": "2.1.x",
-    "clean-css": "2.2.x",
+    "clean-css": "3.0.x",
     "cli": "0.6.x",
     "uglify-js": "2.4.x",
     "relateurl": "0.2.x"
