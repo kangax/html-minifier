@@ -8,18 +8,20 @@ var fs = require('fs'),
     Table = require('cli-table');
 
 var fileNames = [
-  // 'es6-draft',
-  // 'eloquentjavascript',
-  'wikipedia',
-  'stackoverflow',
-  'amazon',
-  'es6-table',
-  'msn',
-  'google',
-  'newyorktimes',
   'abc',
-  'html-minifier'
+  'amazon',
+  //'eloquentjavascript',
+  //'es6-draft',
+  'es6-table',
+  'google',
+  'html-minifier',
+  'msn',
+  'newyorktimes',
+  'stackoverflow',
+  'wikipedia'
 ];
+
+fileNames = fileNames.sort().reverse();
 
 var table = new Table({
   head: ['File', 'Before', 'After', 'Savings', 'Time'],
