@@ -223,7 +223,9 @@ cli.main(function(args, options) {
     process.stderr.write('Error: Minification error');
   }
 
-  minifyOptions.lint && minifyOptions.lint.populate();
+  if (minifyOptions.lint) {
+    minifyOptions.lint.populate();
+  }
 
   if (minified !== null) {
     // Write the output

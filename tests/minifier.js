@@ -270,7 +270,7 @@
   });
 
   test('cleaning class/style attributes', function() {
-    input = '<p class=" foo bar  ">foo bar baz</p>', output;
+    input = '<p class=" foo bar  ">foo bar baz</p>';
     equal(minify(input, { cleanAttributes: true }), '<p class="foo bar">foo bar baz</p>');
 
     input = '<p class=" foo      ">foo bar baz</p>';

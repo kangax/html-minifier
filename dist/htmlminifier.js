@@ -622,12 +622,12 @@
     lineBreakStamp = 'htmlmincollapsedlinebreak';
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.substr(0, 1) !== '/'
-      || ( prevTag.substr(0, 1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
+      || (prevTag.substr(0, 1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
       str = str.replace(/^\s+/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveBefore : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.substr(0, 1) === '/'
-      || ( nextTag.substr(0, 1) !== '/' && tags.indexOf(nextTag) === -1))) {
+      || (nextTag.substr(0, 1) !== '/' && tags.indexOf(nextTag) === -1))) {
       str = str.replace(/\s+$/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveAfter : '');
     }
 
@@ -673,13 +673,13 @@
 
   function canRemoveAttributeQuotes(value) {
     // http://mathiasbynens.be/notes/unquoted-attribute-values
-    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value) && !(/\/$/ ).test(value) &&
+    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value) && !(/\/$/).test(value) &&
     // make sure trailing slash is not interpreted as HTML self-closing tag
         !(/\/$/).test(value);
   }
 
   function attributesInclude(attributes, attribute) {
-    for (var i = attributes.length; i--; ) {
+    for (var i = attributes.length; i--;) {
       if (attributes[i].name.toLowerCase() === attribute) {
         return true;
       }
@@ -1144,7 +1144,7 @@
     new HTMLParser(value, {
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
-      start: function( tag, attrs, unary, unarySlash ) {
+      start: function(tag, attrs, unary, unarySlash) {
         if (isIgnoring) {
           buffer.push('<' + tag, attrsToMarkup(attrs), unarySlash ? '/' : '', '>');
           return;
@@ -1181,25 +1181,29 @@
 
         var openTag = '<' + tag;
         var closeTag = ((unarySlash && options.keepClosingSlash) ? '/' : '') + '>';
-        if ( attrs.length === 0) {
+        if (attrs.length === 0) {
           openTag += closeTag;
         }
 
         buffer.push(openTag);
 
-        lint && lint.testElement(tag);
+        if (lint) {
+          lint.testElement(tag);
+        }
 
         var token;
-        for ( var i = 0, len = attrs.length; i < len; i++ ) {
-          lint && lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
+        for (var i = 0, len = attrs.length; i < len; i++) {
+          if (lint) {
+            lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
+          }
           token = normalizeAttribute(attrs[i], attrs, tag, unarySlash, i, options);
-          if ( i === len - 1 ) {
+          if (i === len - 1) {
             token += closeTag;
           }
           buffer.push(token);
         }
       },
-      end: function( tag, attrs ) {
+      end: function(tag, attrs) {
 
         if (isIgnoring) {
           buffer.push('</' + tag + '>');
@@ -1226,8 +1230,8 @@
         var isElementEmpty = currentChars === '' && tag === currentTag;
         if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs))) {
           // remove last "element" from buffer, return
-          for ( var i = buffer.length - 1; i >= 0; i-- ) {
-            if ( /^<[^\/!]/.test(buffer[i]) ) {
+          for (var i = buffer.length - 1; i >= 0; i--) {
+            if (/^<[^\/!]/.test(buffer[i])) {
               buffer.splice(i);
               break;
             }
@@ -1247,7 +1251,7 @@
         buffer.length = 0;
         currentChars = '';
       },
-      chars: function( text, prevTag, nextTag ) {
+      chars: function(text, prevTag, nextTag) {
         prevTag = prevTag === '' ? 'comment' : prevTag;
         nextTag = nextTag === '' ? 'comment' : nextTag;
 
@@ -1284,10 +1288,12 @@
           }
         }
         currentChars = text;
-        lint && lint.testChars(text);
+        if (lint) {
+          lint.testChars(text);
+        }
         buffer.push(text);
       },
-      comment: function( text, nonStandard ) {
+      comment: function(text, nonStandard) {
 
         var prefix = nonStandard ? '<!' : '<!--';
         var suffix = nonStandard ? '>' : '-->';
@@ -1328,16 +1334,16 @@
     return str;
   }
 
-  function joinResultSegments( results, options ) {
+  function joinResultSegments(results, options) {
     var str;
     var maxLineLength = options.maxLineLength;
-    if ( maxLineLength ) {
+    if (maxLineLength) {
       var token;
       var lines = [];
       var line = '';
-      for ( var i = 0, len = results.length; i < len; i++ ) {
+      for (var i = 0, len = results.length; i < len; i++) {
         token = results[i];
-        if ( line.length + token.length < maxLineLength ) {
+        if (line.length + token.length < maxLineLength) {
           line += token;
         }
         else {
@@ -1357,7 +1363,7 @@
   }
 
   // for CommonJS enviroments, export everything
-  if ( typeof exports !== 'undefined' ) {
+  if (typeof exports !== 'undefined') {
     exports.minify = minify;
   }
   else {
