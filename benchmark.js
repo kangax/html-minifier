@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-/* jshint strict:false */
+'use strict';
 
 var fs = require('fs'),
     path = require('path'),
     exec = require('child_process').exec,
+    chalk = require('chalk'),
     Table = require('cli-table');
 
 var fileNames = [
@@ -28,34 +29,32 @@ var table = new Table({
   colWidths: [20, 25, 25, 20, 20]
 });
 
-console.log('');
-
 function toKb(size) {
   return (size / 1024).toFixed(2);
 }
 
 function redSize(size) {
-  return '\033[91m' + size + '\033[0m (' + toKb(size) + 'KB)';
+  return chalk.red.bold(size) + chalk.white(' (' + toKb(size) + ' KB)');
 }
 
 function greenSize(size) {
-  return '\033[92m' + size + '\033[0m (' + toKb(size) + 'KB)';
+  return chalk.green.bold(size) + chalk.white(' (' + toKb(size) + ' KB)');
 }
 
 function blueSavings(oldSize, newSize) {
   var savingsPercent = (1 - newSize / oldSize) * 100;
   var savings = (oldSize - newSize) / 1024;
-  return '\033[96m' + savingsPercent.toFixed(2) + '\033[0m% (' + savings.toFixed(2) + 'KB)';
+  return chalk.cyan.bold(savingsPercent.toFixed(2)) + chalk.white('% (' + savings.toFixed(2) + ' KB)');
 }
 
 function blueTime(time) {
-  return '\033[96m' + time + '\033[0mms';
+  return chalk.cyan.bold(time) + chalk.white(' ms');
 }
 
 function test(fileName, done) {
 
   if (!fileName) {
-    console.log(table.toString());
+    console.log('\n' + table.toString());
     return;
   }
 
