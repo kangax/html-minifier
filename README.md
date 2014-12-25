@@ -1,9 +1,9 @@
-[![NPM version](https://badge.fury.io/js/html-minifier.svg)](http://badge.fury.io/js/html-minifier)
-[![Build Status](https://travis-ci.org/kangax/html-minifier.svg)](https://travis-ci.org/kangax/html-minifier)
-[![Dependency Status](https://david-dm.org/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier)
-[![devDependency Status](https://david-dm.org/kangax/html-minifier/dev-status.svg?theme=shields.io)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
+[![NPM version](https://img.shields.io/npm/v/html-minifier.svg?style=flat)](https://www.npmjs.com/package/html-minifier)
+[![Build Status](https://img.shields.io/travis/kangax/html-minifier.svg?style=flat)](https://travis-ci.org/kangax/html-minifier)
+[![Dependency Status](https://img.shields.io/david/kangax/html-minifier.svg?style=flat)](https://david-dm.org/kangax/html-minifier)
+[![devDependency Status](https://img.shields.io/david/dev/kangax/html-minifier.svg?style=flat)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
 
-[HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly __configurable__, __well-tested__, Javascript-based HTML minifier, with lint-like capabilities.
+[HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, Javascript-based HTML minifier, with lint-like capabilities.
 
 See [corresponding blog post](http://perfectionkills.com/experimenting-with-html-minifier/) for all the gory details of [how it works](http://perfectionkills.com/experimenting-with-html-minifier/#how_it_works), [description of each option](http://perfectionkills.com/experimenting-with-html-minifier/#options), [testing results](http://perfectionkills.com/experimenting-with-html-minifier/#field_testing) and [conclusions](http://perfectionkills.com/experimenting-with-html-minifier/#cost_and_benefits).
 
@@ -48,7 +48,7 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | `removeEmptyElements`          | [Remove all elements with empty contents](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_elements) | `false` |
 | `lint`                         | [Toggle linting](http://perfectionkills.com/experimenting-with-html-minifier/#validate_input_through_html_lint) | `false` |
 | `keepClosingSlash`             | Keep the trailing slash on singleton elements                            | `false` |
-| `caseSensitive`                | Treat attributes in case sensitive manner (useful for custom html tags.) | `false` |
+| `caseSensitive`                | Treat attributes in case sensitive manner (useful for custom HTML tags.) | `false` |
 | `minifyJS`                     | Minify Javascript in script elements and on* attributes (uses [UglifyJS](https://github.com/mishoo/UglifyJS2)) | `false` (could be `true`, `false`, `Object` (options)) |
 | `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/GoalSmashers/clean-css)) | `false` (could be `true`, `false`, `Object` (options)) |
 | `minifyURLs`                   | Minify URLs in various attributes (uses [relateurl](https://github.com/stevenvachon/relateurl)) | `false` (could be `Object` (options)) |
