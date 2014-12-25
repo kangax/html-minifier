@@ -945,6 +945,41 @@
     // }), output);
   });
 
+  test('minification of scripts with different mimetypes', function() {
+    input = '<script type="">function f(){  return 1  }</script>';
+    output = '<script type="">function f(){return 1}</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<script type="text/javascript">function f(){  return 1  }</script>';
+    output = '<script type="text/javascript">function f(){return 1}</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<script foo="bar">function f(){  return 1  }</script>';
+    output = '<script foo="bar">function f(){return 1}</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<script type="text/ecmascript">function f(){  return 1  }</script>';
+    output = '<script type="text/ecmascript">function f(){return 1}</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<script type="application/javascript">function f(){  return 1  }</script>';
+    output = '<script type="application/javascript">function f(){return 1}</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<script type="boo">function f(){  return 1  }</script>';
+
+    equal(minify(input, { minifyJS: true }), input);
+
+    input = '<script type="text/html"><!-- ko if: true -->\n\n\n<div></div>\n\n\n<!-- /ko --></script>';
+
+    equal(minify(input, { minifyJS: true }), input);
+  });
+
   test('on* minification', function() {
     input = '<div onclick="alert(a + b)"></div>';
     output = '<div onclick="alert(a+b)"></div>';

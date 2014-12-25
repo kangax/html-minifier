@@ -725,6 +725,30 @@
     );
   }
 
+  // https://mathiasbynens.be/demo/javascript-mime-type
+  // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
+  var executableScriptsMimetypes = {
+    'text/javascript': 1,
+    'text/ecmascript': 1,
+    'text/jscript': 1,
+    'application/javascript': 1,
+    'application/x-javascript': 1
+  };
+
+  function isExecutableScript(tag, attrs) {
+    if (tag !== 'script') {
+      return false;
+    }
+    for (var i = 0, len = attrs.length; i < len; i++) {
+      var attrName = attrs[i].name.toLowerCase();
+      if (attrName === 'type') {
+        return attrs[i].value === '' ||
+               executableScriptsMimetypes[attrs[i].value] === 1;
+      }
+    }
+    return true;
+  }
+
   function isStyleLinkTypeAttribute(tag, attrName, attrValue) {
     return (
       (tag === 'style' || tag === 'link') &&
@@ -1271,7 +1295,7 @@
             text = processScript(text, options, currentAttrs);
           }
         }
-        if (currentTag === 'script' && options.minifyJS) {
+        if (options.minifyJS && isExecutableScript(currentTag, currentAttrs)) {
           text = minifyJS(text, options.minifyJS);
         }
         if (currentTag === 'style' && options.minifyCSS) {
