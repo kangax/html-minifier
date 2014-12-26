@@ -42,8 +42,9 @@
     "change-case": "2.1.x",
     "clean-css": "2.2.x",
     "cli": "0.6.x",
-    "uglify-js": "2.4.x",
-    "relateurl": "0.2.x"
+    "htmlparser": "^1.7.7",
+    "relateurl": "0.2.x",
+    "uglify-js": "2.4.x"
   },
   "devDependencies": {
     "cli-table": "0.3.x",

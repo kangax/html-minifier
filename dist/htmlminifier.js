@@ -577,7 +577,7 @@
     HTMLParser = global.HTMLParser;
   }
   else if (typeof require === 'function') {
-    HTMLParser = require('./htmlparser').HTMLParser;
+    HTMLParser = require('htmlparser').HTMLParser;
   }
 
   var trimWhitespace = function(str) {
