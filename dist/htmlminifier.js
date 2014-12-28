@@ -732,7 +732,8 @@
     'text/ecmascript': 1,
     'text/jscript': 1,
     'application/javascript': 1,
-    'application/x-javascript': 1
+    'application/x-javascript': 1,
+    'application/ecmascript': 1
   };
 
   function isExecutableScript(tag, attrs) {
