@@ -39,7 +39,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "change-case": "2.1.x",
+    "change-case": "2.2.x",
     "clean-css": "3.0.x",
     "cli": "0.6.x",
     "uglify-js": "2.4.x",
@@ -54,7 +54,7 @@
     "grunt-contrib-qunit": "0.5.x",
     "grunt-contrib-uglify": "0.7.x",
     "grunt-exec": "0.4.x",
-    "grunt-jscs": "1.1.x",
+    "grunt-jscs": "1.2.x",
     "load-grunt-tasks": "2.0.x",
     "qunit": "0.7.x",
     "time-grunt": "1.0.x"
