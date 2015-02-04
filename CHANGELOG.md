@@ -1,3 +1,15 @@
+## [0.7.0](https://github.com/kangax/html-minifier/compare/v0.6.9...v0.7.0)
+
+* TODO
+
+## [0.6.9](https://github.com/kangax/html-minifier/compare/v0.6.8...v0.6.9)
+
+* TODO
+
+## [0.6.8](https://github.com/kangax/html-minifier/compare/v0.6.7...v0.6.8)
+
+* TODO
+
 ## [0.6.7](https://github.com/kangax/html-minifier/compare/v0.6.6...v0.6.7)
 
 * Preserve empty script with `src` attribute
