@@ -2,7 +2,7 @@ language: node_js
 
 node_js:
   - "0.10"
-  - "0.11"
+  - "0.12"
 
 branches:
   only:
@@ -10,7 +10,3 @@ branches:
 
 before_script:
   - npm install -g grunt-cli
-
-matrix:
-  allow_failures:
-    - node_js: "0.11"
