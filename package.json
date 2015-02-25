@@ -46,7 +46,7 @@
     "relateurl": "0.2.x"
   },
   "devDependencies": {
-    "chalk": "0.5.x",
+    "chalk": "1.0.x",
     "cli-table": "0.3.x",
     "grunt": "0.4.x",
     "grunt-contrib-concat": "0.5.x",
@@ -57,7 +57,7 @@
     "grunt-jscs": "1.5.x",
     "load-grunt-tasks": "3.1.x",
     "qunit": "0.7.x",
-    "time-grunt": "1.0.x"
+    "time-grunt": "1.1.x"
   },
   "files": [
     "dist",
