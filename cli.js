@@ -163,6 +163,7 @@ cli.main(function(args, options) {
 
     var BUFSIZE = 4096;
     var buf = new Buffer(BUFSIZE);
+    var fullBuf = new Buffer(0);
     var bytesRead;
 
     while (true) { // Loop as long as stdin input is available.
@@ -194,9 +195,10 @@ cli.main(function(args, options) {
         //   *interactive* stdin input.
         break;
       }
-      original += buf.toString('utf8', 0, bytesRead);
+      fullBuf = Buffer.concat([fullBuf, buf.slice(0, bytesRead)]);
     }
 
+    original = fullBuf.toString('utf8');
   }
 
   function parseJSONOption(value) {
