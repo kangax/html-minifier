@@ -489,7 +489,9 @@
       options = { };
     }
     options.fromString = true;
-    options.output = { inline_script: true };
+    var outputOptions = options.output || {};
+    outputOptions.inline_script = true;
+    options.output = outputOptions;
 
     try {
       // try to get global reference first
