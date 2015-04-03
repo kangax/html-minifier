@@ -30,6 +30,7 @@
 'use strict';
 
 var cli = require('cli');
+var concat = require('concat-stream');
 var changeCase = require('change-case');
 var path = require('path');
 var fs = require('fs');
@@ -143,60 +144,25 @@ cli.main(function(args, options) {
     output = options.output;
   }
 
-  var original = '';
-  var status = 0;
-
   if (input !== null) { // Minifying one or more files specified on the CMD line
+
+    var original = '';
 
     input.forEach(function(afile) {
       try {
         original += fs.readFileSync(afile, 'utf8');
       }
       catch (e) {
-        status = 2;
         process.stderr.write('Error: Cannot read file ' + afile);
+        cli.exit(2);
       }
     });
 
+    runMinify(original);
+
   }
   else { // Minifying input coming from STDIN
-
-    var BUFSIZE = 4096;
-    var buf = new Buffer(BUFSIZE);
-    var bytesRead;
-
-    while (true) { // Loop as long as stdin input is available.
-      bytesRead = 0;
-      try {
-        bytesRead = fs.readSync(process.stdin.fd, buf, 0, BUFSIZE);
-      }
-      catch (e) {
-        if (e.code === 'EAGAIN') { // 'resource temporarily unavailable'
-          // Happens on OS X 10.8.3 (not Windows 7!), if there's no
-          // stdin input - typically when invoking a script without any
-          // input (for interactive stdin input).
-          // If you were to just continue, you'd create a tight loop.
-          process.stderr.write('ERROR: interactive stdin input not supported');
-          cli.exit(2);
-        }
-        else if (e.code === 'EOF') {
-          // Happens on Windows 7, but not OS X 10.8.3:
-          // simply signals the end of *piped* stdin input.
-          break;
-        }
-        throw e; // unexpected exception
-      }
-      if (bytesRead === 0) {
-        // No more stdin input available.
-        // OS X 10.8.3: regardless of input method, this is how the end
-        //   of input is signaled.
-        // Windows 7: this is how the end of input is signaled for
-        //   *interactive* stdin input.
-        break;
-      }
-      original += buf.toString('utf8', 0, bytesRead);
-    }
-
+    process.stdin.pipe(concat({ encoding: 'string' }, runMinify));
   }
 
   function parseJSONOption(value) {
@@ -215,36 +181,37 @@ cli.main(function(args, options) {
     }
   }
 
-  // Run minify
-  var minified = null;
-  try {
-    minified = minify(original, minifyOptions);
-  }
-  catch (e) {
-    status = 3;
-    process.stderr.write('Error: Minification error');
-  }
-
-  if (minifyOptions.lint) {
-    minifyOptions.lint.populate();
-  }
-
-  if (minified !== null) {
-    // Write the output
+  function runMinify(original) {
+    var status = 0;
+    var minified = null;
     try {
-      if (output !== null) {
-        fs.writeFileSync(path.resolve(output), minified);
-      }
-      else {
-        process.stdout.write(minified);
-      }
+      minified = minify(original, minifyOptions);
     }
     catch (e) {
-      status = 4;
-      process.stderr.write('Error: Cannot write to output');
+      status = 3;
+      process.stderr.write('Error: Minification error');
     }
+
+    if (minifyOptions.lint) {
+      minifyOptions.lint.populate();
+    }
+
+    if (minified !== null) {
+      // Write the output
+      try {
+        if (output !== null) {
+          fs.writeFileSync(path.resolve(output), minified);
+        }
+        else {
+          process.stdout.write(minified);
+        }
+      }
+      catch (e) {
+        status = 4;
+        process.stderr.write('Error: Cannot write to output');
+      }
+    }
+
+    cli.exit(status);
   }
-
-  cli.exit(status);
-
 });
