@@ -235,8 +235,8 @@
             chars = false;
           }
 
-        // Start tag:
         }
+        // Start tag:
         else if ( /^</.test( html ) ) {
           match = html.match( startTag );
           if ( match ) {
