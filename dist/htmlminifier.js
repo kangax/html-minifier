@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v0.7.0 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v0.7.1 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2015 Juriy "kangax" Zaytsev
  * Licensed under MIT (https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE)
  */
@@ -1055,7 +1055,9 @@
       options = { };
     }
     options.fromString = true;
-    options.output = { inline_script: true };
+    var outputOptions = options.output || {};
+    outputOptions.inline_script = true;
+    options.output = outputOptions;
 
     try {
       // try to get global reference first
