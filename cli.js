@@ -4,7 +4,7 @@
  *
  * The MIT License (MIT)
  *
- *  Copyright (c) 2014 Zoltan Frombach
+ *  Copyright (c) 2014-2015 Zoltan Frombach
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of
  *  this software and associated documentation files (the "Software"), to deal in
@@ -69,7 +69,10 @@ var mainOptions = {
   preventAttributesEscaping: [[false, 'Prevents the escaping of the values of attributes.']],
   useShortDoctype: [[false, 'Replaces the doctype with the short (HTML5) doctype']],
   removeEmptyAttributes: [[false, 'Remove all attributes with whitespace-only values']],
+  removeScriptTypeAttributes: [[false, 'Remove type="text/javascript" from script tags. Other type attribute values are left intact.']],
+  removeStyleLinkTypeAttributes: [[false, 'Remove type="text/css" from style and link tags. Other type attribute values are left intact.']],
   removeOptionalTags: [[false, 'Remove unrequired tags']],
+  removeIgnored: [[false, 'Remove all tags starting and ending with <%, %>, <?, ?>']],
   removeEmptyElements: [[false, 'Remove all elements with empty contents']],
   lint: [[false, 'Toggle linting']],
   keepClosingSlash: [[false, 'Keep the trailing slash on singleton elements']],
@@ -79,7 +82,10 @@ var mainOptions = {
   minifyURLs: [[false, 'Minify URLs in various attributes (uses relateurl)']],
   ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json'],
   processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json'],
-  maxLineLength: [[false, 'Max line length', 'number'], true]
+  maxLineLength: [[false, 'Max line length', 'number'], true],
+  customAttrAssign: [[false, 'Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', 'string'], 'json'],
+  customAttrSurround: [[false, 'Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', 'string'], 'json'],
+  customAttrCollapse: [[false, 'Regex that specifies custom attribute to strip newlines from (e.g. /ng\-class/)', 'string'], true]
 };
 
 var cliOptions = {
