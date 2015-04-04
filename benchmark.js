@@ -19,7 +19,8 @@ var fileNames = [
   'msn',
   'newyorktimes',
   'stackoverflow',
-  'wikipedia'
+  'wikipedia',
+  'es6'
 ];
 
 fileNames = fileNames.sort().reverse();
