@@ -97,6 +97,56 @@ cli.parse(cliOptions);
 
 cli.main(function(args, options) {
 
+  function parseJSONOption(value) {
+    if (value !== null) {
+      var jsonArray;
+      try {
+        jsonArray = JSON.parse(value);
+      }
+      catch (e) {}
+      if (jsonArray instanceof Array) {
+        return jsonArray;
+      }
+      else {
+        return [value];
+      }
+    }
+  }
+
+  function runMinify(original) {
+    var status = 0;
+    var minified = null;
+    try {
+      minified = minify(original, minifyOptions);
+    }
+    catch (e) {
+      status = 3;
+      process.stderr.write('Error: Minification error');
+    }
+
+    if (minifyOptions.lint) {
+      minifyOptions.lint.populate();
+    }
+
+    if (minified !== null) {
+      // Write the output
+      try {
+        if (output !== null) {
+          fs.writeFileSync(path.resolve(output), minified);
+        }
+        else {
+          process.stdout.write(minified);
+        }
+      }
+      catch (e) {
+        status = 4;
+        process.stderr.write('Error: Cannot write to output');
+      }
+    }
+
+    cli.exit(status);
+  }
+
   if (options.version) {
     process.stderr.write(appName + ' v' + appVersion);
     cli.exit(0);
@@ -165,53 +215,4 @@ cli.main(function(args, options) {
     process.stdin.pipe(concat({ encoding: 'string' }, runMinify));
   }
 
-  function parseJSONOption(value) {
-    if (value !== null) {
-      var jsonArray;
-      try {
-        jsonArray = JSON.parse(value);
-      }
-      catch (e) {}
-      if (jsonArray instanceof Array) {
-        return jsonArray;
-      }
-      else {
-        return [value];
-      }
-    }
-  }
-
-  function runMinify(original) {
-    var status = 0;
-    var minified = null;
-    try {
-      minified = minify(original, minifyOptions);
-    }
-    catch (e) {
-      status = 3;
-      process.stderr.write('Error: Minification error');
-    }
-
-    if (minifyOptions.lint) {
-      minifyOptions.lint.populate();
-    }
-
-    if (minified !== null) {
-      // Write the output
-      try {
-        if (output !== null) {
-          fs.writeFileSync(path.resolve(output), minified);
-        }
-        else {
-          process.stdout.write(minified);
-        }
-      }
-      catch (e) {
-        status = 4;
-        process.stderr.write('Error: Cannot write to output');
-      }
-    }
-
-    cli.exit(status);
-  }
 });
