@@ -831,4 +831,4 @@
     global.minify = minify;
   }
 
-}(this));
+}(typeof exports === 'undefined' ? this : exports));
