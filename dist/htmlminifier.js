@@ -1397,7 +1397,7 @@
     global.minify = minify;
   }
 
-}(this));
+}(typeof exports === 'undefined' ? this : exports));
 
 /*!
  * HTMLLint (to be used in conjunction with HTMLMinifier)
