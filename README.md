@@ -69,6 +69,26 @@ If you have chunks of markup you would like preserved, you can wrap them `<!-- h
 
 SVG tags are automatically recognized, and when they are minified, both case-sensitivity and closing-slashes are preserved, regardless of the minification settings used for the rest of the file.
 
+### Working with invalid markup
+
+HTMLMinifier *can't work with invalid or partial chunks of markup*. This is because it parses markup into a tree struture, then modifies it (removing anything that was specified for removal, ignoring anything that was specified to be ingored, etc.), then it creates a markup out of that tree and returns it. 
+
+Input markup (e.g. `<p id="">foo`)
+
+↓
+
+Internal representation of markup in a form of tree (e.g. `{tag: "p", attr: "id", children: ["foo"] }`)
+
+↓
+
+Transformation of internal representation (e.g. removal of "id" attribute)
+
+↓
+
+Output of resulting markup (e.g. `<p>foo</p>`)
+
+HTMLMinifier can't know that original markup was only half of the tree; it does its best to try to parse it as a full tree and it loses information about tree being malformed or partial in the beginning. As a result, it can't create a partial/malformed tree at the time of the output.
+
 ## Installation Instructions
 
 From NPM for use as a command line app:
