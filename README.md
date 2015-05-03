@@ -71,7 +71,7 @@ SVG tags are automatically recognized, and when they are minified, both case-sen
 
 ### Working with invalid markup
 
-HTMLMinifier *can't work with invalid or partial chunks of markup*. This is because it parses markup into a tree struture, then modifies it (removing anything that was specified for removal, ignoring anything that was specified to be ingored, etc.), then it creates a markup out of that tree and returns it. 
+HTMLMinifier **can't work with invalid or partial chunks of markup**. This is because it parses markup into a tree struture, then modifies it (removing anything that was specified for removal, ignoring anything that was specified to be ingored, etc.), then it creates a markup out of that tree and returns it. 
 
 Input markup (e.g. `<p id="">foo`)
 
