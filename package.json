@@ -17,10 +17,7 @@
     "Hugo Wetterberg <hugo@wetterberg.nu>",
     "Zoltan Frombach <tssajo@gmail.com>"
   ],
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE"
-  },
+  "license": "MIT",
   "bin": "./cli.js",
   "repository": {
     "type": "git",
