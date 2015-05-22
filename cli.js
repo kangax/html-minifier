@@ -104,21 +104,21 @@ cli.parse(cliOptions);
 cli.main(function(args, options) {
 
   function stringToRegExp(value) {
-    // JSON does not support regexes, so, e.g., JSON.parse() will not create 
-    // a RegExp from the JSON value `[ "/matchString/" ]`, which is 
+    // JSON does not support regexes, so, e.g., JSON.parse() will not create
+    // a RegExp from the JSON value `[ "/matchString/" ]`, which is
     // technically just an array containing a string that begins and end with
-    // a forward slash. To get a RegExp from a JSON string, it must be 
+    // a forward slash. To get a RegExp from a JSON string, it must be
     // constructed explicitly in JavaScript.
-    // 
+    //
     // The likelihood of actually wanting to match text that is enclosed in
-    // forward slashes is probably quite rare, so if forward slashes were 
+    // forward slashes is probably quite rare, so if forward slashes were
     // included in an argument that requires a regex, the user most likely
     // thought they were part of the syntax for specifying a regex.
-    //  
-    // In the unlikely case that forward slashes are indeed desired in the 
-    // search string, the user would need to enclose the expression in a 
+    //
+    // In the unlikely case that forward slashes are indeed desired in the
+    // search string, the user would need to enclose the expression in a
     // second set of slashes:
-    // 
+    //
     //    --customAttrSrround "[\"//matchString//\"]"
     //
     if (value) {
@@ -217,7 +217,7 @@ cli.main(function(args, options) {
           minifyOptions[key] = parseJSONOption(value);
           break;
         case 'json-regex':
-          minifyOptions[key] = parseJSONOption(value, {regexArray: true});
+          minifyOptions[key] = parseJSONOption(value, { regexArray: true });
           break;
         case 'string-regex':
           minifyOptions[key] = stringToRegExp(value);
