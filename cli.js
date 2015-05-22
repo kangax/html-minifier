@@ -80,12 +80,12 @@ var mainOptions = {
   minifyJS: [[false, 'Minify Javascript in script elements and on* attributes (uses UglifyJS)']],
   minifyCSS: [[false, 'Minify CSS in style elements and style attributes (uses clean-css)']],
   minifyURLs: [[false, 'Minify URLs in various attributes (uses relateurl)']],
-  ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json'],
-  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json'],
+  ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json-regex'],
+  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json-regex'],
   maxLineLength: [[false, 'Max line length', 'number'], true],
-  customAttrAssign: [[false, 'Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', 'string'], 'json'],
-  customAttrSurround: [[false, 'Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', 'string'], 'json'],
-  customAttrCollapse: [[false, 'Regex that specifies custom attribute to strip newlines from (e.g. /ng\-class/)', 'string'], true]
+  customAttrAssign: [[false, 'Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', 'string'], 'json-regex'],
+  customAttrSurround: [[false, 'Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', 'string'], 'json-regex'],
+  customAttrCollapse: [[false, 'Regex that specifies custom attribute to strip newlines from (e.g. /ng\-class/)', 'string'], 'string-regex']
 };
 
 var cliOptions = {
@@ -103,13 +103,49 @@ cli.parse(cliOptions);
 
 cli.main(function(args, options) {
 
-  function parseJSONOption(value) {
+  function stringToRegExp(value) {
+    // JSON does not support regexes, so, e.g., JSON.parse() will not create 
+    // a RegExp from the JSON value `[ "/matchString/" ]`, which is 
+    // technically just an array containing a string that begins and end with
+    // a forward slash. To get a RegExp from a JSON string, it must be 
+    // constructed explicitly in JavaScript.
+    // 
+    // The likelihood of actually wanting to match text that is enclosed in
+    // forward slashes is probably quite rare, so if forward slashes were 
+    // included in an argument that requires a regex, the user most likely
+    // thought they were part of the syntax for specifying a regex.
+    //  
+    // In the unlikely case that forward slashes are indeed desired in the 
+    // search string, the user would need to enclose the expression in a 
+    // second set of slashes:
+    // 
+    //    --customAttrSrround "[\"//matchString//\"]"
+    //
+    if (value) {
+      var stripSlashes = /^\/(.*)\/$/.exec(value);
+      if (stripSlashes) {
+        value = stripSlashes[1];
+      }
+      return new RegExp(value);
+    }
+  }
+
+  function parseJSONOption(value, options) {
+    var opts = options || {};
     if (value !== null) {
       var jsonArray;
       try {
         jsonArray = JSON.parse(value);
+        if (opts.regexArray) {
+          jsonArray = jsonArray.map(function (regexString) {
+            return stringToRegExp(regexString);
+          });
+        }
       }
-      catch (e) {}
+      catch (e) {
+        process.stderr.write('Error: Could not parse JSON value \'' + value + '\'');
+        cli.exit(1);
+      }
       if (jsonArray instanceof Array) {
         return jsonArray;
       }
@@ -128,6 +164,7 @@ cli.main(function(args, options) {
     catch (e) {
       status = 3;
       process.stderr.write('Error: Minification error');
+      process.stderr.write('\n' + e);
     }
 
     if (minifyOptions.lint) {
@@ -178,6 +215,12 @@ cli.main(function(args, options) {
       switch (mainOptions[key][1]) {
         case 'json':
           minifyOptions[key] = parseJSONOption(value);
+          break;
+        case 'json-regex':
+          minifyOptions[key] = parseJSONOption(value, {regexArray: true});
+          break;
+        case 'string-regex':
+          minifyOptions[key] = stringToRegExp(value);
           break;
         case true:
           minifyOptions[key] = value;
