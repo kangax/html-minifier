@@ -1,7 +1,7 @@
 /*!
  * HTMLMinifier v0.7.2 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2015 Juriy "kangax" Zaytsev
- * Licensed under MIT (https://github.com/kangax/html-minifier/blob/gh-pages/LICENSE)
+ * Licensed under the MIT license
  */
 /*!
  * HTML Parser By John Resig (ejohn.org)
