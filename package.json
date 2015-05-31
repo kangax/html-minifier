@@ -59,10 +59,11 @@
   },
   "files": [
     "dist",
+    "src",
     "cli.js",
     "sample-cli-config-file.conf",
     "CHANGELOG.md",
     "LICENSE"
   ],
-  "main": "./dist/htmlminifier.js"
+  "main": "src/htmlminifier.js"
 }
