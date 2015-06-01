@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "change-case": "2.3.x",
-    "clean-css": "3.2.x",
+    "clean-css": "3.3.x",
     "cli": "0.7.x",
     "concat-stream": "1.4.x",
     "uglify-js": "2.4.x",
