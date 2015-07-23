@@ -143,8 +143,7 @@ cli.main(function(args, options) {
         }
       }
       catch (e) {
-        process.stderr.write('Error: Could not parse JSON value \'' + value + '\'');
-        cli.exit(1);
+        cli.fatal('Could not parse JSON value \'' + value + '\'');
       }
       if (jsonArray instanceof Array) {
         return jsonArray;
@@ -163,8 +162,8 @@ cli.main(function(args, options) {
     }
     catch (e) {
       status = 3;
-      process.stderr.write('Error: Minification error');
-      process.stderr.write('\n' + e);
+      cli.error('Minification error');
+      process.stderr.write(e);
     }
 
     if (minifyOptions.lint) {
@@ -183,7 +182,7 @@ cli.main(function(args, options) {
       }
       catch (e) {
         status = 4;
-        process.stderr.write('Error: Cannot write to output');
+        cli.error('Cannot write to output');
       }
     }
 
@@ -191,7 +190,7 @@ cli.main(function(args, options) {
   }
 
   if (options.version) {
-    process.stderr.write(appName + ' v' + appVersion);
+    cli.output(appName + ' v' + appVersion);
     cli.exit(0);
   }
 
@@ -203,8 +202,7 @@ cli.main(function(args, options) {
       }
     }
     catch (e) {
-      process.stderr.write('Error: Cannot read the specified config file');
-      cli.exit(1);
+      cli.fatal('Cannot read the specified config file');
     }
   }
 
@@ -252,7 +250,7 @@ cli.main(function(args, options) {
         original += fs.readFileSync(afile, 'utf8');
       }
       catch (e) {
-        process.stderr.write('Error: Cannot read file ' + afile);
+        cli.error('Cannot read file ' + afile);
         cli.exit(2);
       }
     });
