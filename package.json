@@ -38,13 +38,13 @@
   "dependencies": {
     "change-case": "2.3.x",
     "clean-css": "3.3.x",
-    "cli": "0.7.x",
-    "concat-stream": "1.4.x",
+    "cli": "0.8.x",
+    "concat-stream": "1.5.x",
     "uglify-js": "2.4.x",
     "relateurl": "0.2.x"
   },
   "devDependencies": {
-    "chalk": "1.0.x",
+    "chalk": "1.1.x",
     "cli-table": "0.3.x",
     "grunt": "0.4.x",
     "grunt-contrib-concat": "0.5.x",
