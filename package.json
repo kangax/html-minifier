@@ -18,19 +18,19 @@
     "Zoltan Frombach <tssajo@gmail.com>"
   ],
   "license": "MIT",
-  "bin": "./cli.js",
+  "bin": {
+    "html-minifier": "./cli.js"
+  },
+  "main": "src/htmlminifier.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kangax/html-minifier"
+    "url": "git+https://github.com/kangax/html-minifier.git"
   },
   "bugs": {
     "url": "https://github.com/kangax/html-minifier/issues"
   },
   "engines": {
     "node": ">=0.10.0"
-  },
-  "directories": {
-    "test": "tests"
   },
   "scripts": {
     "test": "grunt test"
@@ -40,8 +40,8 @@
     "clean-css": "3.4.x",
     "cli": "0.10.x",
     "concat-stream": "1.5.x",
-    "uglify-js": "2.4.x",
-    "relateurl": "0.2.x"
+    "relateurl": "0.2.x",
+    "uglify-js": "2.4.x"
   },
   "devDependencies": {
     "chalk": "1.1.x",
@@ -64,6 +64,5 @@
     "sample-cli-config-file.conf",
     "CHANGELOG.md",
     "LICENSE"
-  ],
-  "main": "src/htmlminifier.js"
+  ]
 }
