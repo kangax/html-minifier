@@ -58,6 +58,7 @@ How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/min
 | `customAttrAssign`             | Arrays of regex'es that allow to support custom attribute assign expressions (e.g. `'<div flex?="{{mode != cover}}"></div>'`) | `[ ]` |
 | `customAttrSurround`           | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) | `[ ]` |
 | `customAttrCollapse`           | Regex that specifies custom attribute to strip newlines from (e.g. `/ng\-class/`) | |
+| `quoteCharacter`               | Type of quote to use for attribute values (' or ") | |
 
 ## Special cases
 
