@@ -1278,4 +1278,14 @@
     equal(minify(input, { preventAttributesEscaping: true }), input);
   });
 
+  test('quoteCharacter is single quote', function() {
+    equal(minify('<div class=\'bar\'>foo</div>', { quoteCharacter: '\'' }), '<div class=\'bar\'>foo</div>');
+    equal(minify('<div class="bar">foo</div>', { quoteCharacter: '\'' }), '<div class=\'bar\'>foo</div>');
+  });
+
+  test('quoteCharacter is not single quote or double quote', function() {
+    equal(minify('<div class=\'bar\'>foo</div>', { quoteCharacter: 'm' }), '<div class="bar">foo</div>');
+    equal(minify('<div class="bar">foo</div>', { quoteCharacter: 'm' }), '<div class="bar">foo</div>');
+  });
+
 })(typeof exports === 'undefined' ? window : exports);
