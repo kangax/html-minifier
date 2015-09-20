@@ -964,7 +964,7 @@
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = options.preventAttributesEscaping ? attr.value : attr.escaped,
-        attrQuote = options.preventAttributesEscaping ? attr.quote : '"',
+        attrQuote = options.preventAttributesEscaping ? attr.quote : (options.quoteCharacter === '\'' ? '\'' : '"'),
         attrFragment,
         emittedAttrValue,
         isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
