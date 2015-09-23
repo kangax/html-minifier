@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v0.7.2 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v0.8.0 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2015 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -911,7 +911,7 @@
   }
 
   function isOptionalTag(tag) {
-    return (/^(?:html|t?body|t?head|tfoot|tr|td|th|dt|dd|option|colgroup|source)$/).test(tag);
+    return (/^(?:html|t?body|t?head|tfoot|tr|td|th|dt|dd|option|colgroup|source|track)$/).test(tag);
   }
 
   var reEmptyAttribute = new RegExp(
