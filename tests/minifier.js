@@ -873,13 +873,13 @@
               '<source src="foo.wav">' +
               '<source src="far.wav">' +
               '<source src="foobar.wav">' +
-              '<track kind="captions" src="sampleCaptions.vtt" srclang="en">'
+              '<track kind="captions" src="sampleCaptions.vtt" srclang="en">' +
             '</audio>';
     output = '<audio controls="controls">' +
               '<source src="foo.wav">' +
               '<source src="far.wav">' +
               '<source src="foobar.wav">' +
-              '<track kind="captions" src="sampleCaptions.vtt" srclang="en">'
+              '<track kind="captions" src="sampleCaptions.vtt" srclang="en">' +
             '</audio>';
 
     equal(minify(input, { removeOptionalTags: true }), output);
