@@ -1260,7 +1260,7 @@
     '> ' +
     '</div>';
 
-    output = '<div class="fragment square" ng-hide="square1.hide" ng-class="{ \'bounceInDown\': !square1.hide, \'bounceOutDown\': square1.hide }"> </div>';
+    output = '<div class="fragment square" ng-hide="square1.hide" ng-class="{\'bounceInDown\': !square1.hide, \'bounceOutDown\': square1.hide }"> </div>';
 
     equal(minify(input, { customAttrCollapse: /ng\-class/ }), output);
   });
