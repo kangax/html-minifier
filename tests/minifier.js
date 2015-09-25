@@ -1272,14 +1272,14 @@
     equal(minify( input, { customAttrCollapse: /.+/ }), output);
   });
 
-  test('custom attribute collapse with newlines, whitespace, and carriage returns', function(){
-    input = '<div ng-class="{ \n\r' + 
-            '               value:true, \n\r'+
-            '               value2:false \n\r' + 
+  test('custom attribute collapse with newlines, whitespace, and carriage returns', function() {
+    input = '<div ng-class="{ \n\r' +
+            '               value:true, \n\r' +
+            '               value2:false \n\r' +
             '               }"></div>';
     output = '<div ng-class="{value:true,value2:false}"></div>';
 
-    equal(minify( input, {customAttrCollapse: '/ng\-class/'}), output);
+    equal(minify(input, { customAttrCollapse: /ng\-class/ }), output);
   });
 
   test('do not escape attribute value', function() {
