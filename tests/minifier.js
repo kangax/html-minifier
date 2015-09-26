@@ -1260,7 +1260,7 @@
     '> ' +
     '</div>';
 
-    output = '<div class="fragment square" ng-hide="square1.hide" ng-class="{ \'bounceInDown\': !square1.hide, \'bounceOutDown\': square1.hide }"> </div>';
+    output = '<div class="fragment square" ng-hide="square1.hide" ng-class="{\'bounceInDown\': !square1.hide, \'bounceOutDown\': square1.hide }"> </div>';
 
     equal(minify(input, { customAttrCollapse: /ng\-class/ }), output);
   });
@@ -1270,6 +1270,16 @@
     output = '<div ng-some></div>';
 
     equal(minify( input, { customAttrCollapse: /.+/ }), output);
+  });
+
+  test('custom attribute collapse with newlines, whitespace, and carriage returns', function() {
+    input = '<div ng-class="{ \n\r' +
+            '               value:true, \n\r' +
+            '               value2:false \n\r' +
+            '               }"></div>';
+    output = '<div ng-class="{value:true,value2:false}"></div>';
+
+    equal(minify(input, { customAttrCollapse: /ng\-class/ }), output);
   });
 
   test('do not escape attribute value', function() {
