@@ -1176,6 +1176,11 @@
   test('noscript', function() {
     input = '<SCRIPT SRC="x"></SCRIPT><NOSCRIPT>x</NOSCRIPT>';
     equal(minify(input), '<script src="x"></script><noscript>x</noscript>');
+
+    input = '<noscript>\n<!-- anchor linking to external file -->\n' +
+            '<a href="#" onclick="javascript:">External Link</a>\n</noscript>';
+    equal(minify(input, { removeComments: true, collapseWhitespace: true, removeEmptyAttributes: true }),
+      '<noscript><a href="#">External Link</a></noscript>');
   });
 
   test('max line length', function() {

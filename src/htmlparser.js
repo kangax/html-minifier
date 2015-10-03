@@ -68,7 +68,7 @@
   var fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected');
 
   // Special Elements (can contain anything)
-  var special = makeMap('script,style,noscript');
+  var special = makeMap('script,style');
 
   var reCache = {}, stackedTag, reStackedTag, tagMatch;
 
