@@ -671,11 +671,11 @@
     return (/^on[a-z]+/).test(attrName);
   }
 
-  function canRemoveAttributeQuotes(value) {
+  function canRemoveAttributeQuotes(value, isLast) {
     // http://mathiasbynens.be/notes/unquoted-attribute-values
-    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value) && !(/\/$/).test(value) &&
-    // make sure trailing slash is not interpreted as HTML self-closing tag
-        !(/\/$/).test(value);
+    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value) &&
+           // make sure trailing slash is not interpreted as HTML self-closing tag
+           !(isLast && (/\/$/).test(value));
   }
 
   function attributesInclude(attributes, attribute) {
@@ -960,7 +960,7 @@
     return markup;
   }
 
-  function normalizeAttribute(attr, attrs, tag, unarySlash, index, options) {
+  function normalizeAttribute(attr, attrs, tag, unarySlash, index, options, isLast) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = options.preventAttributesEscaping ? attr.value : attr.escaped,
@@ -983,7 +983,7 @@
     attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
-        !canRemoveAttributeQuotes(attrValue) || isTerminalOfUnarySlash) {
+        !canRemoveAttributeQuotes(attrValue, isLast) || isTerminalOfUnarySlash) {
       emittedAttrValue = attrQuote + attrValue + attrQuote;
     }
     else {
@@ -1218,13 +1218,14 @@
           lint.testElement(tag);
         }
 
-        var token;
+        var token, isLast;
         for (var i = 0, len = attrs.length; i < len; i++) {
+          isLast = i === len - 1;
           if (lint) {
             lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
           }
-          token = normalizeAttribute(attrs[i], attrs, tag, unarySlash, i, options);
-          if (i === len - 1) {
+          token = normalizeAttribute(attrs[i], attrs, tag, unarySlash, i, options, isLast);
+          if (isLast) {
             token += closeTag;
           }
           buffer.push(token);

@@ -505,7 +505,7 @@
     equal(minify(input, { removeAttributeQuotes: true }), '<a href=# title=foo#bar>x</a>');
 
     input = '<a href="http://example.com/" title="blah">\nfoo\n\n</a>';
-    equal(minify(input, { removeAttributeQuotes: true }), '<a href="http://example.com/" title=blah>\nfoo\n\n</a>');
+    equal(minify(input, { removeAttributeQuotes: true }), '<a href=http://example.com/ title=blah>\nfoo\n\n</a>');
 
     input = '<a title="blah" href="http://example.com/">\nfoo\n\n</a>';
     equal(minify(input, { removeAttributeQuotes: true }), '<a title=blah href="http://example.com/">\nfoo\n\n</a>');
