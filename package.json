@@ -38,10 +38,10 @@
   "dependencies": {
     "change-case": "2.3.x",
     "clean-css": "3.4.x",
-    "cli": "0.10.x",
+    "cli": "0.11.x",
     "concat-stream": "1.5.x",
     "relateurl": "0.2.x",
-    "uglify-js": "2.4.x"
+    "uglify-js": "2.5.x"
   },
   "devDependencies": {
     "chalk": "1.1.x",
