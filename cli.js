@@ -195,17 +195,30 @@ cli.main(function(args, options) {
   }
 
   if (options['config-file']) {
+    var fileOptions;
+    var fileOptionsPath = path.resolve(options['config-file']);
     try {
-      var fileOptions = JSON.parse(fs.readFileSync(path.resolve(options['config-file']), 'utf8'));
-      if ((fileOptions !== null) && (typeof fileOptions === 'object')) {
-        minifyOptions = fileOptions;
-      }
+      fs.accessSync(fileOptionsPath, fs.R_OK);
     }
     catch (e) {
-      cli.fatal('Cannot read the specified config file');
+      cli.fatal('The specified config file doesn’t exist or is unreadable:\n' + fileOptionsPath);
+    }
+    try {
+      fileOptions = JSON.parse(fs.readFileSync(fileOptionsPath), 'utf8');
+    }
+    catch (je) {
+      try {
+        fileOptions = require(fileOptionsPath);
+      }
+      catch (ne) {
+        cli.fatal('Cannot read the specified config file. \nAs JSON: ' + je.message + '\nAs module: ' + ne.message);
+      }
+    }
+
+    if (fileOptions && typeof fileOptions === 'object') {
+      minifyOptions = fileOptions;
     }
   }
-
   mainOptionKeys.forEach(function(key) {
     var paramKey = changeCase.paramCase(key);
     var value = options[paramKey];
