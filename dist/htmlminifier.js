@@ -652,7 +652,7 @@
   }
 
   function isIgnoredComment(text, options) {
-    if ((/^!/).test(text)) {
+    if ((/^!/).test(text) || /\s*htmlmin:temp/.test(text)) {
       return true;
     }
 

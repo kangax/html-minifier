@@ -1154,7 +1154,7 @@
             '@endfor' +
             '<p>....</p>';
 
-    equal(minify(input), output);
+    equal(minify(input, { removeComments: true }), output);
 
     input = '<!-- htmlmin:ignore --> <p class="logged"|cond="$is_logged === true" id="foo"> bar</p> <!-- htmlmin:ignore -->';
     output = ' <p class="logged"|cond="$is_logged === true" id="foo"> bar</p> ';
