@@ -1134,19 +1134,28 @@
     input = '<!-- htmlmin:ignore --><div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div><!-- htmlmin:ignore -->' +
             '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
 
-    output = '<!-- htmlmin:ignore --><div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div><!-- htmlmin:ignore -->' +
-            '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
-
-    equal(minify(input, { collapseWhitespace: true, removeComments: false }), output);
-
     output = '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>' +
             '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
 
-    equal(minify(input, { collapseWhitespace: true, removeComments: true }), output);
+    equal(minify(input, { collapseWhitespace: true }), output);
 
     input = '<!-- htmlmin:ignore --><!-- htmlmin:ignore -->';
-    equal(minify(input, { removeComments: true }), '');
-    equal(minify(input, { removeComments: false }), input);
+    equal(minify(input), '');
+
+    input = '<p>.....</p><!-- htmlmin:ignore -->' +
+            '@for( $i = 0 ; $i < $criterions->count() ; $i++ )' +
+                '<h1>{{ $criterions[$i]->value }}</h1>' +
+            '@endfor' +
+            '<!-- htmlmin:ignore --><p>....</p>';
+
+    output = '<p>.....</p>' +
+            '@for( $i = 0 ; $i < $criterions->count() ; $i++ )' +
+                '<h1>{{ $criterions[$i]->value }}</h1>' +
+            '@endfor' +
+            '<p>....</p>';
+
+    equal(minify(input), output);
+
   });
 
   test('meta viewport', function() {

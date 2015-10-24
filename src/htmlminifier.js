@@ -386,14 +386,6 @@
     return !(/^(?:pre|textarea)$/.test(tag));
   }
 
-  function attrsToMarkup(attrs) {
-    var markup = '';
-    for (var i = 0, len = attrs.length; i < len; i++) {
-      markup += (' ' + attrs[i].name + (isBooleanAttribute(attrs[i].value) ? '' : ('="' + attrs[i].value + '"')));
-    }
-    return markup;
-  }
-
   function normalizeAttribute(attr, attrs, tag, unarySlash, index, options, isLast) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
@@ -585,14 +577,24 @@
         stackNoTrimWhitespace = [],
         stackNoCollapseWhitespace = [],
         lint = options.lint,
-        isIgnoring = false,
-        t = new Date();
+        t = new Date(),
+        ignoredMarkupChunks = [ ],
+        reIgnore = /<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g;
 
     if (options.removeIgnored) {
       value = value
         .replace(/<\?[^\?]+\?>/g, '')
         .replace(/<%[^%]+%>/g, '');
     }
+
+    // temporarily replace ignored chunks with comments,
+    // so that we don't have to worry what's there.
+    // for all we care there might be
+    // completely-horribly-broken-alien-non-html-emoj-cthulhu-filled content
+    value = value.replace(reIgnore, function(match, group1) {
+      ignoredMarkupChunks.push(group1);
+      return '<!-- htmlmin:temp -->';
+    });
 
     function _canCollapseWhitespace(tag, attrs) {
       return canCollapseWhitespace(tag) || options.canCollapseWhitespace(tag, attrs);
@@ -606,10 +608,6 @@
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
       start: function(tag, attrs, unary, unarySlash) {
-        if (isIgnoring) {
-          buffer.push('<' + tag, attrsToMarkup(attrs), unarySlash ? '/' : '', '>');
-          return;
-        }
 
         var lowerTag = tag.toLowerCase();
 
@@ -667,11 +665,6 @@
       },
       end: function(tag, attrs) {
 
-        if (isIgnoring) {
-          buffer.push('</' + tag + '>');
-          return;
-        }
-
         var lowerTag = tag.toLowerCase();
         if (lowerTag === 'svg') {
           options = optionsStack.pop();
@@ -717,11 +710,6 @@
         prevTag = prevTag === '' ? 'comment' : prevTag;
         nextTag = nextTag === '' ? 'comment' : nextTag;
 
-        if (isIgnoring) {
-          buffer.push(text);
-          return;
-        }
-
         if (currentTag === 'script' || currentTag === 'style') {
           if (options.removeCommentsFromCDATA) {
             text = removeComments(text, currentTag);
@@ -760,13 +748,6 @@
         var prefix = nonStandard ? '<!' : '<!--';
         var suffix = nonStandard ? '>' : '-->';
 
-        if (/^\s*htmlmin:ignore/.test(text)) {
-          isIgnoring = !isIgnoring;
-          if (!options.removeComments) {
-            buffer.push('<!--' + text + '-->');
-          }
-          return;
-        }
         if (options.removeComments) {
           if (isConditionalComment(text)) {
             text = prefix + cleanConditionalComment(text) + suffix;
@@ -792,6 +773,11 @@
 
     results.push.apply(results, buffer);
     var str = joinResultSegments(results, options);
+
+    str = str.replace(/<!-- htmlmin:temp -->/g, function() {
+      return ignoredMarkupChunks.shift();
+    });
+
     log('minified in: ' + (new Date() - t) + 'ms');
     return str;
   }
