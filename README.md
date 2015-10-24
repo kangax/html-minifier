@@ -11,6 +11,8 @@ See [corresponding blog post](http://perfectionkills.com/experimenting-with-html
 
 Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_minifier), and for Node.js, [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin), [Gulp module](https://github.com/jonschlinkert/gulp-htmlmin), and [Koa middleware wrapper](https://github.com/koajs/html-minifier).
 
+## Minification comparison
+
 How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Peavy](http://www.willpeavy.com/minifier/) (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as [htmlcompressor.com](http://htmlcompressor.com) and [minimize](https://github.com/Swaagie/minimize)?
 
 | Site | Original size _(KB)_ | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
