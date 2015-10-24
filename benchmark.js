@@ -6,12 +6,15 @@ var fs = require('fs'),
     path = require('path'),
     exec = require('child_process').exec,
     chalk = require('chalk'),
-    Table = require('cli-table');
+    Table = require('cli-table'),
+
+    Minimize = require('minimize'),
+    minimize = new Minimize();
 
 var fileNames = [
   'abc',
   'amazon',
-  //'eloquentjavascript',
+  'eloquentjavascript',
   //'es6-draft',
   'es6-table',
   'google',
@@ -95,6 +98,16 @@ function test(fileName, done) {
 
             var minifiedSize = stats.size;
             var minifiedTime = new Date() - startTime;
+
+            minimize.parse(
+              fs.readFileSync(filePath),
+              function (error, data) {
+                console.log('minimize',
+                  filePath,
+                  toKb(data.length),
+                  toKb(minifiedSize));
+              }
+            );
 
             // Gzip the minified output
             exec('gzip --keep --force --best --stdout ' + minifiedFilePath + ' > ' + gzMinifiedFilePath, function () {

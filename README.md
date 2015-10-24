@@ -11,17 +11,17 @@ See [corresponding blog post](http://perfectionkills.com/experimenting-with-html
 
 Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_minifier), and for Node.js, [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin), [Gulp module](https://github.com/jonschlinkert/gulp-htmlmin), and [Koa middleware wrapper](https://github.com/koajs/html-minifier).
 
-How does HTMLMinifier compare to [another solution](http://www.willpeavy.com/minifier/) — HTML Minifier from Will Peavy (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as htmlcompressor.com?
+How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Peavy](http://www.willpeavy.com/minifier/) (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as [htmlcompressor.com](http://htmlcompressor.com) and [minimize](https://github.com/Swaagie/minimize)?
 
-| Site | Original size _(KB)_ | HTMLMinifier _(KB)_ | Will Peavy _(KB)_ | htmlcompressor.com _(KB)_ |
-| --------------------------------------------------------------------------- |:-----------:| ----------------:| ------------:| ----------------:|
-| [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>37.3</b>      |   43.3       | 41.9 |
-| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>      |   92         | 91.9 |
-| [MSN](http://msn.com)                                                       | 156.6       | <b>133</b>       |   145        | 138.3 |
-| [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>159.5</b>     |   168.3      | 163.3 |
-| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     |   225        | 218.5 |
-| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>380.6</b>     |   396.3      | n/a |
-| [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 869.5       | <b>830</b>       |   872        | n/a |
+| Site | Original size _(KB)_ | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
+| --------------------------------------------------------------------------- |:-----------:| ----------------:| ----------------:| ------------:| ----------------:|
+| [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>37.3</b>      | 41.8      |   43.3       | 41.9 |
+| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>      | 94.1      |   92         | 91.9 |
+| [MSN](http://msn.com)                                                       | 156.6       | <b>133</b>       | 137.7     |   145        | 138.3 |
+| [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>159.5</b>     | 165.1     |   168.3      | 163.3 |
+| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     | 234.1     |   225        | 218.5 |
+| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>380.6</b>     | 386.6     |   396.3      | n/a |
+| [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 869.5       | <b>830</b>       | 838       |   872        | n/a |
 
 
 
@@ -72,7 +72,7 @@ SVG tags are automatically recognized, and when they are minified, both case-sen
 
 ### Working with invalid markup
 
-HTMLMinifier **can't work with invalid or partial chunks of markup**. This is because it parses markup into a tree structure, then modifies it (removing anything that was specified for removal, ignoring anything that was specified to be ingored, etc.), then it creates a markup out of that tree and returns it. 
+HTMLMinifier **can't work with invalid or partial chunks of markup**. This is because it parses markup into a tree structure, then modifies it (removing anything that was specified for removal, ignoring anything that was specified to be ingored, etc.), then it creates a markup out of that tree and returns it.
 
 Input markup (e.g. `<p id="">foo`)
 
