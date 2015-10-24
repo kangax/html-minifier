@@ -1156,6 +1156,11 @@
 
     equal(minify(input), output);
 
+    input = '<!-- htmlmin:ignore --> <p class="logged"|cond="$is_logged === true" id="foo"> bar</p> <!-- htmlmin:ignore -->';
+    output = ' <p class="logged"|cond="$is_logged === true" id="foo"> bar</p> ';
+
+    equal(minify(input), output);
+
   });
 
   test('meta viewport', function() {
