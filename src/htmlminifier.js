@@ -579,12 +579,24 @@
         lint = options.lint,
         t = new Date(),
         ignoredMarkupChunks = [ ],
-        reIgnore = /<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g;
+        ignoredCustomMarkupChunks = [ ],
+        reIgnore = /<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g,
+        uidAttr = ' htmlmin' + (Math.random() + '').slice(2) + ' ',
+        reCustomIgnore,
+        customFragments;
 
-    if (options.removeIgnored) {
-      value = value
-        .replace(/<\?[^\?]+\?>/g, '')
-        .replace(/<%[^%]+%>/g, '');
+    if (options.ignoreCustomFragments) {
+
+      customFragments = options.ignoreCustomFragments.map(function(re) {
+        return re.source;
+      });
+      reCustomIgnore = new RegExp('(?:' + customFragments.join('|') + ')', 'g');
+
+      // temporarily replace custom ignored fragments with unique attributes
+      value = value.replace(reCustomIgnore, function(match) {
+        ignoredCustomMarkupChunks.push(match);
+        return uidAttr;
+      });
     }
 
     // temporarily replace ignored chunks with comments,
@@ -774,6 +786,11 @@
     results.push.apply(results, buffer);
     var str = joinResultSegments(results, options);
 
+    var customIgnoreRe = new RegExp('\\s*' + trimWhitespace(uidAttr) + '\\s*', 'g');
+
+    str = str.replace(customIgnoreRe, function() {
+      return ignoredCustomMarkupChunks.shift();
+    });
     str = str.replace(/<!-- htmlmin:temp -->/g, function() {
       return ignoredMarkupChunks.shift();
     });

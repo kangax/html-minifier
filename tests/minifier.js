@@ -823,26 +823,74 @@
   });
 
   // https://github.com/kangax/html-minifier/issues/10
-  test('Ignored tags: enabled by default', function() {
+  test('Ignore custom fragments', function() {
 
-    input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
-    output = 'This is the start.<% ... %><%= ... %><? ... ?>No comment, but middle.<?= ... ?><?php ... ?><?xml ... ?>Hello, this is the end!';
-    equal(minify(input, {}), input);
-    equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
-    output = 'This is the start.No comment, but middle. Hello, this is the end!';
-    equal(minify(input, { removeComments: true, collapseWhitespace: true, removeIgnored: true }), output);
+    // var reFragments = [ /<\?[^\?]+\?>/g, /<%[^%]+%>/g ];
 
-    input = '<% if foo? %>\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n<% end %>';
-    output = '<% if foo? %><div class="bar">...</div><% end %>';
-    equal(minify(input, {}), input);
-    equal(minify(input, { collapseWhitespace: true }), output);
-    output = '<div class="bar">...</div>';
-    equal(minify(input, { collapseWhitespace: true, removeIgnored: true }), output);
+    // input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
+    // output = 'This is the start.<% ... %><%= ... %><? ... ?>No comment, but middle.<?= ... ?><?php ... ?><?xml ... ?>Hello, this is the end!';
 
-    input = '<a class="<% if foo? %>bar<% end %>"></a>';
-    equal(minify(input, {}), input);
-    output = '<a class="bar"></a>';
-    equal(minify(input, { removeIgnored: true }), output);
+    // equal(minify(input, {}), input);
+    // equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
+
+    // output = 'This is the start.No comment, but middle. Hello, this is the end!';
+
+    // equal(minify(input, {
+    //   removeComments: true,
+    //   collapseWhitespace: true,
+    //   ignoreCustomFragments: reFragments
+    // }), output);
+
+    // input = '<% if foo? %>\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n<% end %>';
+    // output = '<% if foo? %><div class="bar">...</div><% end %>';
+    // equal(minify(input, {}), input);
+    // equal(minify(input, { collapseWhitespace: true }), output);
+    // output = '<div class="bar">...</div>';
+    // equal(minify(input, { collapseWhitespace: true, ignoreCustomFragments: reFragments }), output);
+
+    // input = '<a class="<% if foo? %>bar<% end %>"></a>';
+    // equal(minify(input, {}), input);
+    // output = '<a class="bar"></a>';
+    // equal(minify(input, { ignoreCustomFragments: reFragments }), output);
+
+    input = '<img src="{% static "images/logo.png" %}">';
+    output = '<img src="{% static "images/logo.png" %}">';
+
+    equal(minify(input, { ignoreCustomFragments: [ (/\{\%[^\%]*?\%\}/g) ] }), output);
+
+    input = '<p{% if form.name.errors %}class=\'error\'{% endif %}>' +
+              '{{ form.name.label_tag }}' +
+              '{{ form.name }}' +
+              '{% if form.name.errors %}' +
+              '{% for error in form.name.errors %}' +
+              '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }}</span>' +
+              '{% endfor %}' +
+              '{% endif %}' +
+            '</p>';
+    output = '';
+
+    equal(minify(input, {
+      ignoreCustomFragments: [
+        /\{\%[\s\S]*?\%\}/g,
+        /\{\{[\s\S]*?\}\}/g
+      ],
+      quoteCharacter: '\''
+    }), input);
+
+    input = '<a href="/legal.htm"<?php echo e(Request::path() == \'/\' ? \' rel="nofollow"\':\'\'); ?>>Legal Notices</a>';
+    equal(minify(input, {
+      ignoreCustomFragments: [
+        /<\?php[\s\S]*?\?>/g
+      ]
+    }), input);
+
+    input = '<input type="checkbox"<%= (model.isChecked ? \'checked="checked"\' : \'\') %>>';
+    equal(minify(input, {
+      ignoreCustomFragments: [
+        /<\%=[\s\S]*?%>/g
+      ]
+    }), input);
+
   });
 
   test('bootstrap\'s span > button > span', function() {
