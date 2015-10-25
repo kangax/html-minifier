@@ -891,6 +891,16 @@
       ]
     }), input);
 
+    input = '<div' +
+              '{{IF text}}' +
+              'data-yashareDescription="{{shorted(text, 300)}}"' +
+              '{{END IF}}></div>';
+    equal(minify(input, {
+      ignoreCustomFragments: [
+        /\{\{[\s\S]*?\}\}/g
+      ],
+      caseSensitive: true
+    }), input);
   });
 
   test('bootstrap\'s span > button > span', function() {
