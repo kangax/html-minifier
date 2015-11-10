@@ -91,7 +91,9 @@ var mainOptions = {
 var cliOptions = {
   version: ['v', 'Version information'],
   output: ['o', 'Specify output file (if not specified STDOUT will be used for output)', 'file'],
-  'config-file': ['c', 'Use config file', 'file']
+  'config-file': ['c', 'Use config file', 'file'],
+  'input-dir': [false, 'Specify an input directory', 'dir'],
+  'output-dir': [false, 'Specify an output directory', 'dir']
 };
 
 var mainOptionKeys = Object.keys(mainOptions);
@@ -154,7 +156,7 @@ cli.main(function(args, options) {
     }
   }
 
-  function runMinify(original) {
+  function runMinify(original, output) {
     var status = 0;
     var minified = null;
     try {
@@ -182,11 +184,42 @@ cli.main(function(args, options) {
       }
       catch (e) {
         status = 4;
+        console.log(output);
         cli.error('Cannot write to output');
       }
     }
+  }
 
-    cli.exit(status);
+  function createDirectory(path){
+    try{
+      fs.mkdirSync(path);
+    }
+    catch(e){
+       if (e.code == 'EEXIST') {
+         return;
+       }
+      cli.fatal('Can not create directory ' + path);
+      cli.exit(3);
+    }
+  }
+
+  function processDirectory(inputDir, outputDir) {
+    createDirectory(outputDir);
+    var fileList = fs.readdirSync(inputDir);
+
+    fileList.forEach(function(fileName){
+      var inputFilePath = inputDir + '/' + fileName;
+      var outputFilePath = outputDir + '/' + fileName;
+
+      var stat = fs.statSync(inputFilePath);
+      if (stat.isDirectory()) {
+        processDirectory(inputFilePath, outputFilePath);
+        return;
+      }
+
+      var originalContent = fs.readFileSync(inputFilePath, 'utf8');
+      runMinify(originalContent, outputFilePath);
+    });
   }
 
   if (options.version) {
@@ -250,6 +283,41 @@ cli.main(function(args, options) {
     input = args;
   }
 
+  if (options['input-dir'] || options['output-dir']) {
+    var inputDir = options['input-dir'];
+    var outputDir = options['output-dir'];
+
+    if (!inputDir) {
+      cli.error('The option output-dir need to be use with the option include-dir. If you are working with only 1 file, use -o.');
+      cli.exit(2);
+    }
+
+    try {
+      fs.statSync(inputDir);
+    }
+    catch(e) {
+      cli.error('The input directory does not exits');
+      cli.exit(2);
+    }
+
+
+    if (!outputDir) {
+      cli.error('You need to specify where to write the output files with the option --output-dir');
+      cli.exit(2);
+    }
+
+    try{
+      processDirectory(inputDir, outputDir);
+    } catch(e) {
+      cli.error('Something wrong happened');
+      cli.error(e);
+      cli.exit(3);
+    }
+
+    cli.exit(0);
+    return;
+  }
+
   if (options.output) {
     output = options.output;
   }
@@ -268,11 +336,11 @@ cli.main(function(args, options) {
       }
     });
 
-    runMinify(original);
+    runMinify(original, output);
 
   }
   else { // Minifying input coming from STDIN
     process.stdin.pipe(concat({ encoding: 'string' }, runMinify));
   }
-
+  cli.exit(status);
 });
