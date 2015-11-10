@@ -190,14 +190,14 @@ cli.main(function(args, options) {
     }
   }
 
-  function createDirectory(path){
-    try{
+  function createDirectory(path) {
+    try {
       fs.mkdirSync(path);
     }
-    catch(e){
-       if (e.code == 'EEXIST') {
-         return;
-       }
+    catch (e) {
+      if (e.code === 'EEXIST') {
+        return;
+      }
       cli.fatal('Can not create directory ' + path);
       cli.exit(3);
     }
@@ -207,7 +207,7 @@ cli.main(function(args, options) {
     createDirectory(outputDir);
     var fileList = fs.readdirSync(inputDir);
 
-    fileList.forEach(function(fileName){
+    fileList.forEach(function(fileName) {
       var inputFilePath = inputDir + '/' + fileName;
       var outputFilePath = outputDir + '/' + fileName;
 
@@ -295,7 +295,7 @@ cli.main(function(args, options) {
     try {
       fs.statSync(inputDir);
     }
-    catch(e) {
+    catch (e) {
       cli.error('The input directory does not exits');
       cli.exit(2);
     }
@@ -306,9 +306,10 @@ cli.main(function(args, options) {
       cli.exit(2);
     }
 
-    try{
+    try {
       processDirectory(inputDir, outputDir);
-    } catch(e) {
+    }
+    catch (e) {
       cli.error('Something wrong happened');
       cli.error(e);
       cli.exit(3);
