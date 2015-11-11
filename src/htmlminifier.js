@@ -47,7 +47,7 @@
       'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
       'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q',
       'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
-      'sub', 'sup', 'time', 'tt', 'u', 'var'
+      'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
     ],
     lineBreakBefore = /^[\t ]*[\n\r]+[\t\n\r ]*/,
     lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/,
@@ -586,7 +586,7 @@
       log(err);
     }
 
-    return text;
+    return text.trim();
   }
 
   function minify(value, options) {
