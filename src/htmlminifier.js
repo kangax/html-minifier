@@ -47,7 +47,7 @@
       'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
       'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q',
       'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
-      'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
+      'sub', 'sup', 'time', 'tt', 'u', 'var'
     ],
     lineBreakBefore = /^[\t ]*[\n\r]+[\t\n\r ]*/,
     lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/,
@@ -561,6 +561,34 @@
     return text;
   }
 
+  function minifySVG(text, options) {
+    if (!text.trim().length) {
+      return text;
+    }
+
+    if (typeof options !== 'object') {
+      options = { };
+    }
+
+    try {
+      if (typeof require === 'function'){
+        var SVGO = require( 'svgo' );
+
+        if (text){
+          var svgo1 = new SVGO(options);
+          svgo1.optimize(text, function (rr) {
+            text = rr.data;
+          });
+        }
+      }
+    }
+    catch (err) {
+      log(err);
+    }
+
+    return text;
+  }
+
   function minify(value, options) {
 
     options = options || {};
@@ -738,6 +766,9 @@
         }
         if (currentTag === 'style' && options.minifyCSS) {
           text = minifyCSS(text, options.minifyCSS);
+        }
+        if (currentTag === 'svg' && options.minifySVG) {
+          text = minifySVG(text, options.minifySVG);
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {
