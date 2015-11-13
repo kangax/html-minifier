@@ -41,7 +41,7 @@
     "cli": "0.11.x",
     "concat-stream": "1.5.x",
     "relateurl": "0.2.x",
-    "uglify-js": "2.5.x"
+    "uglify-js": "2.6.x"
   },
   "devDependencies": {
     "chalk": "1.1.x",
@@ -52,7 +52,7 @@
     "grunt-contrib-qunit": "0.7.x",
     "grunt-contrib-uglify": "0.10.x",
     "grunt-exec": "0.4.x",
-    "grunt-jscs": "2.2.x",
+    "grunt-jscs": "2.3.x",
     "load-grunt-tasks": "3.3.x",
     "qunit": "0.7.x",
     "time-grunt": "1.2.x"
