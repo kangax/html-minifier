@@ -622,12 +622,12 @@
     lineBreakStamp = 'htmlmincollapsedlinebreak';
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.substr(0, 1) !== '/'
-      || (prevTag.substr(0, 1) === '/' && tags.indexOf(prevTag.substr(1)) === -1))) {
+      || (prevTag.substr(0, 1) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
       str = str.replace(/^\s+/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveBefore : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.substr(0, 1) === '/'
-      || (nextTag.substr(0, 1) !== '/' && tags.indexOf(nextTag) === -1))) {
+      || (nextTag.substr(0, 1) !== '/' && (options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)))) {
       str = str.replace(/\s+$/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveAfter : '');
     }
 
