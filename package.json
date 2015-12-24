@@ -41,6 +41,7 @@
     "cli": "0.11.x",
     "concat-stream": "1.5.x",
     "relateurl": "0.2.x",
+    "svgo": "^0.6.0",
     "uglify-js": "2.6.x"
   },
   "devDependencies": {
