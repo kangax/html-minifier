@@ -345,5 +345,5 @@ cli.main(function(args, options) {
   else { // Minifying input coming from STDIN
     process.stdin.pipe(concat({ encoding: 'string' }, runMinify));
   }
-  cli.exit(status);
+  cli.exit();
 });
