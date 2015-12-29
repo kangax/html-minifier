@@ -190,6 +190,8 @@ cli.main(function(args, options) {
         cli.error('Cannot write to output');
       }
     }
+    
+    cli.exit(status);
   }
 
   function createDirectory(path) {
@@ -345,5 +347,4 @@ cli.main(function(args, options) {
   else { // Minifying input coming from STDIN
     process.stdin.pipe(concat({ encoding: 'string' }, runMinify));
   }
-  cli.exit(status);
 });
