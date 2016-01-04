@@ -430,6 +430,14 @@
     equal(minify(input, { removeRedundantAttributes: true }), output);
   });
 
+  // https://github.com/kangax/html-minifier/issues/431
+  test('removing redundant attributes spellchecker', function() {
+    equal(minify('<input spellcheck="true" >', { removeRedundantAttributes: true } ), '<input>');
+    equal(minify('<input spellcheck="lol" >', { removeRedundantAttributes: true } ), '<input>');
+    equal(minify('<input spellcheck="false" >', { removeRedundantAttributes: true } ), '<input spellcheck="false">');
+    equal(minify('<input autocomplete="off" spellcheck="true" >', { removeRedundantAttributes: true } ), '<input autocomplete="off">');
+  });
+
   test('removing redundant attributes (&lt;... = "javascript: ..." ...>)', function() {
     input = '<p onclick="javascript:alert(1)">x</p>';
     equal(minify(input, { cleanAttributes: true }), '<p onclick="alert(1)">x</p>');
@@ -714,11 +722,11 @@
       'Enabled=foo Formnovalidate=foo Hidden=foo Indeterminate=foo Inert=foo Ismap=foo Itemscope=foo ' +
       'Loop=foo Multiple=foo Muted=foo Nohref=foo Noresize=foo Noshade=foo Novalidate=foo Nowrap=foo Open=foo ' +
       'Pauseonexit=foo Readonly=foo Required=foo Reversed=foo Scoped=foo Seamless=foo Selected=foo Sortable=foo ' +
-      'Spellcheck=foo Truespeed=foo Typemustmatch=foo Visible=foo></div>';
+      'Truespeed=foo Typemustmatch=foo Visible=foo></div>';
     output = '<div Allowfullscreen Async Autofocus Autoplay Checked Compact Controls Declare Default Defaultchecked ' +
       'Defaultmuted Defaultselected Defer Disabled Enabled Formnovalidate Hidden Indeterminate Inert ' +
       'Ismap Itemscope Loop Multiple Muted Nohref Noresize Noshade Novalidate Nowrap Open Pauseonexit Readonly ' +
-      'Required Reversed Scoped Seamless Selected Sortable Spellcheck Truespeed Typemustmatch Visible></div>';
+      'Required Reversed Scoped Seamless Selected Sortable Truespeed Typemustmatch Visible></div>';
     equal(minify(input, { collapseBooleanAttributes: true, caseSensitive: true }), output);
   });
 
