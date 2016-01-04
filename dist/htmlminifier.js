@@ -1,6 +1,6 @@
 /*!
- * HTMLMinifier v1.0.1 (http://kangax.github.io/html-minifier/)
- * Copyright 2010-2015 Juriy "kangax" Zaytsev
+ * HTMLMinifier v1.1.0 (http://kangax.github.io/html-minifier/)
+ * Copyright 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
 /*!
@@ -73,7 +73,7 @@
   var fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected');
 
   // Special Elements (can contain anything)
-  var special = makeMap('script,style');
+  var special = makeMap('script,style,svg');
 
   var reCache = {}, stackedTag, reStackedTag, tagMatch;
 
@@ -1127,6 +1127,34 @@
     return text;
   }
 
+  function minifySVG(text, options) {
+    if (!text.trim().length) {
+      return text;
+    }
+
+    if (typeof options !== 'object') {
+      options = { };
+    }
+
+    try {
+      if (typeof require === 'function'){
+        var SVGO = require( 'svgo' );
+
+        if (text){
+          var svgo1 = new SVGO(options);
+          svgo1.optimize(text, function (rr) {
+            text = rr.data;
+          });
+        }
+      }
+    }
+    catch (err) {
+      log(err);
+    }
+
+    return text.trim();
+  }
+
   function minify(value, options) {
 
     options = options || {};
@@ -1304,6 +1332,9 @@
         }
         if (currentTag === 'style' && options.minifyCSS) {
           text = minifyCSS(text, options.minifyCSS);
+        }
+        if (currentTag === 'svg' && options.minifySVG) {
+          text = minifySVG(text, options.minifySVG);
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {

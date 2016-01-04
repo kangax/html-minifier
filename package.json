@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "HTML minifier with lint-like capabilities.",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "keywords": [
     "html",
     "minifier",
