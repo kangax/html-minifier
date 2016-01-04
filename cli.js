@@ -79,7 +79,6 @@ var mainOptions = {
   caseSensitive: [[false, 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)']],
   minifyJS: [[false, 'Minify Javascript in script elements and on* attributes (uses UglifyJS)']],
   minifyCSS: [[false, 'Minify CSS in style elements and style attributes (uses clean-css)']],
-  minifySVG:[[false, 'Minify SVG (uses SVGO)']],
   minifyURLs: [[false, 'Minify URLs in various attributes (uses relateurl)']],
   ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json-regex'],
   processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json-regex'],
