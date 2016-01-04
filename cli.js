@@ -73,7 +73,6 @@ var mainOptions = {
   removeScriptTypeAttributes: [[false, 'Remove type="text/javascript" from script tags. Other type attribute values are left intact.']],
   removeStyleLinkTypeAttributes: [[false, 'Remove type="text/css" from style and link tags. Other type attribute values are left intact.']],
   removeOptionalTags: [[false, 'Remove unrequired tags']],
-  removeIgnored: [[false, 'Remove all tags starting and ending with <%, %>, <?, ?>']],
   removeEmptyElements: [[false, 'Remove all elements with empty contents']],
   lint: [[false, 'Toggle linting']],
   keepClosingSlash: [[false, 'Keep the trailing slash on singleton elements']],
@@ -190,7 +189,7 @@ cli.main(function(args, options) {
         cli.error('Cannot write to output');
       }
     }
-    
+
     cli.exit(status);
   }
 
