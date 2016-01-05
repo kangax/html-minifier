@@ -175,7 +175,7 @@ cli.main(function(args, options) {
     if (minified !== null) {
       // Write the output
       try {
-        if (output !== null) {
+        if (output != null) {
           fs.writeFileSync(path.resolve(output), minified);
         }
         else {
