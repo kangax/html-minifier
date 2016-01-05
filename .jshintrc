@@ -8,5 +8,6 @@
   "node":       true,
   "strict":     true,
   "undef":      true,
-  "unused":     true
+  "unused":     true,
+  "eqnull":     true
 }
