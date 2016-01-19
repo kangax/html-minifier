@@ -508,7 +508,7 @@
     equal(minify(input, { removeAttributeQuotes: true }), '<a href=http://example.com/ title=blah>\nfoo\n\n</a>');
 
     input = '<a title="blah" href="http://example.com/">\nfoo\n\n</a>';
-    equal(minify(input, { removeAttributeQuotes: true }), '<a title=blah href="http://example.com/">\nfoo\n\n</a>');
+    equal(minify(input, { removeAttributeQuotes: true }), '<a title=blah href=http://example.com/ >\nfoo\n\n</a>');
 
     input = '<p class=foo|bar:baz></p>';
     equal(minify(input, { removeAttributeQuotes: true }), '<p class=foo|bar:baz></p>');
@@ -739,8 +739,8 @@
   test('keeping trailing slashes in tags', function() {
     equal(minify('<img src="test"/>', { keepClosingSlash: true }), '<img src="test"/>');
     // https://github.com/kangax/html-minifier/issues/233
-    equal(minify('<img src="test"/>', { keepClosingSlash: true, removeAttributeQuotes: true }), '<img src="test"/>');
-    equal(minify('<img title="foo" src="test"/>', { keepClosingSlash: true, removeAttributeQuotes: true }), '<img title=foo src="test"/>');
+    equal(minify('<img src="test"/>', { keepClosingSlash: true, removeAttributeQuotes: true }), '<img src=test />');
+    equal(minify('<img title="foo" src="test"/>', { keepClosingSlash: true, removeAttributeQuotes: true }), '<img title=foo src=test />');
   });
 
   test('removing optional tags', function() {

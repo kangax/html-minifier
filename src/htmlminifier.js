@@ -105,11 +105,9 @@
     return (/^on[a-z]+/).test(attrName);
   }
 
-  function canRemoveAttributeQuotes(value, isLast) {
+  function canRemoveAttributeQuotes(value) {
     // http://mathiasbynens.be/notes/unquoted-attribute-values
-    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value) &&
-           // make sure trailing slash is not interpreted as HTML self-closing tag
-           !(isLast && (/\/$/).test(value));
+    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value);
   }
 
   function attributesInclude(attributes, attribute) {
@@ -386,14 +384,13 @@
     return !(/^(?:pre|textarea)$/.test(tag));
   }
 
-  function normalizeAttribute(attr, attrs, tag, unarySlash, index, options, isLast) {
+  function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isLast) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
         attrValue = options.preventAttributesEscaping ? attr.value : attr.escaped,
         attrQuote = options.preventAttributesEscaping ? attr.quote : (options.quoteCharacter === '\'' ? '\'' : '"'),
         attrFragment,
-        emittedAttrValue,
-        isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
+        emittedAttrValue;
 
     if ((options.removeRedundantAttributes &&
       isAttributeRedundant(tag, attrName, attrValue, attrs))
@@ -409,8 +406,12 @@
     attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
-        !canRemoveAttributeQuotes(attrValue, isLast) || isTerminalOfUnarySlash) {
+        !canRemoveAttributeQuotes(attrValue)) {
       emittedAttrValue = attrQuote + attrValue + attrQuote;
+    }
+    // make sure trailing slash is not interpreted as HTML self-closing tag
+    else if (isLast && (hasUnarySlash || /\/$/.test(attrValue))) {
+      emittedAttrValue = attrValue + ' ';
     }
     else {
       emittedAttrValue = attrValue;
@@ -651,7 +652,8 @@
         }
 
         var openTag = '<' + tag;
-        var closeTag = ((unarySlash && options.keepClosingSlash) ? '/' : '') + '>';
+        var hasUnarySlash = unarySlash && options.keepClosingSlash;
+        var closeTag = (hasUnarySlash ? '/' : '') + '>';
         if (attrs.length === 0) {
           openTag += closeTag;
         }
@@ -668,7 +670,7 @@
           if (lint) {
             lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
           }
-          token = normalizeAttribute(attrs[i], attrs, tag, unarySlash, i, options, isLast);
+          token = normalizeAttribute(attrs[i], attrs, tag, hasUnarySlash, i, options, isLast);
           if (isLast) {
             token += closeTag;
           }
