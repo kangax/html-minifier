@@ -405,6 +405,11 @@
 
     attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
+    if (options.removeEmptyAttributes &&
+        canDeleteEmptyAttribute(tag, attrName, attrValue)) {
+      return '';
+    }
+
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue)) {
       emittedAttrValue = attrQuote + attrValue + attrQuote;
@@ -415,11 +420,6 @@
     }
     else {
       emittedAttrValue = attrValue;
-    }
-
-    if (options.removeEmptyAttributes &&
-        canDeleteEmptyAttribute(tag, attrName, attrValue)) {
-      return '';
     }
 
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
