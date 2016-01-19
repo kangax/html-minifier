@@ -653,10 +653,6 @@
 
         var openTag = '<' + tag;
         var hasUnarySlash = unarySlash && options.keepClosingSlash;
-        var closeTag = (hasUnarySlash ? '/' : '') + '>';
-        if (attrs.length === 0) {
-          openTag += closeTag;
-        }
 
         buffer.push(openTag);
 
@@ -664,18 +660,20 @@
           lint.testElement(tag);
         }
 
-        var token, isLast;
-        for (var i = 0, len = attrs.length; i < len; i++) {
-          isLast = i === len - 1;
+        var token, isLast = true;
+        var insert = buffer.length;
+        for (var i = attrs.length; --i >= 0; ) {
           if (lint) {
             lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
           }
           token = normalizeAttribute(attrs[i], attrs, tag, hasUnarySlash, i, options, isLast);
-          if (isLast) {
-            token += closeTag;
+          if (token) {
+            isLast = false;
+            buffer.splice(insert, 0, token);
           }
-          buffer.push(token);
         }
+
+        buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');
       },
       end: function(tag, attrs) {
 
