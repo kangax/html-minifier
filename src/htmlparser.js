@@ -91,7 +91,9 @@
         // Capture the custom attribute opening and closing markup surrounding the standard attribute rules
         attrClauses[i] = '(?:\\s*'
           + handler.customAttrSurround[i][0].source
+          + '\\s*'
           + startTagAttrs.source
+          + '\\s*'
           + handler.customAttrSurround[i][1].source
           + ')';
       }
@@ -125,9 +127,9 @@
       var attrClauses = [];
       for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
         attrClauses[i] = '(?:'
-          + '(' + handler.customAttrSurround[i][0].source + ')'
+          + '(' + handler.customAttrSurround[i][0].source + ')\\s*'
           + singleAttr.source
-          + '(' + handler.customAttrSurround[i][1].source + ')'
+          + '\\s*(' + handler.customAttrSurround[i][1].source + ')'
           + ')';
       }
       attrClauses.unshift('(?:' + singleAttr.source + ')');

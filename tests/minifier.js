@@ -545,7 +545,7 @@
     input = '<input {{#unless value}}checked="checked"{{/unless}}>';
     equal(minify(input, customAttrOptions), input);
 
-    input = '<input {{#if value1}}data-attr="example"{{/if}} {{#unless value2}}checked="checked"{{/unless}}>';
+    input = '<input {{#if value1}}data-attr="example" {{/if}}{{#unless value2}}checked="checked"{{/unless}}>';
     equal(minify(input, customAttrOptions), input);
 
     input = '<input checked="checked">';
@@ -564,8 +564,11 @@
     input = '<input {{#if value}}checked="checked"{{/if}}>';
     equal(minify(input, customAttrOptions), '<input {{#if value}}checked{{/if}}>');
 
-    input = '<input {{#if value1}}checked="checked"{{/if}} {{#if value2}}data-attr="foo"{{/if}}>';
-    equal(minify(input, customAttrOptions), '<input {{#if value1}}checked{{/if}} {{#if value2}}data-attr=foo{{/if}}>');
+    input = '<input {{#if value1}}checked="checked"{{/if}} {{#if value2}}data-attr="foo"{{/if}}/>';
+    equal(minify(input, customAttrOptions), '<input {{#if value1}}checked {{/if}}{{#if value2}}data-attr=foo{{/if}}>');
+
+    customAttrOptions.keepClosingSlash = true;
+    equal(minify(input, customAttrOptions), '<input {{#if value1}}checked {{/if}}{{#if value2}}data-attr=foo {{/if}}/>');
   });
 
   test('preserving custom attribute-joining markup', function() {
@@ -1312,25 +1315,25 @@
     equal(minify('<script>alert(\'-->\')<\/script>', options), '<script>alert(\'-->\')\n<\/script>');
 
     equal(minify('<a title="x"href=" ">foo</a>', options), '<a title="x" href="">foo\n</a>');
-    equal(minify('<p id=""class=""title="">x', options), '<p id="" class=""\n title="">x</p>');
+    equal(minify('<p id=""class=""title="">x', options), '<p id="" class="" \ntitle="">x</p>');
     equal(minify('<p x="x\'"">x</p>', options), '<p x="x\'">x</p>', 'trailing quote should be ignored');
     equal(minify('<a href="#"><p>Click me</p></a>', options), '<a href="#"><p>Click me\n</p></a>');
     equal(minify('<span><button>Hit me</button></span>', options), '<span><button>Hit me\n</button></span>');
     equal(minify('<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>', options),
-      '<object\n type="image/svg+xml"\n data="image.svg"><div>\n[fallback image]</div>\n</object>'
+      '<object \ntype="image/svg+xml" \ndata="image.svg"><div>\n[fallback image]</div>\n</object>'
     );
 
     equal(minify('<ng-include src="x"></ng-include>', options), '<ng-include src="x">\n</ng-include>');
     equal(minify('<ng:include src="x"></ng:include>', options), '<ng:include src="x">\n</ng:include>');
     equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>', options),
-      '<ng-include\n src="\'views/partial-notification.html\'">\n</ng-include><div\n ng-view=""></div>'
+      '<ng-include \nsrc="\'views/partial-notification.html\'">\n</ng-include><div \nng-view=""></div>'
     );
     equal(minify('<some-tag-1></some-tag-1><some-tag-2></some-tag-2>', options),
       '<some-tag-1>\n</some-tag-1>\n<some-tag-2>\n</some-tag-2>'
     );
     equal(minify('[\']["]', options), '[\']["]');
     equal(minify('<a href="test.html"><div>hey</div></a>', options), '<a href="test.html">\n<div>hey</div></a>');
-    equal(minify(':) <a href="http://example.com">link</a>', options), ':) <a\n href="http://example.com">\nlink</a>');
+    equal(minify(':) <a href="http://example.com">link</a>', options), ':) <a \nhref="http://example.com">\nlink</a>');
 
     equal(minify('<a href>ok</a>', options), '<a href>ok</a>');
   });
@@ -1406,6 +1409,40 @@
   test('quoteCharacter is not single quote or double quote', function() {
     equal(minify('<div class=\'bar\'>foo</div>', { quoteCharacter: 'm' }), '<div class="bar">foo</div>');
     equal(minify('<div class="bar">foo</div>', { quoteCharacter: 'm' }), '<div class="bar">foo</div>');
+  });
+
+  test('remove space between attributes', function() {
+    var input, output;
+    var options = {
+      collapseBooleanAttributes: true,
+      keepClosingSlash: true,
+      removeAttributeQuotes: true,
+      removeTagWhitespace: true
+    };
+
+    input = '<input data-attr="example" value="hello world!" checked="checked">';
+    output = '<input data-attr=example value="hello world!"checked>';
+    equal(minify(input, options), output);
+
+    input = '<input checked="checked" value="hello world!" data-attr="example">';
+    output = '<input checked value="hello world!"data-attr=example>';
+    equal(minify(input, options), output);
+
+    input = '<input checked="checked" data-attr="example" value="hello world!">';
+    output = '<input checked data-attr=example value="hello world!">';
+    equal(minify(input, options), output);
+
+    input = '<input data-attr="example" value="hello world!" checked="checked"/>';
+    output = '<input data-attr=example value="hello world!"checked/>';
+    equal(minify(input, options), output);
+
+    input = '<input checked="checked" value="hello world!" data-attr="example"/>';
+    output = '<input checked value="hello world!"data-attr=example />';
+    equal(minify(input, options), output);
+
+    input = '<input checked="checked" data-attr="example" value="hello world!"/>';
+    output = '<input checked data-attr=example value="hello world!"/>';
+    equal(minify(input, options), output);
   });
 
 })(typeof exports === 'undefined' ? window : exports);

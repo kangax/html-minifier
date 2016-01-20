@@ -429,24 +429,30 @@
         }
       }
       emittedAttrValue = attrQuote + attrValue + attrQuote;
+      if (!isLast && !options.removeTagWhitespace) {
+        emittedAttrValue += ' ';
+      }
     }
     // make sure trailing slash is not interpreted as HTML self-closing tag
-    else if (isLast && (hasUnarySlash || /\/$/.test(attrValue))) {
-      emittedAttrValue = attrValue + ' ';
+    else if (isLast && !hasUnarySlash && !/\/$/.test(attrValue)) {
+      emittedAttrValue = attrValue;
     }
     else {
-      emittedAttrValue = attrValue;
+      emittedAttrValue = attrValue + ' ';
     }
 
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
         isBooleanAttribute(attrName, attrValue))) {
       attrFragment = attrName;
+      if (!isLast) {
+        attrFragment += ' ';
+      }
     }
     else {
       attrFragment = attrName + attr.customAssign + emittedAttrValue;
     }
 
-    return (' ' + attr.customOpen + attrFragment + attr.customClose);
+    return attr.customOpen + attrFragment + attr.customClose;
   }
 
   function setDefaultTesters(options) {
@@ -676,8 +682,8 @@
           lint.testElement(tag);
         }
 
+        var parts = [ ];
         var token, isLast = true;
-        var insert = buffer.length;
         for (var i = attrs.length; --i >= 0; ) {
           if (lint) {
             lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].value);
@@ -685,8 +691,12 @@
           token = normalizeAttribute(attrs[i], attrs, tag, hasUnarySlash, i, options, isLast);
           if (token) {
             isLast = false;
-            buffer.splice(insert, 0, token);
+            parts.unshift(token);
           }
+        }
+        if (parts.length > 0) {
+          buffer.push(' ');
+          buffer.push.apply(buffer, parts);
         }
 
         buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');
