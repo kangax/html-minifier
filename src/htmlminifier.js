@@ -242,7 +242,7 @@
       if (options.minifyJS) {
         var wrappedCode = '(function(){' + attrValue + '})()';
         var minified = minifyJS(wrappedCode, options.minifyJS);
-        return minified.slice(12, minified.length - 4).replace(/"/g, '&quot;');
+        return minified.slice(12, minified.length - 4);
       }
       return attrValue;
     }
@@ -387,8 +387,8 @@
   function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isLast) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
-        attrValue = options.preventAttributesEscaping ? attr.value : attr.escaped,
-        attrQuote = options.preventAttributesEscaping ? attr.quote : (options.quoteCharacter === '\'' ? '\'' : '"'),
+        attrValue = attr.value,
+        attrQuote = attr.quote,
         attrFragment,
         emittedAttrValue;
 
@@ -412,6 +412,22 @@
 
     if (attrValue !== undefined && !options.removeAttributeQuotes ||
         !canRemoveAttributeQuotes(attrValue)) {
+      if (!options.preventAttributesEscaping) {
+        if (options.quoteCharacter !== undefined) {
+          attrQuote = options.quoteCharacter === '\'' ? '\'' : '"';
+        }
+        else {
+          var apos = (attrValue.match(/'/g) || []).length;
+          var quot = (attrValue.match(/"/g) || []).length;
+          attrQuote = apos < quot ? '\'' : '"';
+        }
+        if (attrQuote === '"') {
+          attrValue = attrValue.replace(/"/g, '&#34;');
+        }
+        else {
+          attrValue = attrValue.replace(/'/g, '&#39;');
+        }
+      }
       emittedAttrValue = attrQuote + attrValue + attrQuote;
     }
     // make sure trailing slash is not interpreted as HTML self-closing tag
@@ -664,7 +680,7 @@
         var insert = buffer.length;
         for (var i = attrs.length; --i >= 0; ) {
           if (lint) {
-            lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
+            lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].value);
           }
           token = normalizeAttribute(attrs[i], attrs, tag, hasUnarySlash, i, options, isLast);
           if (token) {

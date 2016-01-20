@@ -362,9 +362,6 @@
         attrs.push({
           name: name,
           value: value,
-          escaped: value && value.replace(/(^|.)("+)/g, function(match) {
-            return match.replace(/"/g, '&quot;');
-          }),
           customAssign: customAssign || '=',
           customOpen:  customOpen || '',
           customClose: customClose || '',
@@ -424,7 +421,7 @@
         results += '<' + tag;
 
         for ( var i = 0; i < attrs.length; i++ ) {
-          results += ' ' + attrs[i].name + '="' + attrs[i].escaped + '"';
+          results += ' ' + attrs[i].name + '="' + (attrs[i].value || '').replace(/"/g, '&#34;') + '"';
         }
 
         results += (unary ? '/' : '') + '>';

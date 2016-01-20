@@ -976,8 +976,11 @@
 
   test('nested quotes', function() {
     input = '<div data=\'{"test":"\\"test\\""}\'></div>';
-    output = '<div data="{&quot;test&quot;:&quot;\\&quot;test\\&quot;&quot;}"></div>';
-    equal(minify(input), output);
+    equal(minify(input), input);
+    equal(minify(input, { quoteCharacter: '\'' }), input);
+
+    output = '<div data="{&#34;test&#34;:&#34;\\&#34;test\\&#34;&#34;}"></div>';
+    equal(minify(input, { quoteCharacter: '"' }), output);
   });
 
   test('script minification', function() {
@@ -1056,14 +1059,26 @@
     equal(minify(input, { minifyJS: true }), output);
 
     input = '<a onclick="try{ dcsMultiTrack(\'DCS.dcsuri\',\'USPS\',\'WT.ti\') }catch(e){}"> foobar</a>';
-    output = '<a onclick="try{dcsMultiTrack(&quot;DCS.dcsuri&quot;,&quot;USPS&quot;,&quot;WT.ti&quot;)}catch(e){}"> foobar</a>';
+    output = '<a onclick=\'try{dcsMultiTrack("DCS.dcsuri","USPS","WT.ti")}catch(e){}\'> foobar</a>';
 
     equal(minify(input, { minifyJS: { mangle: false } }), output);
+    equal(minify(input, { minifyJS: { mangle: false }, quoteCharacter: '\'' }), output);
+
+    input = '<a onclick="try{ dcsMultiTrack(\'DCS.dcsuri\',\'USPS\',\'WT.ti\') }catch(e){}"> foobar</a>';
+    output = '<a onclick="try{dcsMultiTrack(&#34;DCS.dcsuri&#34;,&#34;USPS&#34;,&#34;WT.ti&#34;)}catch(e){}"> foobar</a>';
+
+    equal(minify(input, { minifyJS: { mangle: false }, quoteCharacter: '"' }), output);
 
     input = '<a onClick="_gaq.push([\'_trackEvent\', \'FGF\', \'banner_click\']);"></a>';
-    output = '<a onclick="_gaq.push([&quot;_trackEvent&quot;,&quot;FGF&quot;,&quot;banner_click&quot;])"></a>';
+    output = '<a onclick=\'_gaq.push(["_trackEvent","FGF","banner_click"])\'></a>';
 
     equal(minify(input, { minifyJS: true }), output);
+    equal(minify(input, { minifyJS: true, quoteCharacter: '\'' }), output);
+
+    input = '<a onClick="_gaq.push([\'_trackEvent\', \'FGF\', \'banner_click\']);"></a>';
+    output = '<a onclick="_gaq.push([&#34;_trackEvent&#34;,&#34;FGF&#34;,&#34;banner_click&#34;])"></a>';
+
+    equal(minify(input, { minifyJS: true, quoteCharacter: '"' }), output);
 
     input = '<button type="button" onclick=";return false;" id="appbar-guide-button"></button>';
     output = '<button type="button" onclick="return!1" id="appbar-guide-button"></button>';
