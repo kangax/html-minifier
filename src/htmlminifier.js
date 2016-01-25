@@ -105,11 +105,9 @@
     return (/^on[a-z]+/).test(attrName);
   }
 
-  function canRemoveAttributeQuotes(value, isLast) {
+  function canRemoveAttributeQuotes(value) {
     // http://mathiasbynens.be/notes/unquoted-attribute-values
-    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value) &&
-           // make sure trailing slash is not interpreted as HTML self-closing tag
-           !(isLast && (/\/$/).test(value));
+    return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value);
   }
 
   function attributesInclude(attributes, attribute) {
@@ -244,7 +242,7 @@
       if (options.minifyJS) {
         var wrappedCode = '(function(){' + attrValue + '})()';
         var minified = minifyJS(wrappedCode, options.minifyJS);
-        return minified.slice(12, minified.length - 4).replace(/"/g, '&quot;');
+        return minified.slice(12, minified.length - 4);
       }
       return attrValue;
     }
@@ -386,14 +384,13 @@
     return !(/^(?:pre|textarea)$/.test(tag));
   }
 
-  function normalizeAttribute(attr, attrs, tag, unarySlash, index, options, isLast) {
+  function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isLast) {
 
     var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
-        attrValue = options.preventAttributesEscaping ? attr.value : attr.escaped,
-        attrQuote = options.preventAttributesEscaping ? attr.quote : (options.quoteCharacter === '\'' ? '\'' : '"'),
+        attrValue = attr.value,
+        attrQuote = attr.quote,
         attrFragment,
-        emittedAttrValue,
-        isTerminalOfUnarySlash = unarySlash && index === attrs.length - 1;
+        emittedAttrValue;
 
     if ((options.removeRedundantAttributes &&
       isAttributeRedundant(tag, attrName, attrValue, attrs))
@@ -408,28 +405,54 @@
 
     attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
-    if (attrValue !== undefined && !options.removeAttributeQuotes ||
-        !canRemoveAttributeQuotes(attrValue, isLast) || isTerminalOfUnarySlash) {
-      emittedAttrValue = attrQuote + attrValue + attrQuote;
-    }
-    else {
-      emittedAttrValue = attrValue;
-    }
-
     if (options.removeEmptyAttributes &&
         canDeleteEmptyAttribute(tag, attrName, attrValue)) {
       return '';
     }
 
+    if (attrValue !== undefined && !options.removeAttributeQuotes ||
+        !canRemoveAttributeQuotes(attrValue)) {
+      if (!options.preventAttributesEscaping) {
+        if (options.quoteCharacter !== undefined) {
+          attrQuote = options.quoteCharacter === '\'' ? '\'' : '"';
+        }
+        else {
+          var apos = (attrValue.match(/'/g) || []).length;
+          var quot = (attrValue.match(/"/g) || []).length;
+          attrQuote = apos < quot ? '\'' : '"';
+        }
+        if (attrQuote === '"') {
+          attrValue = attrValue.replace(/"/g, '&#34;');
+        }
+        else {
+          attrValue = attrValue.replace(/'/g, '&#39;');
+        }
+      }
+      emittedAttrValue = attrQuote + attrValue + attrQuote;
+      if (!isLast && !options.removeTagWhitespace) {
+        emittedAttrValue += ' ';
+      }
+    }
+    // make sure trailing slash is not interpreted as HTML self-closing tag
+    else if (isLast && !hasUnarySlash && !/\/$/.test(attrValue)) {
+      emittedAttrValue = attrValue;
+    }
+    else {
+      emittedAttrValue = attrValue + ' ';
+    }
+
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
         isBooleanAttribute(attrName, attrValue))) {
       attrFragment = attrName;
+      if (!isLast) {
+        attrFragment += ' ';
+      }
     }
     else {
       attrFragment = attrName + attr.customAssign + emittedAttrValue;
     }
 
-    return (' ' + attr.customOpen + attrFragment + attr.customClose);
+    return attr.customOpen + attrFragment + attr.customClose;
   }
 
   function setDefaultTesters(options) {
@@ -651,10 +674,7 @@
         }
 
         var openTag = '<' + tag;
-        var closeTag = ((unarySlash && options.keepClosingSlash) ? '/' : '') + '>';
-        if (attrs.length === 0) {
-          openTag += closeTag;
-        }
+        var hasUnarySlash = unarySlash && options.keepClosingSlash;
 
         buffer.push(openTag);
 
@@ -662,18 +682,24 @@
           lint.testElement(tag);
         }
 
-        var token, isLast;
-        for (var i = 0, len = attrs.length; i < len; i++) {
-          isLast = i === len - 1;
+        var parts = [ ];
+        var token, isLast = true;
+        for (var i = attrs.length; --i >= 0; ) {
           if (lint) {
-            lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].escaped);
+            lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].value);
           }
-          token = normalizeAttribute(attrs[i], attrs, tag, unarySlash, i, options, isLast);
-          if (isLast) {
-            token += closeTag;
+          token = normalizeAttribute(attrs[i], attrs, tag, hasUnarySlash, i, options, isLast);
+          if (token) {
+            isLast = false;
+            parts.unshift(token);
           }
-          buffer.push(token);
         }
+        if (parts.length > 0) {
+          buffer.push(' ');
+          buffer.push.apply(buffer, parts);
+        }
+
+        buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');
       },
       end: function(tag, attrs) {
 

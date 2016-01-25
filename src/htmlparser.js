@@ -91,7 +91,9 @@
         // Capture the custom attribute opening and closing markup surrounding the standard attribute rules
         attrClauses[i] = '(?:\\s*'
           + handler.customAttrSurround[i][0].source
+          + '\\s*'
           + startTagAttrs.source
+          + '\\s*'
           + handler.customAttrSurround[i][1].source
           + ')';
       }
@@ -125,9 +127,9 @@
       var attrClauses = [];
       for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
         attrClauses[i] = '(?:'
-          + '(' + handler.customAttrSurround[i][0].source + ')'
+          + '(' + handler.customAttrSurround[i][0].source + ')\\s*'
           + singleAttr.source
-          + '(' + handler.customAttrSurround[i][1].source + ')'
+          + '\\s*(' + handler.customAttrSurround[i][1].source + ')'
           + ')';
       }
       attrClauses.unshift('(?:' + singleAttr.source + ')');
@@ -362,9 +364,6 @@
         attrs.push({
           name: name,
           value: value,
-          escaped: value && value.replace(/(^|.)("+)/g, function(match) {
-            return match.replace(/"/g, '&quot;');
-          }),
           customAssign: customAssign || '=',
           customOpen:  customOpen || '',
           customClose: customClose || '',
@@ -424,7 +423,7 @@
         results += '<' + tag;
 
         for ( var i = 0; i < attrs.length; i++ ) {
-          results += ' ' + attrs[i].name + '="' + attrs[i].escaped + '"';
+          results += ' ' + attrs[i].name + '="' + (attrs[i].value || '').replace(/"/g, '&#34;') + '"';
         }
 
         results += (unary ? '/' : '') + '>';

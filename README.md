@@ -39,6 +39,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `collapseInlineTagWhitespace`  | Don't leave any spaces between `display:inline;` elements when collapsing. Must be used in conjunction with `collapseWhitespace=true` | `false` |
 | `preserveLineBreaks`           | Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break. Must be used in conjunction with `collapseWhitespace=true` | `false` |
 | `collapseBooleanAttributes`    | [Omit attribute values from boolean attributes](http://perfectionkills.com/experimenting-with-html-minifier/#collapse_boolean_attributes) | `false` |
+| `removeTagWhitespace`          | Remove space between attributes whenever possible. | `false` |
 | `removeAttributeQuotes`        | [Remove quotes around attributes when possible.](http://perfectionkills.com/experimenting-with-html-minifier/#remove_attribute_quotes) | `false` |
 | `removeRedundantAttributes`    | [Remove attributes when value matches default.](http://perfectionkills.com/experimenting-with-html-minifier/#remove_redundant_attributes) | `false` |
 | `preventAttributesEscaping`    | Prevents the escaping of the values of attributes. | `false` |
@@ -61,7 +62,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `customAttrAssign`             | Arrays of regex'es that allow to support custom attribute assign expressions (e.g. `'<div flex?="{{mode != cover}}"></div>'`) | `[ ]` |
 | `customAttrSurround`           | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) | `[ ]` |
 | `customAttrCollapse`           | Regex that specifies custom attribute to strip newlines from (e.g. `/ng\-class/`) | |
-| `quoteCharacter`               | Type of quote to use for attribute values (' or ") | " |
+| `quoteCharacter`               | Type of quote to use for attribute values (' or ") | |
 
 ## Special cases
 
