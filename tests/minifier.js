@@ -1050,7 +1050,11 @@
     equal(minify(input, { minifyJS: true }), input);
   });
 
-  test('on* minification', function() {
+  test('event minification', function() {
+    input = '<div only="alert(a + b)" one=";return false;"></div>';
+
+    equal(minify(input, { minifyJS: true }), input);
+
     input = '<div onclick="alert(a + b)"></div>';
     output = '<div onclick="alert(a+b)"></div>';
 
@@ -1087,6 +1091,20 @@
     output = '<button type="button" onclick="return!1" id="appbar-guide-button"></button>';
 
     equal(minify(input, { minifyJS: true }), output);
+
+    input = '<button type="button" onclick=";return false;" ng-click="a(1 + 2)" data-click="a(1 + 2)"></button>';
+    output = '<button type="button" onclick="return!1" ng-click="a(1 + 2)" data-click="a(1 + 2)"></button>';
+
+    equal(minify(input, { minifyJS: true }), output);
+    equal(minify(input, { minifyJS: true, customEventAttributes: [ ] }), input);
+
+    output = '<button type="button" onclick=";return false;" ng-click="a(3)" data-click="a(1 + 2)"></button>';
+
+    equal(minify(input, { minifyJS: true, customEventAttributes: [ /^ng-/ ] }), output);
+
+    output = '<button type="button" onclick="return!1" ng-click="a(3)" data-click="a(1 + 2)"></button>';
+
+    equal(minify(input, { minifyJS: true, customEventAttributes: [ /^on/, /^ng-/ ] }), output);
   });
 
   test('escaping closing script tag', function() {

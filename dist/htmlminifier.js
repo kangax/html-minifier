@@ -666,8 +666,19 @@
     return false;
   }
 
-  function isEventAttribute(attrName) {
-    return (/^on[a-z]+/).test(attrName);
+  function isEventAttribute(attrName, options) {
+    var patterns = options.customEventAttributes;
+    if (patterns) {
+      for (var i = patterns.length; i--;) {
+        if (patterns[i].test(attrName)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    else {
+      return (/^on[a-z]{3,}$/).test(attrName);
+    }
   }
 
   function canRemoveAttributeQuotes(value) {
@@ -801,13 +812,15 @@
     );
   }
 
+  var fnPrefix = '!function(){';
+  var fnSuffix = '}();';
+
   function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
-    if (attrValue && isEventAttribute(attrName)) {
+    if (attrValue && isEventAttribute(attrName, options)) {
       attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '').replace(/\s*;$/, '');
       if (options.minifyJS) {
-        var wrappedCode = '(function(){' + attrValue + '})()';
-        var minified = minifyJS(wrappedCode, options.minifyJS);
-        return minified.slice(12, minified.length - 4);
+        var minified = minifyJS(fnPrefix + attrValue + fnSuffix, options.minifyJS);
+        return minified.slice(fnPrefix.length, -fnSuffix.length);
       }
       return attrValue;
     }
