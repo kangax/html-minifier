@@ -65,6 +65,7 @@ var mainOptions = {
   preserveLineBreaks: [[false, 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.']],
   collapseInlineTagWhitespace: [[false, 'Collapse white space around inline tag']],
   collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes']],
+  removeTagWhitespace: [[false, 'Remove space between attributes whenever possible.']],
   removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
   removeRedundantAttributes: [[false, 'Remove attributes when value matches default.']],
   preventAttributesEscaping: [[false, 'Prevents the escaping of the values of attributes.']],
