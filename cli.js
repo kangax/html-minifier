@@ -65,6 +65,7 @@ var mainOptions = {
   preserveLineBreaks: [[false, 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.']],
   collapseInlineTagWhitespace: [[false, 'Collapse white space around inline tag']],
   collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes']],
+  removeTagWhitespace: [[false, 'Remove space between attributes whenever possible.']],
   removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
   removeRedundantAttributes: [[false, 'Remove attributes when value matches default.']],
   preventAttributesEscaping: [[false, 'Prevents the escaping of the values of attributes.']],
@@ -83,6 +84,7 @@ var mainOptions = {
   ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json-regex'],
   processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json-regex'],
   maxLineLength: [[false, 'Max line length', 'number'], true],
+  customEventAttributes: [[false, 'Arrays of regex\'es that allow to support custom event attributes for minifyJS (e.g. ng-click)', 'string'], 'json-regex'],
   customAttrAssign: [[false, 'Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', 'string'], 'json-regex'],
   customAttrSurround: [[false, 'Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', 'string'], 'json-regex'],
   customAttrCollapse: [[false, 'Regex that specifies custom attribute to strip newlines from (e.g. /ng\-class/)', 'string'], 'string-regex']
