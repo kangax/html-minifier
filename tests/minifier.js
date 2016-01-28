@@ -987,7 +987,7 @@
   });
 
   test('script minification', function() {
-    input = '<script></script>foo';
+    input = '<script></script>(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()';
 
     equal(minify(input, { minifyJS: true }), input);
 
