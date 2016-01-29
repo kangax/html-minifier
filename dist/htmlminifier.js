@@ -1298,8 +1298,12 @@
           }
         }
 
-        var isElementEmpty = currentChars === '' && tag === currentTag;
-        if ((options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs))) {
+        var isElementEmpty = false;
+        if (tag === currentTag) {
+          currentTag = '';
+          isElementEmpty = currentChars === '';
+        }
+        if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
           // remove last "element" from buffer, return
           for (var i = buffer.length - 1; i >= 0; i--) {
             if (/^<[^\/!]/.test(buffer[i])) {

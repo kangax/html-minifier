@@ -987,6 +987,10 @@
   });
 
   test('script minification', function() {
+    input = '<script></script>(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()';
+
+    equal(minify(input, { minifyJS: true }), input);
+
     input = '<script>(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
     output = '<script>!function(){var a=1,n=2;alert(a+" "+n)}();</script>';
 
@@ -1115,6 +1119,10 @@
   });
 
   test('style minification', function() {
+    input = '<style></style>div#foo { background-color: red; color: white }';
+
+    equal(minify(input, { minifyCSS: true }), input);
+
     input = '<style>div#foo { background-color: red; color: white }</style>';
     output = '<style>div#foo{background-color:red;color:#fff}</style>';
 
