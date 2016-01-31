@@ -908,6 +908,13 @@
       ],
       caseSensitive: true
     }), input);
+
+    input = '<img class="{% foo %} {% bar %}">';
+    equal(minify(input, {
+      ignoreCustomFragments: [
+        /\{\%[^\%]*?\%\}/g
+      ]
+    }), input);
   });
 
   test('bootstrap\'s span > button > span', function() {
@@ -1278,6 +1285,11 @@
     output = ' <p class="logged"|cond="$is_logged === true" id="foo"> bar</p> ';
 
     equal(minify(input), output);
+
+    input = '<!-- htmlmin:ignore --><body <?php body_class(); ?>><!-- htmlmin:ignore -->';
+    output = '<body <?php body_class(); ?>>';
+
+    equal(minify(input, { ignoreCustomFragments: [ /<\?php[\s\S]*?\?>/ ] }), output);
 
   });
 

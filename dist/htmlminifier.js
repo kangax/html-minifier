@@ -651,7 +651,7 @@
   }
 
   function isIgnoredComment(text, options) {
-    if ((/^!/).test(text) || /\s*htmlmin:temp/.test(text)) {
+    if (/^!/.test(text)) {
       return true;
     }
 
@@ -1162,6 +1162,14 @@
     return text;
   }
 
+  function uniqueId(value) {
+    var id;
+    do {
+      id = Math.random().toString(36).slice(2);
+    } while (~value.indexOf(id));
+    return id;
+  }
+
   function minify(value, options) {
 
     options = options || {};
@@ -1178,36 +1186,36 @@
         stackNoTrimWhitespace = [],
         stackNoCollapseWhitespace = [],
         lint = options.lint,
-        t = new Date(),
+        t = Date.now(),
         ignoredMarkupChunks = [ ],
         ignoredCustomMarkupChunks = [ ],
-        reIgnore = /<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g,
-        uidAttr = ' htmlmin' + (Math.random() + '').slice(2) + ' ',
-        reCustomIgnore,
-        customFragments;
+        uidIgnore,
+        uidAttr;
 
-    if (options.ignoreCustomFragments) {
-
-      customFragments = options.ignoreCustomFragments.map(function(re) {
-        return re.source;
-      });
-      reCustomIgnore = new RegExp('(?:' + customFragments.join('|') + ')', 'g');
-
-      // temporarily replace custom ignored fragments with unique attributes
-      value = value.replace(reCustomIgnore, function(match) {
-        ignoredCustomMarkupChunks.push(match);
-        return uidAttr;
+    if (~value.indexOf('<!-- htmlmin:ignore -->')) {
+      uidIgnore = '<!--!' + uniqueId(value) + '-->';
+      // temporarily replace ignored chunks with comments,
+      // so that we don't have to worry what's there.
+      // for all we care there might be
+      // completely-horribly-broken-alien-non-html-emoj-cthulhu-filled content
+      value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, function(match, group1) {
+        ignoredMarkupChunks.push(group1);
+        return uidIgnore;
       });
     }
 
-    // temporarily replace ignored chunks with comments,
-    // so that we don't have to worry what's there.
-    // for all we care there might be
-    // completely-horribly-broken-alien-non-html-emoj-cthulhu-filled content
-    value = value.replace(reIgnore, function(match, group1) {
-      ignoredMarkupChunks.push(group1);
-      return '<!-- htmlmin:temp -->';
-    });
+    if (options.ignoreCustomFragments) {
+      uidAttr = uniqueId(value);
+      var customFragments = options.ignoreCustomFragments.map(function(re) {
+        return re.source;
+      });
+      var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')\\s*', 'g');
+      // temporarily replace custom ignored fragments with unique attributes
+      value = value.replace(reCustomIgnore, function(match) {
+        ignoredCustomMarkupChunks.push(match);
+        return ' ' + uidAttr + ' ';
+      });
+    }
 
     function _canCollapseWhitespace(tag, attrs) {
       return canCollapseWhitespace(tag) || options.canCollapseWhitespace(tag, attrs);
@@ -1394,16 +1402,18 @@
     results.push.apply(results, buffer);
     var str = joinResultSegments(results, options);
 
-    var customIgnoreRe = new RegExp('\\s*' + trimWhitespace(uidAttr) + '\\s*', 'g');
+    if (uidAttr) {
+      str = str.replace(new RegExp('\\s*' + uidAttr + '\\s*', 'g'), function() {
+        return ignoredCustomMarkupChunks.shift();
+      });
+    }
+    if (uidIgnore) {
+      str = str.replace(new RegExp(uidIgnore, 'g'), function() {
+        return ignoredMarkupChunks.shift();
+      });
+    }
 
-    str = str.replace(customIgnoreRe, function() {
-      return ignoredCustomMarkupChunks.shift();
-    });
-    str = str.replace(/<!-- htmlmin:temp -->/g, function() {
-      return ignoredMarkupChunks.shift();
-    });
-
-    log('minified in: ' + (new Date() - t) + 'ms');
+    log('minified in: ' + (Date.now() - t) + 'ms');
     return str;
   }
 
