@@ -11,7 +11,7 @@ var fs = require('fs'),
     querystring = require('querystring'),
     chalk = require('chalk'),
     Table = require('cli-table'),
-
+    Progress = require('progress'),
     Minimize = require('minimize'),
     minimize = new Minimize();
 
@@ -28,6 +28,11 @@ var fileNames = [
   'stackoverflow',
   'wikipedia'
 ].sort();
+
+var progress = new Progress('[:bar] :etas :fileName', {
+  width: 50,
+  total: fileNames.length
+});
 
 var table = new Table({
   head: ['File', 'Before', 'After', 'Minimize', 'Will Peavy', 'htmlcompressor.com', 'Savings', 'Time'],
@@ -79,8 +84,6 @@ function run(tasks, done) {
 var rows = {};
 run(fileNames.map(function (fileName) {
   return function (done) {
-    console.log('Processing...', fileName);
-
     var filePath = path.join('benchmarks/', fileName + '.html');
     var original = {
       filePath: filePath,
@@ -271,6 +274,7 @@ run(fileNames.map(function (fileName) {
         [blueTime(minifiedTime), blueTime(gzMinifiedTime)].join('\n')
       );
       rows[fileName] = row;
+      progress.tick({ fileName: fileName });
       done();
     });
   };
