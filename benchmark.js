@@ -121,7 +121,7 @@ run(fileNames.map(function (fileName) {
           });
         });
       },
-      // Minified test
+      // HTMLMinifier test
       function (done) {
         // Begin timing after gzipped fixtures have been created
         var startTime = Date.now();
@@ -167,7 +167,9 @@ run(fileNames.map(function (fileName) {
               if (err) {
                 throw new Error('There was an error writing ' + minimizedFilePath);
               }
+              // Gzip the minified output
               gzip(minimizedFilePath, gzMinimizedFilePath, function () {
+                // Open and read the size of the minified+gzipped output
                 fs.stat(gzMinimizedFilePath, function (err, stats) {
                   if (err) {
                     throw new Error('There was an error reading ' + gzMinimizedFilePath);
@@ -199,14 +201,17 @@ run(fileNames.map(function (fileName) {
             res.on('data', function (chunk) {
               response += chunk;
             }).on('end', function () {
+              // Extract result from <textarea/>
               var start = response.indexOf('>', response.indexOf('<textarea'));
               var end = response.lastIndexOf('</textarea>');
               fs.writeFile(willPeavyFilePath, response.substring(start + 1, end), {
                 encoding: 'utf8'
               }, function () {
                 run([
+                  // Gzip the minified output
                   function (done) {
                     gzip(willPeavyFilePath, gzWillPeavyFilePath, function () {
+                      // Open and read the size of the minified+gzipped output
                       fs.stat(gzWillPeavyFilePath, function (err, stats) {
                         if (err) {
                           throw new Error('There was an error reading ' + gzWillPeavyFilePath);
@@ -216,6 +221,7 @@ run(fileNames.map(function (fileName) {
                       });
                     });
                   },
+                  // Open and read the size of the minified output
                   function (done) {
                     fs.stat(willPeavyFilePath, function (err, stats) {
                       if (err) {
@@ -263,8 +269,10 @@ run(fileNames.map(function (fileName) {
                   encoding: 'utf8'
                 }, function () {
                   run([
+                    // Gzip the minified output
                     function (done) {
                       gzip(compressFilePath, gzCompressFilePath, function () {
+                        // Open and read the size of the minified+gzipped output
                         fs.stat(gzCompressFilePath, function (err, stats) {
                           if (err) {
                             throw new Error('There was an error reading ' + gzCompressFilePath);
@@ -274,6 +282,7 @@ run(fileNames.map(function (fileName) {
                         });
                       });
                     },
+                    // Open and read the size of the minified output
                     function (done) {
                       fs.stat(compressFilePath, function (err, stats) {
                         if (err) {
@@ -286,6 +295,7 @@ run(fileNames.map(function (fileName) {
                   ], done);
                 });
               }
+              // Site refused to process content
               else {
                 compressSize = gzCompressSize = 0;
                 done();
