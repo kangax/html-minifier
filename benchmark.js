@@ -19,15 +19,14 @@ var fileNames = [
   'abc',
   'amazon',
   'eloquentjavascript',
-  'es6-draft',
+  'es6',
   'es6-table',
   'google',
   'html-minifier',
   'msn',
   'newyorktimes',
   'stackoverflow',
-  'wikipedia',
-  'es6'
+  'wikipedia'
 ].sort();
 
 var table = new Table({
