@@ -98,6 +98,201 @@ run(fileNames.map(function (fileName) {
         compressSize, gzCompressSize,
         minifiedTime, gzMinifiedTime;
 
+    function testHTMLMinifier(done) {
+      // Begin timing after gzipped fixtures have been created
+      var startTime = Date.now();
+      fork('./cli', [filePath, '-c', 'benchmark.conf', '-o', minifiedFilePath]).on('exit', function () {
+        minifiedTime = Date.now() - startTime;
+        run([
+          // Gzip the minified output
+          function (done) {
+            gzip(minifiedFilePath, gzMinifiedFilePath, function () {
+              gzMinifiedTime = Date.now() - startTime;
+              // Open and read the size of the minified+gzipped output
+              fs.stat(gzMinifiedFilePath, function (err, stats) {
+                if (err) {
+                  throw new Error('There was an error reading ' + gzMinifiedFilePath);
+                }
+                gzMinifiedSize = stats.size;
+                done();
+              });
+            });
+          },
+          // Open and read the size of the minified output
+          function (done) {
+            fs.stat(minifiedFilePath, function (err, stats) {
+              if (err) {
+                throw new Error('There was an error reading ' + minifiedFilePath);
+              }
+              minifiedSize = stats.size;
+              done();
+            });
+          }
+        ], done);
+      });
+    }
+
+    function testMinimize(done) {
+      fs.readFile(filePath, function (err, data) {
+        if (err) {
+          throw new Error('There was an error reading ' + filePath);
+        }
+        minimize.parse(data, function (error, data) {
+          minimizedSize = data.length;
+          fs.writeFile(minimizedFilePath, data, function (err) {
+            if (err) {
+              throw new Error('There was an error writing ' + minimizedFilePath);
+            }
+            // Gzip the minified output
+            gzip(minimizedFilePath, gzMinimizedFilePath, function () {
+              // Open and read the size of the minified+gzipped output
+              fs.stat(gzMinimizedFilePath, function (err, stats) {
+                if (err) {
+                  throw new Error('There was an error reading ' + gzMinimizedFilePath);
+                }
+                gzMinimizedSize = stats.size;
+                done();
+              });
+            });
+          });
+        });
+      });
+    }
+
+    function testWillPeavy(done) {
+      fs.readFile(filePath, {
+        encoding: 'utf8'
+      }, function (err, data) {
+        if (err) {
+          throw new Error('There was an error reading ' + filePath);
+        }
+        var options = url.parse('http://www.willpeavy.com/minifier/');
+        options.method = 'POST';
+        options.headers = {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        };
+        http.request(options, function (res) {
+          res.setEncoding('utf8');
+          var response = '';
+          res.on('data', function (chunk) {
+            response += chunk;
+          }).on('end', function () {
+            // Extract result from <textarea/>
+            var start = response.indexOf('>', response.indexOf('<textarea'));
+            var end = response.lastIndexOf('</textarea>');
+            fs.writeFile(willPeavyFilePath, response.substring(start + 1, end), {
+              encoding: 'utf8'
+            }, function () {
+              run([
+                // Gzip the minified output
+                function (done) {
+                  gzip(willPeavyFilePath, gzWillPeavyFilePath, function () {
+                    // Open and read the size of the minified+gzipped output
+                    fs.stat(gzWillPeavyFilePath, function (err, stats) {
+                      if (err) {
+                        throw new Error('There was an error reading ' + gzWillPeavyFilePath);
+                      }
+                      gzWillPeavySize = stats.size;
+                      done();
+                    });
+                  });
+                },
+                // Open and read the size of the minified output
+                function (done) {
+                  fs.stat(willPeavyFilePath, function (err, stats) {
+                    if (err) {
+                      throw new Error('There was an error reading ' + willPeavyFilePath);
+                    }
+                    willPeavySize = stats.size;
+                    done();
+                  });
+                }
+              ], done);
+            });
+          });
+        }).end(querystring.stringify({
+          html: data
+        }));
+      });
+    }
+
+    function testHTMLCompressor(done) {
+      fs.readFile(filePath, {
+        encoding: 'utf8'
+      }, function (err, data) {
+        if (err) {
+          throw new Error('There was an error reading ' + filePath);
+        }
+        var options = url.parse('http://htmlcompressor.com/compress_ajax_v2.php');
+        options.method = 'POST';
+        options.headers = {
+          'Accept-Encoding': 'gzip',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        };
+        http.request(options, function (res) {
+          if (res.headers['content-encoding'] === 'gzip') {
+            res = res.pipe(zlib.createGunzip());
+          }
+          res.setEncoding('utf8');
+          var response = '';
+          res.on('data', function (chunk) {
+            response += chunk;
+          }).on('end', function () {
+            /* global JSON: true */
+            response = JSON.parse(response);
+            if (response.success) {
+              fs.writeFile(compressFilePath, response.result, {
+                encoding: 'utf8'
+              }, function () {
+                run([
+                  // Gzip the minified output
+                  function (done) {
+                    gzip(compressFilePath, gzCompressFilePath, function () {
+                      // Open and read the size of the minified+gzipped output
+                      fs.stat(gzCompressFilePath, function (err, stats) {
+                        if (err) {
+                          throw new Error('There was an error reading ' + gzCompressFilePath);
+                        }
+                        gzCompressSize = stats.size;
+                        done();
+                      });
+                    });
+                  },
+                  // Open and read the size of the minified output
+                  function (done) {
+                    fs.stat(compressFilePath, function (err, stats) {
+                      if (err) {
+                        throw new Error('There was an error reading ' + compressFilePath);
+                      }
+                      compressSize = stats.size;
+                      done();
+                    });
+                  }
+                ], done);
+              });
+            }
+            // Site refused to process content
+            else {
+              compressSize = gzCompressSize = 0;
+              done();
+            }
+          });
+        }).end(querystring.stringify({
+          code_type:'html',
+          verbose: 1,
+          html_level: 1,
+          minimize_style: 1,
+          minimize_events: 1,
+          minimize_js_href: 1,
+          minimize_css: 1,
+          minimize_js: 1,
+          js_engine: 'yui',
+          js_fallback: 1,
+          code: data
+        }));
+      });
+    }
+
     run([
       // Open and read the size of the original input
       function (done) {
@@ -121,201 +316,10 @@ run(fileNames.map(function (fileName) {
           });
         });
       },
-      // HTMLMinifier test
-      function (done) {
-        // Begin timing after gzipped fixtures have been created
-        var startTime = Date.now();
-        fork('./cli', [filePath, '-c', 'benchmark.conf', '-o', minifiedFilePath]).on('exit', function () {
-          minifiedTime = Date.now() - startTime;
-          run([
-            // Gzip the minified output
-            function (done) {
-              gzip(minifiedFilePath, gzMinifiedFilePath, function () {
-                gzMinifiedTime = Date.now() - startTime;
-                // Open and read the size of the minified+gzipped output
-                fs.stat(gzMinifiedFilePath, function (err, stats) {
-                  if (err) {
-                    throw new Error('There was an error reading ' + gzMinifiedFilePath);
-                  }
-                  gzMinifiedSize = stats.size;
-                  done();
-                });
-              });
-            },
-            // Open and read the size of the minified output
-            function (done) {
-              fs.stat(minifiedFilePath, function (err, stats) {
-                if (err) {
-                  throw new Error('There was an error reading ' + minifiedFilePath);
-                }
-                minifiedSize = stats.size;
-                done();
-              });
-            }
-          ], done);
-        });
-      },
-      // Minimize test
-      function (done) {
-        fs.readFile(filePath, function (err, data) {
-          if (err) {
-            throw new Error('There was an error reading ' + filePath);
-          }
-          minimize.parse(data, function (error, data) {
-            minimizedSize = data.length;
-            fs.writeFile(minimizedFilePath, data, function (err) {
-              if (err) {
-                throw new Error('There was an error writing ' + minimizedFilePath);
-              }
-              // Gzip the minified output
-              gzip(minimizedFilePath, gzMinimizedFilePath, function () {
-                // Open and read the size of the minified+gzipped output
-                fs.stat(gzMinimizedFilePath, function (err, stats) {
-                  if (err) {
-                    throw new Error('There was an error reading ' + gzMinimizedFilePath);
-                  }
-                  gzMinimizedSize = stats.size;
-                  done();
-                });
-              });
-            });
-          });
-        });
-      },
-      // Will Peavy test
-      function (done) {
-        fs.readFile(filePath, {
-          encoding: 'utf8'
-        }, function (err, data) {
-          if (err) {
-            throw new Error('There was an error reading ' + filePath);
-          }
-          var options = url.parse('http://www.willpeavy.com/minifier/');
-          options.method = 'POST';
-          options.headers = {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          };
-          http.request(options, function (res) {
-            res.setEncoding('utf8');
-            var response = '';
-            res.on('data', function (chunk) {
-              response += chunk;
-            }).on('end', function () {
-              // Extract result from <textarea/>
-              var start = response.indexOf('>', response.indexOf('<textarea'));
-              var end = response.lastIndexOf('</textarea>');
-              fs.writeFile(willPeavyFilePath, response.substring(start + 1, end), {
-                encoding: 'utf8'
-              }, function () {
-                run([
-                  // Gzip the minified output
-                  function (done) {
-                    gzip(willPeavyFilePath, gzWillPeavyFilePath, function () {
-                      // Open and read the size of the minified+gzipped output
-                      fs.stat(gzWillPeavyFilePath, function (err, stats) {
-                        if (err) {
-                          throw new Error('There was an error reading ' + gzWillPeavyFilePath);
-                        }
-                        gzWillPeavySize = stats.size;
-                        done();
-                      });
-                    });
-                  },
-                  // Open and read the size of the minified output
-                  function (done) {
-                    fs.stat(willPeavyFilePath, function (err, stats) {
-                      if (err) {
-                        throw new Error('There was an error reading ' + willPeavyFilePath);
-                      }
-                      willPeavySize = stats.size;
-                      done();
-                    });
-                  }
-                ], done);
-              });
-            });
-          }).end(querystring.stringify({
-            html: data
-          }));
-        });
-      },
-      // HTML Compressor test
-      function (done) {
-        fs.readFile(filePath, {
-          encoding: 'utf8'
-        }, function (err, data) {
-          if (err) {
-            throw new Error('There was an error reading ' + filePath);
-          }
-          var options = url.parse('http://htmlcompressor.com/compress_ajax_v2.php');
-          options.method = 'POST';
-          options.headers = {
-            'Accept-Encoding': 'gzip',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          };
-          http.request(options, function (res) {
-            if (res.headers['content-encoding'] === 'gzip') {
-              res = res.pipe(zlib.createGunzip());
-            }
-            res.setEncoding('utf8');
-            var response = '';
-            res.on('data', function (chunk) {
-              response += chunk;
-            }).on('end', function () {
-              /* global JSON: true */
-              response = JSON.parse(response);
-              if (response.success) {
-                fs.writeFile(compressFilePath, response.result, {
-                  encoding: 'utf8'
-                }, function () {
-                  run([
-                    // Gzip the minified output
-                    function (done) {
-                      gzip(compressFilePath, gzCompressFilePath, function () {
-                        // Open and read the size of the minified+gzipped output
-                        fs.stat(gzCompressFilePath, function (err, stats) {
-                          if (err) {
-                            throw new Error('There was an error reading ' + gzCompressFilePath);
-                          }
-                          gzCompressSize = stats.size;
-                          done();
-                        });
-                      });
-                    },
-                    // Open and read the size of the minified output
-                    function (done) {
-                      fs.stat(compressFilePath, function (err, stats) {
-                        if (err) {
-                          throw new Error('There was an error reading ' + compressFilePath);
-                        }
-                        compressSize = stats.size;
-                        done();
-                      });
-                    }
-                  ], done);
-                });
-              }
-              // Site refused to process content
-              else {
-                compressSize = gzCompressSize = 0;
-                done();
-              }
-            });
-          }).end(querystring.stringify({
-            code_type:'html',
-            verbose: 1,
-            html_level: 1,
-            minimize_style: 1,
-            minimize_events: 1,
-            minimize_js_href: 1,
-            minimize_css: 1,
-            minimize_js: 1,
-            js_engine: 'yui',
-            js_fallback: 1,
-            code: data
-          }));
-        });
-      }
+      testHTMLMinifier,
+      testMinimize,
+      testWillPeavy,
+      testHTMLCompressor
     ], function () {
       rows[fileName] = [
         [fileName, '+ gzipped'].join('\n'),
