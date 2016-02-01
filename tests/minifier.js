@@ -832,33 +832,35 @@
   // https://github.com/kangax/html-minifier/issues/10
   test('Ignore custom fragments', function() {
 
-    // var reFragments = [ /<\?[^\?]+\?>/g, /<%[^%]+%>/g ];
+    var reFragments = [ /<\?[^\?]+\?>/, /<%[^%]+%>/ ];
 
-    // input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
-    // output = 'This is the start.<% ... %><%= ... %><? ... ?>No comment, but middle.<?= ... ?><?php ... ?><?xml ... ?>Hello, this is the end!';
+    input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
+    output = 'This is the start.<% ... %><%= ... %><? ... ?>No comment, but middle.<?= ... ?><?php ... ?><?xml ... ?>Hello, this is the end!';
 
-    // equal(minify(input, {}), input);
-    // equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
+    equal(minify(input, {}), input);
+    equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
 
-    // output = 'This is the start.No comment, but middle. Hello, this is the end!';
+    output = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
 
-    // equal(minify(input, {
-    //   removeComments: true,
-    //   collapseWhitespace: true,
-    //   ignoreCustomFragments: reFragments
-    // }), output);
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true,
+      ignoreCustomFragments: reFragments
+    }), output);
 
-    // input = '<% if foo? %>\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n<% end %>';
-    // output = '<% if foo? %><div class="bar">...</div><% end %>';
-    // equal(minify(input, {}), input);
-    // equal(minify(input, { collapseWhitespace: true }), output);
-    // output = '<div class="bar">...</div>';
-    // equal(minify(input, { collapseWhitespace: true, ignoreCustomFragments: reFragments }), output);
+    input = '<% if foo? %>\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n<% end %>';
+    output = '<% if foo? %><div class="bar">...</div><% end %>';
 
-    // input = '<a class="<% if foo? %>bar<% end %>"></a>';
-    // equal(minify(input, {}), input);
-    // output = '<a class="bar"></a>';
-    // equal(minify(input, { ignoreCustomFragments: reFragments }), output);
+    equal(minify(input, {}), input);
+    equal(minify(input, { collapseWhitespace: true }), output);
+
+    output = '<% if foo? %>\r\n  <div class="bar">...</div>\r\n<% end %>';
+
+    equal(minify(input, { collapseWhitespace: true, ignoreCustomFragments: reFragments }), output);
+
+    input = '<a class="<% if foo? %>bar<% end %>"></a>';
+    equal(minify(input, {}), input);
+    equal(minify(input, { ignoreCustomFragments: reFragments }), input);
 
     input = '<img src="{% static "images/logo.png" %}">';
     output = '<img src="{% static "images/logo.png" %}">';
@@ -874,8 +876,6 @@
               '{% endfor %}' +
               '{% endif %}' +
             '</p>';
-    output = '';
-
     equal(minify(input, {
       ignoreCustomFragments: [
         /\{\%[\s\S]*?\%\}/g,
@@ -1008,22 +1008,21 @@
 
     equal(minify(input, { minifyJS: { mangle: false } }), output);
 
-    // input = '<script>' +
-    //         '  <!--' +
-    //         '    Platform.Mobile.Bootstrap.init(function () {' +
-    //         '      Platform.Mobile.Core.Navigation.go("Login", {' +
-    //         '        "error": ""' +
-    //         '      });' +
-    //         '    });' +
-    //         '  //-->' +
-    //         '</script>';
+    input = '<script>\n' +
+            '  <!--\n' +
+            '    Platform.Mobile.Bootstrap.init(function () {\n' +
+            '      Platform.Mobile.Core.Navigation.go("Login", {\n' +
+            '        "error": ""\n' +
+            '      });\n' +
+            '    });\n' +
+            '  //-->\n' +
+            '</script>';
+    output = '<script>Platform.Mobile.Bootstrap.init(function(){Platform.Mobile.Core.Navigation.go("Login",{error:""})});</script>';
 
-    // output = '<script>Platform.Mobile.Bootstrap.init(function(){Platform.Mobile.Core.Navigation.go("Login",{error:""})});</script>';
-
-    // equal(minify(input, {
-    //   removeCommentsFromCDATA: true,
-    //   minifyJS: true
-    // }), output);
+    equal(minify(input, {
+      removeCommentsFromCDATA: true,
+      minifyJS: true
+    }), output);
   });
 
   test('minification of scripts with different mimetypes', function() {
