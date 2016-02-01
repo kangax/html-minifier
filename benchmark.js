@@ -5,7 +5,10 @@
 var fs = require('fs'),
     path = require('path'),
     zlib = require('zlib'),
-    exec = require('child_process').exec,
+    fork = require('child_process').fork,
+    http = require('http'),
+    url = require('url'),
+    querystring = require('querystring'),
     chalk = require('chalk'),
     Table = require('cli-table'),
 
@@ -28,8 +31,8 @@ var fileNames = [
 ].sort();
 
 var table = new Table({
-  head: ['File', 'Before', 'After', 'Savings', 'Time', 'Minimize'],
-  colWidths: [20, 25, 25, 20, 10, 25]
+  head: ['File', 'Before', 'After', 'Minimize', 'Will Peavy', 'htmlcompressor.com', 'Savings', 'Time'],
+  colWidths: [20, 25, 25, 25, 25, 25, 20, 10]
 });
 
 function toKb(size) {
@@ -82,13 +85,18 @@ run(fileNames.map(function (fileName) {
     var filePath = path.join('benchmarks/', fileName + '.html');
     var minifiedFilePath = path.join('benchmarks/generated/', fileName + '.min.html');
     var minimizedFilePath = path.join('benchmarks/generated/', fileName + '.mz.html');
+    var willPeavyFilePath = path.join('benchmarks/generated/', fileName + '.wp.html');
+    var compressFilePath = path.join('benchmarks/generated/', fileName + '.hc.html');
     var gzFilePath = path.join('benchmarks/generated/', fileName + '.html.gz');
     var gzMinifiedFilePath = path.join('benchmarks/generated/', fileName + '.min.html.gz');
     var gzMinimizedFilePath = path.join('benchmarks/generated/', fileName + '.mz.html.gz');
-    var command = path.normalize('./cli.js') + ' ' + filePath + ' -c benchmark.conf' + ' -o ' + minifiedFilePath;
+    var gzWillPeavyFilePath = path.join('benchmarks/generated/', fileName + '.wp.html.gz');
+    var gzCompressFilePath = path.join('benchmarks/generated/', fileName + '.hc.html.gz');
     var originalSize, gzOriginalSize,
         minifiedSize, gzMinifiedSize,
         minimizedSize, gzMinimizedSize,
+        willPeavySize, gzWillPeavySize,
+        compressSize, gzCompressSize,
         minifiedTime, gzMinifiedTime;
 
     run([
@@ -118,31 +126,34 @@ run(fileNames.map(function (fileName) {
       function (done) {
         // Begin timing after gzipped fixtures have been created
         var startTime = Date.now();
-        exec('node ' + command, function () {
-
-          // Open and read the size of the minified output
-          fs.stat(minifiedFilePath, function (err, stats) {
-            if (err) {
-              throw new Error('There was an error reading ' + minifiedFilePath);
-            }
-
-            minifiedSize = stats.size;
-            minifiedTime = Date.now() - startTime;
-
+        fork('./cli', [filePath, '-c', 'benchmark.conf', '-o', minifiedFilePath]).on('exit', function () {
+          minifiedTime = Date.now() - startTime;
+          run([
             // Gzip the minified output
-            gzip(minifiedFilePath, gzMinifiedFilePath, function () {
-              // Open and read the size of the minified+gzipped output
-              fs.stat(gzMinifiedFilePath, function (err, stats) {
-                if (err) {
-                  throw new Error('There was an error reading ' + gzMinifiedFilePath);
-                }
-
-                gzMinifiedSize = stats.size;
+            function (done) {
+              gzip(minifiedFilePath, gzMinifiedFilePath, function () {
                 gzMinifiedTime = Date.now() - startTime;
+                // Open and read the size of the minified+gzipped output
+                fs.stat(gzMinifiedFilePath, function (err, stats) {
+                  if (err) {
+                    throw new Error('There was an error reading ' + gzMinifiedFilePath);
+                  }
+                  gzMinifiedSize = stats.size;
+                  done();
+                });
+              });
+            },
+            // Open and read the size of the minified output
+            function (done) {
+              fs.stat(minifiedFilePath, function (err, stats) {
+                if (err) {
+                  throw new Error('There was an error reading ' + minifiedFilePath);
+                }
+                minifiedSize = stats.size;
                 done();
               });
-            });
-          });
+            }
+          ], done);
         });
       },
       // Minimize test
@@ -169,15 +180,143 @@ run(fileNames.map(function (fileName) {
             });
           });
         });
+      },
+      // Will Peavy test
+      function (done) {
+        fs.readFile(filePath, {
+          encoding: 'utf8'
+        }, function (err, data) {
+          if (err) {
+            throw new Error('There was an error reading ' + filePath);
+          }
+          var options = url.parse('http://www.willpeavy.com/minifier/');
+          options.method = 'POST';
+          options.headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          };
+          http.request(options, function (res) {
+            res.setEncoding('utf8');
+            var response = '';
+            res.on('data', function (chunk) {
+              response += chunk;
+            }).on('end', function () {
+              var start = response.indexOf('>', response.indexOf('<textarea'));
+              var end = response.lastIndexOf('</textarea>');
+              fs.writeFile(willPeavyFilePath, response.substring(start + 1, end), {
+                encoding: 'utf8'
+              }, function () {
+                run([
+                  function (done) {
+                    gzip(willPeavyFilePath, gzWillPeavyFilePath, function () {
+                      fs.stat(gzWillPeavyFilePath, function (err, stats) {
+                        if (err) {
+                          throw new Error('There was an error reading ' + gzWillPeavyFilePath);
+                        }
+                        gzWillPeavySize = stats.size;
+                        done();
+                      });
+                    });
+                  },
+                  function (done) {
+                    fs.stat(willPeavyFilePath, function (err, stats) {
+                      if (err) {
+                        throw new Error('There was an error reading ' + willPeavyFilePath);
+                      }
+                      willPeavySize = stats.size;
+                      done();
+                    });
+                  }
+                ], done);
+              });
+            });
+          }).end(querystring.stringify({
+            html: data
+          }));
+        });
+      },
+      // HTML Compressor test
+      function (done) {
+        fs.readFile(filePath, {
+          encoding: 'utf8'
+        }, function (err, data) {
+          if (err) {
+            throw new Error('There was an error reading ' + filePath);
+          }
+          var options = url.parse('http://htmlcompressor.com/compress_ajax_v2.php');
+          options.method = 'POST';
+          options.headers = {
+            'Accept-Encoding': 'gzip',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          };
+          http.request(options, function (res) {
+            if (res.headers['content-encoding'] === 'gzip') {
+              res = res.pipe(zlib.createGunzip());
+            }
+            res.setEncoding('utf8');
+            var response = '';
+            res.on('data', function (chunk) {
+              response += chunk;
+            }).on('end', function () {
+              /* global JSON: true */
+              response = JSON.parse(response);
+              if (response.success) {
+                fs.writeFile(compressFilePath, response.result, {
+                  encoding: 'utf8'
+                }, function () {
+                  run([
+                    function (done) {
+                      gzip(compressFilePath, gzCompressFilePath, function () {
+                        fs.stat(gzCompressFilePath, function (err, stats) {
+                          if (err) {
+                            throw new Error('There was an error reading ' + gzCompressFilePath);
+                          }
+                          gzCompressSize = stats.size;
+                          done();
+                        });
+                      });
+                    },
+                    function (done) {
+                      fs.stat(compressFilePath, function (err, stats) {
+                        if (err) {
+                          throw new Error('There was an error reading ' + compressFilePath);
+                        }
+                        compressSize = stats.size;
+                        done();
+                      });
+                    }
+                  ], done);
+                });
+              }
+              else {
+                compressSize = gzCompressSize = 0;
+                done();
+              }
+            });
+          }).end(querystring.stringify({
+            code_type:'html',
+            verbose: 1,
+            html_level: 1,
+            minimize_style: 1,
+            minimize_events: 1,
+            minimize_js_href: 1,
+            minimize_css: 1,
+            minimize_js: 1,
+            js_engine: 'yui',
+            js_fallback: 1,
+            code: data
+          }));
+        });
       }
     ], function () {
       rows[fileName] = [
         [fileName, '+ gzipped'].join('\n'),
         [redSize(originalSize), redSize(gzOriginalSize)].join('\n'),
         [greenSize(minifiedSize), greenSize(gzMinifiedSize)].join('\n'),
+        [greenSize(minimizedSize), greenSize(gzMinimizedSize)].join('\n'),
+        [greenSize(willPeavySize), greenSize(gzWillPeavySize)].join('\n'),
+        [greenSize(compressSize), greenSize(gzCompressSize)].join('\n'),
         [blueSavings(originalSize, minifiedSize), blueSavings(gzOriginalSize, gzMinifiedSize)].join('\n'),
-        [blueTime(minifiedTime), blueTime(gzMinifiedTime)].join('\n'),
-        [greenSize(minimizedSize), greenSize(gzMinimizedSize)].join('\n')
+        [blueTime(minifiedTime), blueTime(gzMinifiedTime)].join('\n')
       ];
       done();
     });
@@ -186,5 +325,6 @@ run(fileNames.map(function (fileName) {
   fileNames.forEach(function (fileName) {
     table.push(rows[fileName]);
   });
-  console.log('\n' + table.toString());
+  console.log();
+  console.log(table.toString());
 });
