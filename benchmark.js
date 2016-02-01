@@ -4,6 +4,7 @@
 
 var fs = require('fs'),
     path = require('path'),
+    zlib = require('zlib'),
     exec = require('child_process').exec,
     chalk = require('chalk'),
     Table = require('cli-table'),
@@ -15,7 +16,7 @@ var fileNames = [
   'abc',
   'amazon',
   'eloquentjavascript',
-  //'es6-draft',
+  'es6-draft',
   'es6-table',
   'google',
   'html-minifier',
@@ -24,13 +25,11 @@ var fileNames = [
   'stackoverflow',
   'wikipedia',
   'es6'
-];
-
-fileNames = fileNames.sort().reverse();
+].sort();
 
 var table = new Table({
-  head: ['File', 'Before', 'After', 'Savings', 'Time'],
-  colWidths: [20, 25, 25, 20, 20]
+  head: ['File', 'Before', 'After', 'Savings', 'Time', 'Minimize'],
+  colWidths: [20, 25, 25, 20, 10, 25]
 });
 
 function toKb(size) {
@@ -55,39 +54,70 @@ function blueTime(time) {
   return chalk.cyan.bold(time) + chalk.white(' ms');
 }
 
-function test(fileName, done) {
+function gzip(inPath, outPath, callback) {
+  fs.createReadStream(inPath).pipe(zlib.createGzip({
+    level: zlib.Z_BEST_COMPRESSION
+  })).pipe(fs.createWriteStream(outPath)).on('finish', callback);
+}
 
-  if (!fileName) {
-    console.log('\n' + table.toString());
-    return;
+function run(tasks, done) {
+  var remaining = tasks.length;
+
+  function callback() {
+    if (!--remaining) {
+      done();
+    }
   }
 
-  console.log('Processing...', fileName);
+  tasks.forEach(function (task) {
+    task(callback);
+  });
+}
 
-  var filePath = path.join('benchmarks/', fileName + '.html');
-  var minifiedFilePath = path.join('benchmarks/generated/', fileName + '.min.html');
-  var gzFilePath = path.join('benchmarks/generated/', fileName + '.html.gz');
-  var gzMinifiedFilePath = path.join('benchmarks/generated/', fileName + '.min.html.gz');
-  var command = path.normalize('./cli.js') + ' ' + filePath + ' -c benchmark.conf' + ' -o ' + minifiedFilePath;
+var rows = {};
+run(fileNames.map(function (fileName) {
+  return function (done) {
+    console.log('Processing...', fileName);
 
-  // Open and read the size of the original input
-  fs.stat(filePath, function (err, stats) {
-    if (err) {
-      throw new Error('There was an error reading ' + filePath);
-    }
-    var originalSize = stats.size;
+    var filePath = path.join('benchmarks/', fileName + '.html');
+    var minifiedFilePath = path.join('benchmarks/generated/', fileName + '.min.html');
+    var minimizedFilePath = path.join('benchmarks/generated/', fileName + '.mz.html');
+    var gzFilePath = path.join('benchmarks/generated/', fileName + '.html.gz');
+    var gzMinifiedFilePath = path.join('benchmarks/generated/', fileName + '.min.html.gz');
+    var gzMinimizedFilePath = path.join('benchmarks/generated/', fileName + '.mz.html.gz');
+    var command = path.normalize('./cli.js') + ' ' + filePath + ' -c benchmark.conf' + ' -o ' + minifiedFilePath;
+    var originalSize, gzOriginalSize,
+        minifiedSize, gzMinifiedSize,
+        minimizedSize, gzMinimizedSize,
+        minifiedTime, gzMinifiedTime;
 
-    exec('gzip --keep --force --best --stdout ' + filePath + ' > ' + gzFilePath, function () {
+    run([
+      // Open and read the size of the original input
+      function (done) {
+        fs.stat(filePath, function (err, stats) {
+          if (err) {
+            throw new Error('There was an error reading ' + filePath);
+          }
+          originalSize = stats.size;
+          done();
+        });
+      },
       // Open and read the size of the gzipped original
-      fs.stat(gzFilePath, function (err, stats) {
-        if (err) {
-          throw new Error('There was an error reading ' + gzFilePath);
-        }
-
-        var gzOriginalSize = stats.size;
-
+      function (done) {
+        gzip(filePath, gzFilePath, function () {
+          fs.stat(gzFilePath, function (err, stats) {
+            if (err) {
+              throw new Error('There was an error reading ' + gzFilePath);
+            }
+            gzOriginalSize = stats.size;
+            done();
+          });
+        });
+      },
+      // Minified test
+      function (done) {
         // Begin timing after gzipped fixtures have been created
-        var startTime = new Date();
+        var startTime = Date.now();
         exec('node ' + command, function () {
 
           // Open and read the size of the minified output
@@ -96,48 +126,65 @@ function test(fileName, done) {
               throw new Error('There was an error reading ' + minifiedFilePath);
             }
 
-            var minifiedSize = stats.size;
-            var minifiedTime = new Date() - startTime;
-
-            minimize.parse(
-              fs.readFileSync(filePath),
-              function (error, data) {
-                console.log('minimize',
-                  filePath,
-                  toKb(data.length),
-                  toKb(minifiedSize));
-              }
-            );
+            minifiedSize = stats.size;
+            minifiedTime = Date.now() - startTime;
 
             // Gzip the minified output
-            exec('gzip --keep --force --best --stdout ' + minifiedFilePath + ' > ' + gzMinifiedFilePath, function () {
+            gzip(minifiedFilePath, gzMinifiedFilePath, function () {
               // Open and read the size of the minified+gzipped output
               fs.stat(gzMinifiedFilePath, function (err, stats) {
                 if (err) {
                   throw new Error('There was an error reading ' + gzMinifiedFilePath);
                 }
 
-                var gzMinifiedSize = stats.size;
-                var gzMinifiedTime = new Date() - startTime;
-
-                table.push([
-                  [fileName, '+ gzipped'].join('\n'),
-                  [redSize(originalSize), redSize(gzOriginalSize)].join('\n'),
-                  [greenSize(minifiedSize), greenSize(gzMinifiedSize)].join('\n'),
-                  [blueSavings(originalSize, minifiedSize), blueSavings(gzOriginalSize, gzMinifiedSize)].join('\n'),
-                  [blueTime(minifiedTime), blueTime(gzMinifiedTime)].join('\n')
-                ]);
-
+                gzMinifiedSize = stats.size;
+                gzMinifiedTime = Date.now() - startTime;
                 done();
               });
             });
           });
         });
-      });
+      },
+      // Minimize test
+      function (done) {
+        fs.readFile(filePath, function (err, data) {
+          if (err) {
+            throw new Error('There was an error reading ' + filePath);
+          }
+          minimize.parse(data, function (error, data) {
+            minimizedSize = data.length;
+            fs.writeFile(minimizedFilePath, data, function (err) {
+              if (err) {
+                throw new Error('There was an error writing ' + minimizedFilePath);
+              }
+              gzip(minimizedFilePath, gzMinimizedFilePath, function () {
+                fs.stat(gzMinimizedFilePath, function (err, stats) {
+                  if (err) {
+                    throw new Error('There was an error reading ' + gzMinimizedFilePath);
+                  }
+                  gzMinimizedSize = stats.size;
+                  done();
+                });
+              });
+            });
+          });
+        });
+      }
+    ], function () {
+      rows[fileName] = [
+        [fileName, '+ gzipped'].join('\n'),
+        [redSize(originalSize), redSize(gzOriginalSize)].join('\n'),
+        [greenSize(minifiedSize), greenSize(gzMinifiedSize)].join('\n'),
+        [blueSavings(originalSize, minifiedSize), blueSavings(gzOriginalSize, gzMinifiedSize)].join('\n'),
+        [blueTime(minifiedTime), blueTime(gzMinifiedTime)].join('\n'),
+        [greenSize(minimizedSize), greenSize(gzMinimizedSize)].join('\n')
+      ];
+      done();
     });
+  };
+}), function () {
+  fileNames.forEach(function (fileName) {
+    table.push(rows[fileName]);
   });
-}
-
-(function run() {
-  test(fileNames.pop(), run);
-})();
+  console.log('\n' + table.toString());
+});
