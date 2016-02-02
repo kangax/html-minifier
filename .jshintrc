@@ -1,6 +1,7 @@
 {
   "browser":    true,
   "eqeqeq":     true,
+  "eqnull":     true,
   "es3":        true,
   "expr":       true,
   "laxbreak":   true,
@@ -8,6 +9,5 @@
   "node":       true,
   "strict":     true,
   "undef":      true,
-  "unused":     true,
-  "eqnull":     true
+  "unused":     true
 }
