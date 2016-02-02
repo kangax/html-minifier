@@ -2,18 +2,18 @@
 
 'use strict';
 
-var fs = require('fs'),
-    path = require('path'),
-    zlib = require('zlib'),
-    fork = require('child_process').fork,
-    http = require('http'),
-    url = require('url'),
-    querystring = require('querystring'),
+var brotli = require('brotli'),
     chalk = require('chalk'),
-    Table = require('cli-table'),
-    Progress = require('progress'),
+    fork = require('child_process').fork,
+    fs = require('fs'),
+    http = require('http'),
     Minimize = require('minimize'),
-    minimize = new Minimize();
+    path = require('path'),
+    Progress = require('progress'),
+    querystring = require('querystring'),
+    Table = require('cli-table'),
+    url = require('url'),
+    zlib = require('zlib');
 
 var fileNames = [
   'abc',
@@ -28,6 +28,8 @@ var fileNames = [
   'stackoverflow',
   'wikipedia'
 ].sort();
+
+var minimize = new Minimize();
 
 var progress = new Progress('[:bar] :etas :fileName', {
   width: 50,
@@ -68,17 +70,18 @@ function gzip(inPath, outPath, callback) {
 }
 
 function run(tasks, done) {
-  var remaining = tasks.length;
+  var i = 0;
 
   function callback() {
-    if (!--remaining) {
+    if (i < tasks.length) {
+      tasks[i++](callback);
+    }
+    else {
       done();
     }
   }
 
-  tasks.forEach(function (task) {
-    task(callback);
-  });
+  callback();
 }
 
 var rows = {};
@@ -87,29 +90,55 @@ run(fileNames.map(function (fileName) {
     var filePath = path.join('benchmarks/', fileName + '.html');
     var original = {
       filePath: filePath,
-      gzFilePath: path.join('benchmarks/generated/', fileName + '.html.gz')
+      gzFilePath: path.join('benchmarks/generated/', fileName + '.html.gz'),
+      brFilePath: path.join('benchmarks/generated/', fileName + '.html.br')
     };
     var infos = {};
     ['minifier', 'minimize', 'willpeavy', 'compressor'].forEach(function (name) {
       infos[name] = {
         filePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html'),
-        gzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.gz')
+        gzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.gz'),
+        brFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.br')
       };
     });
-    var minifiedTime, gzMinifiedTime;
 
     function readSizes(info, done) {
+      info.endTime = Date.now();
       run([
         // Gzip the minified output
         function (done) {
           gzip(info.filePath, info.gzFilePath, function () {
-            // Open and read the size of the minified+gzipped output
+            info.gzTime = Date.now();
+            // Open and read the size of the minified+gzip output
             fs.stat(info.gzFilePath, function (err, stats) {
               if (err) {
                 throw new Error('There was an error reading ' + info.gzFilePath);
               }
               info.gzSize = stats.size;
               done();
+            });
+          });
+        },
+        // Brotli the minified output
+        function (done) {
+          fs.readFile(info.filePath, function(err, data) {
+            if (err) {
+              throw new Error('There was an error reading ' + info.filePath);
+            }
+            var output = new Buffer(brotli.compress(data, true).buffer);
+            fs.writeFile(info.brFilePath, output, function(err) {
+              info.brTime = Date.now();
+              if (err) {
+                throw new Error('There was an error writing ' + info.brFilePath);
+              }
+              // Open and read the size of the minified+brotli output
+              fs.stat(info.brFilePath, function (err, stats) {
+                if (err) {
+                  throw new Error('There was an error reading ' + info.brFilePath);
+                }
+                info.brSize = stats.size;
+                done();
+              });
             });
           });
         },
@@ -127,16 +156,11 @@ run(fileNames.map(function (fileName) {
     }
 
     function testHTMLMinifier(done) {
-      // Begin timing after gzipped fixtures have been created
-      var startTime = Date.now();
       var info = infos.minifier;
+      info.startTime = Date.now();
       var args = [filePath, '-c', 'benchmark.conf', '-o', info.filePath];
       fork('./cli', args).on('exit', function () {
-        minifiedTime = Date.now() - startTime;
-        readSizes(info, function () {
-          gzMinifiedTime = Date.now() - startTime;
-          done();
-        });
+        readSizes(info, done);
       });
     }
 
@@ -233,6 +257,7 @@ run(fileNames.map(function (fileName) {
             else {
               info.size = 0;
               info.gzSize = 0;
+              info.brSize = 0;
               done();
             }
           });
@@ -262,16 +287,24 @@ run(fileNames.map(function (fileName) {
       testHTMLCompressor
     ], function () {
       var row = [
-        [fileName, '+ gzipped'].join('\n'),
-        [redSize(original.size), redSize(original.gzSize)].join('\n')
+        [fileName, '+ gzip', '+ brotli'].join('\n'),
+        [redSize(original.size), redSize(original.gzSize), redSize(original.brSize)].join('\n')
       ];
       for (var name in infos) {
         var info = infos[name];
-        row.push([greenSize(info.size), greenSize(info.gzSize)].join('\n'));
+        row.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.brSize)].join('\n'));
       }
       row.push(
-        [blueSavings(original.size, infos.minifier.size), blueSavings(original.gzSize, infos.minifier.gzSize)].join('\n'),
-        [blueTime(minifiedTime), blueTime(gzMinifiedTime)].join('\n')
+        [
+          blueSavings(original.size, infos.minifier.size),
+          blueSavings(original.gzSize, infos.minifier.gzSize),
+          blueSavings(original.brSize, infos.minifier.brSize)
+        ].join('\n'),
+        [
+          blueTime(infos.minifier.endTime - infos.minifier.startTime),
+          blueTime(original.gzTime - original.endTime),
+          blueTime(original.brTime - original.gzTime)
+        ].join('\n')
       );
       rows[fileName] = row;
       progress.tick({ fileName: fileName });
