@@ -7,6 +7,7 @@ var brotli = require('brotli'),
     fork = require('child_process').fork,
     fs = require('fs'),
     http = require('http'),
+    lzma = require('lzma'),
     Minimize = require('minimize'),
     path = require('path'),
     Progress = require('progress'),
@@ -63,6 +64,51 @@ function blueTime(time) {
   return chalk.cyan.bold(time) + chalk.white(' ms');
 }
 
+function readBuffer(filePath, callback) {
+  fs.readFile(filePath, function (err, data) {
+    if (err) {
+      throw new Error('There was an error reading ' + filePath);
+    }
+    callback(data);
+  });
+}
+
+function readText(filePath, callback) {
+  fs.readFile(filePath, { encoding: 'utf8' }, function (err, data) {
+    if (err) {
+      throw new Error('There was an error reading ' + filePath);
+    }
+    callback(data);
+  });
+}
+
+function writeBuffer(filePath, data, callback) {
+  fs.writeFile(filePath, data, function (err) {
+    if (err) {
+      throw new Error('There was an error writing ' + filePath);
+    }
+    callback();
+  });
+}
+
+function writeText(filePath, data, callback) {
+  fs.writeFile(filePath, data, { encoding: 'utf8' }, function (err) {
+    if (err) {
+      throw new Error('There was an error writing ' + filePath);
+    }
+    callback();
+  });
+}
+
+function readSize(filePath, callback) {
+  fs.stat(filePath, function (err, stats) {
+    if (err) {
+      throw new Error('There was an error reading ' + filePath);
+    }
+    callback(stats.size);
+  });
+}
+
 function gzip(inPath, outPath, callback) {
   fs.createReadStream(inPath).pipe(zlib.createGzip({
     level: zlib.Z_BEST_COMPRESSION
@@ -87,10 +133,12 @@ function run(tasks, done) {
 var rows = {};
 run(fileNames.map(function (fileName) {
   return function (done) {
+    progress.tick(0, { fileName: fileName });
     var filePath = path.join('benchmarks/', fileName + '.html');
     var original = {
       filePath: filePath,
       gzFilePath: path.join('benchmarks/generated/', fileName + '.html.gz'),
+      lzFilePath: path.join('benchmarks/generated/', fileName + '.html.lz'),
       brFilePath: path.join('benchmarks/generated/', fileName + '.html.br')
     };
     var infos = {};
@@ -98,6 +146,7 @@ run(fileNames.map(function (fileName) {
       infos[name] = {
         filePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html'),
         gzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.gz'),
+        lzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.lz'),
         brFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.br')
       };
     });
@@ -105,38 +154,44 @@ run(fileNames.map(function (fileName) {
     function readSizes(info, done) {
       info.endTime = Date.now();
       run([
-        // Gzip the minified output
+        // Apply Gzip on minified output
         function (done) {
           gzip(info.filePath, info.gzFilePath, function () {
             info.gzTime = Date.now();
             // Open and read the size of the minified+gzip output
-            fs.stat(info.gzFilePath, function (err, stats) {
-              if (err) {
-                throw new Error('There was an error reading ' + info.gzFilePath);
-              }
-              info.gzSize = stats.size;
+            readSize(info.gzFilePath, function (size) {
+              info.gzSize = size;
               done();
             });
           });
         },
-        // Brotli the minified output
+        // Apply LZMA on minified output
         function (done) {
-          fs.readFile(info.filePath, function(err, data) {
-            if (err) {
-              throw new Error('There was an error reading ' + info.filePath);
-            }
-            var output = new Buffer(brotli.compress(data, true).buffer);
-            fs.writeFile(info.brFilePath, output, function(err) {
-              info.brTime = Date.now();
-              if (err) {
-                throw new Error('There was an error writing ' + info.brFilePath);
+          readBuffer(info.filePath, function (data) {
+            lzma.compress(data, 1, function (result, error) {
+              if (error) {
+                throw error;
               }
+              writeBuffer(info.lzFilePath, new Buffer(result), function () {
+                info.lzTime = Date.now();
+                // Open and read the size of the minified+lzma output
+                readSize(info.lzFilePath, function (size) {
+                  info.lzSize = size;
+                  done();
+                });
+              });
+            });
+          });
+        },
+        // Apply Brotli on minified output
+        function (done) {
+          readBuffer(info.filePath, function (data) {
+            var output = new Buffer(brotli.compress(data, true).buffer);
+            writeBuffer(info.brFilePath, output, function () {
+              info.brTime = Date.now();
               // Open and read the size of the minified+brotli output
-              fs.stat(info.brFilePath, function (err, stats) {
-                if (err) {
-                  throw new Error('There was an error reading ' + info.brFilePath);
-                }
-                info.brSize = stats.size;
+              readSize(info.brFilePath, function (size) {
+                info.brSize = size;
                 done();
               });
             });
@@ -144,11 +199,8 @@ run(fileNames.map(function (fileName) {
         },
         // Open and read the size of the minified output
         function (done) {
-          fs.stat(info.filePath, function (err, stats) {
-            if (err) {
-              throw new Error('There was an error reading ' + info.filePath);
-            }
-            info.size = stats.size;
+          readSize(info.filePath, function (size) {
+            info.size = size;
             done();
           });
         }
@@ -165,16 +217,10 @@ run(fileNames.map(function (fileName) {
     }
 
     function testMinimize(done) {
-      fs.readFile(filePath, function (err, data) {
-        if (err) {
-          throw new Error('There was an error reading ' + filePath);
-        }
+      readBuffer(filePath, function (data) {
         minimize.parse(data, function (error, data) {
           var info = infos.minimize;
-          fs.writeFile(info.filePath, data, function (err) {
-            if (err) {
-              throw new Error('There was an error writing ' + info.filePath);
-            }
+          writeBuffer(info.filePath, data, function () {
             readSizes(info, done);
           });
         });
@@ -182,12 +228,7 @@ run(fileNames.map(function (fileName) {
     }
 
     function testWillPeavy(done) {
-      fs.readFile(filePath, {
-        encoding: 'utf8'
-      }, function (err, data) {
-        if (err) {
-          throw new Error('There was an error reading ' + filePath);
-        }
+      readText(filePath, function (data) {
         var options = url.parse('http://www.willpeavy.com/minifier/');
         options.method = 'POST';
         options.headers = {
@@ -203,12 +244,7 @@ run(fileNames.map(function (fileName) {
             var start = response.indexOf('>', response.indexOf('<textarea'));
             var end = response.lastIndexOf('</textarea>');
             var info = infos.willpeavy;
-            fs.writeFile(info.filePath, response.substring(start + 1, end), {
-              encoding: 'utf8'
-            }, function (err) {
-              if (err) {
-                throw new Error('There was an error writing ' + info.filePath);
-              }
+            writeText(info.filePath, response.substring(start + 1, end), function () {
               readSizes(info, done);
             });
           });
@@ -219,12 +255,7 @@ run(fileNames.map(function (fileName) {
     }
 
     function testHTMLCompressor(done) {
-      fs.readFile(filePath, {
-        encoding: 'utf8'
-      }, function (err, data) {
-        if (err) {
-          throw new Error('There was an error reading ' + filePath);
-        }
+      readText(filePath, function (data) {
         var options = url.parse('http://htmlcompressor.com/compress_ajax_v2.php');
         options.method = 'POST';
         options.headers = {
@@ -244,12 +275,7 @@ run(fileNames.map(function (fileName) {
             response = JSON.parse(response);
             var info = infos.compressor;
             if (response.success) {
-              fs.writeFile(info.filePath, response.result, {
-                encoding: 'utf8'
-              }, function (err) {
-                if (err) {
-                  throw new Error('There was an error writing ' + info.filePath);
-                }
+              writeText(info.filePath, response.result, function () {
                 readSizes(info, done);
               });
             }
@@ -257,6 +283,7 @@ run(fileNames.map(function (fileName) {
             else {
               info.size = 0;
               info.gzSize = 0;
+              info.lzSize = 0;
               info.brSize = 0;
               done();
             }
@@ -287,27 +314,29 @@ run(fileNames.map(function (fileName) {
       testHTMLCompressor
     ], function () {
       var row = [
-        [fileName, '+ gzip', '+ brotli'].join('\n'),
-        [redSize(original.size), redSize(original.gzSize), redSize(original.brSize)].join('\n')
+        [fileName, '+ gzip', '+ lzma', '+ brotli'].join('\n'),
+        [redSize(original.size), redSize(original.gzSize), redSize(original.lzSize), redSize(original.brSize)].join('\n')
       ];
       for (var name in infos) {
         var info = infos[name];
-        row.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.brSize)].join('\n'));
+        row.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.lzSize), greenSize(info.brSize)].join('\n'));
       }
       row.push(
         [
           blueSavings(original.size, infos.minifier.size),
           blueSavings(original.gzSize, infos.minifier.gzSize),
+          blueSavings(original.lzSize, infos.minifier.lzSize),
           blueSavings(original.brSize, infos.minifier.brSize)
         ].join('\n'),
         [
           blueTime(infos.minifier.endTime - infos.minifier.startTime),
           blueTime(original.gzTime - original.endTime),
-          blueTime(original.brTime - original.gzTime)
+          blueTime(original.lzTime - original.gzTime),
+          blueTime(original.brTime - original.lzTime)
         ].join('\n')
       );
       rows[fileName] = row;
-      progress.tick({ fileName: fileName });
+      progress.tick({ fileName: '' });
       done();
     });
   };
