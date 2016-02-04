@@ -605,16 +605,24 @@
     return str ? str.replace(/[\t\n\r ]+/g, ' ') : str;
   }
 
+  function matchingMap(values) {
+    var map = Object.create(null);
+    values.forEach(function(value) {
+      map[value] = true;
+    });
+    return map;
+  }
+
+  // array of non-empty element tags that will maintain a single space outside of them
+  var inlineTags = matchingMap([
+    'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
+    'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
+    'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
+    'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
+  ]);
+
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
-    // array of non-empty element tags that will maintain a single space outside of them
-    var tags = [
-      'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
-      'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
-      'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
-      'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
-    ],
-    lineBreakBefore = '',
-    lineBreakAfter = '';
+    var lineBreakBefore = '', lineBreakAfter = '';
 
     if (options.preserveLineBreaks) {
       str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
@@ -627,12 +635,12 @@
     }
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
-      || options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)) {
+      || options.collapseInlineTagWhitespace || !inlineTags[prevTag.substr(1)])) {
       str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
-      || options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)) {
+      || options.collapseInlineTagWhitespace || !inlineTags[nextTag])) {
       str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
@@ -733,14 +741,14 @@
 
   // https://mathiasbynens.be/demo/javascript-mime-type
   // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
-  var executableScriptsMimetypes = {
-    'text/javascript': 1,
-    'text/ecmascript': 1,
-    'text/jscript': 1,
-    'application/javascript': 1,
-    'application/x-javascript': 1,
-    'application/ecmascript': 1
-  };
+  var executableScriptsMimetypes = matchingMap([
+    'text/javascript',
+    'text/ecmascript',
+    'text/jscript',
+    'application/javascript',
+    'application/x-javascript',
+    'application/ecmascript'
+  ]);
 
   function isExecutableScript(tag, attrs) {
     if (tag !== 'script') {
@@ -749,8 +757,8 @@
     for (var i = 0, len = attrs.length; i < len; i++) {
       var attrName = attrs[i].name.toLowerCase();
       if (attrName === 'type') {
-        return attrs[i].value === '' ||
-               executableScriptsMimetypes[attrs[i].value] === 1;
+        var attrValue = attrs[i].value;
+        return attrValue === '' || executableScriptsMimetypes[attrValue];
       }
     }
     return true;
