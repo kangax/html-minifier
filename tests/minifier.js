@@ -1153,6 +1153,10 @@
     output = '<link rel="stylesheet" href="/style.css"><form action="folder2/"><a href="file.html">link</a></form>';
 
     equal(minify(input, { minifyURLs: { site: 'http://website.com/folder/' } }), output);
+
+    input = '<link rel="canonical" href="http://website.com/">';
+
+    equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
   });
 
   test('valueless attributes', function() {

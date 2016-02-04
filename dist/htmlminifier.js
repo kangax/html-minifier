@@ -811,6 +811,17 @@
     );
   }
 
+  function isCanonicalURL(tag, attrs) {
+    if (tag !== 'link') {
+      return false;
+    }
+    for (var i = 0, len = attrs.length; i < len; i++) {
+      if (attrs[i].name === 'rel' && attrs[i].value === 'canonical') {
+        return true;
+      }
+    }
+  }
+
   var fnPrefix = '!function(){';
   var fnSuffix = '}();';
 
@@ -828,7 +839,7 @@
     }
     else if (isUriTypeAttribute(attrName, tag)) {
       attrValue = trimWhitespace(attrValue);
-      if (options.minifyURLs) {
+      if (options.minifyURLs && !isCanonicalURL(tag, attrs)) {
         return minifyURLs(attrValue, options.minifyURLs);
       }
       return attrValue;
