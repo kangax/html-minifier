@@ -999,12 +999,12 @@
     equal(minify(input, { minifyJS: true }), input);
 
     input = '<script>(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
-    output = '<script>!function(){var a=1,n=2;alert(a+" "+n)}();</script>';
+    output = '<script>!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
 
     equal(minify(input, { minifyJS: true }), output);
 
     input = '<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({\'gtm.start\':new Date().getTime(),event:\'gtm.js\'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';j.async=true;j.src=\'//www.googletagmanager.com/gtm.js?id=\'+i+dl;f.parentNode.insertBefore(j,f);})(window,document,\'script\',\'dataLayer\',\'GTM-67NT\');</script>';
-    output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl="dataLayer"!=l?"&l="+l:"";j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id="+i+dl,f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer","GTM-67NT");</script>';
+    output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl="dataLayer"!=l?"&l="+l:"";j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id="+i+dl,f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer","GTM-67NT")</script>';
 
     equal(minify(input, { minifyJS: { mangle: false } }), output);
 
@@ -1017,7 +1017,7 @@
             '    });\n' +
             '  //-->\n' +
             '</script>';
-    output = '<script>Platform.Mobile.Bootstrap.init(function(){Platform.Mobile.Core.Navigation.go("Login",{error:""})});</script>';
+    output = '<script>Platform.Mobile.Bootstrap.init(function(){Platform.Mobile.Core.Navigation.go("Login",{error:""})})</script>';
 
     equal(minify(input, {
       removeCommentsFromCDATA: true,
@@ -1119,7 +1119,7 @@
 
   test('escaping closing script tag', function() {
     var input = '<script>window.jQuery || document.write(\'<script src="jquery.js"><\\/script>\')</script>';
-    var output = '<script>window.jQuery||document.write(\'<script src="jquery.js"><\\/script>\');</script>';
+    var output = '<script>window.jQuery||document.write(\'<script src="jquery.js"><\\/script>\')</script>';
 
     equal(minify(input, { minifyJS: true }), output);
   });

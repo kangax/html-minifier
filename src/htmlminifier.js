@@ -787,6 +787,9 @@
         }
         if (options.minifyJS && isExecutableScript(currentTag, currentAttrs)) {
           text = minifyJS(text, options.minifyJS);
+          if (text.charAt(text.length - 1) === ';') {
+            text = text.slice(0, -1);
+          }
         }
         if (currentTag === 'style' && options.minifyCSS) {
           text = minifyCSS(text, options.minifyCSS);
