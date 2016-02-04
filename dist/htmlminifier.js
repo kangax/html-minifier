@@ -615,18 +615,16 @@
     ],
     lineBreakBefore = /^[\t ]*[\n\r]+[\t\n\r ]*/,
     lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/,
-    preserveBefore = lineBreakBefore.test(str) ? '\n' : ' ',
-    preserveAfter = lineBreakAfter.test(str) ? '\n' : ' ',
     lineBreakStamp = 'htmlmincollapsedlinebreak';
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
       || (prevTag.charAt(0) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
-      str = str.replace(/^\s+/, options.preserveLineBreaks ? preserveBefore : options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/^\s+/, options.preserveLineBreaks && lineBreakBefore.test(str) ? '\n' : options.conservativeCollapse ? ' ' : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
       || (nextTag.charAt(0) !== '/' && (options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)))) {
-      str = str.replace(/\s+$/, options.preserveLineBreaks ? preserveAfter : options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/\s+$/, options.preserveLineBreaks && lineBreakAfter.test(str) ? '\n' : options.conservativeCollapse ? ' ' : '');
     }
 
     if (prevTag && nextTag) {

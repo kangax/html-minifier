@@ -1218,6 +1218,13 @@
       conservativeCollapse: true,
       preserveLineBreaks: true
     }), output);
+
+    input = '<div> text <span>\n text</span> \n</div>';
+    output = '<div>text <span>\ntext</span>\n</div>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      preserveLineBreaks: true
+    }), output);
   });
 
   test('collapse inline tag whitespace', function() {
