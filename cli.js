@@ -192,7 +192,7 @@ cli.main(function(args, options) {
       }
     }
 
-    cli.exit(status);
+    return status;
   }
 
   function createDirectory(path) {
@@ -211,6 +211,7 @@ cli.main(function(args, options) {
   function processDirectory(inputDir, outputDir) {
     createDirectory(outputDir);
     var fileList = fs.readdirSync(inputDir);
+    var status = 0;
 
     fileList.forEach(function(fileName) {
       var inputFilePath = inputDir + '/' + fileName;
@@ -223,8 +224,10 @@ cli.main(function(args, options) {
       }
 
       var originalContent = fs.readFileSync(inputFilePath, 'utf8');
-      runMinify(originalContent, outputFilePath);
+      status = runMinify(originalContent, outputFilePath);
     });
+
+    cli.exit(status);
   }
 
   if (options.version) {
@@ -342,7 +345,7 @@ cli.main(function(args, options) {
       }
     });
 
-    runMinify(original, output);
+    cli.exit(runMinify(original, output));
 
   }
   else { // Minifying input coming from STDIN
