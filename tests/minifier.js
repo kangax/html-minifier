@@ -694,6 +694,11 @@
     equal(minify(input, { removeEmptyElements: true }), input);
     input = '<script></script>';
     equal(minify(input, { removeEmptyElements: true }), '');
+
+    input = '<div>Empty <!-- NOT --> </div>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+    output = '<div>Empty<!-- NOT --></div>';
+    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
   });
 
   test('collapsing boolean attributes', function() {

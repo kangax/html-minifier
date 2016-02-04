@@ -815,7 +815,7 @@
             text = !(prevTag && nextTag || nextTag === 'html') ? collapseWhitespace(text) : text;
           }
         }
-        currentChars = text;
+        currentChars += text;
         if (lint) {
           lint.testChars(text);
         }
