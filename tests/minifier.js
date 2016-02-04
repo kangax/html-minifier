@@ -1217,6 +1217,18 @@
       collapseWhitespace: true,
       collapseInlineTagWhitespace: true
     }), output);
+
+    input = '<p>where <math> <mi>R</mi> </math> is the Rici tensor.</p>';
+    output = '<p>where <math><mi>R</mi></math> is the Rici tensor.</p>';
+    equal(minify(input, {
+      collapseWhitespace: true
+    }), output);
+
+    output = '<p>where<math><mi>R</mi></math>is the Rici tensor.</p>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      collapseInlineTagWhitespace: true
+    }), output);
   });
 
   test('ignore custom comments', function() {

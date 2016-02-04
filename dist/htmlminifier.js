@@ -606,12 +606,11 @@
   }
 
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
-
     // array of non-empty element tags that will maintain a single space outside of them
     var tags = [
       'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
-      'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q',
-      'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
+      'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
+      'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
       'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
     ],
     lineBreakBefore = /^[\t ]*[\n\r]+[\t\n\r ]*/,
@@ -620,13 +619,13 @@
     preserveAfter = lineBreakAfter.test(str) ? '\n' : ' ',
     lineBreakStamp = 'htmlmincollapsedlinebreak';
 
-    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.substr(0, 1) !== '/'
-      || (prevTag.substr(0, 1) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
+    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
+      || (prevTag.charAt(0) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
       str = str.replace(/^\s+/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveBefore : '');
     }
 
-    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.substr(0, 1) === '/'
-      || (nextTag.substr(0, 1) !== '/' && (options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)))) {
+    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
+      || (nextTag.charAt(0) !== '/' && (options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)))) {
       str = str.replace(/\s+$/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveAfter : '');
     }
 
