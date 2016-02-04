@@ -49,8 +49,7 @@
       'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
     ],
     lineBreakBefore = /^[\t ]*[\n\r]+[\t\n\r ]*/,
-    lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/,
-    lineBreakStamp = 'htmlmincollapsedlinebreak';
+    lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/;
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
       || (prevTag.charAt(0) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
@@ -63,16 +62,18 @@
     }
 
     if (prevTag && nextTag) {
-
+      var prefix = '', suffix = '';
       if (options.preserveLineBreaks) {
-        str = str
-          .replace(lineBreakBefore, lineBreakStamp)
-          .replace(lineBreakAfter, lineBreakStamp);
+        str = str.replace(lineBreakBefore, function() {
+          prefix = '\n';
+          return '';
+        }).replace(lineBreakAfter, function() {
+          suffix = '\n';
+          return '';
+        });
       }
       // strip non space whitespace then compress spaces to one
-      return str
-        .replace(/[\t\n\r]+/g, ' ').replace(/[ ]+/g, ' ')
-        .replace(new RegExp(lineBreakStamp, 'g'), '\n');
+      return prefix + str.replace(/[\t\n\r ]+/g, ' ') + suffix;
     }
 
     return str;
