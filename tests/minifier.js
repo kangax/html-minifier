@@ -1208,6 +1208,11 @@
       collapseWhitespace: true,
       preserveLineBreaks: true
     }), output);
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true,
+      preserveLineBreaks: true
+    }), output);
   });
 
   test('collapse inline tag whitespace', function() {

@@ -621,12 +621,12 @@
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
       || (prevTag.charAt(0) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
-      str = str.replace(/^\s+/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveBefore : '');
+      str = str.replace(/^\s+/, options.preserveLineBreaks ? preserveBefore : options.conservativeCollapse ? ' ' : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
       || (nextTag.charAt(0) !== '/' && (options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)))) {
-      str = str.replace(/\s+$/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveAfter : '');
+      str = str.replace(/\s+$/, options.preserveLineBreaks ? preserveAfter : options.conservativeCollapse ? ' ' : '');
     }
 
     if (prevTag && nextTag) {
