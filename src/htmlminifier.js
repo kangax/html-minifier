@@ -292,8 +292,11 @@
       return attrValue;
     }
     else if (isMetaViewport(tag, attrs) && attrName === 'content') {
-      attrValue = attrValue.replace(/\s+/g, '').replace(/[0-9]+\.[0-9]+/g, function(num) {
-        return (+num).toString();
+      attrValue = attrValue.replace(/\s+/g, '').replace(/[0-9]+\.[0-9]+/g, function(numString) {
+        // "0.90000" -> "0.9"
+        // "1.0" -> "1"
+        // "1.0001" -> "1.0001" (unchanged)
+        return (+numString).toString();
       });
     }
     else if (attrValue && options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
