@@ -210,7 +210,7 @@ run(fileNames.map(function (fileName) {
     function testHTMLMinifier(done) {
       var info = infos.minifier;
       info.startTime = Date.now();
-      var args = [filePath, '-c', 'benchmark.conf', '-o', info.filePath];
+      var args = [filePath, '-c', 'sample-cli-config-file.conf', '-o', info.filePath];
       fork('./cli', args).on('exit', function () {
         readSizes(info, done);
       });

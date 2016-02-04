@@ -94,7 +94,12 @@
   test('space normalization around text', function() {
     equal(minify('   <p>blah</p>\n\n\n   '), '<p>blah</p>');
     // tags from collapseWhitespaceSmart()
-    ['a', 'b', 'big', 'button', 'code', 'em', 'font', 'i', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'time', 'tt', 'u'].forEach(function(el) {
+    [
+      'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
+      'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
+      'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
+      'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
+    ].forEach(function(el) {
       equal(minify('<p>foo <' + el + '>baz</' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '> bar</p>');
       equal(minify('<p>foo<' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '>bar</p>');
       equal(minify('<p>foo <' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '>bar</p>');
@@ -694,6 +699,11 @@
     equal(minify(input, { removeEmptyElements: true }), input);
     input = '<script></script>';
     equal(minify(input, { removeEmptyElements: true }), '');
+
+    input = '<div>Empty <!-- NOT --> </div>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+    output = '<div>Empty<!-- NOT --></div>';
+    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
   });
 
   test('collapsing boolean attributes', function() {
@@ -720,11 +730,11 @@
       'Enabled=foo Formnovalidate=foo Hidden=foo Indeterminate=foo Inert=foo Ismap=foo Itemscope=foo ' +
       'Loop=foo Multiple=foo Muted=foo Nohref=foo Noresize=foo Noshade=foo Novalidate=foo Nowrap=foo Open=foo ' +
       'Pauseonexit=foo Readonly=foo Required=foo Reversed=foo Scoped=foo Seamless=foo Selected=foo Sortable=foo ' +
-      'Spellcheck=foo Truespeed=foo Typemustmatch=foo Visible=foo></div>';
+      'Truespeed=foo Typemustmatch=foo Visible=foo></div>';
     output = '<div Allowfullscreen Async Autofocus Autoplay Checked Compact Controls Declare Default Defaultchecked ' +
       'Defaultmuted Defaultselected Defer Disabled Enabled Formnovalidate Hidden Indeterminate Inert ' +
       'Ismap Itemscope Loop Multiple Muted Nohref Noresize Noshade Novalidate Nowrap Open Pauseonexit Readonly ' +
-      'Required Reversed Scoped Seamless Selected Sortable Spellcheck Truespeed Typemustmatch Visible></div>';
+      'Required Reversed Scoped Seamless Selected Sortable Truespeed Typemustmatch Visible></div>';
     equal(minify(input, { collapseBooleanAttributes: true, caseSensitive: true }), output);
   });
 
@@ -999,12 +1009,12 @@
     equal(minify(input, { minifyJS: true }), input);
 
     input = '<script>(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
-    output = '<script>!function(){var a=1,n=2;alert(a+" "+n)}();</script>';
+    output = '<script>!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
 
     equal(minify(input, { minifyJS: true }), output);
 
     input = '<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({\'gtm.start\':new Date().getTime(),event:\'gtm.js\'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';j.async=true;j.src=\'//www.googletagmanager.com/gtm.js?id=\'+i+dl;f.parentNode.insertBefore(j,f);})(window,document,\'script\',\'dataLayer\',\'GTM-67NT\');</script>';
-    output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl="dataLayer"!=l?"&l="+l:"";j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id="+i+dl,f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer","GTM-67NT");</script>';
+    output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl="dataLayer"!=l?"&l="+l:"";j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id="+i+dl,f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer","GTM-67NT")</script>';
 
     equal(minify(input, { minifyJS: { mangle: false } }), output);
 
@@ -1017,7 +1027,7 @@
             '    });\n' +
             '  //-->\n' +
             '</script>';
-    output = '<script>Platform.Mobile.Bootstrap.init(function(){Platform.Mobile.Core.Navigation.go("Login",{error:""})});</script>';
+    output = '<script>Platform.Mobile.Bootstrap.init(function(){Platform.Mobile.Core.Navigation.go("Login",{error:""})})</script>';
 
     equal(minify(input, {
       removeCommentsFromCDATA: true,
@@ -1119,7 +1129,7 @@
 
   test('escaping closing script tag', function() {
     var input = '<script>window.jQuery || document.write(\'<script src="jquery.js"><\\/script>\')</script>';
-    var output = '<script>window.jQuery||document.write(\'<script src="jquery.js"><\\/script>\');</script>';
+    var output = '<script>window.jQuery||document.write(\'<script src="jquery.js"><\\/script>\')</script>';
 
     equal(minify(input, { minifyJS: true }), output);
   });
@@ -1153,6 +1163,10 @@
     output = '<link rel="stylesheet" href="/style.css"><form action="folder2/"><a href="file.html">link</a></form>';
 
     equal(minify(input, { minifyURLs: { site: 'http://website.com/folder/' } }), output);
+
+    input = '<link rel="canonical" href="http://website.com/">';
+
+    equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
   });
 
   test('valueless attributes', function() {
@@ -1204,6 +1218,18 @@
       collapseWhitespace: true,
       preserveLineBreaks: true
     }), output);
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true,
+      preserveLineBreaks: true
+    }), output);
+
+    input = '<div> text <span>\n text</span> \n</div>';
+    output = '<div>text <span>\ntext</span>\n</div>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      preserveLineBreaks: true
+    }), output);
   });
 
   test('collapse inline tag whitespace', function() {
@@ -1213,6 +1239,18 @@
     }), input);
 
     output = '<button>a</button><button>b</button>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      collapseInlineTagWhitespace: true
+    }), output);
+
+    input = '<p>where <math> <mi>R</mi> </math> is the Rici tensor.</p>';
+    output = '<p>where <math><mi>R</mi></math> is the Rici tensor.</p>';
+    equal(minify(input, {
+      collapseWhitespace: true
+    }), output);
+
+    output = '<p>where<math><mi>R</mi></math>is the Rici tensor.</p>';
     equal(minify(input, {
       collapseWhitespace: true,
       collapseInlineTagWhitespace: true
@@ -1293,7 +1331,6 @@
   });
 
   test('meta viewport', function() {
-
     input = '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
     output = '<meta name="viewport" content="width=device-width,initial-scale=1">';
 
@@ -1306,6 +1343,11 @@
 
     input = '<meta name="viewport" content="width= 500 ,  initial-scale=1">';
     output = '<meta name="viewport" content="width=500,initial-scale=1">';
+
+    equal(minify(input), output);
+
+    input = '<meta name="viewport" content="width=device-width, initial-scale=1.0001, maximum-scale=3.140000">';
+    output = '<meta name="viewport" content="width=device-width,initial-scale=1.0001,maximum-scale=3.14">';
 
     equal(minify(input), output);
   });

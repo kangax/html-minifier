@@ -605,45 +605,51 @@
     return str ? str.replace(/[\t\n\r ]+/g, ' ') : str;
   }
 
+  function matchingMap(values) {
+    var map = Object.create(null);
+    values.forEach(function(value) {
+      map[value] = true;
+    });
+    return map;
+  }
+
+  // array of non-empty element tags that will maintain a single space outside of them
+  var inlineTags = matchingMap([
+    'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
+    'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
+    'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
+    'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
+  ]);
+
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
+    var lineBreakBefore = '', lineBreakAfter = '';
 
-    // array of non-empty element tags that will maintain a single space outside of them
-    var tags = [
-      'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
-      'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'q',
-      'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
-      'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
-    ],
-    lineBreakBefore = /^[\t ]*[\n\r]+[\t\n\r ]*/,
-    lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/,
-    preserveBefore = lineBreakBefore.test(str) ? '\n' : ' ',
-    preserveAfter = lineBreakAfter.test(str) ? '\n' : ' ',
-    lineBreakStamp = 'htmlmincollapsedlinebreak';
-
-    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.substr(0, 1) !== '/'
-      || (prevTag.substr(0, 1) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
-      str = str.replace(/^\s+/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveBefore : '');
+    if (options.preserveLineBreaks) {
+      str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
+        lineBreakBefore = '\n';
+        return '';
+      }).replace(/[\t\n\r ]*[\n\r]+[\t ]*$/, function() {
+        lineBreakAfter = '\n';
+        return '';
+      });
     }
 
-    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.substr(0, 1) === '/'
-      || (nextTag.substr(0, 1) !== '/' && (options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)))) {
-      str = str.replace(/\s+$/, options.conservativeCollapse ? ' ' : options.preserveLineBreaks ? preserveAfter : '');
+    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
+      || options.collapseInlineTagWhitespace || !inlineTags[prevTag.substr(1)])) {
+      str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
+    }
+
+    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
+      || options.collapseInlineTagWhitespace || !inlineTags[nextTag])) {
+      str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
     if (prevTag && nextTag) {
-
-      if (options.preserveLineBreaks) {
-        str = str
-          .replace(lineBreakBefore, lineBreakStamp)
-          .replace(lineBreakAfter, lineBreakStamp);
-      }
       // strip non space whitespace then compress spaces to one
-      return str
-        .replace(/[\t\n\r]+/g, ' ').replace(/[ ]+/g, ' ')
-        .replace(new RegExp(lineBreakStamp, 'g'), '\n');
+      str = str.replace(/[\t\n\r ]+/g, ' ');
     }
 
-    return str;
+    return lineBreakBefore + str + lineBreakAfter;
   }
 
   function isConditionalComment(text) {
@@ -735,14 +741,14 @@
 
   // https://mathiasbynens.be/demo/javascript-mime-type
   // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
-  var executableScriptsMimetypes = {
-    'text/javascript': 1,
-    'text/ecmascript': 1,
-    'text/jscript': 1,
-    'application/javascript': 1,
-    'application/x-javascript': 1,
-    'application/ecmascript': 1
-  };
+  var executableScriptsMimetypes = matchingMap([
+    'text/javascript',
+    'text/ecmascript',
+    'text/jscript',
+    'application/javascript',
+    'application/x-javascript',
+    'application/ecmascript'
+  ]);
 
   function isExecutableScript(tag, attrs) {
     if (tag !== 'script') {
@@ -751,8 +757,8 @@
     for (var i = 0, len = attrs.length; i < len; i++) {
       var attrName = attrs[i].name.toLowerCase();
       if (attrName === 'type') {
-        return attrs[i].value === '' ||
-               executableScriptsMimetypes[attrs[i].value] === 1;
+        var attrValue = attrs[i].value;
+        return attrValue === '' || executableScriptsMimetypes[attrValue];
       }
     }
     return true;
@@ -771,7 +777,7 @@
   };
 
   function isBooleanAttribute(attrName, attrValue) {
-    var isSimpleBoolean = (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|spellcheck|truespeed|typemustmatch|visible)$/i).test(attrName);
+    var isSimpleBoolean = (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|truespeed|typemustmatch|visible)$/i).test(attrName);
     if (isSimpleBoolean) {
       return true;
     }
@@ -812,6 +818,17 @@
     );
   }
 
+  function isCanonicalURL(tag, attrs) {
+    if (tag !== 'link') {
+      return false;
+    }
+    for (var i = 0, len = attrs.length; i < len; i++) {
+      if (attrs[i].name === 'rel' && attrs[i].value === 'canonical') {
+        return true;
+      }
+    }
+  }
+
   var fnPrefix = '!function(){';
   var fnSuffix = '}();';
 
@@ -829,7 +846,7 @@
     }
     else if (isUriTypeAttribute(attrName, tag)) {
       attrValue = trimWhitespace(attrValue);
-      if (options.minifyURLs) {
+      if (options.minifyURLs && !isCanonicalURL(tag, attrs)) {
         return minifyURLs(attrValue, options.minifyURLs);
       }
       return attrValue;
@@ -848,7 +865,12 @@
       return attrValue;
     }
     else if (isMetaViewport(tag, attrs) && attrName === 'content') {
-      attrValue = attrValue.replace(/1\.0/g, '1').replace(/\s+/g, '');
+      attrValue = attrValue.replace(/\s+/g, '').replace(/[0-9]+\.[0-9]+/g, function(numString) {
+        // "0.90000" -> "0.9"
+        // "1.0" -> "1"
+        // "1.0001" -> "1.0001" (unchanged)
+        return (+numString).toString();
+      });
     }
     else if (attrValue && options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
       attrValue = attrValue.replace(/\n+|\r+|\s{2,}/g, '');
@@ -1351,6 +1373,9 @@
         }
         if (options.minifyJS && isExecutableScript(currentTag, currentAttrs)) {
           text = minifyJS(text, options.minifyJS);
+          if (text.charAt(text.length - 1) === ';') {
+            text = text.slice(0, -1);
+          }
         }
         if (currentTag === 'style' && options.minifyCSS) {
           text = minifyCSS(text, options.minifyCSS);
@@ -1362,10 +1387,10 @@
               : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length) {
-            text = !(prevTag && nextTag || nextTag === 'html') ? collapseWhitespace(text) : text;
+            text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespace(text);
           }
         }
-        currentChars = text;
+        currentChars += text;
         if (lint) {
           lint.testChars(text);
         }
