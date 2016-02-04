@@ -62,12 +62,12 @@
     }
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
-      || (prevTag.charAt(0) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
+      || options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)) {
       str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
-      || (nextTag.charAt(0) !== '/' && (options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)))) {
+      || options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)) {
       str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
@@ -811,7 +811,7 @@
               : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length) {
-            text = !(prevTag && nextTag || nextTag === 'html') ? collapseWhitespace(text) : text;
+            text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespace(text);
           }
         }
         currentChars += text;
