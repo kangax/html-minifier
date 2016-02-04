@@ -94,7 +94,12 @@
   test('space normalization around text', function() {
     equal(minify('   <p>blah</p>\n\n\n   '), '<p>blah</p>');
     // tags from collapseWhitespaceSmart()
-    ['a', 'b', 'big', 'button', 'code', 'em', 'font', 'i', 'kbd', 'mark', 'q', 's', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'time', 'tt', 'u'].forEach(function(el) {
+    [
+      'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
+      'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
+      'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
+      'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
+    ].forEach(function(el) {
       equal(minify('<p>foo <' + el + '>baz</' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '> bar</p>');
       equal(minify('<p>foo<' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '>bar</p>');
       equal(minify('<p>foo <' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '>bar</p>');
