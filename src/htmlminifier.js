@@ -48,35 +48,35 @@
       'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
       'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
     ],
-    lineBreakBefore = /^[\t ]*[\n\r]+[\t\n\r ]*/,
-    lineBreakAfter = /[\t\n\r ]*[\n\r]+[\t ]*$/;
+    lineBreakBefore = '',
+    lineBreakAfter = '';
+
+    if (options.preserveLineBreaks) {
+      str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
+        lineBreakBefore = '\n';
+        return '';
+      }).replace(/[\t\n\r ]*[\n\r]+[\t ]*$/, function() {
+        lineBreakAfter = '\n';
+        return '';
+      });
+    }
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
       || (prevTag.charAt(0) === '/' && (options.collapseInlineTagWhitespace || tags.indexOf(prevTag.substr(1)) === -1)))) {
-      str = str.replace(/^\s+/, options.preserveLineBreaks && lineBreakBefore.test(str) ? '\n' : options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
       || (nextTag.charAt(0) !== '/' && (options.collapseInlineTagWhitespace || tags.indexOf(nextTag) === -1)))) {
-      str = str.replace(/\s+$/, options.preserveLineBreaks && lineBreakAfter.test(str) ? '\n' : options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
     if (prevTag && nextTag) {
-      var prefix = '', suffix = '';
-      if (options.preserveLineBreaks) {
-        str = str.replace(lineBreakBefore, function() {
-          prefix = '\n';
-          return '';
-        }).replace(lineBreakAfter, function() {
-          suffix = '\n';
-          return '';
-        });
-      }
       // strip non space whitespace then compress spaces to one
-      return prefix + str.replace(/[\t\n\r ]+/g, ' ') + suffix;
+      str = str.replace(/[\t\n\r ]+/g, ' ');
     }
 
-    return str;
+    return lineBreakBefore + str + lineBreakAfter;
   }
 
   function isConditionalComment(text) {
