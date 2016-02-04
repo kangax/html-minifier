@@ -847,7 +847,9 @@
       return attrValue;
     }
     else if (isMetaViewport(tag, attrs) && attrName === 'content') {
-      attrValue = attrValue.replace(/1\.0/g, '1').replace(/\s+/g, '');
+      attrValue = attrValue.replace(/\s+/g, '').replace(/[0-9]+\.[0-9]+/g, function(num) {
+        return (+num).toString();
+      });
     }
     else if (attrValue && options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
       attrValue = attrValue.replace(/\n+|\r+|\s{2,}/g, '');

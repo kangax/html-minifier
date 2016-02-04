@@ -1305,7 +1305,6 @@
   });
 
   test('meta viewport', function() {
-
     input = '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
     output = '<meta name="viewport" content="width=device-width,initial-scale=1">';
 
@@ -1318,6 +1317,11 @@
 
     input = '<meta name="viewport" content="width= 500 ,  initial-scale=1">';
     output = '<meta name="viewport" content="width=500,initial-scale=1">';
+
+    equal(minify(input), output);
+
+    input = '<meta name="viewport" content="width=device-width, initial-scale=1.0001, maximum-scale=3.140000">';
+    output = '<meta name="viewport" content="width=device-width,initial-scale=1.0001,maximum-scale=3.14">';
 
     equal(minify(input), output);
   });
