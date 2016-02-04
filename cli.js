@@ -83,7 +83,7 @@ var mainOptions = {
   minifyURLs: [[false, 'Minify URLs in various attributes (uses relateurl)']],
   ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json-regex'],
   ignoreCustomFragments: [[false, 'Array of regex\'es that allow to ignore certain fragments, when matched (e.g. <?php ... ?>, {{ ... }})', 'string'], 'json-regex'],
-  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json-regex'],
+  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json'],
   maxLineLength: [[false, 'Max line length', 'number'], true],
   customEventAttributes: [[false, 'Arrays of regex\'es that allow to support custom event attributes for minifyJS (e.g. ng-click)', 'string'], 'json-regex'],
   customAttrAssign: [[false, 'Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', 'string'], 'json-regex'],
