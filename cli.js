@@ -168,7 +168,7 @@ cli.main(function(args, options) {
     catch (e) {
       status = 3;
       cli.error('Minification error');
-      process.stderr.write(e);
+      process.stderr.write((e.stack || e).toString());
     }
 
     if (minifyOptions.lint) {
@@ -239,13 +239,13 @@ cli.main(function(args, options) {
     var fileOptions;
     var fileOptionsPath = path.resolve(options['config-file']);
     try {
-      fs.accessSync(fileOptionsPath, fs.R_OK);
+      fileOptions = fs.readFileSync(fileOptionsPath, { encoding: 'utf8' });
     }
     catch (e) {
       cli.fatal('The specified config file doesn’t exist or is unreadable:\n' + fileOptionsPath);
     }
     try {
-      fileOptions = JSON.parse(fs.readFileSync(fileOptionsPath), 'utf8');
+      fileOptions = JSON.parse(fileOptions);
     }
     catch (je) {
       try {
