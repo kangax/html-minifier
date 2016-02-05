@@ -605,16 +605,16 @@
     return str ? str.replace(/[\t\n\r ]+/g, ' ') : str;
   }
 
-  function matchingMap(values) {
-    var map = Object.create(null);
+  function createMap(values) {
+    var map = {};
     values.forEach(function(value) {
-      map[value] = true;
+      map[value] = 1;
     });
     return map;
   }
 
   // array of non-empty element tags that will maintain a single space outside of them
-  var inlineTags = matchingMap([
+  var inlineTags = createMap([
     'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
     'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
     'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
@@ -635,12 +635,12 @@
     }
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
-      || options.collapseInlineTagWhitespace || !inlineTags[prevTag.substr(1)])) {
+      || options.collapseInlineTagWhitespace || inlineTags[prevTag.substr(1)] !== 1)) {
       str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
-      || options.collapseInlineTagWhitespace || !inlineTags[nextTag])) {
+      || options.collapseInlineTagWhitespace || inlineTags[nextTag] !== 1)) {
       str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
@@ -741,7 +741,7 @@
 
   // https://mathiasbynens.be/demo/javascript-mime-type
   // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
-  var executableScriptsMimetypes = matchingMap([
+  var executableScriptsMimetypes = createMap([
     'text/javascript',
     'text/ecmascript',
     'text/jscript',
@@ -758,7 +758,7 @@
       var attrName = attrs[i].name.toLowerCase();
       if (attrName === 'type') {
         var attrValue = attrs[i].value;
-        return attrValue === '' || executableScriptsMimetypes[attrValue];
+        return attrValue === '' || executableScriptsMimetypes[attrValue] === 1;
       }
     }
     return true;
