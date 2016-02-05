@@ -168,7 +168,7 @@ cli.main(function(args, options) {
     catch (e) {
       status = 3;
       cli.error('Minification error');
-      process.stderr.write(e);
+      process.stderr.write((e.stack || e).toString());
     }
 
     if (minifyOptions.lint) {
