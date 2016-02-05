@@ -1363,7 +1363,14 @@
       chars: function(text, prevTag, nextTag) {
         prevTag = prevTag === '' ? 'comment' : prevTag;
         nextTag = nextTag === '' ? 'comment' : nextTag;
-
+        if (options.collapseWhitespace) {
+          if (!stackNoTrimWhitespace.length) {
+            text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
+          }
+          if (!stackNoCollapseWhitespace.length) {
+            text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespace(text);
+          }
+        }
         if (currentTag === 'script' || currentTag === 'style') {
           if (options.removeCommentsFromCDATA) {
             text = removeComments(text, currentTag);
@@ -1383,14 +1390,6 @@
         }
         if (currentTag === 'style' && options.minifyCSS) {
           text = minifyCSS(text, options.minifyCSS);
-        }
-        if (options.collapseWhitespace) {
-          if (!stackNoTrimWhitespace.length) {
-            text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
-          }
-          if (!stackNoCollapseWhitespace.length) {
-            text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespace(text);
-          }
         }
         currentChars += text;
         if (lint) {
