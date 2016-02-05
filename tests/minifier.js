@@ -113,7 +113,8 @@
     equal(minify('<p>foo<img>bar</p>', { collapseWhitespace: true }), '<p>foo<img>bar</p>');
     equal(minify('<p>foo <img>bar</p>', { collapseWhitespace: true }), '<p>foo <img>bar</p>');
     equal(minify('<p>foo<img> bar</p>', { collapseWhitespace: true }), '<p>foo<img> bar</p>');
-    equal(minify('<div> Empty <!-- or --> not </div>', { collapseWhitespace:true }), '<div>Empty<!-- or --> not</div>');
+    equal(minify('<div> Empty <!-- or --> not </div>', { collapseWhitespace: true }), '<div>Empty<!-- or --> not</div>');
+    equal(minify('<div> a <input><!-- b --> c </div>', { removeComments: true, collapseWhitespace: true }), '<div>a <input> c</div>');
   });
 
   test('doctype normalization', function() {
@@ -851,13 +852,6 @@
     equal(minify(input, {}), input);
     equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
 
-    output = 'This is the start. <% ... %>\n<%= ... %>\n<? ... ?>\nNo comment, but middle.\n<?= ... ?>\n<?php ... ?>\n<?xml ... ?>\nHello, this is the end!';
-    equal(minify(input, {
-      removeComments: true,
-      collapseWhitespace: true,
-      preserveLineBreaks: true
-    }), output);
-
     output = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
 
     equal(minify(input, {
@@ -1246,6 +1240,14 @@
       collapseWhitespace: true,
       preserveLineBreaks: true
     }), output);
+
+    input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
+    output = 'This is the start. <% ... %>\n<%= ... %>\n<? ... ?>\nNo comment, but middle.\n<?= ... ?>\n<?php ... ?>\n<?xml ... ?>\nHello, this is the end!';
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true,
+      preserveLineBreaks: true
+    }), output);
   });
 
   test('collapse inline tag whitespace', function() {
@@ -1381,7 +1383,7 @@
     input = '<noscript>\n<!-- anchor linking to external file -->\n' +
             '<a href="#" onclick="javascript:">External Link</a>\n</noscript>';
     equal(minify(input, { removeComments: true, collapseWhitespace: true, removeEmptyAttributes: true }),
-      '<noscript> <a href="#">External Link</a></noscript>');
+      '<noscript><a href="#">External Link</a></noscript>');
   });
 
   test('max line length', function() {

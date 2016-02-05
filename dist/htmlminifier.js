@@ -1206,6 +1206,7 @@
 
     var results = [ ],
         buffer = [ ],
+        charsPrevTag,
         currentChars = '',
         currentTag = '',
         currentAttrs = [],
@@ -1272,6 +1273,7 @@
         tag = options.caseSensitive ? tag : lowerTag;
 
         currentTag = tag;
+        charsPrevTag = undefined;
         currentChars = '';
         currentAttrs = attrs;
 
@@ -1358,6 +1360,7 @@
         }
         // flush buffer
         buffer.length = 0;
+        charsPrevTag = undefined;
         currentChars = '';
       },
       chars: function(text, prevTag, nextTag) {
@@ -1365,13 +1368,18 @@
         nextTag = nextTag === '' ? 'comment' : nextTag;
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {
-            if (prevTag === 'comment' && (buffer[buffer.length - 1] === ''
-              || currentChars.charAt(currentChars.length - 1) === ' ')) {
-              var charsIndex = buffer.length - 2;
-              buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
-                text = trailingSpaces + text;
-                return '';
-              });
+            if (prevTag === 'comment') {
+              var removed = buffer[buffer.length - 1] === '';
+              if (removed) {
+                prevTag = charsPrevTag;
+              }
+              if (removed || currentChars.charAt(currentChars.length - 1) === ' ') {
+                var charsIndex = buffer.length - 2;
+                buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
+                  text = trailingSpaces + text;
+                  return '';
+                });
+              }
             }
             text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
           }
@@ -1399,6 +1407,7 @@
         if (currentTag === 'style' && options.minifyCSS) {
           text = minifyCSS(text, options.minifyCSS);
         }
+        charsPrevTag = prevTag;
         currentChars += text;
         if (lint) {
           lint.testChars(text);
