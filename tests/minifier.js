@@ -113,7 +113,7 @@
     equal(minify('<p>foo<img>bar</p>', { collapseWhitespace: true }), '<p>foo<img>bar</p>');
     equal(minify('<p>foo <img>bar</p>', { collapseWhitespace: true }), '<p>foo <img>bar</p>');
     equal(minify('<p>foo<img> bar</p>', { collapseWhitespace: true }), '<p>foo<img> bar</p>');
-    equal(minify('<div> Empty <!-- or --> not </div>', { collapseWhitespace:true }), '<div>Empty <!-- or --> not</div>');
+    equal(minify('<div> Empty <!-- or --> not </div>', { collapseWhitespace:true }), '<div>Empty<!-- or --> not</div>');
   });
 
   test('doctype normalization', function() {
@@ -703,7 +703,7 @@
 
     input = '<div>Empty <!-- NOT --> </div>';
     equal(minify(input, { removeEmptyElements: true }), input);
-    output = '<div>Empty <!-- NOT --></div>';
+    output = '<div>Empty<!-- NOT --></div>';
     equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
   });
 
@@ -846,10 +846,17 @@
     var reFragments = [ /<\?[^\?]+\?>/, /<%[^%]+%>/ ];
 
     input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
-    output = 'This is the start. <% ... %> <%= ... %> <? ... ?>  No comment, but middle. <?= ... ?> <?php ... ?> <?xml ... ?> Hello, this is the end!';
+    output = 'This is the start. <% ... %> <%= ... %> <? ... ?> No comment, but middle. <?= ... ?> <?php ... ?> <?xml ... ?> Hello, this is the end!';
 
     equal(minify(input, {}), input);
     equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
+
+    output = 'This is the start. <% ... %>\n<%= ... %>\n<? ... ?>\nNo comment, but middle.\n<?= ... ?>\n<?php ... ?>\n<?xml ... ?>\nHello, this is the end!';
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true,
+      preserveLineBreaks: true
+    }), output);
 
     output = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
 
@@ -1185,6 +1192,14 @@
     input = '<b>   foo \n\n</b>';
     output = '<b> foo </b>';
     equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true
+    }), output);
+
+    input = '<html>\n\n<!--test-->\n\n</html>';
+    output = '<html> </html>';
+    equal(minify(input, {
+      removeComments: true,
       collapseWhitespace: true,
       conservativeCollapse: true
     }), output);

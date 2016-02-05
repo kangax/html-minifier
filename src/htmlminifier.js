@@ -796,6 +796,14 @@
         nextTag = nextTag === '' ? 'comment' : nextTag;
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {
+            if (prevTag === 'comment' && (buffer[buffer.length - 1] === ''
+              || currentChars.charAt(currentChars.length - 1) === ' ')) {
+              var charsIndex = buffer.length - 2;
+              buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
+                text = trailingSpaces + text;
+                return '';
+              });
+            }
             text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length) {
