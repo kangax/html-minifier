@@ -179,6 +179,7 @@
               handler.comment( html.substring( 4, index ) );
             }
             html = html.substring( index + 3 );
+            prevTag = '';
             chars = false;
           }
         }
@@ -192,6 +193,7 @@
               handler.comment( html.substring(2, index + 1 ), true /* non-standard */ );
             }
             html = html.substring( index + 2 );
+            prevTag = '';
             chars = false;
           }
         }
@@ -204,6 +206,7 @@
               handler.chars( html.substring( 0, index + 2 ) );
             }
             html = html.substring( index + 2 );
+            prevTag = '';
           }
         }
 
@@ -214,6 +217,7 @@
               handler.chars(html.substring( 0, index + 2) );
             }
             html = html.substring( index + 2 );
+            prevTag = '';
           }
         }
 
@@ -634,13 +638,13 @@
       });
     }
 
-    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && (prevTag.charAt(0) !== '/'
-      || options.collapseInlineTagWhitespace || inlineTags[prevTag.substr(1)] !== 1)) {
+    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && prevTag !== 'comment'
+      && (prevTag.charAt(0) !== '/' || options.collapseInlineTagWhitespace || inlineTags[prevTag.substr(1)] !== 1)) {
       str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
-    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && (nextTag.charAt(0) === '/'
-      || options.collapseInlineTagWhitespace || inlineTags[nextTag] !== 1)) {
+    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && nextTag !== 'comment'
+      && (nextTag.charAt(0) === '/' || options.collapseInlineTagWhitespace || inlineTags[nextTag] !== 1)) {
       str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
@@ -1382,9 +1386,7 @@
         }
         if (options.collapseWhitespace) {
           if (!stackNoTrimWhitespace.length) {
-            text = ((prevTag && prevTag !== 'comment') || (nextTag && nextTag !== 'comment')) ?
-              collapseWhitespaceSmart(text, prevTag, nextTag, options)
-              : trimWhitespace(text);
+            text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length) {
             text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespace(text);

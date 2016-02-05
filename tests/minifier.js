@@ -113,6 +113,7 @@
     equal(minify('<p>foo<img>bar</p>', { collapseWhitespace: true }), '<p>foo<img>bar</p>');
     equal(minify('<p>foo <img>bar</p>', { collapseWhitespace: true }), '<p>foo <img>bar</p>');
     equal(minify('<p>foo<img> bar</p>', { collapseWhitespace: true }), '<p>foo<img> bar</p>');
+    equal(minify('<div> Empty <!-- or --> not </div>', { collapseWhitespace:true }), '<div>Empty <!-- or --> not</div>');
   });
 
   test('doctype normalization', function() {
@@ -702,7 +703,7 @@
 
     input = '<div>Empty <!-- NOT --> </div>';
     equal(minify(input, { removeEmptyElements: true }), input);
-    output = '<div>Empty<!-- NOT --></div>';
+    output = '<div>Empty <!-- NOT --></div>';
     equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
   });
 
@@ -845,7 +846,7 @@
     var reFragments = [ /<\?[^\?]+\?>/, /<%[^%]+%>/ ];
 
     input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
-    output = 'This is the start.<% ... %><%= ... %><? ... ?>No comment, but middle.<?= ... ?><?php ... ?><?xml ... ?>Hello, this is the end!';
+    output = 'This is the start. <% ... %> <%= ... %> <? ... ?>  No comment, but middle. <?= ... ?> <?php ... ?> <?xml ... ?> Hello, this is the end!';
 
     equal(minify(input, {}), input);
     equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
@@ -1365,7 +1366,7 @@
     input = '<noscript>\n<!-- anchor linking to external file -->\n' +
             '<a href="#" onclick="javascript:">External Link</a>\n</noscript>';
     equal(minify(input, { removeComments: true, collapseWhitespace: true, removeEmptyAttributes: true }),
-      '<noscript><a href="#">External Link</a></noscript>');
+      '<noscript> <a href="#">External Link</a></noscript>');
   });
 
   test('max line length', function() {
