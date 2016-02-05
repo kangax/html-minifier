@@ -174,6 +174,7 @@
               handler.comment( html.substring( 4, index ) );
             }
             html = html.substring( index + 3 );
+            prevTag = '';
             chars = false;
           }
         }
@@ -187,6 +188,7 @@
               handler.comment( html.substring(2, index + 1 ), true /* non-standard */ );
             }
             html = html.substring( index + 2 );
+            prevTag = '';
             chars = false;
           }
         }
@@ -199,6 +201,7 @@
               handler.chars( html.substring( 0, index + 2 ) );
             }
             html = html.substring( index + 2 );
+            prevTag = '';
           }
         }
 
@@ -209,6 +212,7 @@
               handler.chars(html.substring( 0, index + 2) );
             }
             html = html.substring( index + 2 );
+            prevTag = '';
           }
         }
 
