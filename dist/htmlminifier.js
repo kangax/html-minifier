@@ -1373,7 +1373,7 @@
               if (removed) {
                 prevTag = charsPrevTag;
               }
-              if (removed || currentChars.charAt(currentChars.length - 1) === ' ') {
+              if (buffer.length > 1 && (removed || currentChars.charAt(currentChars.length - 1) === ' ')) {
                 var charsIndex = buffer.length - 2;
                 buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
                   text = trailingSpaces + text;
