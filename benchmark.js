@@ -16,19 +16,20 @@ var brotli = require('brotli'),
     url = require('url'),
     zlib = require('zlib');
 
-var fileNames = [
-  'abc',
-  'amazon',
-  'eloquentjavascript',
-  'es6',
-  'es6-table',
-  'google',
-  'html-minifier',
-  'msn',
-  'newyorktimes',
-  'stackoverflow',
-  'wikipedia'
-].sort();
+var urls = {
+  amazon: 'http://www.amazon.com/',
+  eloquentjavascript: 'http://eloquentjavascript.net/print.html',
+  es6: 'https://people.mozilla.org/~jorendorff/es6-draft.html',
+  'es6-table': 'http://kangax.github.io/es5-compat-table/es6/',
+  google: 'http://www.google.com/',
+  'html-minifier': 'https://github.com/kangax/html-minifier',
+  msn: 'http://www.msn.com/',
+  nbc: 'http://www.nbc.com/',
+  newyorktimes: 'http://www.nytimes.com/',
+  stackoverflow: 'http://stackoverflow.com/',
+  wikipedia: 'http://en.wikipedia.org/wiki/President_of_the_United_States'
+};
+var fileNames = Object.keys(urls).sort();
 
 var minimize = new Minimize();
 
@@ -210,7 +211,7 @@ run(fileNames.map(function (fileName) {
     function testHTMLMinifier(done) {
       var info = infos.minifier;
       info.startTime = Date.now();
-      var args = [filePath, '-c', 'sample-cli-config-file.conf', '-o', info.filePath];
+      var args = [filePath, '-c', 'sample-cli-config-file.conf', '--minify-urls', urls[fileName], '-o', info.filePath];
       fork('./cli', args).on('exit', function () {
         readSizes(info, done);
       });

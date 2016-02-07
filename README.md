@@ -15,15 +15,19 @@ Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_mini
 
 How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Peavy](http://www.willpeavy.com/minifier/) (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as [htmlcompressor.com](http://htmlcompressor.com) and [minimize](https://github.com/Swaagie/minimize)?
 
-| Site | Original size _(KB)_ | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
-| --------------------------------------------------------------------------- |:-----------:| ----------------:| ----------------:| ------------:| ----------------:|
-| [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>37.3</b>      | 41.8      |   43.3       | 41.9 |
-| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>      | 94.1      |   92         | 91.9 |
-| [MSN](http://msn.com)                                                       | 156.6       | <b>133</b>       | 137.7     |   145        | 138.3 |
-| [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>159.5</b>     | 165.1     |   168.3      | 163.3 |
-| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     | 234.1     |   225        | 218.5 |
-| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>380.6</b>     | 386.6     |   396.3      | n/a |
-| [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 869.5       | <b>830</b>       | 838       |   872        | n/a |
+| Site                                                                        | Original size _(KB)_ | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
+| --------------------------------------------------------------------------- |:--------------------:| ------------:| --------:| ----------:| ------------------:|
+| [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 49                   | <b>37</b>    | 42       | 44         | 43                 |
+| [NBC](http://www.nbc.com)                                                   | 91                   | <b>75</b>    | 84       | 86         | 85                 |
+| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 118                  | <b>80</b>    | 93       | 95         | 94                 |
+| [New York Times](http://www.nytimes.com/)                                   | 131                  | <b>102</b>   | 122      | 125        | 120                |
+| [Google](http://www.google.com/)                                            | 133                  | <b>128</b>   | 132      | 135        | 131                |
+| [MSN](http://msn.com)                                                       | 157                  | <b>132</b>   | 138      | 145        | 138                |
+| [Stackoverflow](http://stackoverflow.com)                                   | 200                  | <b>159</b>   | 165      | 174        | 166                |
+| [Amazon](http://amazon.com)                                                 | 246                  | <b>211</b>   | 234      | 230        | 219                |
+| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401                  | <b>373</b>   | 388      | 400        | n/a                |
+| [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 870                  | <b>831</b>   | 840      | 864        | n/a                |
+| [ES6 draft](https://people.mozilla.org/~jorendorff/es6-draft.html)          | 3678                 | <b>3060</b>  | 3079     | 3204       | n/a                |
 
 
 
