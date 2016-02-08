@@ -622,9 +622,11 @@
     output = '<div><textarea></textarea></div>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
-    input = '<div><pre> $foo = "baz"; </pre>    </div>';
+    input = '<div><pRe> $foo = "baz"; </pRe>    </div>';
     output = '<div><pre> $foo = "baz"; </pre></div>';
     equal(minify(input, { collapseWhitespace: true }), output);
+    output = '<div><pRe>$foo = "baz";</pRe></div>';
+    equal(minify(input, { collapseWhitespace: true, caseSensitive: true }), output);
 
     input = '<script type=\"text\/javascript\">var = \"hello\";<\/script>\r\n\r\n\r\n'               +
              '<style type=\"text\/css\">#foo { color: red;        }          <\/style>\r\n\r\n\r\n'  +

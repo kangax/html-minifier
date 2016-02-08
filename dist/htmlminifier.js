@@ -1330,6 +1330,8 @@
           options = optionsStack.pop();
         }
 
+        tag = options.caseSensitive ? tag : lowerTag;
+
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
           if (stackNoTrimWhitespace.length &&
@@ -1357,7 +1359,7 @@
         }
         else {
           // push end tag to buffer
-          buffer.push('</' + (options.caseSensitive ? tag : lowerTag) + '>');
+          buffer.push('</' + tag + '>');
           results.push.apply(results, buffer);
           // flush buffer
           buffer.length = 0;
