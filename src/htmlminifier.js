@@ -824,7 +824,7 @@
           if (optionalStartTag && (optionalStartTag !== 'body' || headerTags[tag] !== 1)) {
             removeStartTag();
           }
-          optionalStartTag = !attrs.length && optionalStartTags[tag] === 1 ? tag : '';
+          optionalStartTag = '';
           if (canRemovePrecedingTag(optionalEndTag, tag)) {
             removeEndTag();
           }
@@ -865,6 +865,9 @@
         if (parts.length > 0) {
           buffer.push(' ');
           buffer.push.apply(buffer, parts);
+        }
+        else if (options.removeOptionalTags && optionalStartTags[tag] === 1) {
+          optionalStartTag = tag;
         }
 
         buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');

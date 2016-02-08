@@ -784,9 +784,19 @@
 
   test('removing optional tags', function() {
     input = '<html><head><title>hello</title></head><body><p>foo<span>bar</span></p></body></html>';
+    equal(minify(input), input);
     output = '<title>hello</title><p>foo<span>bar</span>';
     equal(minify(input, { removeOptionalTags: true }), output);
-    equal(minify(input), input);
+
+    input = '<html lang=""><head><title>hello</title></head><body style=""><p>foo<span>bar</span></p></body></html>';
+    output = '<html lang=""><title>hello</title><body style=""><p>foo<span>bar</span>';
+    equal(minify(input, { removeOptionalTags: true }), output);
+    output = '<title>hello</title><p>foo<span>bar</span>';
+    equal(minify(input, { removeOptionalTags: true, removeEmptyAttributes: true }), output);
+
+    input = '<html><head><title>a</title><link href="b.css" rel="stylesheet"/></head><body><a href="c.html"></a><div class="d"><input value="e"/></div></body></html>';
+    output = '<title>a</title><link href="b.css" rel="stylesheet"><a href="c.html"></a><div class="d"><input value="e"></div>';
+    equal(minify(input, { removeOptionalTags: true }), output);
   });
 
   test('removing optional tags in tables', function() {
