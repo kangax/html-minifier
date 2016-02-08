@@ -784,7 +784,7 @@
 
   test('removing optional tags', function() {
     input = '<html><head><title>hello</title></head><body><p>foo<span>bar</span></p></body></html>';
-    output = '<html><head><title>hello</title><body><p>foo<span>bar</span></p>';
+    output = '<title>hello</title><p>foo<span>bar</span>';
     equal(minify(input, { removeOptionalTags: true }), output);
     equal(minify(input), input);
   });
@@ -812,6 +812,16 @@
     output = '<select><option>foo<option>bar</select>';
     equal(minify(input, { removeOptionalTags: true }), output);
 
+    input = '<select>\n' +
+            '  <option>foo</option>\n' +
+            '  <option>bar</option>\n' +
+            '</select>';
+    equal(minify(input, { removeOptionalTags: true }), input);
+    output = '<select><option>foo<option>bar</select>';
+    equal(minify(input, { removeOptionalTags: true, collapseWhitespace: true }), output);
+    output = '<select> <option>foo</option> <option>bar</option> </select>';
+    equal(minify(input, { removeOptionalTags: true, collapseWhitespace: true, conservativeCollapse: true }), output);
+
     // example from htmldog.com
     input = '<select name="catsndogs">' +
               '<optgroup label="Cats">' +
@@ -823,13 +833,11 @@
             '</select>';
 
     output = '<select name="catsndogs">' +
-              '<optgroup label="Cats">' +
-                '<option>Tiger<option>Leopard<option>Lynx' +
-              '</optgroup>' +
-              '<optgroup label="Dogs">' +
-                '<option>Grey Wolf<option>Red Fox<option>Fennec' +
-              '</optgroup>' +
-            '</select>';
+               '<optgroup label="Cats">' +
+                 '<option>Tiger<option>Leopard<option>Lynx' +
+               '<optgroup label="Dogs">' +
+                 '<option>Grey Wolf<option>Red Fox<option>Fennec' +
+             '</select>';
 
     equal(minify(input, { removeOptionalTags: true }), output);
   });

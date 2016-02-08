@@ -377,8 +377,103 @@
     return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
   }
 
-  function isOptionalTag(tag) {
-    return (/^(?:html|t?body|t?head|tfoot|tr|td|th|dt|dd|option|colgroup|source|track)$/).test(tag);
+  var optionalStartTags = createMap([
+    'html',
+    'head',
+    'body'
+  ]);
+  var optionalEndTags = createMap([
+    'html',
+    'head',
+    'body',
+    'li',
+    'dt',
+    'dd',
+    'p',
+    'rb',
+    'rt',
+    'rtc',
+    'rp',
+    'optgroup',
+    'option',
+    'colgroup',
+    'thead',
+    'tbody',
+    'tfoot',
+    'tr',
+    'td',
+    'th'
+  ]);
+  var headerTags = createMap([
+    'meta',
+    'link',
+    'script',
+    'style',
+    'template'
+  ]);
+  var removePrecedingParagraphTag = createMap([
+    'address',
+    'article',
+    'aside',
+    'blockquote',
+    'div',
+    'dl',
+    'fieldset',
+    'footer',
+    'form',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'header',
+    'hgroup',
+    'hr',
+    'main',
+    'nav',
+    'ol',
+    'p',
+    'pre',
+    'section',
+    'table',
+    'ul'
+  ]);
+
+  function canRemovePrecedingTag(optionalEndTag, tag) {
+    switch (optionalEndTag) {
+      case 'html':
+      case 'head':
+      case 'body':
+      case 'colgroup':
+        return true;
+      case 'li':
+      case 'optgroup':
+      case 'tr':
+        return tag === optionalEndTag;
+      case 'dt':
+      case 'dd':
+        return tag === 'dt' || tag === 'dd';
+      case 'p':
+        return removePrecedingParagraphTag[tag] === 1;
+      case 'rb':
+      case 'rt':
+      case 'rp':
+        return tag === 'rb' || tag === 'rt' || tag === 'rtc' || tag === 'rp';
+      case 'rtc':
+        return tag === 'rb' || tag === 'rtc' || tag === 'rp';
+      case 'option':
+        return tag === 'option' || tag === 'optgroup';
+      case 'thead':
+      case 'tbody':
+        return tag === 'tbody' || tag === 'tfoot';
+      case 'tfoot':
+        return tag === 'tbody';
+      case 'td':
+      case 'th':
+        return tag === 'td' || tag === 'th';
+    }
+    return false;
   }
 
   var reEmptyAttribute = new RegExp(
@@ -643,6 +738,8 @@
         currentAttrs = [],
         stackNoTrimWhitespace = [],
         stackNoCollapseWhitespace = [],
+        optionalStartTag = '',
+        optionalEndTag = '',
         lint = options.lint,
         t = Date.now(),
         ignoredMarkupChunks = [ ],
@@ -691,11 +788,18 @@
       buffer.length = Math.max(0, index);
     }
 
+    function removeEndTag() {
+      var index = buffer.length - 1;
+      while (index > 0 && !/^<\//.test(buffer[index])) {
+        index--;
+      }
+      buffer.length = index;
+    }
+
     new HTMLParser(value, {
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
       start: function(tag, attrs, unary, unarySlash) {
-
         var lowerTag = tag.toLowerCase();
 
         if (lowerTag === 'svg') {
@@ -715,6 +819,17 @@
         charsPrevTag = undefined;
         currentChars = '';
         currentAttrs = attrs;
+
+        if (options.removeOptionalTags) {
+          if (optionalStartTag && (optionalStartTag !== 'body' || headerTags[tag] !== 1)) {
+            removeStartTag();
+          }
+          optionalStartTag = !attrs.length && optionalStartTags[tag] === 1 ? tag : '';
+          if (canRemovePrecedingTag(optionalEndTag, tag)) {
+            removeEndTag();
+          }
+          optionalEndTag = '';
+        }
 
         // set whitespace flags for nested tags (eg. <code> within a <pre>)
         if (options.collapseWhitespace) {
@@ -755,13 +870,19 @@
         buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');
       },
       end: function(tag, attrs) {
-
         var lowerTag = tag.toLowerCase();
         if (lowerTag === 'svg') {
           options = optionsStack.pop();
         }
 
         tag = options.caseSensitive ? tag : lowerTag;
+
+        if (options.removeOptionalTags) {
+          if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || tag !== 'a')) {
+            removeEndTag();
+          }
+          optionalEndTag = optionalEndTags[tag] === 1 ? tag : '';
+        }
 
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
@@ -783,17 +904,13 @@
         if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
           // remove last "element" from buffer
           removeStartTag();
-        }
-        else if (options.removeOptionalTags && isOptionalTag(tag)) {
-          // noop, leave start tag in buffer
-          return;
+          optionalStartTag = '';
+          optionalEndTag = '';
         }
         else {
-          // push end tag to buffer
-          buffer.push('</' + tag + '>');
+          // push out everything but the end tag
           results.push.apply(results, buffer);
-          // flush buffer
-          buffer.length = 0;
+          buffer = ['</' + tag + '>'];
           charsPrevTag = undefined;
           currentChars = '';
         }
@@ -842,6 +959,16 @@
         if (currentTag === 'style' && options.minifyCSS) {
           text = minifyCSS(text, options.minifyCSS);
         }
+        if (options.removeOptionalTags && text) {
+          if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
+            removeStartTag();
+          }
+          optionalStartTag = '';
+          if (optionalEndTag === 'html' || optionalEndTag === 'body' || (optionalEndTag === 'head' || optionalEndTag === 'colgroup') && !/^\s/.test(text)) {
+            removeEndTag();
+          }
+          optionalEndTag = '';
+        }
         charsPrevTag = prevTag;
         currentChars += text;
         if (lint) {
@@ -850,10 +977,8 @@
         buffer.push(text);
       },
       comment: function(text, nonStandard) {
-
         var prefix = nonStandard ? '<!' : '<!--';
         var suffix = nonStandard ? '>' : '-->';
-
         if (options.removeComments) {
           if (isConditionalComment(text)) {
             text = prefix + cleanConditionalComment(text) + suffix;
@@ -868,6 +993,10 @@
         else {
           text = prefix + text + suffix;
         }
+        if (options.removeOptionalTags && text) {
+          optionalStartTag = '';
+          optionalEndTag = '';
+        }
         buffer.push(text);
       },
       doctype: function(doctype) {
@@ -876,6 +1005,15 @@
       customAttrAssign: options.customAttrAssign,
       customAttrSurround: options.customAttrSurround
     });
+
+    if (options.removeOptionalTags) {
+      if (optionalStartTag) {
+        removeStartTag();
+      }
+      if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead') {
+        removeEndTag();
+      }
+    }
 
     results.push.apply(results, buffer);
     var str = joinResultSegments(results, options);
