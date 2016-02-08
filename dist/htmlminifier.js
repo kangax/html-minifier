@@ -761,7 +761,7 @@
     for (var i = 0, len = attrs.length; i < len; i++) {
       var attrName = attrs[i].name.toLowerCase();
       if (attrName === 'type') {
-        var attrValue = attrs[i].value;
+        var attrValue = trimWhitespace(attrs[i].value).split(/;/, 2)[0].toLowerCase();
         return attrValue === '' || executableScriptsMimetypes[attrValue] === 1;
       }
     }
