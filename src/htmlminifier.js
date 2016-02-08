@@ -81,7 +81,7 @@
 
     if (prevTag && nextTag) {
       // strip non space whitespace then compress spaces to one
-      str = str.replace(/[\t\n\r ]+/g, ' ');
+      str = collapseWhitespace(str);
     }
 
     return lineBreakBefore + str + lineBreakAfter;
