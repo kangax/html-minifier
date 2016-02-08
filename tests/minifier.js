@@ -702,6 +702,24 @@
     input = '<script></script>';
     equal(minify(input, { removeEmptyElements: true }), '');
 
+    input = '<div>after<span></span> </div>';
+    output = '<div>after </div>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+    output = '<div>after</div>';
+    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+
+    input = '<div>before <span></span></div>';
+    output = '<div>before </div>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+    output = '<div>before </div>';
+    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+
+    input = '<div>both <span></span> </div>';
+    output = '<div>both  </div>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+    output = '<div>both </div>';
+    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+
     input = '<div>Empty <!-- NOT --> </div>';
     equal(minify(input, { removeEmptyElements: true }), input);
     output = '<div>Empty<!-- NOT --></div>';

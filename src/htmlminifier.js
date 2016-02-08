@@ -683,6 +683,14 @@
       return canTrimWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
     }
 
+    function removeStartTag() {
+      var index = buffer.length - 1;
+      while (index > 0 && !/^<[^/!]/.test(buffer[index])) {
+        index--;
+      }
+      buffer.length = Math.max(0, index);
+    }
+
     new HTMLParser(value, {
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
@@ -771,14 +779,8 @@
           isElementEmpty = currentChars === '';
         }
         if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
-          // remove last "element" from buffer, return
-          for (var i = buffer.length - 1; i >= 0; i--) {
-            if (/^<[^\/!]/.test(buffer[i])) {
-              buffer.splice(i);
-              break;
-            }
-          }
-          return;
+          // remove last "element" from buffer
+          removeStartTag();
         }
         else if (options.removeOptionalTags && isOptionalTag(tag)) {
           // noop, leave start tag in buffer
@@ -788,11 +790,11 @@
           // push end tag to buffer
           buffer.push('</' + (options.caseSensitive ? tag : lowerTag) + '>');
           results.push.apply(results, buffer);
+          // flush buffer
+          buffer.length = 0;
+          charsPrevTag = undefined;
+          currentChars = '';
         }
-        // flush buffer
-        buffer.length = 0;
-        charsPrevTag = undefined;
-        currentChars = '';
       },
       chars: function(text, prevTag, nextTag) {
         prevTag = prevTag === '' ? 'comment' : prevTag;
