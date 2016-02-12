@@ -934,10 +934,17 @@
     return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
   }
 
+  // Tag omission rules from http://www.w3.org/TR/html5/syntax.html#optional-tags
   var optionalStartTags = createMap('html,head,body');
   var optionalEndTags = createMap('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,thead,tbody,tfoot,tr,td,th');
   var headerTags = createMap('meta,link,script,style,template');
-  var removePrecedingParagraphTag = createMap('address,article,aside,blockquote,div,dl,fieldset,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,nav,ol,p,pre,section,table,ul');
+  var descriptionTags = createMap('dt,dd');
+  var pTag = createMap('address,article,aside,blockquote,div,dl,fieldset,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,nav,ol,p,pre,section,table,ul');
+  var rubyTags = createMap('rb,rt,rtc,rp');
+  var rtcTag = createMap('rb,rtc,rp');
+  var optionTag = createMap('option,optgroup');
+  var tableTags = createMap('tbody,tfoot');
+  var cellTags = createMap('td,th');
 
   function canRemovePrecedingTag(optionalEndTag, tag) {
     switch (optionalEndTag) {
@@ -952,25 +959,25 @@
         return tag === optionalEndTag;
       case 'dt':
       case 'dd':
-        return tag === 'dt' || tag === 'dd';
+        return descriptionTags(tag);
       case 'p':
-        return removePrecedingParagraphTag(tag);
+        return pTag(tag);
       case 'rb':
       case 'rt':
       case 'rp':
-        return tag === 'rb' || tag === 'rt' || tag === 'rtc' || tag === 'rp';
+        return rubyTags(tag);
       case 'rtc':
-        return tag === 'rb' || tag === 'rtc' || tag === 'rp';
+        return rtcTag(tag);
       case 'option':
-        return tag === 'option' || tag === 'optgroup';
+        return optionTag(tag);
       case 'thead':
       case 'tbody':
-        return tag === 'tbody' || tag === 'tfoot';
+        return tableTags(tag);
       case 'tfoot':
         return tag === 'tbody';
       case 'td':
       case 'th':
-        return tag === 'td' || tag === 'th';
+        return cellTags(tag);
     }
     return false;
   }
@@ -1320,10 +1327,14 @@
         currentAttrs = attrs;
 
         if (options.removeOptionalTags) {
+          // <html> may be omitted if first thing inside is not comment
+          // <head> may be omitted if first thing inside is an element
+          // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
           if (optionalStartTag && (optionalStartTag !== 'body' || !headerTags(tag))) {
             removeStartTag();
           }
           optionalStartTag = '';
+          // end-tag-followed-by-start-tag omission rules
           if (canRemovePrecedingTag(optionalEndTag, tag)) {
             removeEndTag();
           }
@@ -1365,6 +1376,7 @@
           buffer.push(' ');
           buffer.push.apply(buffer, parts);
         }
+        // start tag must never be omitted if it has any attributes
         else if (options.removeOptionalTags && optionalStartTags(tag)) {
           optionalStartTag = tag;
         }
@@ -1380,6 +1392,10 @@
         tag = options.caseSensitive ? tag : lowerTag;
 
         if (options.removeOptionalTags) {
+          // </html> or </body> may be omitted if not followed by comment
+          // </head> may be omitted if not followed by space or comment
+          // </p> may be omitted if no more content in non-</a> parent
+          // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
           if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || tag !== 'a')) {
             removeEndTag();
           }
@@ -1477,10 +1493,14 @@
           text = minifyCSS(text, options.minifyCSS);
         }
         if (options.removeOptionalTags && text) {
+          // <html> may be omitted if first thing inside is not comment
+          // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
           if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
             removeStartTag();
           }
           optionalStartTag = '';
+          // </html> or </body> may be omitted if not followed by comment
+          // </head> or </colgroup> may be omitted if not followed by space or comment
           if (optionalEndTag === 'html' || optionalEndTag === 'body' || (optionalEndTag === 'head' || optionalEndTag === 'colgroup') && !/^\s/.test(text)) {
             removeEndTag();
           }
@@ -1511,6 +1531,7 @@
           text = prefix + text + suffix;
         }
         if (options.removeOptionalTags && text) {
+          // preceding comments suppress tag omissions
           optionalStartTag = '';
           optionalEndTag = '';
         }
@@ -1524,9 +1545,12 @@
     });
 
     if (options.removeOptionalTags) {
+      // <html> may be omitted if first thing inside is not comment
+      // <head> or <body> may be omitted if empty
       if (optionalStartTag) {
         removeStartTag();
       }
+      // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
       if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead') {
         removeEndTag();
       }
