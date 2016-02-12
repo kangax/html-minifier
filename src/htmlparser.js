@@ -150,7 +150,7 @@
   }
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
-    var index, chars, match, stack = [], last = html, prevTag, nextTag;
+    var index, match, stack = [], last = html, prevTag, nextTag;
     stack.last = function() {
       var last = this[ this.length - 1 ];
       return last && last.tag;
@@ -160,8 +160,6 @@
     var attr = attrForHandler(handler);
 
     while ( html ) {
-      chars = true;
-
       // Make sure we're not in a script or style element
       if ( !stack.last() || !special[ stack.last() ] ) {
 
@@ -175,7 +173,7 @@
             }
             html = html.substring( index + 3 );
             prevTag = '';
-            chars = false;
+            continue;
           }
         }
 
@@ -189,12 +187,12 @@
             }
             html = html.substring( index + 2 );
             prevTag = '';
-            chars = false;
+            continue;
           }
         }
 
         // Ignored elements?
-        else if ( /^<\?/.test( html ) ) {
+        if ( /^<\?/.test( html ) ) {
           index = html.indexOf( '?>', 2 );
           if ( index >= 0 ) {
             if ( handler.chars ) {
@@ -202,10 +200,11 @@
             }
             html = html.substring( index + 2 );
             prevTag = '';
+            continue;
           }
         }
 
-        else if ( /^<%/.test( html ) ) {
+        if ( /^<%/.test( html ) ) {
           index = html.indexOf( '%>', 2 );
           if ( index >= 0 ) {
             if ( handler.chars ) {
@@ -213,67 +212,66 @@
             }
             html = html.substring( index + 2 );
             prevTag = '';
+            continue;
           }
         }
 
         // Doctype:
-        else if ( (match = doctype.exec( html )) ) {
+        if ( (match = doctype.exec( html )) ) {
           if ( handler.doctype ) {
             handler.doctype( match[0] );
           }
           html = html.substring( match[0].length );
-          chars = false;
+          prevTag = '';
+          continue;
         }
 
         // End tag:
-        else if ( /^<\//.test( html ) ) {
+        if ( /^<\//.test( html ) ) {
           match = html.match( endTag );
-
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( endTag, parseEndTag );
             prevTag = '/' + match[1].toLowerCase();
-            chars = false;
+            continue;
           }
 
         }
         // Start tag:
-        else if ( /^</.test( html ) ) {
+        if ( /^</.test( html ) ) {
           match = html.match( startTag );
           if ( match ) {
             html = html.substring( match[0].length );
             match[0].replace( startTag, parseStartTag );
             prevTag = match[1].toLowerCase();
-            chars = false;
+            continue;
           }
         }
 
-        if ( chars ) {
-          index = html.indexOf('<');
+        index = html.indexOf('<');
 
-          var text = index < 0 ? html : html.substring( 0, index );
-          html = index < 0 ? '' : html.substring( index );
+        var text = index < 0 ? html : html.substring( 0, index );
+        html = index < 0 ? '' : html.substring( index );
 
-          // next tag
-          tagMatch = html.match( startTag );
+        // next tag
+        tagMatch = html.match( startTag );
+        if (tagMatch) {
+          nextTag = tagMatch[1];
+        }
+        else {
+          tagMatch = html.match( endTag );
           if (tagMatch) {
-            nextTag = tagMatch[1];
+            nextTag = '/' + tagMatch[1];
           }
           else {
-            tagMatch = html.match( endTag );
-            if (tagMatch) {
-              nextTag = '/' + tagMatch[1];
-            }
-            else {
-              nextTag = '';
-            }
+            nextTag = '';
           }
-
-          if ( handler.chars ) {
-            handler.chars(text, prevTag, nextTag);
-          }
-
         }
+
+        if ( handler.chars ) {
+          handler.chars(text, prevTag, nextTag);
+        }
+        prevTag = '';
 
       }
       else {
