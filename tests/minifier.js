@@ -115,6 +115,21 @@
     equal(minify('<p>foo<img> bar</p>', { collapseWhitespace: true }), '<p>foo<img> bar</p>');
     equal(minify('<div> Empty <!-- or --> not </div>', { collapseWhitespace: true }), '<div>Empty<!-- or --> not</div>');
     equal(minify('<div> a <input><!-- b --> c </div>', { removeComments: true, collapseWhitespace: true }), '<div>a <input> c</div>');
+    [
+      '  a  <? b ?>  c  ',
+      '<!-- d -->  a  <? b ?>  c  ',
+      '  <!-- d -->a  <? b ?>  c  ',
+      '  a<!-- d -->  <? b ?>  c  ',
+      '  a  <!-- d --><? b ?>  c  ',
+      '  a  <? b ?><!-- d -->  c  ',
+      '  a  <? b ?>  <!-- d -->c  ',
+      '  a  <? b ?>  c<!-- d -->  ',
+      '  a  <? b ?>  c  <!-- d -->'
+    ].forEach(function(input, index) {
+      input = input.replace(/b/, 'b' + index);
+      equal(minify(input, { removeComments: true, collapseWhitespace: true }), 'a <? b' + index + ' ?> c');
+      equal(minify('<p>' + input + '</p>', { removeComments: true, collapseWhitespace: true }), '<p>a <? b' + index + ' ?> c</p>');
+    });
   });
 
   test('doctype normalization', function() {
@@ -713,13 +728,13 @@
     input = '<div>before <span></span></div>';
     output = '<div>before </div>';
     equal(minify(input, { removeEmptyElements: true }), output);
-    output = '<div>before </div>';
+    output = '<div>before</div>';
     equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
 
     input = '<div>both <span></span> </div>';
     output = '<div>both  </div>';
     equal(minify(input, { removeEmptyElements: true }), output);
-    output = '<div>both </div>';
+    output = '<div>both</div>';
     equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
 
     input = '<div>Empty <!-- NOT --> </div>';

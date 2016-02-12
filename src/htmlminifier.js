@@ -816,7 +816,7 @@
         tag = options.caseSensitive ? tag : lowerTag;
 
         currentTag = tag;
-        charsPrevTag = undefined;
+        charsPrevTag = tag;
         currentChars = '';
         currentAttrs = attrs;
 
@@ -889,9 +889,24 @@
 
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
-          if (stackNoTrimWhitespace.length &&
-            tag === stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
-            stackNoTrimWhitespace.pop();
+          if (stackNoTrimWhitespace.length) {
+            if (tag === stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
+              stackNoTrimWhitespace.pop();
+            }
+          }
+          else {
+            var charsIndex;
+            if (buffer.length > 1 && buffer[buffer.length - 1] === '' && /\s+$/.test(buffer[buffer.length - 2])) {
+              charsIndex = buffer.length - 2;
+            }
+            else if (buffer.length > 0 && /\s+$/.test(buffer[buffer.length - 1])) {
+              charsIndex = buffer.length - 1;
+            }
+            if (charsIndex > 0) {
+              buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(text) {
+                return collapseWhitespaceSmart(text, 'comment', '/' + tag, options);
+              });
+            }
           }
           if (stackNoCollapseWhitespace.length &&
             tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
@@ -914,7 +929,7 @@
           // push out everything but the end tag
           results.push.apply(results, buffer);
           buffer = ['</' + tag + '>'];
-          charsPrevTag = undefined;
+          charsPrevTag = '/' + tag;
           currentChars = '';
         }
       },
@@ -972,7 +987,7 @@
           }
           optionalEndTag = '';
         }
-        charsPrevTag = prevTag;
+        charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
         currentChars += text;
         if (lint) {
           lint.testChars(text);
@@ -1061,7 +1076,7 @@
       str = results.join('');
     }
 
-    return str;
+    return trimWhitespace(str);
   }
 
   // for CommonJS enviroments, export everything
