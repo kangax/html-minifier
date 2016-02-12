@@ -609,19 +609,16 @@
 
   function createMap(values) {
     var map = {};
-    values.forEach(function(value) {
+    values.split(/,/).forEach(function(value) {
       map[value] = 1;
     });
-    return map;
+    return function(value) {
+      return map[value] === 1;
+    };
   }
 
   // array of non-empty element tags that will maintain a single space outside of them
-  var inlineTags = createMap([
-    'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
-    'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
-    'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
-    'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
-  ]);
+  var inlineTags = createMap('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
 
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
     var lineBreakBefore = '', lineBreakAfter = '';
@@ -637,12 +634,12 @@
     }
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && prevTag !== 'comment'
-      && (prevTag.charAt(0) !== '/' || options.collapseInlineTagWhitespace || inlineTags[prevTag.substr(1)] !== 1)) {
+      && (prevTag.charAt(0) !== '/' || options.collapseInlineTagWhitespace || !inlineTags(prevTag.substr(1)))) {
       str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && nextTag !== 'comment'
-      && (nextTag.charAt(0) === '/' || options.collapseInlineTagWhitespace || inlineTags[nextTag] !== 1)) {
+      && (nextTag.charAt(0) === '/' || options.collapseInlineTagWhitespace || !inlineTags(nextTag))) {
       str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
     }
 
@@ -743,14 +740,7 @@
 
   // https://mathiasbynens.be/demo/javascript-mime-type
   // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
-  var executableScriptsMimetypes = createMap([
-    'text/javascript',
-    'text/ecmascript',
-    'text/jscript',
-    'application/javascript',
-    'application/x-javascript',
-    'application/ecmascript'
-  ]);
+  var executableScriptsMimetypes = createMap('text/javascript,text/ecmascript,text/jscript,application/javascript,application/x-javascript,application/ecmascript');
 
   function isExecutableScript(tag, attrs) {
     if (tag !== 'script') {
@@ -760,7 +750,7 @@
       var attrName = attrs[i].name.toLowerCase();
       if (attrName === 'type') {
         var attrValue = trimWhitespace(attrs[i].value).split(/;/, 2)[0].toLowerCase();
-        return attrValue === '' || executableScriptsMimetypes[attrValue] === 1;
+        return attrValue === '' || executableScriptsMimetypes(attrValue);
       }
     }
     return true;
@@ -944,68 +934,10 @@
     return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
   }
 
-  var optionalStartTags = createMap([
-    'html',
-    'head',
-    'body'
-  ]);
-  var optionalEndTags = createMap([
-    'html',
-    'head',
-    'body',
-    'li',
-    'dt',
-    'dd',
-    'p',
-    'rb',
-    'rt',
-    'rtc',
-    'rp',
-    'optgroup',
-    'option',
-    'colgroup',
-    'thead',
-    'tbody',
-    'tfoot',
-    'tr',
-    'td',
-    'th'
-  ]);
-  var headerTags = createMap([
-    'meta',
-    'link',
-    'script',
-    'style',
-    'template'
-  ]);
-  var removePrecedingParagraphTag = createMap([
-    'address',
-    'article',
-    'aside',
-    'blockquote',
-    'div',
-    'dl',
-    'fieldset',
-    'footer',
-    'form',
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
-    'header',
-    'hgroup',
-    'hr',
-    'main',
-    'nav',
-    'ol',
-    'p',
-    'pre',
-    'section',
-    'table',
-    'ul'
-  ]);
+  var optionalStartTags = createMap('html,head,body');
+  var optionalEndTags = createMap('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,thead,tbody,tfoot,tr,td,th');
+  var headerTags = createMap('meta,link,script,style,template');
+  var removePrecedingParagraphTag = createMap('address,article,aside,blockquote,div,dl,fieldset,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,nav,ol,p,pre,section,table,ul');
 
   function canRemovePrecedingTag(optionalEndTag, tag) {
     switch (optionalEndTag) {
@@ -1022,7 +954,7 @@
       case 'dd':
         return tag === 'dt' || tag === 'dd';
       case 'p':
-        return removePrecedingParagraphTag[tag] === 1;
+        return removePrecedingParagraphTag(tag);
       case 'rb':
       case 'rt':
       case 'rp':
@@ -1388,7 +1320,7 @@
         currentAttrs = attrs;
 
         if (options.removeOptionalTags) {
-          if (optionalStartTag && (optionalStartTag !== 'body' || headerTags[tag] !== 1)) {
+          if (optionalStartTag && (optionalStartTag !== 'body' || !headerTags(tag))) {
             removeStartTag();
           }
           optionalStartTag = '';
@@ -1433,7 +1365,7 @@
           buffer.push(' ');
           buffer.push.apply(buffer, parts);
         }
-        else if (options.removeOptionalTags && optionalStartTags[tag] === 1) {
+        else if (options.removeOptionalTags && optionalStartTags(tag)) {
           optionalStartTag = tag;
         }
 
@@ -1451,7 +1383,7 @@
           if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || tag !== 'a')) {
             removeEndTag();
           }
-          optionalEndTag = optionalEndTags[tag] === 1 ? tag : '';
+          optionalEndTag = optionalEndTags(tag) ? tag : '';
         }
 
         // check if current tag is in a whitespace stack
