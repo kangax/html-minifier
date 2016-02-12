@@ -56,13 +56,10 @@
     IS_REGEX_CAPTURING_BROKEN = g === '';
   });
 
-  // Empty Elements - HTML 4.01
+  // Empty Elements
   var empty = makeMap('area,base,basefont,br,col,embed,frame,hr,img,input,isindex,keygen,link,meta,param,source,track,wbr');
 
-  // Block Elements - HTML 4.01
-  // var block = makeMap('address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul');
-
-  // Inline Elements - HTML 4.01
+  // Inline Elements
   var inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var');
 
   // Elements that you can, intentionally, leave open
