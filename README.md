@@ -27,7 +27,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | [Amazon](http://amazon.com)                                                 | 246                  | <b>204</b>   | 234      | 230        | 219                |
 | [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401                  | <b>367</b>   | 388      | 400        | n/a                |
 | [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 870                  | <b>826</b>   | 840      | 864        | n/a                |
-| [ES6 draft](https://people.mozilla.org/~jorendorff/es6-draft.html)          | 3678                 | <b>2990</b>  | 3079     | 3204       | n/a                |
+| [ES6 draft](https://people.mozilla.org/~jorendorff/es6-draft.html)          | 3678                 | <b>2991</b>  | 3079     | 3204       | n/a                |
 
 
 
