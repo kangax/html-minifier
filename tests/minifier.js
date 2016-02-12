@@ -115,6 +115,21 @@
     equal(minify('<p>foo<img> bar</p>', { collapseWhitespace: true }), '<p>foo<img> bar</p>');
     equal(minify('<div> Empty <!-- or --> not </div>', { collapseWhitespace: true }), '<div>Empty<!-- or --> not</div>');
     equal(minify('<div> a <input><!-- b --> c </div>', { removeComments: true, collapseWhitespace: true }), '<div>a <input> c</div>');
+    [
+      '  a  <? b ?>  c  ',
+      '<!-- d -->  a  <? b ?>  c  ',
+      '  <!-- d -->a  <? b ?>  c  ',
+      '  a<!-- d -->  <? b ?>  c  ',
+      '  a  <!-- d --><? b ?>  c  ',
+      '  a  <? b ?><!-- d -->  c  ',
+      '  a  <? b ?>  <!-- d -->c  ',
+      '  a  <? b ?>  c<!-- d -->  ',
+      '  a  <? b ?>  c  <!-- d -->'
+    ].forEach(function(input, index) {
+      input = input.replace(/b/, 'b' + index);
+      equal(minify(input, { removeComments: true, collapseWhitespace: true }), 'a <? b' + index + ' ?> c');
+      equal(minify('<p>' + input + '</p>', { removeComments: true, collapseWhitespace: true }), '<p>a <? b' + index + ' ?> c</p>');
+    });
   });
 
   test('doctype normalization', function() {
@@ -622,9 +637,11 @@
     output = '<div><textarea></textarea></div>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
-    input = '<div><pre> $foo = "baz"; </pre>    </div>';
+    input = '<div><pRe> $foo = "baz"; </pRe>    </div>';
     output = '<div><pre> $foo = "baz"; </pre></div>';
     equal(minify(input, { collapseWhitespace: true }), output);
+    output = '<div><pRe>$foo = "baz";</pRe></div>';
+    equal(minify(input, { collapseWhitespace: true, caseSensitive: true }), output);
 
     input = '<script type=\"text\/javascript\">var = \"hello\";<\/script>\r\n\r\n\r\n'               +
              '<style type=\"text\/css\">#foo { color: red;        }          <\/style>\r\n\r\n\r\n'  +
@@ -702,6 +719,24 @@
     input = '<script></script>';
     equal(minify(input, { removeEmptyElements: true }), '');
 
+    input = '<div>after<span></span> </div>';
+    output = '<div>after </div>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+    output = '<div>after</div>';
+    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+
+    input = '<div>before <span></span></div>';
+    output = '<div>before </div>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+    output = '<div>before</div>';
+    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+
+    input = '<div>both <span></span> </div>';
+    output = '<div>both  </div>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+    output = '<div>both</div>';
+    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+
     input = '<div>Empty <!-- NOT --> </div>';
     equal(minify(input, { removeEmptyElements: true }), input);
     output = '<div>Empty<!-- NOT --></div>';
@@ -764,9 +799,19 @@
 
   test('removing optional tags', function() {
     input = '<html><head><title>hello</title></head><body><p>foo<span>bar</span></p></body></html>';
-    output = '<html><head><title>hello</title><body><p>foo<span>bar</span></p>';
-    equal(minify(input, { removeOptionalTags: true }), output);
     equal(minify(input), input);
+    output = '<title>hello</title><p>foo<span>bar</span>';
+    equal(minify(input, { removeOptionalTags: true }), output);
+
+    input = '<html lang=""><head><title>hello</title></head><body style=""><p>foo<span>bar</span></p></body></html>';
+    output = '<html lang=""><title>hello</title><body style=""><p>foo<span>bar</span>';
+    equal(minify(input, { removeOptionalTags: true }), output);
+    output = '<title>hello</title><p>foo<span>bar</span>';
+    equal(minify(input, { removeOptionalTags: true, removeEmptyAttributes: true }), output);
+
+    input = '<html><head><title>a</title><link href="b.css" rel="stylesheet"/></head><body><a href="c.html"></a><div class="d"><input value="e"/></div></body></html>';
+    output = '<title>a</title><link href="b.css" rel="stylesheet"><a href="c.html"></a><div class="d"><input value="e"></div>';
+    equal(minify(input, { removeOptionalTags: true }), output);
   });
 
   test('removing optional tags in tables', function() {
@@ -792,6 +837,16 @@
     output = '<select><option>foo<option>bar</select>';
     equal(minify(input, { removeOptionalTags: true }), output);
 
+    input = '<select>\n' +
+            '  <option>foo</option>\n' +
+            '  <option>bar</option>\n' +
+            '</select>';
+    equal(minify(input, { removeOptionalTags: true }), input);
+    output = '<select><option>foo<option>bar</select>';
+    equal(minify(input, { removeOptionalTags: true, collapseWhitespace: true }), output);
+    output = '<select> <option>foo</option> <option>bar</option> </select>';
+    equal(minify(input, { removeOptionalTags: true, collapseWhitespace: true, conservativeCollapse: true }), output);
+
     // example from htmldog.com
     input = '<select name="catsndogs">' +
               '<optgroup label="Cats">' +
@@ -803,13 +858,11 @@
             '</select>';
 
     output = '<select name="catsndogs">' +
-              '<optgroup label="Cats">' +
-                '<option>Tiger<option>Leopard<option>Lynx' +
-              '</optgroup>' +
-              '<optgroup label="Dogs">' +
-                '<option>Grey Wolf<option>Red Fox<option>Fennec' +
-              '</optgroup>' +
-            '</select>';
+               '<optgroup label="Cats">' +
+                 '<option>Tiger<option>Leopard<option>Lynx' +
+               '<optgroup label="Dogs">' +
+                 '<option>Grey Wolf<option>Red Fox<option>Fennec' +
+             '</select>';
 
     equal(minify(input, { removeOptionalTags: true }), output);
   });
@@ -952,21 +1005,14 @@
   });
 
   test('source & track', function() {
-
     input = '<audio controls="controls">' +
               '<source src="foo.wav">' +
               '<source src="far.wav">' +
               '<source src="foobar.wav">' +
               '<track kind="captions" src="sampleCaptions.vtt" srclang="en">' +
             '</audio>';
-    output = '<audio controls="controls">' +
-              '<source src="foo.wav">' +
-              '<source src="far.wav">' +
-              '<source src="foobar.wav">' +
-              '<track kind="captions" src="sampleCaptions.vtt" srclang="en">' +
-            '</audio>';
-
-    equal(minify(input, { removeOptionalTags: true }), output);
+    equal(minify(input), input);
+    equal(minify(input, { removeOptionalTags: true }), input);
   });
 
   test('mixed html and svg', function() {
@@ -1012,6 +1058,16 @@
 
     input = '<script>(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
     output = '<script>!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<script type="text/JavaScript">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
+    output = '<script type="text/JavaScript">!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<script type="application/javascript;version=1.8">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
+    output = '<script type="application/javascript;version=1.8">!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
 
     equal(minify(input, { minifyJS: true }), output);
 
