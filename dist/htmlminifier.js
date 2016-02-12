@@ -606,7 +606,7 @@
 
   function createMap(values) {
     var map = {};
-    values.split(/,/).forEach(function(value) {
+    values.forEach(function(value) {
       map[value] = 1;
     });
     return function(value) {
@@ -614,8 +614,12 @@
     };
   }
 
+  function createMapFromString(values) {
+    return createMap(values.split(/,/));
+  }
+
   // array of non-empty element tags that will maintain a single space outside of them
-  var inlineTags = createMap('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
+  var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
 
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
     var lineBreakBefore = '', lineBreakAfter = '';
@@ -737,7 +741,14 @@
 
   // https://mathiasbynens.be/demo/javascript-mime-type
   // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
-  var executableScriptsMimetypes = createMap('text/javascript,text/ecmascript,text/jscript,application/javascript,application/x-javascript,application/ecmascript');
+  var executableScriptsMimetypes = createMap([
+    'text/javascript',
+    'text/ecmascript',
+    'text/jscript',
+    'application/javascript',
+    'application/x-javascript',
+    'application/ecmascript'
+  ]);
 
   function isExecutableScript(tag, attrs) {
     if (tag !== 'script') {
@@ -932,16 +943,16 @@
   }
 
   // Tag omission rules from http://www.w3.org/TR/html5/syntax.html#optional-tags
-  var optionalStartTags = createMap('html,head,body');
-  var optionalEndTags = createMap('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,thead,tbody,tfoot,tr,td,th');
-  var headerTags = createMap('meta,link,script,style,template');
-  var descriptionTags = createMap('dt,dd');
-  var pTag = createMap('address,article,aside,blockquote,div,dl,fieldset,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,nav,ol,p,pre,section,table,ul');
-  var rubyTags = createMap('rb,rt,rtc,rp');
-  var rtcTag = createMap('rb,rtc,rp');
-  var optionTag = createMap('option,optgroup');
-  var tableTags = createMap('tbody,tfoot');
-  var cellTags = createMap('td,th');
+  var optionalStartTags = createMapFromString('html,head,body');
+  var optionalEndTags = createMapFromString('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,thead,tbody,tfoot,tr,td,th');
+  var headerTags = createMapFromString('meta,link,script,style,template');
+  var descriptionTags = createMapFromString('dt,dd');
+  var pTag = createMapFromString('address,article,aside,blockquote,div,dl,fieldset,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,nav,ol,p,pre,section,table,ul');
+  var rubyTags = createMapFromString('rb,rt,rtc,rp');
+  var rtcTag = createMapFromString('rb,rtc,rp');
+  var optionTag = createMapFromString('option,optgroup');
+  var tableTags = createMapFromString('tbody,tfoot');
+  var cellTags = createMapFromString('td,th');
 
   function canRemovePrecedingTag(optionalEndTag, tag) {
     switch (optionalEndTag) {
