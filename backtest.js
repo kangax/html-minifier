@@ -93,7 +93,7 @@ function minify(hash) {
         task.stderr.resume();
         setTimeout(function() {
           task.kill();
-        }, 10000);
+        }, 15000);
       };
     }), function() {
       process.send(results);
@@ -137,7 +137,7 @@ if (process.argv.length > 2) {
       var running = 0, ready = true;
 
       function fork() {
-        if (commits.length && running < 8) {
+        if (commits.length && running < 4) {
           var hash = commits.shift();
           var task = child_process.fork('./backtest');
           task.on('message', function(data) {
