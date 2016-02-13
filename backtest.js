@@ -91,6 +91,9 @@ function minify(hash) {
         });
         task.stdout.resume();
         task.stderr.resume();
+        setTimeout(function() {
+          task.kill();
+        }, 10000);
       };
     }), function() {
       process.send(results);
