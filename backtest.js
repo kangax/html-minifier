@@ -6,19 +6,7 @@ var child_process = require('child_process'),
     fs = require('fs'),
     path = require('path');
 
-var urls = {
-  amazon: 'http://www.amazon.com/',
-  eloquentjavascript: 'http://eloquentjavascript.net/print.html',
-  es6: 'https://people.mozilla.org/~jorendorff/es6-draft.html',
-  'es6-table': 'http://kangax.github.io/es5-compat-table/es6/',
-  google: 'http://www.google.com/',
-  'html-minifier': 'https://github.com/kangax/html-minifier',
-  msn: 'http://www.msn.com/',
-  nbc: 'http://www.nbc.com/',
-  newyorktimes: 'http://www.nytimes.com/',
-  stackoverflow: 'http://stackoverflow.com/',
-  wikipedia: 'http://en.wikipedia.org/wiki/President_of_the_United_States'
-};
+var urls = require('./benchmarks');
 var fileNames = Object.keys(urls).sort();
 
 function all(tasks, callback) {
