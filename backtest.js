@@ -139,7 +139,7 @@ if (process.argv.length > 2) {
         var index = line.indexOf(' ');
         var hash = line.substr(0, index);
         table[hash] = {
-          date: line.substr(index + 1).replace('+', '')
+          date: line.substr(index + 1).replace('+', '').replace(/ 0000$/, '')
         };
         return hash;
       });
