@@ -110,6 +110,9 @@ if (process.argv.length > 2) {
         if (commits.length && running < nThreads) {
           var hash = commits.shift();
           var task = child_process.fork('./backtest', { silent: true });
+          setTimeout(function() {
+            task.kill();
+          }, 15000);
           var output = '';
           task.on('message', function(data) {
             if (data === 'ready') {
