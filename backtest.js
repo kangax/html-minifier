@@ -9,7 +9,7 @@ var child_process = require('child_process'),
     Progress = require('progress');
 
 var urls = require('./benchmarks');
-var fileNames = Object.keys(urls).sort();
+var fileNames = Object.keys(urls);
 
 function git() {
   var args = [].concat.apply([], [].slice.call(arguments, 0, -1));
@@ -101,9 +101,9 @@ function print(table) {
   for (var hash in table) {
     var data = table[hash];
     row = [ hash, '"' + data.date + '"' ];
-    for (var i = 0; i < fileNames.length; i++) {
-      row.push(data[fileNames[i]]);
-    }
+    fileNames.forEach(function(fileName) {
+      row.push(data[fileName]);
+    });
     output.push(row.join(','));
     if (data.error) {
       errors.push(hash + ' - ' + data.error);
