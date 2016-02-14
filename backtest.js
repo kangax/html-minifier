@@ -10,20 +10,6 @@ var child_process = require('child_process'),
 var urls = require('./benchmarks');
 var fileNames = Object.keys(urls).sort();
 
-function run(tasks, callback) {
-  var remaining = tasks.length;
-
-  function done() {
-    if (!--remaining) {
-      callback();
-    }
-  }
-
-  tasks.forEach(function(task) {
-    task(done);
-  });
-}
-
 function git() {
   var args = [].concat.apply([], [].slice.call(arguments, 0, -1));
   var callback = arguments[arguments.length - 1];
@@ -45,29 +31,27 @@ function readText(filePath, callback) {
 function minify(hash, options) {
   var minify = require('./src/htmlminifier').minify;
   process.send('ready');
-  var results = {};
-  run(fileNames.map(function(fileName) {
-    return function(done) {
-      readText(path.join('benchmarks/', fileName + '.html'), function(err, data) {
-        if (err) {
-          throw err;
+  var count = fileNames.length;
+  fileNames.forEach(function(fileName) {
+    readText(path.join('benchmarks/', fileName + '.html'), function(err, data) {
+      if (err) {
+        throw err;
+      }
+      else {
+        try {
+          options.minifyURLs = { site: urls[fileName] };
+          process.send({ name: fileName, size: minify(data, options).length });
         }
-        else {
-          try {
-            options.minifyURLs = { site: urls[fileName] };
-            results[fileName] = minify(data, options).length;
-          }
-          catch (e) {
-            console.error('[' + fileName + ']', e.stack || e);
-          }
-          finally {
-            done();
+        catch (e) {
+          console.error('[' + fileName + ']', e.stack || e);
+        }
+        finally {
+          if (!--count) {
+            process.disconnect();
           }
         }
-      });
-    };
-  }), function() {
-    process.send(results);
+      }
+    });
   });
 }
 
@@ -107,19 +91,13 @@ if (process.argv.length > 2) {
       var nThreads = os.cpus().length;
       var running = 0, ready = true;
 
-      function done() {
-        if (!--running && !commits.length) {
-          print(table);
-        }
-      }
-
       function fork() {
         if (commits.length && running < nThreads) {
           var hash = commits.shift();
           var task = child_process.fork('./backtest', { silent: true });
           var error = '';
-          setTimeout(function() {
-            if (task) {
+          var id = setTimeout(function() {
+            if (task.connected) {
               error += 'task timed out\n';
               task.kill();
             }
@@ -127,22 +105,20 @@ if (process.argv.length > 2) {
           task.on('message', function(data) {
             if (data === 'ready') {
               ready = true;
+              fork();
             }
             else {
-              var date = table[hash].date;
-              table[hash] = data;
-              table[hash].date = date;
-              task.disconnect();
-              task = null;
-              done();
+              table[hash][data.name] = data.size;
             }
-            fork();
-          }).on('exit', function(code) {
+          }).on('exit', function() {
+            clearTimeout(id);
             if (error) {
               console.error(hash, '-', error);
             }
-            if (code !== 0) {
-              done();
+            if (!--running && !commits.length) {
+              print(table);
+            }
+            else {
               fork();
             }
           });
