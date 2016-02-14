@@ -53,6 +53,7 @@ function minify(hash, options) {
           throw err;
         }
         else {
+          options.minifyURLs = { site: urls[fileName] };
           results[fileName] = minify(data, options).length;
           done();
         }
