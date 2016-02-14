@@ -38,14 +38,8 @@ function writeText(filePath, data) {
 }
 
 function loadModule() {
-  try {
-    require('./src/htmlparser');
-    return require('./src/htmlminifier').minify;
-  }
-  catch (e) {
-    require('./htmlparser');
-    return require('./master').minify;
-  }
+  require('./src/htmlparser');
+  return require('./src/htmlminifier').minify || global.minify;
 }
 
 function getOptions(fileName, options) {
@@ -130,12 +124,11 @@ if (process.argv.length > 2) {
       var running = 0, ready = true;
       var progress = new Progress('[:bar] :etas', {
         width: 50,
-        total: commits.length
+        total: commits.length * 2
       });
 
       function fork() {
         if (commits.length && running < nThreads) {
-          progress.tick(1);
           var hash = commits.shift();
           var task = child_process.fork('./backtest', { silent: true });
           var error = '';
@@ -147,6 +140,7 @@ if (process.argv.length > 2) {
           }, 60000);
           task.on('message', function(data) {
             if (data === 'ready') {
+              progress.tick(1);
               ready = true;
               fork();
             }
@@ -154,6 +148,7 @@ if (process.argv.length > 2) {
               table[hash][data.name] = data.size;
             }
           }).on('exit', function() {
+            progress.tick(1);
             clearTimeout(id);
             if (error) {
               table[hash].error = error;
