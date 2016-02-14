@@ -53,9 +53,16 @@ function minify(hash, options) {
           throw err;
         }
         else {
-          options.minifyURLs = { site: urls[fileName] };
-          results[fileName] = minify(data, options).length;
-          done();
+          try {
+            options.minifyURLs = { site: urls[fileName] };
+            results[fileName] = minify(data, options).length;
+          }
+          catch (e) {
+            console.error('[' + fileName + ']', e.stack || e);
+          }
+          finally {
+            done();
+          }
         }
       });
     };
@@ -112,9 +119,11 @@ if (process.argv.length > 2) {
           var task = child_process.fork('./backtest', { silent: true });
           var error = '';
           setTimeout(function() {
-            error = 'task timed out\n';
-            task.kill();
-          }, 20000);
+            if (task) {
+              error += 'task timed out\n';
+              task.kill();
+            }
+          }, 60000);
           task.on('message', function(data) {
             if (data === 'ready') {
               ready = true;
@@ -124,12 +133,15 @@ if (process.argv.length > 2) {
               table[hash] = data;
               table[hash].date = date;
               task.disconnect();
+              task = null;
               done();
             }
             fork();
           }).on('exit', function(code) {
-            if (code !== 0) {
+            if (error) {
               console.error(hash, '-', error);
+            }
+            if (code !== 0) {
               done();
               fork();
             }
