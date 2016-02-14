@@ -147,33 +147,31 @@ else {
   process.on('message', function(hash) {
     var paths = ['src', 'benchmark.conf', 'sample-cli-config-file.conf'];
     git('reset', 'HEAD', '--', paths, function() {
-      git('clean', '-f', '-d', '--', paths, function() {
-        var conf = 'sample-cli-config-file.conf';
+      var conf = 'sample-cli-config-file.conf';
 
-        function checkout() {
-          var path = paths.shift();
-          git('checkout', hash, '--', path, function(code) {
-            if (code === 0 && path === 'benchmark.conf') {
-              conf = path;
-            }
-            if (paths.length) {
-              checkout();
-            }
-            else {
-              readText(conf, function(err, data) {
-                if (err) {
-                  throw err;
-                }
-                else {
-                  minify(hash, JSON.parse(data));
-                }
-              });
-            }
-          });
-        }
+      function checkout() {
+        var path = paths.shift();
+        git('checkout', hash, '--', path, function(code) {
+          if (code === 0 && path === 'benchmark.conf') {
+            conf = path;
+          }
+          if (paths.length) {
+            checkout();
+          }
+          else {
+            readText(conf, function(err, data) {
+              if (err) {
+                throw err;
+              }
+              else {
+                minify(hash, JSON.parse(data));
+              }
+            });
+          }
+        });
+      }
 
-        checkout();
-      });
+      checkout();
     });
   });
 }
