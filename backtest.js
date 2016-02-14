@@ -5,7 +5,8 @@
 var child_process = require('child_process'),
     fs = require('fs'),
     os = require('os'),
-    path = require('path');
+    path = require('path'),
+    Progress = require('progress');
 
 var urls = require('./benchmarks');
 var fileNames = Object.keys(urls).sort();
@@ -26,6 +27,14 @@ function git() {
 
 function readText(filePath, callback) {
   fs.readFile(filePath, { encoding: 'utf8' }, callback);
+}
+
+function writeText(filePath, data) {
+  fs.writeFile(filePath, data, { encoding: 'utf8' }, function (err) {
+    if (err) {
+      throw err;
+    }
+  });
 }
 
 function loadModule() {
@@ -85,6 +94,7 @@ function minify(hash, options) {
 
 function print(table) {
   var output = [];
+  var errors = [];
   var row = fileNames.slice(0);
   row.unshift('hash', 'date');
   output.push(row.join(','));
@@ -95,12 +105,12 @@ function print(table) {
       row.push(data[fileNames[i]]);
     }
     output.push(row.join(','));
-  }
-  fs.writeFile('backtest.csv', output.join('\n'), { encoding: 'utf8' }, function(err) {
-    if (err) {
-      throw err;
+    if (data.error) {
+      errors.push(hash + ' - ' + data.error);
     }
-  });
+  }
+  writeText('backtest.csv', output.join('\n'));
+  writeText('backtest.log', errors.join('\n'));
 }
 
 if (process.argv.length > 2) {
@@ -118,9 +128,14 @@ if (process.argv.length > 2) {
       });
       var nThreads = os.cpus().length;
       var running = 0, ready = true;
+      var progress = new Progress('[:bar] :etas', {
+        width: 50,
+        total: commits.length
+      });
 
       function fork() {
         if (commits.length && running < nThreads) {
+          progress.tick(1);
           var hash = commits.shift();
           var task = child_process.fork('./backtest', { silent: true });
           var error = '';
@@ -141,7 +156,7 @@ if (process.argv.length > 2) {
           }).on('exit', function() {
             clearTimeout(id);
             if (error) {
-              console.error(hash, '-', error);
+              table[hash].error = error;
             }
             if (!--running && !commits.length) {
               print(table);
