@@ -110,10 +110,11 @@ if (process.argv.length > 2) {
         if (commits.length && running < nThreads) {
           var hash = commits.shift();
           var task = child_process.fork('./backtest', { silent: true });
+          var error = '';
           setTimeout(function() {
+            error = 'task timed out\n';
             task.kill();
-          }, 15000);
-          var output = '';
+          }, 20000);
           task.on('message', function(data) {
             if (data === 'ready') {
               ready = true;
@@ -128,14 +129,14 @@ if (process.argv.length > 2) {
             fork();
           }).on('exit', function(code) {
             if (code !== 0) {
-              console.error(hash, '-', output.substr(0, output.indexOf('\n')));
+              console.error(hash, '-', error);
               done();
               fork();
             }
           });
           task.stderr.setEncoding('utf8');
           task.stderr.on('data', function(data) {
-            output += data;
+            error += data;
           });
           task.stdout.resume();
           task.send(hash);
