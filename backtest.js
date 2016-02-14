@@ -4,12 +4,13 @@
 
 var child_process = require('child_process'),
     fs = require('fs'),
+    os = require('os'),
     path = require('path');
 
 var urls = require('./benchmarks');
 var fileNames = Object.keys(urls).sort();
 
-function all(tasks, callback) {
+function run(tasks, callback) {
   var remaining = tasks.length;
 
   function done() {
@@ -24,80 +25,41 @@ function all(tasks, callback) {
 }
 
 function git() {
-  var args = [].slice.call(arguments, 0, -1);
+  var args = [].concat.apply([], [].slice.call(arguments, 0, -1));
   var callback = arguments[arguments.length - 1];
   var task = child_process.spawn('git', args, { stdio: [ 'ignore', 'pipe', 'ignore' ] });
   var output = '';
   task.stdout.setEncoding('utf8');
   task.stdout.on('data', function(data) {
     output += data;
-  }).on('end', function() {
-    callback(output);
+  });
+  task.on('exit', function(code) {
+    callback(code, output);
   });
 }
 
-function setupConf(hash, callback) {
-  var output = path.join('benchmarks/generated/', hash + '.conf');
+function readText(filePath, callback) {
+  fs.readFile(filePath, { encoding: 'utf8' }, callback);
+}
 
-  function done(data) {
-    fs.writeFile(output, data, function(err) {
-      if (err) {
-        console.error(hash, ': error writing backtest.csv');
-        callback();
-      }
-      else {
-        callback(output);
-      }
-    });
-  }
-
-  fs.readFile('benchmark.conf', function(err, data) {
-    if (err) {
-      fs.readFile('sample-cli-config-file.conf', function(err, data) {
+function minify(hash, options) {
+  var minify = require('./src/htmlminifier').minify;
+  process.send('ready');
+  var results = {};
+  run(fileNames.map(function(fileName) {
+    return function(done) {
+      readText(path.join('benchmarks/', fileName + '.html'), function(err, data) {
         if (err) {
-          console.error(hash, ': failed to extract configuration');
-          process.send({});
+          throw err;
         }
         else {
-          done(data);
+          results[fileName] = minify(data, options).length;
+          done();
         }
       });
-    }
-    else {
-      done(data);
-    }
-  });
-}
-
-function minify(hash) {
-  setupConf(hash, function(conf) {
-    var results = {};
-    process.send('ready');
-    all(fileNames.map(function(fileName) {
-      return function(done) {
-        var input = path.join('benchmarks/', fileName + '.html');
-        var output = path.join('benchmarks/generated/', fileName + '.' + hash + '.html');
-        var args = [input, '-c', conf, '--minify-urls', urls[fileName], '-o', output];
-        var task = child_process.fork('./cli', args, { silent: true }).on('exit', function () {
-          fs.stat(output, function(err, stats) {
-            if (err) {
-              console.error(hash, ': failed to minify "' + fileName + '"');
-            }
-            else {
-              results[fileName] = stats.size;
-            }
-            done();
-          });
-        });
-        task.stdout.resume();
-        task.stderr.resume();
-        setTimeout(function() {
-          task.kill();
-        }, 15000);
-      };
-    }), function() {
-      process.send(results);
-    });
+    };
+  }), function() {
+    process.send(results);
   });
 }
 
@@ -116,7 +78,7 @@ function print(table) {
   }
   fs.writeFile('backtest.csv', output.join('\n'), { encoding: 'utf8' }, function(err) {
     if (err) {
-      throw new Error('There was an error writing backtest.csv');
+      throw err;
     }
   });
 }
@@ -124,7 +86,7 @@ function print(table) {
 if (process.argv.length > 2) {
   var count = +process.argv[2];
   if (count) {
-    git('log', '--date=iso', '--pretty=format:%h %cd', '-' + count, function(data) {
+    git('log', '--date=iso', '--pretty=format:%h %cd', '-' + count, function(code, data) {
       var table = {};
       var commits = data.split(/\s*?\n/).map(function(line) {
         var index = line.indexOf(' ');
@@ -134,12 +96,20 @@ if (process.argv.length > 2) {
         };
         return hash;
       });
+      var nThreads = os.cpus().length;
       var running = 0, ready = true;
 
       function fork() {
-        if (commits.length && running < 4) {
+        if (commits.length && running < nThreads) {
           var hash = commits.shift();
-          var task = child_process.fork('./backtest');
+          var task = child_process.fork('./backtest', { silent: true });
+
+          function done() {
+            if (!--running && !commits.length) {
+              print(table);
+            }
+          }
+
           task.on('message', function(data) {
             if (data === 'ready') {
               ready = true;
@@ -149,12 +119,18 @@ if (process.argv.length > 2) {
               table[hash] = data;
               table[hash].date = date;
               task.disconnect();
-              if (!--running && !commits.length) {
-                print(table);
-              }
+              done();
             }
             fork();
+          }).on('exit', function(code) {
+            if (code !== 0) {
+              console.error(hash, ': minify task failed');
+              done();
+              fork();
+            }
           });
+          task.stderr.resume();
+          task.stdout.resume();
           task.send(hash);
           running++;
         }
@@ -169,13 +145,34 @@ if (process.argv.length > 2) {
 }
 else {
   process.on('message', function(hash) {
-    git('reset', 'HEAD', '--', 'dist', 'benchmark.conf', 'sample-cli-config-file.conf', function() {
-      all(['dist', 'benchmark.conf', 'sample-cli-config-file.conf'].map(function(path) {
-        return function(done) {
-          git('checkout', hash, '--', path, done);
-        };
-      }), function() {
-        minify(hash);
+    var paths = ['src', 'benchmark.conf', 'sample-cli-config-file.conf'];
+    git('reset', 'HEAD', '--', paths, function() {
+      git('clean', '-f', '-d', '--', paths, function() {
+        var conf = 'sample-cli-config-file.conf';
+
+        function checkout() {
+          var path = paths.shift();
+          git('checkout', hash, '--', path, function(code) {
+            if (code === 0 && path === 'benchmark.conf') {
+              conf = path;
+            }
+            if (paths.length) {
+              checkout();
+            }
+            else {
+              readText(conf, function(err, data) {
+                if (err) {
+                  throw err;
+                }
+                else {
+                  minify(hash, JSON.parse(data));
+                }
+              });
+            }
+          });
+        }
+
+        checkout();
       });
     });
   });
