@@ -28,8 +28,31 @@ function readText(filePath, callback) {
   fs.readFile(filePath, { encoding: 'utf8' }, callback);
 }
 
+function loadModule() {
+  try {
+    require('./src/htmlparser');
+    return require('./src/htmlminifier').minify;
+  }
+  catch (e) {
+    require('./htmlparser');
+    return require('./master').minify;
+  }
+}
+
+function getOptions(fileName, options) {
+  var result = {
+    minifyURLs: {
+      site: urls[fileName]
+    }
+  };
+  for (var key in options) {
+    result[key] = options[key];
+  }
+  return result;
+}
+
 function minify(hash, options) {
-  var minify = require('./src/htmlminifier').minify;
+  var minify = loadModule();
   process.send('ready');
   var count = fileNames.length;
   fileNames.forEach(function(fileName) {
@@ -39,8 +62,13 @@ function minify(hash, options) {
       }
       else {
         try {
-          options.minifyURLs = { site: urls[fileName] };
-          process.send({ name: fileName, size: minify(data, options).length });
+          var minified = minify(data, getOptions(fileName, options));
+          if (minified) {
+            process.send({ name: fileName, size: minified.length });
+          }
+          else {
+            throw new Error('unexpected result: ' + minified);
+          }
         }
         catch (e) {
           console.error('[' + fileName + ']', e.stack || e);
