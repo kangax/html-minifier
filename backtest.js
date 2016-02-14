@@ -99,17 +99,17 @@ if (process.argv.length > 2) {
       var nThreads = os.cpus().length;
       var running = 0, ready = true;
 
+      function done() {
+        if (!--running && !commits.length) {
+          print(table);
+        }
+      }
+
       function fork() {
         if (commits.length && running < nThreads) {
           var hash = commits.shift();
           var task = child_process.fork('./backtest', { silent: true });
-
-          function done() {
-            if (!--running && !commits.length) {
-              print(table);
-            }
-          }
-
+          var output = '';
           task.on('message', function(data) {
             if (data === 'ready') {
               ready = true;
@@ -124,12 +124,15 @@ if (process.argv.length > 2) {
             fork();
           }).on('exit', function(code) {
             if (code !== 0) {
-              console.error(hash, ': minify task failed');
+              console.error(hash, '-', output.substr(0, output.indexOf('\n')));
               done();
               fork();
             }
           });
-          task.stderr.resume();
+          task.stderr.setEncoding('utf8');
+          task.stderr.on('data', function(data) {
+            output += data;
+          });
           task.stdout.resume();
           task.send(hash);
           running++;
@@ -164,6 +167,7 @@ else {
                 throw err;
               }
               else {
+                /* global JSON: true */
                 minify(hash, JSON.parse(data));
               }
             });
