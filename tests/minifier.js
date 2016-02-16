@@ -1297,6 +1297,32 @@
       preserveLineBreaks: true
     }), output);
 
+    input = '<div>  text \n </div>';
+    output = '<div>text\n</div>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      preserveLineBreaks: true
+    }), output);
+    output = '<div> text\n</div>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true,
+      preserveLineBreaks: true
+    }), output);
+
+    input = '<div>\ntext  </div>';
+    output = '<div>\ntext</div>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      preserveLineBreaks: true
+    }), output);
+    output = '<div>\ntext </div>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true,
+      preserveLineBreaks: true
+    }), output);
+
     input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
     output = 'This is the start. <% ... %>\n<%= ... %>\n<? ... ?>\nNo comment, but middle.\n<?= ... ?>\n<?php ... ?>\n<?xml ... ?>\nHello, this is the end!';
     equal(minify(input, {

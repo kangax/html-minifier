@@ -636,12 +636,12 @@
 
     if (prevTag && prevTag !== 'img' && prevTag !== 'input' && prevTag !== 'comment'
       && (prevTag.charAt(0) !== '/' || options.collapseInlineTagWhitespace || !inlineTags(prevTag.substr(1)))) {
-      str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? ' ' : '');
     }
 
     if (nextTag && nextTag !== 'img' && nextTag !== 'input' && nextTag !== 'comment'
       && (nextTag.charAt(0) === '/' || options.collapseInlineTagWhitespace || !inlineTags(nextTag))) {
-      str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? ' ' : '');
     }
 
     if (prevTag && nextTag) {
