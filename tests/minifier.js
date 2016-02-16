@@ -897,33 +897,56 @@
   // https://github.com/kangax/html-minifier/issues/10
   test('Ignore custom fragments', function() {
 
-    var reFragments = [ /<\?[^\?]+\?>/, /<%[^%]+%>/ ];
+    var reFragments = [ /<\?[^\?]+\?>/, /<%[^%]+%>/, /\{\{[^\}]*\}\}/ ];
 
-    input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
-    output = 'This is the start. <% ... %> <%= ... %> <? ... ?> No comment, but middle. <?= ... ?> <?php ... ?> <?xml ... ?> Hello, this is the end!';
+    input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n{{ ... }}\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
+    output = 'This is the start. <% ... %> <%= ... %> <? ... ?> No comment, but middle. {{ ... }} <?php ... ?> <?xml ... ?> Hello, this is the end!';
 
     equal(minify(input, {}), input);
     equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
-
-    output = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\nNo comment, but middle.\r\n<?= ... ?>\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
-
     equal(minify(input, {
       removeComments: true,
       collapseWhitespace: true,
       ignoreCustomFragments: reFragments
     }), output);
 
-    input = '<% if foo? %>\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n<% end %>';
-    output = '<% if foo? %><div class="bar">...</div><% end %>';
+    output = 'This is the start. <% ... %>\n<%= ... %>\n<? ... ?>\nNo comment, but middle. {{ ... }}\n<?php ... ?>\n<?xml ... ?>\nHello, this is the end!';
+
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true,
+      preserveLineBreaks: true
+    }), output);
+
+    output = 'This is the start. <% ... %>\n<%= ... %>\n<? ... ?>\nNo comment, but middle.\n{{ ... }}\n<?php ... ?>\n<?xml ... ?>\nHello, this is the end!';
+
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true,
+      preserveLineBreaks: true,
+      ignoreCustomFragments: reFragments
+    }), output);
+
+    input = '{{ if foo? }}\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n{{ end \n}}';
+    output = '{{ if foo? }}<div class="bar">...</div>{{ end }}';
 
     equal(minify(input, {}), input);
     equal(minify(input, { collapseWhitespace: true }), output);
+    equal(minify(input, { collapseWhitespace: true, ignoreCustomFragments: [] }), output);
 
-    output = '<% if foo? %>\r\n  <div class="bar">...</div>\r\n<% end %>';
+    output = '{{ if foo? }} <div class="bar">...</div> {{ end \n}}';
 
     equal(minify(input, { collapseWhitespace: true, ignoreCustomFragments: reFragments }), output);
 
-    input = '<a class="<% if foo? %>bar<% end %>"></a>';
+    output = '{{ if foo? }}\n<div class="bar">\n...\n</div>\n{{ end \n}}';
+
+    equal(minify(input, {
+      collapseWhitespace: true,
+      preserveLineBreaks: true,
+      ignoreCustomFragments: reFragments
+    }), output);
+
+    input = '<a class="<% if foo? %>bar<% end %> {{ ... }}"></a>';
     equal(minify(input, {}), input);
     equal(minify(input, { ignoreCustomFragments: reFragments }), input);
 

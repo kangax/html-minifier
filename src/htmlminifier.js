@@ -36,7 +36,7 @@
     };
   }
 
-  function collapseWhitespace(str) {
+  function collapseWhitespaceAll(str) {
     return str ? str.replace(/[\t\n\r ]+/g, ' ') : str;
   }
 
@@ -54,13 +54,10 @@
     return createMap(values.split(/,/));
   }
 
-  // array of non-empty element tags that will maintain a single space outside of them
-  var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
-
-  function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
+  function collapseWhitespace(str, preserveLineBreaks, conservativeCollapse, trimLeft, trimRight, collapseAll) {
     var lineBreakBefore = '', lineBreakAfter = '';
 
-    if (options.preserveLineBreaks) {
+    if (preserveLineBreaks) {
       str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
         lineBreakBefore = '\n';
         return '';
@@ -70,22 +67,30 @@
       });
     }
 
-    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && prevTag !== 'comment'
-      && (prevTag.charAt(0) !== '/' || options.collapseInlineTagWhitespace || !inlineTags(prevTag.substr(1)))) {
-      str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? ' ' : '');
+    if (trimLeft) {
+      str = str.replace(/^\s+/, !lineBreakBefore && conservativeCollapse ? ' ' : '');
     }
 
-    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && nextTag !== 'comment'
-      && (nextTag.charAt(0) === '/' || options.collapseInlineTagWhitespace || !inlineTags(nextTag))) {
-      str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? ' ' : '');
+    if (trimRight) {
+      str = str.replace(/\s+$/, !lineBreakAfter && conservativeCollapse ? ' ' : '');
     }
 
-    if (prevTag && nextTag) {
+    if (collapseAll) {
       // strip non space whitespace then compress spaces to one
-      str = collapseWhitespace(str);
+      str = collapseWhitespaceAll(str);
     }
 
     return lineBreakBefore + str + lineBreakAfter;
+  }
+
+  // array of non-empty element tags that will maintain a single space outside of them
+  var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
+  var selfClosingInlineTags = createMapFromString('comment,img,input');
+
+  function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
+    var trimLeft = prevTag && !selfClosingInlineTags(prevTag) && (options.collapseInlineTagWhitespace || prevTag.charAt(0) !== '/' || !inlineTags(prevTag.substr(1)));
+    var trimRight = nextTag && !selfClosingInlineTags(nextTag) && (options.collapseInlineTagWhitespace || nextTag.charAt(0) === '/' || !inlineTags(nextTag));
+    return collapseWhitespace(str, options.preserveLineBreaks, options.conservativeCollapse, trimLeft, trimRight, prevTag && nextTag);
   }
 
   function isConditionalComment(text) {
@@ -278,7 +283,7 @@
       return attrValue;
     }
     else if (attrName === 'class') {
-      return collapseWhitespace(trimWhitespace(attrValue));
+      return collapseWhitespaceAll(trimWhitespace(attrValue));
     }
     else if (isUriTypeAttribute(attrName, tag)) {
       attrValue = trimWhitespace(attrValue);
@@ -709,14 +714,19 @@
       });
     }
 
-    if (options.ignoreCustomFragments) {
-      uidAttr = uniqueId(value);
-      var customFragments = options.ignoreCustomFragments.map(function(re) {
-        return re.source;
-      });
+    var customFragments = (options.ignoreCustomFragments || [
+      /<%[\s\S]*?%>/,
+      /<\?[\s\S]*?\?>/
+    ]).map(function(re) {
+      return re.source;
+    });
+    if (customFragments.length) {
       var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')\\s*', 'g');
       // temporarily replace custom ignored fragments with unique attributes
       value = value.replace(reCustomIgnore, function(match) {
+        if (!uidAttr) {
+          uidAttr = uniqueId(value);
+        }
         ignoredCustomMarkupChunks.push(match);
         return ' ' + uidAttr + ' ';
       });
@@ -913,7 +923,7 @@
             text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length) {
-            text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespace(text);
+            text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespaceAll(text);
           }
         }
         if (currentTag === 'script' || currentTag === 'style') {
@@ -982,7 +992,7 @@
         buffer.push(text);
       },
       doctype: function(doctype) {
-        buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
+        buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(doctype));
       },
       customAttrAssign: options.customAttrAssign,
       customAttrSurround: options.customAttrSurround
@@ -1004,8 +1014,9 @@
     var str = joinResultSegments(results, options);
 
     if (uidAttr) {
-      str = str.replace(new RegExp('\\s*' + uidAttr + '\\s*', 'g'), function() {
-        return ignoredCustomMarkupChunks.shift();
+      str = str.replace(new RegExp('(\\s*)' + uidAttr + '(\\s*)', 'g'), function(match, prefix, suffix) {
+        var chunk = ignoredCustomMarkupChunks.shift();
+        return options.collapseWhitespace ? collapseWhitespace(prefix + chunk + suffix, options.preserveLineBreaks, true, true, true) : chunk;
       });
     }
     if (uidIgnore) {
