@@ -30,7 +30,7 @@ module.exports = function(grunt) {
         src: 'assets/master.js'
       },
       other: {
-        src: 'benchmark.js'
+        src: ['backtest.js', 'benchmark.js']
       }
     },
 
