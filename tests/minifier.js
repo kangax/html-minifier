@@ -812,24 +812,70 @@
     input = '<html><head><title>a</title><link href="b.css" rel="stylesheet"/></head><body><a href="c.html"></a><div class="d"><input value="e"/></div></body></html>';
     output = '<title>a</title><link href="b.css" rel="stylesheet"><a href="c.html"></a><div class="d"><input value="e"></div>';
     equal(minify(input, { removeOptionalTags: true }), output);
+
+    input = '<!DOCTYPE html><html><head><title>Blah</title></head><body><div><p>This is some text in a div</p><details>Followed by some details</details></div><div><p>This is some more text in a div</p></div></body></html>';
+    output = '<!DOCTYPE html><title>Blah</title><div><p>This is some text in a div<details>Followed by some details</details></div><div><p>This is some more text in a div</div>';
+    equal(minify(input, { removeOptionalTags: true }), output);
+
+    input = '<!DOCTYPE html><html><head><title>Blah</title></head><body><noscript><p>This is some text in a noscript</p><details>Followed by some details</details></noscript><noscript><p>This is some more text in a noscript</p></noscript></body></html>';
+    output = '<!DOCTYPE html><title>Blah</title><body><noscript><p>This is some text in a noscript<details>Followed by some details</details></noscript><noscript><p>This is some more text in a noscript</p></noscript>';
+    equal(minify(input, { removeOptionalTags: true }), output);
   });
 
   test('removing optional tags in tables', function() {
-
     input = '<table>' +
-              '<thead><tr><th>foo</th><th>bar</th></tr></thead>' +
-              '<tfoot><tr><th>baz</th><th>qux</th></tr></tfoot>' +
-              '<tbody><tr><td>boo</td><td>moo</td></tr></tbody>' +
+              '<thead><tr><th>foo</th><th>bar</th> <th>baz</th></tr></thead> ' +
+              '<tbody><tr><td>boo</td><td>moo</td><td>loo</td></tr> </tbody>' +
+              '<tfoot><tr><th>baz</th> <th>qux</th><td>boo</td></tr></tfoot>' +
             '</table>';
+    equal(minify(input), input);
 
     output = '<table>' +
-              '<thead><tr><th>foo<th>bar' +
-              '<tfoot><tr><th>baz<th>qux' +
-              '<tbody><tr><td>boo<td>moo' +
+               '<thead><tr><th>foo<th>bar</th> <th>baz</thead> ' +
+               '<tr><td>boo<td>moo<td>loo</tr> ' +
+               '<tfoot><tr><th>baz</th> <th>qux<td>boo' +
              '</table>';
-
     equal(minify(input, { removeOptionalTags: true }), output);
+
+    output = '<table>' +
+               '<thead><tr><th>foo<th>bar<th>baz' +
+               '<tbody><tr><td>boo<td>moo<td>loo' +
+               '<tfoot><tr><th>baz<th>qux<td>boo' +
+             '</table>';
+    equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
+
+    input = '<table>' +
+              '<caption>foo</caption>' +
+              '<!-- blah -->' +
+              '<colgroup><col span="2"><col></colgroup>' +
+              '<!-- blah -->' +
+              '<tbody><tr><th>bar</th><td>baz</td><th>qux</th></tr></tbody>' +
+            '</table>';
     equal(minify(input), input);
+
+    output = '<table>' +
+               '<caption>foo</caption>' +
+               '<!-- blah -->' +
+               '<col span="2"><col></colgroup>' +
+               '<!-- blah -->' +
+               '<tr><th>bar<td>baz<th>qux' +
+             '</table>';
+    equal(minify(input, { removeOptionalTags: true }), output);
+
+    output = '<table>' +
+               '<caption>foo' +
+               '<col span="2"><col>' +
+               '<tr><th>bar<td>baz<th>qux' +
+             '</table>';
+    equal(minify(input, { removeComments: true, removeOptionalTags: true }), output);
+
+    input = '<table>' +
+              '<tbody></tbody>' +
+            '</table>';
+    equal(minify(input), input);
+
+    output = '<table><tbody></table>';
+    equal(minify(input, { removeOptionalTags: true }), output);
   });
 
   test('removing optional tags in options', function() {
