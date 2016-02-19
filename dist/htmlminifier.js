@@ -593,10 +593,10 @@
     return createMap(values.split(/,/));
   }
 
-  function collapseWhitespace(str, preserveLineBreaks, conservativeCollapse, trimLeft, trimRight, collapseAll) {
+  function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
     var lineBreakBefore = '', lineBreakAfter = '';
 
-    if (preserveLineBreaks) {
+    if (options.preserveLineBreaks) {
       str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
         lineBreakBefore = '\n';
         return '';
@@ -607,11 +607,11 @@
     }
 
     if (trimLeft) {
-      str = str.replace(/^\s+/, !lineBreakBefore && conservativeCollapse ? ' ' : '');
+      str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? ' ' : '');
     }
 
     if (trimRight) {
-      str = str.replace(/\s+$/, !lineBreakAfter && conservativeCollapse ? ' ' : '');
+      str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? ' ' : '');
     }
 
     if (collapseAll) {
@@ -629,7 +629,7 @@
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
     var trimLeft = prevTag && !selfClosingInlineTags(prevTag) && (options.collapseInlineTagWhitespace || prevTag.charAt(0) !== '/' || !inlineTags(prevTag.substr(1)));
     var trimRight = nextTag && !selfClosingInlineTags(nextTag) && (options.collapseInlineTagWhitespace || nextTag.charAt(0) === '/' || !inlineTags(nextTag));
-    return collapseWhitespace(str, options.preserveLineBreaks, options.conservativeCollapse, trimLeft, trimRight, prevTag && nextTag);
+    return collapseWhitespace(str, options, trimLeft, trimRight, prevTag && nextTag);
   }
 
   function isConditionalComment(text) {
@@ -1593,7 +1593,10 @@
     if (uidAttr) {
       str = str.replace(new RegExp('(\\s*)' + uidAttr + '(\\s*)', 'g'), function(match, prefix, suffix) {
         var chunk = ignoredCustomMarkupChunks.shift();
-        return options.collapseWhitespace ? collapseWhitespace(prefix + chunk + suffix, options.preserveLineBreaks, true, true, true) : chunk;
+        return options.collapseWhitespace ? collapseWhitespace(prefix + chunk + suffix, {
+          preserveLineBreaks: options.preserveLineBreaks,
+          conservativeCollapse: true
+        }, true, true) : chunk;
       });
     }
     if (uidIgnore) {
