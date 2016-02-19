@@ -36,7 +36,7 @@
     };
   }
 
-  function collapseWhitespace(str) {
+  function collapseWhitespaceAll(str) {
     return str ? str.replace(/[\t\n\r ]+/g, ' ') : str;
   }
 
@@ -54,10 +54,7 @@
     return createMap(values.split(/,/));
   }
 
-  // array of non-empty element tags that will maintain a single space outside of them
-  var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
-
-  function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
+  function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
     var lineBreakBefore = '', lineBreakAfter = '';
 
     if (options.preserveLineBreaks) {
@@ -70,22 +67,32 @@
       });
     }
 
-    if (prevTag && prevTag !== 'img' && prevTag !== 'input' && prevTag !== 'comment'
-      && (prevTag.charAt(0) !== '/' || options.collapseInlineTagWhitespace || !inlineTags(prevTag.substr(1)))) {
-      str = str.replace(/^\s+/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
+    if (trimLeft) {
+      str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? ' ' : '');
     }
 
-    if (nextTag && nextTag !== 'img' && nextTag !== 'input' && nextTag !== 'comment'
-      && (nextTag.charAt(0) === '/' || options.collapseInlineTagWhitespace || !inlineTags(nextTag))) {
-      str = str.replace(/\s+$/, !options.preserveLineBreaks && options.conservativeCollapse ? ' ' : '');
+    if (trimRight) {
+      str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? ' ' : '');
     }
 
-    if (prevTag && nextTag) {
+    if (collapseAll) {
       // strip non space whitespace then compress spaces to one
-      str = collapseWhitespace(str);
+      str = collapseWhitespaceAll(str);
     }
 
     return lineBreakBefore + str + lineBreakAfter;
+  }
+
+  // array of non-empty element tags that will maintain a single space outside of them
+  var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
+  var selfClosingInlineTags = createMapFromString('comment,img,input');
+
+  function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
+    var trimLeft = prevTag && !selfClosingInlineTags(prevTag) &&
+      (options.collapseInlineTagWhitespace || prevTag.charAt(0) !== '/' || !inlineTags(prevTag.substr(1)));
+    var trimRight = nextTag && !selfClosingInlineTags(nextTag) &&
+      (options.collapseInlineTagWhitespace || nextTag.charAt(0) === '/' || !inlineTags(nextTag));
+    return collapseWhitespace(str, options, trimLeft, trimRight, prevTag && nextTag);
   }
 
   function isConditionalComment(text) {
@@ -278,7 +285,7 @@
       return attrValue;
     }
     else if (attrName === 'class') {
-      return collapseWhitespace(trimWhitespace(attrValue));
+      return collapseWhitespaceAll(trimWhitespace(attrValue));
     }
     else if (isUriTypeAttribute(attrName, tag)) {
       attrValue = trimWhitespace(attrValue);
@@ -378,17 +385,50 @@
     return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
   }
 
-  // Tag omission rules from http://www.w3.org/TR/html5/syntax.html#optional-tags
-  var optionalStartTags = createMapFromString('html,head,body');
-  var optionalEndTags = createMapFromString('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,thead,tbody,tfoot,tr,td,th');
-  var headerTags = createMapFromString('meta,link,script,style,template');
+  // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
+  // with the following deviations:
+  // - retain <body> if followed by <noscript>
+  // - </rb>, </rt>, </rtc>, </rp> & </tfoot> follow http://www.w3.org/TR/html5/syntax.html#optional-tags
+  var optionalStartTags = createMapFromString('html,head,body,colgroup,tbody');
+  var optionalEndTags = createMapFromString('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,caption,thead,tbody,tfoot,tr,td,th');
+  var headerTags = createMapFromString('meta,link,script,style,template,noscript');
   var descriptionTags = createMapFromString('dt,dd');
-  var pTag = createMapFromString('address,article,aside,blockquote,div,dl,fieldset,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,nav,ol,p,pre,section,table,ul');
+  var pBlockTags = createMapFromString('address,article,aside,blockquote,details,div,dl,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,menu,nav,ol,p,pre,section,table,ul');
+  var pInlineTags = createMapFromString('a,audio,del,ins,map,noscript,video');
   var rubyTags = createMapFromString('rb,rt,rtc,rp');
   var rtcTag = createMapFromString('rb,rtc,rp');
   var optionTag = createMapFromString('option,optgroup');
-  var tableTags = createMapFromString('tbody,tfoot');
+  var tableContentTags = createMapFromString('tbody,tfoot');
+  var tableSectionTags = createMapFromString('thead,tbody,tfoot');
   var cellTags = createMapFromString('td,th');
+  var topLevelTags = createMapFromString('html,head,body');
+  var compactTags = createMapFromString('html,body');
+  var looseTags = createMapFromString('head,colgroup,caption');
+
+  function canRemoveParentTag(optionalStartTag, tag) {
+    switch (optionalStartTag) {
+      case 'html':
+      case 'head':
+        return true;
+      case 'body':
+        return !headerTags(tag);
+      case 'colgroup':
+        return tag === 'col';
+      case 'tbody':
+        return tag === 'tr';
+    }
+    return false;
+  }
+
+  function isStartTagMandatory(optionalEndTag, tag) {
+    switch (tag) {
+      case 'colgroup':
+        return optionalEndTag === 'colgroup';
+      case 'tbody':
+        return tableSectionTags(optionalEndTag);
+    }
+    return false;
+  }
 
   function canRemovePrecedingTag(optionalEndTag, tag) {
     switch (optionalEndTag) {
@@ -396,6 +436,7 @@
       case 'head':
       case 'body':
       case 'colgroup':
+      case 'caption':
         return true;
       case 'li':
       case 'optgroup':
@@ -405,7 +446,7 @@
       case 'dd':
         return descriptionTags(tag);
       case 'p':
-        return pTag(tag);
+        return pBlockTags(tag);
       case 'rb':
       case 'rt':
       case 'rp':
@@ -416,7 +457,7 @@
         return optionTag(tag);
       case 'thead':
       case 'tbody':
-        return tableTags(tag);
+        return tableContentTags(tag);
       case 'tfoot':
         return tag === 'tbody';
       case 'td':
@@ -709,14 +750,19 @@
       });
     }
 
-    if (options.ignoreCustomFragments) {
-      uidAttr = uniqueId(value);
-      var customFragments = options.ignoreCustomFragments.map(function(re) {
-        return re.source;
-      });
+    var customFragments = (options.ignoreCustomFragments || [
+      /<%[\s\S]*?%>/,
+      /<\?[\s\S]*?\?>/
+    ]).map(function(re) {
+      return re.source;
+    });
+    if (customFragments.length) {
       var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')\\s*', 'g');
       // temporarily replace custom ignored fragments with unique attributes
       value = value.replace(reCustomIgnore, function(match) {
+        if (!uidAttr) {
+          uidAttr = uniqueId(value);
+        }
         ignoredCustomMarkupChunks.push(match);
         return ' ' + uidAttr + ' ';
       });
@@ -770,17 +816,23 @@
         currentChars = '';
         currentAttrs = attrs;
 
-        if (options.removeOptionalTags) {
+        var optional = options.removeOptionalTags;
+        if (optional) {
           // <html> may be omitted if first thing inside is not comment
           // <head> may be omitted if first thing inside is an element
           // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-          if (optionalStartTag && (optionalStartTag !== 'body' || !headerTags(tag))) {
+          // <colgroup> may be omitted if first thing inside is <col>
+          // <tbody> may be omitted if first thing inside is <tr>
+          if (canRemoveParentTag(optionalStartTag, tag)) {
             removeStartTag();
           }
           optionalStartTag = '';
           // end-tag-followed-by-start-tag omission rules
           if (canRemovePrecedingTag(optionalEndTag, tag)) {
             removeEndTag();
+            // <colgroup> cannot be omitted if preceding </colgroup> is omitted
+            // <tbody> cannot be omitted if preceding </tbody>, </thead> or </tfoot> is omitted
+            optional = !isStartTagMandatory(optionalEndTag, tag);
           }
           optionalEndTag = '';
         }
@@ -821,7 +873,7 @@
           buffer.push.apply(buffer, parts);
         }
         // start tag must never be omitted if it has any attributes
-        else if (options.removeOptionalTags && optionalStartTags(tag)) {
+        else if (optional && optionalStartTags(tag)) {
           optionalStartTag = tag;
         }
 
@@ -840,7 +892,7 @@
           // </head> may be omitted if not followed by space or comment
           // </p> may be omitted if no more content in non-</a> parent
           // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-          if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || tag !== 'a')) {
+          if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
             removeEndTag();
           }
           optionalEndTag = optionalEndTags(tag) ? tag : '';
@@ -913,7 +965,7 @@
             text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
           }
           if (!stackNoCollapseWhitespace.length) {
-            text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespace(text);
+            text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespaceAll(text);
           }
         }
         if (currentTag === 'script' || currentTag === 'style') {
@@ -944,8 +996,8 @@
           }
           optionalStartTag = '';
           // </html> or </body> may be omitted if not followed by comment
-          // </head> or </colgroup> may be omitted if not followed by space or comment
-          if (optionalEndTag === 'html' || optionalEndTag === 'body' || (optionalEndTag === 'head' || optionalEndTag === 'colgroup') && !/^\s/.test(text)) {
+          // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
+          if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
             removeEndTag();
           }
           optionalEndTag = '';
@@ -982,7 +1034,7 @@
         buffer.push(text);
       },
       doctype: function(doctype) {
-        buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespace(doctype));
+        buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(doctype));
       },
       customAttrAssign: options.customAttrAssign,
       customAttrSurround: options.customAttrSurround
@@ -991,7 +1043,7 @@
     if (options.removeOptionalTags) {
       // <html> may be omitted if first thing inside is not comment
       // <head> or <body> may be omitted if empty
-      if (optionalStartTag) {
+      if (topLevelTags(optionalStartTag)) {
         removeStartTag();
       }
       // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
@@ -1004,8 +1056,12 @@
     var str = joinResultSegments(results, options);
 
     if (uidAttr) {
-      str = str.replace(new RegExp('\\s*' + uidAttr + '\\s*', 'g'), function() {
-        return ignoredCustomMarkupChunks.shift();
+      str = str.replace(new RegExp('(\\s*)' + uidAttr + '(\\s*)', 'g'), function(match, prefix, suffix) {
+        var chunk = ignoredCustomMarkupChunks.shift();
+        return options.collapseWhitespace ? collapseWhitespace(prefix + chunk + suffix, {
+          preserveLineBreaks: options.preserveLineBreaks,
+          conservativeCollapse: true
+        }, true, true) : chunk;
       });
     }
     if (uidIgnore) {

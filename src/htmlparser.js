@@ -188,31 +188,6 @@
           }
         }
 
-        // Ignored elements?
-        if ( /^<\?/.test( html ) ) {
-          index = html.indexOf( '?>', 2 );
-          if ( index >= 0 ) {
-            if ( handler.chars ) {
-              handler.chars( html.substring( 0, index + 2 ) );
-            }
-            html = html.substring( index + 2 );
-            prevTag = '';
-            continue;
-          }
-        }
-
-        if ( /^<%/.test( html ) ) {
-          index = html.indexOf( '%>', 2 );
-          if ( index >= 0 ) {
-            if ( handler.chars ) {
-              handler.chars(html.substring( 0, index + 2) );
-            }
-            html = html.substring( index + 2 );
-            prevTag = '';
-            continue;
-          }
-        }
-
         // Doctype:
         if ( (match = doctype.exec( html )) ) {
           if ( handler.doctype ) {
