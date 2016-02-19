@@ -402,6 +402,8 @@
   var tableSectionTags = createMapFromString('thead,tbody,tfoot');
   var cellTags = createMapFromString('td,th');
   var topLevelTags = createMapFromString('html,head,body');
+  var compactTags = createMapFromString('html,body');
+  var looseTags = createMapFromString('head,colgroup,caption');
 
   function canRemoveParentTag(optionalStartTag, tag) {
     switch (optionalStartTag) {
@@ -995,7 +997,7 @@
           optionalStartTag = '';
           // </html> or </body> may be omitted if not followed by comment
           // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
-          if (optionalEndTag === 'html' || optionalEndTag === 'body' || (optionalEndTag === 'head' || optionalEndTag === 'colgroup' || optionalEndTag === 'caption') && !/^\s/.test(text)) {
+          if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
             removeEndTag();
           }
           optionalEndTag = '';
