@@ -627,8 +627,10 @@
   var selfClosingInlineTags = createMapFromString('comment,img,input');
 
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
-    var trimLeft = prevTag && !selfClosingInlineTags(prevTag) && (options.collapseInlineTagWhitespace || prevTag.charAt(0) !== '/' || !inlineTags(prevTag.substr(1)));
-    var trimRight = nextTag && !selfClosingInlineTags(nextTag) && (options.collapseInlineTagWhitespace || nextTag.charAt(0) === '/' || !inlineTags(nextTag));
+    var trimLeft = prevTag && !selfClosingInlineTags(prevTag) &&
+      (options.collapseInlineTagWhitespace || prevTag.charAt(0) !== '/' || !inlineTags(prevTag.substr(1)));
+    var trimRight = nextTag && !selfClosingInlineTags(nextTag) &&
+      (options.collapseInlineTagWhitespace || nextTag.charAt(0) === '/' || !inlineTags(nextTag));
     return collapseWhitespace(str, options, trimLeft, trimRight, prevTag && nextTag);
   }
 
