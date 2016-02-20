@@ -924,6 +924,7 @@
           if (isElementEmpty && topLevelTags(optionalStartTag)) {
             removeStartTag();
           }
+          optionalStartTag = '';
           // </html> or </body> may be omitted if not followed by comment
           // </head> may be omitted if not followed by space or comment
           // </p> may be omitted if no more content in non-</a> parent
