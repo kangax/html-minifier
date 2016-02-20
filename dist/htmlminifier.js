@@ -1328,7 +1328,7 @@
       while (index > 0 && !/^<\//.test(buffer[index])) {
         index--;
       }
-      buffer.length = index;
+      buffer.length = Math.max(0, index);
     }
 
     new HTMLParser(value, {
