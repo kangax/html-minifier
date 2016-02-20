@@ -798,7 +798,10 @@
   });
 
   test('removing optional tags', function() {
-    equal(minify('<body></body>', { removeOptionalTags: true }), '<body>');
+    input = '<body></body>';
+    output = '';
+    equal(minify(input, { removeOptionalTags: true }), output);
+    equal(minify(input, { removeOptionalTags: true, removeEmptyElements: true }), output);
 
     input = '<html><head><title>hello</title></head><body><p>foo<span>bar</span></p></body></html>';
     equal(minify(input), input);
