@@ -1253,12 +1253,10 @@
   }
 
   function minify(value, options) {
-
     options = options || {};
     var optionsStack = [];
-
-    value = trimWhitespace(value);
     setDefaultTesters(options);
+    value = options.collapseWhitespace ? trimWhitespace(value) : value;
 
     var results = [ ],
         buffer = [ ],
@@ -1643,7 +1641,7 @@
       str = results.join('');
     }
 
-    return trimWhitespace(str);
+    return options.collapseWhitespace ? trimWhitespace(str) : str;
   }
 
   // for CommonJS enviroments, export everything

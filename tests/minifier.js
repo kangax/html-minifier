@@ -92,7 +92,10 @@
   });
 
   test('space normalization around text', function() {
-    equal(minify('   <p>blah</p>\n\n\n   '), '<p>blah</p>');
+    input = '   <p>blah</p>\n\n\n   ';
+    equal(minify(input), input);
+    output = '<p>blah</p>';
+    equal(minify(input, { collapseWhitespace: true }), output);
     // tags from collapseWhitespaceSmart()
     [
       'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
@@ -809,44 +812,51 @@
     equal(minify(input, { removeOptionalTags: true, removeEmptyElements: true }), output);
 
     input = ' <html></html>';
-    output = '';
+    output = ' ';
     equal(minify(input, { removeOptionalTags: true }), output);
+    output = '';
     equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
     input = '<html> </html>';
-    output = '';
+    output = ' ';
     equal(minify(input, { removeOptionalTags: true }), output);
+    output = '';
     equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
     input = '<html></html> ';
-    output = '';
+    output = ' ';
     equal(minify(input, { removeOptionalTags: true }), output);
+    output = '';
     equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
     input = ' <html><body></body></html>';
-    output = '';
+    output = ' ';
     equal(minify(input, { removeOptionalTags: true }), output);
+    output = '';
     equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
     input = '<html> <body></body></html>';
-    output = '';
+    output = ' ';
     equal(minify(input, { removeOptionalTags: true }), output);
+    output = '';
     equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
     input = '<html><body> </body></html>';
-    output = '<body>';
+    output = '<body> ';
     equal(minify(input, { removeOptionalTags: true }), output);
     output = '';
     equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
     input = '<html><body></body> </html>';
-    output = '';
+    output = ' ';
     equal(minify(input, { removeOptionalTags: true }), output);
+    output = '';
     equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
     input = '<html><body></body></html> ';
-    output = '';
+    output = ' ';
     equal(minify(input, { removeOptionalTags: true }), output);
+    output = '';
     equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
     input = '<html><head><title>hello</title></head><body><p>foo<span>bar</span></p></body></html>';
