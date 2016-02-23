@@ -926,6 +926,7 @@
   // with the following deviations:
   // - retain <body> if followed by <noscript>
   // - </rb>, </rt>, </rtc>, </rp> & </tfoot> follow http://www.w3.org/TR/html5/syntax.html#optional-tags
+  // - retain all tags which are adjacent to non-standard HTML tags
   var optionalStartTags = createMapFromString('html,head,body,colgroup,tbody');
   var optionalEndTags = createMapFromString('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,caption,thead,tbody,tfoot,tr,td,th');
   var headerTags = createMapFromString('meta,link,script,style,template,noscript');
@@ -941,6 +942,8 @@
   var topLevelTags = createMapFromString('html,head,body');
   var compactTags = createMapFromString('html,body');
   var looseTags = createMapFromString('head,colgroup,caption');
+  var trailingTags = createMapFromString('dt,thead');
+  var htmlTags = createMapFromString('a,abbr,acronym,address,applet,area,article,aside,audio,b,base,basefont,bdi,bdo,bgsound,big,blink,blockquote,body,br,button,canvas,caption,center,cite,code,col,colgroup,command,content,data,datalist,dd,del,details,dfn,dialog,dir,div,dl,dt,element,em,embed,fieldset,figcaption,figure,font,footer,form,frame,frameset,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,image,img,input,ins,isindex,kbd,keygen,label,legend,li,link,listing,main,map,mark,marquee,menu,menuitem,meta,meter,multicol,nav,nobr,noembed,noframes,noscript,object,ol,optgroup,option,output,p,param,picture,plaintext,pre,progress,q,rp,rt,rtc,ruby,s,samp,script,section,select,shadow,small,source,spacer,span,strike,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,tt,u,ul,var,video,wbr,xmp');
 
   function canRemoveParentTag(optionalStartTag, tag) {
     switch (optionalStartTag) {
@@ -1349,17 +1352,18 @@
 
         var optional = options.removeOptionalTags;
         if (optional) {
+          var htmlTag = htmlTags(tag);
           // <html> may be omitted if first thing inside is not comment
           // <head> may be omitted if first thing inside is an element
           // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
           // <colgroup> may be omitted if first thing inside is <col>
           // <tbody> may be omitted if first thing inside is <tr>
-          if (canRemoveParentTag(optionalStartTag, tag)) {
+          if (htmlTag && canRemoveParentTag(optionalStartTag, tag)) {
             removeStartTag();
           }
           optionalStartTag = '';
           // end-tag-followed-by-start-tag omission rules
-          if (canRemovePrecedingTag(optionalEndTag, tag)) {
+          if (htmlTag && canRemovePrecedingTag(optionalEndTag, tag)) {
             removeEndTag();
             // <colgroup> cannot be omitted if preceding </colgroup> is omitted
             // <tbody> cannot be omitted if preceding </tbody>, </thead> or </tfoot> is omitted
@@ -1460,7 +1464,7 @@
           // </head> may be omitted if not followed by space or comment
           // </p> may be omitted if no more content in non-</a> parent
           // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-          if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
+          if (htmlTags(tag) && optionalEndTag && !trailingTags(optionalEndTag) && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
             removeEndTag();
           }
           optionalEndTag = optionalEndTags(tag) ? tag : '';
@@ -1583,7 +1587,7 @@
         removeStartTag();
       }
       // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-      if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead') {
+      if (optionalEndTag && !trailingTags(optionalEndTag)) {
         removeEndTag();
       }
     }
