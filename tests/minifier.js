@@ -1077,14 +1077,23 @@
       ],
       quoteCharacter: '\''
     }), input);
-    /*equal(minify(input, {
+    output = '<p {% if form.name.errors %} class=\'error\' {% endif %}>' +
+              '{{ form.name.label_tag }} ' +
+              '{{ form.name }} ' +
+              '{% if form.name.errors %} ' +
+              '{% for error in form.name.errors %} ' +
+              '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }}</span> ' +
+              '{% endfor %} ' +
+              '{% endif %}' +
+            '</p>';
+    equal(minify(input, {
       ignoreCustomFragments: [
         /\{\%[\s\S]*?\%\}/g,
         /\{\{[\s\S]*?\}\}/g
       ],
       quoteCharacter: '\'',
       collapseWhitespace: true
-    }), input);*/
+    }), output);
 
     input = '<a href="/legal.htm"<?php echo e(Request::path() == \'/\' ? \' rel="nofollow"\':\'\'); ?>>Legal Notices</a>';
     equal(minify(input, {
