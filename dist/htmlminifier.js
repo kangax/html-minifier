@@ -597,10 +597,10 @@
     var lineBreakBefore = '', lineBreakAfter = '';
 
     if (options.preserveLineBreaks) {
-      str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
+      str = str.replace(/^[\t ]*[\n\r][\t\n\r ]*/, function() {
         lineBreakBefore = '\n';
         return '';
-      }).replace(/[\t\n\r ]*[\n\r]+[\t ]*$/, function() {
+      }).replace(/[\t\n\r ]*[\n\r][\t ]*$/, function() {
         lineBreakAfter = '\n';
         return '';
       });
@@ -1301,7 +1301,7 @@
           uidAttr = uniqueId(value);
         }
         ignoredCustomMarkupChunks.push(match);
-        return ' ' + uidAttr + ' ';
+        return '\t' + uidAttr + '\t';
       });
     }
 
@@ -1600,10 +1600,21 @@
     if (uidAttr) {
       str = str.replace(new RegExp('(\\s*)' + uidAttr + '(\\s*)', 'g'), function(match, prefix, suffix) {
         var chunk = ignoredCustomMarkupChunks.shift();
-        return options.collapseWhitespace ? collapseWhitespace(prefix + chunk + suffix, {
-          preserveLineBreaks: options.preserveLineBreaks,
-          conservativeCollapse: true
-        }, true, true) : chunk;
+        if (options.collapseWhitespace) {
+          if (prefix !== '\t') {
+            chunk = prefix + chunk;
+          }
+          if (suffix !== '\t') {
+            chunk += suffix;
+          }
+          return collapseWhitespace(chunk, {
+            preserveLineBreaks: options.preserveLineBreaks,
+            conservativeCollapse: true
+          }, /^\s/.test(chunk), /\s$/.test(chunk));
+        }
+        else {
+          return chunk;
+        }
       });
     }
     if (uidIgnore) {
