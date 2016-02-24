@@ -299,7 +299,7 @@ cli.main(function(args, options) {
     var outputDir = options['output-dir'];
 
     if (!inputDir) {
-      cli.error('The option output-dir need to be use with the option include-dir. If you are working with only 1 file, use -o.');
+      cli.error('The option output-dir needs to be use with the option input-dir. If you are working with only 1 file, use -o.');
       cli.exit(2);
     }
 
