@@ -4,7 +4,7 @@
  *
  * The MIT License (MIT)
  *
- *  Copyright (c) 2014-2015 Zoltan Frombach
+ *  Copyright (c) 2014-2016 Zoltan Frombach
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of
  *  this software and associated documentation files (the "Software"), to deal in
@@ -47,8 +47,8 @@ cli.option_width = 40;
 cli.setApp(appName, appVersion);
 
 var usage = appName + ' [OPTIONS] [FILE(s)]\n\n';
-usage += '  If no input file(s) specified then STDIN will be used for input.\n';
-usage += '  If more than one input file specified those will be concatenated and minified together.\n\n';
+usage += '  If no input files is specified then STDIN will be used for input.\n';
+usage += '  If more than one input file is specified then those will be concatenated and minified together.\n\n';
 usage += '  When you specify a config file with the --config-file option (see sample-cli-config-file.conf for format)\n';
 usage += '    you can still override some of its contents by providing individual command line options, too.\n\n';
 usage += '  When you want to provide an array of strings for --ignore-custom-comments or --process-scripts options\n';
@@ -299,7 +299,7 @@ cli.main(function(args, options) {
     var outputDir = options['output-dir'];
 
     if (!inputDir) {
-      cli.error('The option output-dir needs to be use with the option input-dir. If you are working with only 1 file, use -o.');
+      cli.error('The option output-dir needs to be used with the option input-dir. If you are working with a single file, use -o.');
       cli.exit(2);
     }
 
@@ -307,7 +307,7 @@ cli.main(function(args, options) {
       fs.statSync(inputDir);
     }
     catch (e) {
-      cli.error('The input directory does not exits');
+      cli.error('The input directory does not exist');
       cli.exit(2);
     }
 
@@ -321,7 +321,7 @@ cli.main(function(args, options) {
       processDirectory(inputDir, outputDir);
     }
     catch (e) {
-      cli.error('Something wrong happened');
+      cli.error('Error while processing input files');
       cli.error(e);
       cli.exit(3);
     }
