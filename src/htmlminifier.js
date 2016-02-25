@@ -1,5 +1,3 @@
-/* global CleanCSS */
-
 (function(global) {
   'use strict';
 
@@ -683,15 +681,11 @@
       options.advanced = false;
     }
     try {
-      var cleanCSS;
-
-      if (typeof CleanCSS !== 'undefined') {
-        cleanCSS = new CleanCSS(options);
+      var CleanCSS = global.CleanCSS;
+      if (typeof CleanCSS === 'undefined' && typeof require === 'function') {
+        CleanCSS = require('clean-css');
       }
-      else if (typeof require === 'function') {
-        var CleanCSSModule = require('clean-css');
-        cleanCSS = new CleanCSSModule(options);
-      }
+      var cleanCSS = new CleanCSS(options);
       if (inline) {
         return unwrapCSS(cleanCSS.minify(wrapCSS(text)).styles);
       }
