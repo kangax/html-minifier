@@ -1020,12 +1020,12 @@
       quoteCharacter: '\''
     }), input);
     output = '<p {% if form.name.errors %} class=\'error\' {% endif %}>' +
-              '{{ form.name.label_tag }} ' +
-              '{{ form.name }} ' +
-              '{% if form.name.errors %} ' +
+              '{{ form.name.label_tag }}' +
+              '{{ form.name }}' +
+              '{% if form.name.errors %}' +
               '{% for error in form.name.errors %} ' +
               '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }}</span> ' +
-              '{% endfor %} ' +
+              '{% endfor %}' +
               '{% endif %}' +
             '</p>';
     equal(minify(input, {
