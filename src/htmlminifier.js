@@ -876,19 +876,7 @@
         if (lowerTag === 'svg') {
           options = optionsStack.pop();
         }
-
         tag = options.caseSensitive ? tag : lowerTag;
-
-        if (options.removeOptionalTags) {
-          // </html> or </body> may be omitted if not followed by comment
-          // </head> may be omitted if not followed by space or comment
-          // </p> may be omitted if no more content in non-</a> parent
-          // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-          if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
-            removeEndTag();
-          }
-          optionalEndTag = optionalEndTags(tag) ? tag : '';
-        }
 
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
@@ -922,6 +910,23 @@
           currentTag = '';
           isElementEmpty = currentChars === '';
         }
+
+        if (options.removeOptionalTags) {
+          // <html>, <head> or <body> may be omitted if the element is empty
+          if (isElementEmpty && topLevelTags(optionalStartTag)) {
+            removeStartTag();
+          }
+          optionalStartTag = '';
+          // </html> or </body> may be omitted if not followed by comment
+          // </head> may be omitted if not followed by space or comment
+          // </p> may be omitted if no more content in non-</a> parent
+          // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
+          if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
+            removeEndTag();
+          }
+          optionalEndTag = optionalEndTags(tag) ? tag : '';
+        }
+
         if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
           // remove last "element" from buffer
           removeStartTag();

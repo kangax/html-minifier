@@ -802,9 +802,13 @@
 
   test('removing optional tags', function() {
     input = '<body></body>';
-    output = '<body>';
-    equal(minify(input, { removeOptionalTags: true }), output);
     output = '';
+    equal(minify(input, { removeOptionalTags: true }), output);
+    equal(minify(input, { removeOptionalTags: true, removeEmptyElements: true }), output);
+
+    input = '<html><head></head><body></body></html>';
+    output = '';
+    equal(minify(input, { removeOptionalTags: true }), output);
     equal(minify(input, { removeOptionalTags: true, removeEmptyElements: true }), output);
 
     input = '<html><head><title>hello</title></head><body><p>foo<span>bar</span></p></body></html>';
