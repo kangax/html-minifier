@@ -61,6 +61,35 @@
 
     // https://github.com/kangax/html-minifier/issues/229
     equal(minify('<CUSTOM-TAG></CUSTOM-TAG><div>Hello :)</div>'), '<custom-tag></custom-tag><div>Hello :)</div>');
+
+    input = '<tag v-ref:vm_pv :imgs=" objpicsurl_ "></tag>';
+    equal(minify(input), input);
+
+    throws(function() {
+      minify('<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123></tag>');
+    });
+
+    input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"'
+      + ' placeholder="YYYY-MM-DD"'
+      + ' date-range-picker'
+      + ' data-ng-model="vm.value"'
+      + ' data-ng-model-options="{ debounce: 1000 }"'
+      + ' data-ng-pattern="vm.options.format"'
+      + ' data-options="vm.datepickerOptions">';
+    equal(minify(input), input);
+
+    throws(function() {
+      minify(
+        '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"'
+        + ' <!--FIXME hardcoded placeholder - dates may not be used for service required fields yet. -->'
+        + ' placeholder="YYYY-MM-DD"'
+        + ' date-range-picker'
+        + ' data-ng-model="vm.value"'
+        + ' data-ng-model-options="{ debounce: 1000 }"'
+        + ' data-ng-pattern="vm.options.format"'
+        + ' data-options="vm.datepickerOptions">'
+      );
+    });
   });
 
   test('`minifiy` exists', function() {
