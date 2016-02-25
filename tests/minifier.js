@@ -92,7 +92,10 @@
   });
 
   test('space normalization around text', function() {
-    equal(minify('   <p>blah</p>\n\n\n   '), '<p>blah</p>');
+    input = '   <p>blah</p>\n\n\n   ';
+    equal(minify(input), input);
+    output = '<p>blah</p>';
+    equal(minify(input, { collapseWhitespace: true }), output);
     // tags from collapseWhitespaceSmart()
     [
       'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',

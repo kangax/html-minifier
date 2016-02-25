@@ -595,10 +595,10 @@
     var lineBreakBefore = '', lineBreakAfter = '';
 
     if (options.preserveLineBreaks) {
-      str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
+      str = str.replace(/^[\t ]*[\n\r][\t\n\r ]*/, function() {
         lineBreakBefore = '\n';
         return '';
-      }).replace(/[\t\n\r ]*[\n\r]+[\t ]*$/, function() {
+      }).replace(/[\t\n\r ]*[\n\r][\t ]*$/, function() {
         lineBreakAfter = '\n';
         return '';
       });
@@ -1247,12 +1247,10 @@
   }
 
   function minify(value, options) {
-
     options = options || {};
     var optionsStack = [];
-
-    value = trimWhitespace(value);
     setDefaultTesters(options);
+    value = options.collapseWhitespace ? trimWhitespace(value) : value;
 
     var results = [ ],
         buffer = [ ],
@@ -1632,7 +1630,7 @@
       str = results.join('');
     }
 
-    return trimWhitespace(str);
+    return options.collapseWhitespace ? trimWhitespace(str) : str;
   }
 
   // for CommonJS enviroments, export everything
