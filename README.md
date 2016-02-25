@@ -57,7 +57,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `keepClosingSlash`             | Keep the trailing slash on singleton elements                            | `false` |
 | `caseSensitive`                | Treat attributes in case sensitive manner (useful for custom HTML tags.) | `false` |
 | `minifyJS`                     | Minify Javascript in script elements and event attributes (uses [UglifyJS](https://github.com/mishoo/UglifyJS2)) | `false` (could be `true`, `false`, `Object` (options)) |
-| `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/GoalSmashers/clean-css)) | `false` (could be `true`, `false`, `Object` (options)) |
+| `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/jakubpawlowicz/clean-css)) | `false` (could be `true`, `false`, `Object` (options)) |
 | `minifyURLs`                   | Minify URLs in various attributes (uses [relateurl](https://github.com/stevenvachon/relateurl)) | `false` (could be `Object` (options)) |
 | `ignoreCustomComments`         | Array of regex'es that allow to ignore certain comments, when matched  | `[ ]` |
 | `ignoreCustomFragments`        | Array of regex'es that allow to ignore certain fragments, when matched (e.g. `<?php ... ?>`, `{{ ... }}`, etc.)  | `[ /<%[\s\S]*?%>/, /<\?[\s\S]*?\?>/ ]` |

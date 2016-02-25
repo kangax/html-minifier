@@ -1,5 +1,3 @@
-/* global CleanCSS */
-
 (function(global) {
   'use strict';
 
@@ -58,10 +56,10 @@
     var lineBreakBefore = '', lineBreakAfter = '';
 
     if (options.preserveLineBreaks) {
-      str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
+      str = str.replace(/^[\t ]*[\n\r][\t\n\r ]*/, function() {
         lineBreakBefore = '\n';
         return '';
-      }).replace(/[\t\n\r ]*[\n\r]+[\t ]*$/, function() {
+      }).replace(/[\t\n\r ]*[\n\r][\t ]*$/, function() {
         lineBreakAfter = '\n';
         return '';
       });
@@ -389,6 +387,7 @@
   // with the following deviations:
   // - retain <body> if followed by <noscript>
   // - </rb>, </rt>, </rtc>, </rp> & </tfoot> follow http://www.w3.org/TR/html5/syntax.html#optional-tags
+  // - retain all tags which are adjacent to non-standard HTML tags
   var optionalStartTags = createMapFromString('html,head,body,colgroup,tbody');
   var optionalEndTags = createMapFromString('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,caption,thead,tbody,tfoot,tr,td,th');
   var headerTags = createMapFromString('meta,link,script,style,template,noscript');
@@ -404,6 +403,8 @@
   var topLevelTags = createMapFromString('html,head,body');
   var compactTags = createMapFromString('html,body');
   var looseTags = createMapFromString('head,colgroup,caption');
+  var trailingTags = createMapFromString('dt,thead');
+  var htmlTags = createMapFromString('a,abbr,acronym,address,applet,area,article,aside,audio,b,base,basefont,bdi,bdo,bgsound,big,blink,blockquote,body,br,button,canvas,caption,center,cite,code,col,colgroup,command,content,data,datalist,dd,del,details,dfn,dialog,dir,div,dl,dt,element,em,embed,fieldset,figcaption,figure,font,footer,form,frame,frameset,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,image,img,input,ins,isindex,kbd,keygen,label,legend,li,link,listing,main,map,mark,marquee,menu,menuitem,meta,meter,multicol,nav,nobr,noembed,noframes,noscript,object,ol,optgroup,option,output,p,param,picture,plaintext,pre,progress,q,rp,rt,rtc,ruby,s,samp,script,section,select,shadow,small,source,spacer,span,strike,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,tt,u,ul,var,video,wbr,xmp');
 
   function canRemoveParentTag(optionalStartTag, tag) {
     switch (optionalStartTag) {
@@ -683,15 +684,11 @@
       options.advanced = false;
     }
     try {
-      var cleanCSS;
-
-      if (typeof CleanCSS !== 'undefined') {
-        cleanCSS = new CleanCSS(options);
+      var CleanCSS = global.CleanCSS;
+      if (typeof CleanCSS === 'undefined' && typeof require === 'function') {
+        CleanCSS = require('clean-css');
       }
-      else if (typeof require === 'function') {
-        var CleanCSSModule = require('clean-css');
-        cleanCSS = new CleanCSSModule(options);
-      }
+      var cleanCSS = new CleanCSS(options);
       if (inline) {
         return unwrapCSS(cleanCSS.minify(wrapCSS(text)).styles);
       }
@@ -714,12 +711,10 @@
   }
 
   function minify(value, options) {
-
     options = options || {};
     var optionsStack = [];
-
-    value = trimWhitespace(value);
     setDefaultTesters(options);
+    value = options.collapseWhitespace ? trimWhitespace(value) : value;
 
     var results = [ ],
         buffer = [ ],
@@ -757,14 +752,14 @@
       return re.source;
     });
     if (customFragments.length) {
-      var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')\\s*', 'g');
+      var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')+\\s*', 'g');
       // temporarily replace custom ignored fragments with unique attributes
       value = value.replace(reCustomIgnore, function(match) {
         if (!uidAttr) {
           uidAttr = uniqueId(value);
         }
         ignoredCustomMarkupChunks.push(match);
-        return ' ' + uidAttr + ' ';
+        return '\t' + uidAttr + '\t';
       });
     }
 
@@ -789,7 +784,7 @@
       while (index > 0 && !/^<\//.test(buffer[index])) {
         index--;
       }
-      buffer.length = index;
+      buffer.length = Math.max(0, index);
     }
 
     new HTMLParser(value, {
@@ -818,17 +813,18 @@
 
         var optional = options.removeOptionalTags;
         if (optional) {
+          var htmlTag = htmlTags(tag);
           // <html> may be omitted if first thing inside is not comment
           // <head> may be omitted if first thing inside is an element
           // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
           // <colgroup> may be omitted if first thing inside is <col>
           // <tbody> may be omitted if first thing inside is <tr>
-          if (canRemoveParentTag(optionalStartTag, tag)) {
+          if (htmlTag && canRemoveParentTag(optionalStartTag, tag)) {
             removeStartTag();
           }
           optionalStartTag = '';
           // end-tag-followed-by-start-tag omission rules
-          if (canRemovePrecedingTag(optionalEndTag, tag)) {
+          if (htmlTag && canRemovePrecedingTag(optionalEndTag, tag)) {
             removeEndTag();
             // <colgroup> cannot be omitted if preceding </colgroup> is omitted
             // <tbody> cannot be omitted if preceding </tbody>, </thead> or </tfoot> is omitted
@@ -884,19 +880,7 @@
         if (lowerTag === 'svg') {
           options = optionsStack.pop();
         }
-
         tag = options.caseSensitive ? tag : lowerTag;
-
-        if (options.removeOptionalTags) {
-          // </html> or </body> may be omitted if not followed by comment
-          // </head> may be omitted if not followed by space or comment
-          // </p> may be omitted if no more content in non-</a> parent
-          // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-          if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead' && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
-            removeEndTag();
-          }
-          optionalEndTag = optionalEndTags(tag) ? tag : '';
-        }
 
         // check if current tag is in a whitespace stack
         if (options.collapseWhitespace) {
@@ -930,6 +914,23 @@
           currentTag = '';
           isElementEmpty = currentChars === '';
         }
+
+        if (options.removeOptionalTags) {
+          // <html>, <head> or <body> may be omitted if the element is empty
+          if (isElementEmpty && topLevelTags(optionalStartTag)) {
+            removeStartTag();
+          }
+          optionalStartTag = '';
+          // </html> or </body> may be omitted if not followed by comment
+          // </head> may be omitted if not followed by space or comment
+          // </p> may be omitted if no more content in non-</a> parent
+          // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
+          if (htmlTags(tag) && optionalEndTag && !trailingTags(optionalEndTag) && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
+            removeEndTag();
+          }
+          optionalEndTag = optionalEndTags(tag) ? tag : '';
+        }
+
         if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
           // remove last "element" from buffer
           removeStartTag();
@@ -1047,7 +1048,7 @@
         removeStartTag();
       }
       // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-      if (optionalEndTag && optionalEndTag !== 'dt' && optionalEndTag !== 'thead') {
+      if (optionalEndTag && !trailingTags(optionalEndTag)) {
         removeEndTag();
       }
     }
@@ -1058,10 +1059,21 @@
     if (uidAttr) {
       str = str.replace(new RegExp('(\\s*)' + uidAttr + '(\\s*)', 'g'), function(match, prefix, suffix) {
         var chunk = ignoredCustomMarkupChunks.shift();
-        return options.collapseWhitespace ? collapseWhitespace(prefix + chunk + suffix, {
-          preserveLineBreaks: options.preserveLineBreaks,
-          conservativeCollapse: true
-        }, true, true) : chunk;
+        if (options.collapseWhitespace) {
+          if (prefix !== '\t') {
+            chunk = prefix + chunk;
+          }
+          if (suffix !== '\t') {
+            chunk += suffix;
+          }
+          return collapseWhitespace(chunk, {
+            preserveLineBreaks: options.preserveLineBreaks,
+            conservativeCollapse: true
+          }, /^\s/.test(chunk), /\s$/.test(chunk));
+        }
+        else {
+          return chunk;
+        }
       });
     }
     if (uidIgnore) {
@@ -1099,7 +1111,7 @@
       str = results.join('');
     }
 
-    return trimWhitespace(str);
+    return options.collapseWhitespace ? trimWhitespace(str) : str;
   }
 
   // for CommonJS enviroments, export everything
