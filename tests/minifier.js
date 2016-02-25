@@ -945,7 +945,6 @@
 
   // https://github.com/kangax/html-minifier/issues/10
   test('Ignore custom fragments', function() {
-
     var reFragments = [ /<\?[^\?]+\?>/, /<%[^%]+%>/, /\{\{[^\}]*\}\}/ ];
 
     input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n{{ ... }}\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
@@ -1020,6 +1019,23 @@
       ],
       quoteCharacter: '\''
     }), input);
+    output = '<p {% if form.name.errors %} class=\'error\' {% endif %}>' +
+              '{{ form.name.label_tag }} ' +
+              '{{ form.name }} ' +
+              '{% if form.name.errors %} ' +
+              '{% for error in form.name.errors %} ' +
+              '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }}</span> ' +
+              '{% endfor %} ' +
+              '{% endif %}' +
+            '</p>';
+    equal(minify(input, {
+      ignoreCustomFragments: [
+        /\{\%[\s\S]*?\%\}/g,
+        /\{\{[\s\S]*?\}\}/g
+      ],
+      quoteCharacter: '\'',
+      collapseWhitespace: true
+    }), output);
 
     input = '<a href="/legal.htm"<?php echo e(Request::path() == \'/\' ? \' rel="nofollow"\':\'\'); ?>>Legal Notices</a>';
     equal(minify(input, {
@@ -1051,6 +1067,12 @@
       ignoreCustomFragments: [
         /\{\%[^\%]*?\%\}/g
       ]
+    }), input);
+
+    input = '<table id="<?php echo $this->escapeHtmlAttr($this->table_id); ?>"></table>';
+    equal(minify(input), input);
+    equal(minify(input, {
+      collapseWhitespace: true
     }), input);
   });
 
