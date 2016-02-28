@@ -56,8 +56,17 @@ module.exports = function(grunt) {
     },
 
     exec: {
+      'clean-css': {
+        command: 'npm run assets/clean-css'
+      },
+      relateurl: {
+        command: 'npm run assets/relateurl'
+      },
       test: {
         command: 'node ./test.js'
+      },
+      'uglify-js': {
+        command: 'npm run assets/uglify-js'
       }
     },
 
@@ -96,6 +105,9 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('dist', [
+    'exec:clean-css',
+    'exec:relateurl',
+    'exec:uglify-js',
     'concat',
     'uglify'
   ]);
@@ -104,7 +116,7 @@ module.exports = function(grunt) {
     'dist',
     'jshint',
     'jscs',
-    'exec'
+    'exec:test'
   ]);
 
   grunt.registerTask('default', 'test');
