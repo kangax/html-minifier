@@ -56,10 +56,10 @@
     var lineBreakBefore = '', lineBreakAfter = '';
 
     if (options.preserveLineBreaks) {
-      str = str.replace(/^[\t ]*[\n\r]+[\t\n\r ]*/, function() {
+      str = str.replace(/^[\t ]*[\n\r][\t\n\r ]*/, function() {
         lineBreakBefore = '\n';
         return '';
-      }).replace(/[\t\n\r ]*[\n\r]+[\t ]*$/, function() {
+      }).replace(/[\t\n\r ]*[\n\r][\t ]*$/, function() {
         lineBreakAfter = '\n';
         return '';
       });
@@ -708,12 +708,10 @@
   }
 
   function minify(value, options) {
-
     options = options || {};
     var optionsStack = [];
-
-    value = trimWhitespace(value);
     setDefaultTesters(options);
+    value = options.collapseWhitespace ? trimWhitespace(value) : value;
 
     var results = [ ],
         buffer = [ ],
@@ -751,14 +749,14 @@
       return re.source;
     });
     if (customFragments.length) {
-      var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')\\s*', 'g');
+      var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')+\\s*', 'g');
       // temporarily replace custom ignored fragments with unique attributes
       value = value.replace(reCustomIgnore, function(match) {
         if (!uidAttr) {
           uidAttr = uniqueId(value);
         }
         ignoredCustomMarkupChunks.push(match);
-        return ' ' + uidAttr + ' ';
+        return '\t' + uidAttr + '\t';
       });
     }
 
@@ -1052,10 +1050,21 @@
     if (uidAttr) {
       str = str.replace(new RegExp('(\\s*)' + uidAttr + '(\\s*)', 'g'), function(match, prefix, suffix) {
         var chunk = ignoredCustomMarkupChunks.shift();
-        return options.collapseWhitespace ? collapseWhitespace(prefix + chunk + suffix, {
-          preserveLineBreaks: options.preserveLineBreaks,
-          conservativeCollapse: true
-        }, true, true) : chunk;
+        if (options.collapseWhitespace) {
+          if (prefix !== '\t') {
+            chunk = prefix + chunk;
+          }
+          if (suffix !== '\t') {
+            chunk += suffix;
+          }
+          return collapseWhitespace(chunk, {
+            preserveLineBreaks: options.preserveLineBreaks,
+            conservativeCollapse: true
+          }, /^\s/.test(chunk), /\s$/.test(chunk));
+        }
+        else {
+          return chunk;
+        }
       });
     }
     if (uidIgnore) {
@@ -1093,7 +1102,7 @@
       str = results.join('');
     }
 
-    return trimWhitespace(str);
+    return options.collapseWhitespace ? trimWhitespace(str) : str;
   }
 
   // for CommonJS enviroments, export everything
