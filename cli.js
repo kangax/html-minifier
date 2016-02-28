@@ -47,7 +47,7 @@ cli.option_width = 40;
 cli.setApp(appName, appVersion);
 
 var usage = appName + ' [OPTIONS] [FILE(s)]\n\n';
-usage += '  If no input files is specified then STDIN will be used for input.\n';
+usage += '  If no input files are specified then STDIN will be used for input.\n';
 usage += '  If more than one input file is specified then those will be concatenated and minified together.\n\n';
 usage += '  When you specify a config file with the --config-file option (see sample-cli-config-file.conf for format)\n';
 usage += '    you can still override some of its contents by providing individual command line options, too.\n\n';
