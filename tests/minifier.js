@@ -7,6 +7,10 @@
       input,
       output;
 
+  test('`minifiy` exists', function() {
+    ok(minify);
+  });
+
   test('parsing non-trivial markup', function() {
     equal(minify('<p title="</p>">x</p>'), '<p title="</p>">x</p>');
     equal(minify('<p title=" <!-- hello world --> ">x</p>'), '<p title=" <!-- hello world --> ">x</p>');
@@ -90,10 +94,6 @@
         + ' data-options="vm.datepickerOptions">'
       );
     });
-  });
-
-  test('`minifiy` exists', function() {
-    ok(minify);
   });
 
   test('options', function() {
