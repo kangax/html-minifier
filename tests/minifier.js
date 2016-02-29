@@ -1113,6 +1113,16 @@
     equal(minify(input, {
       collapseWhitespace: true
     }), input);
+
+    input = '<!--{{comment}}-->{{if a}}<div>b</div>{{/if}}';
+    equal(minify(input), input);
+    output = '{{if a}}<div>b</div>{{/if}}';
+    equal(minify(input, {
+      removeComments: true,
+      ignoreCustomFragments: [
+        /\{\{.*?\}\}/g
+      ]
+    }), output);
   });
 
   test('bootstrap\'s span > button > span', function() {
