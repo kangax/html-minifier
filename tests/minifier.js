@@ -62,13 +62,14 @@
     // https://github.com/kangax/html-minifier/issues/229
     equal(minify('<CUSTOM-TAG></CUSTOM-TAG><div>Hello :)</div>'), '<custom-tag></custom-tag><div>Hello :)</div>');
 
+    // https://github.com/kangax/html-minifier/issues/507
     input = '<tag v-ref:vm_pv :imgs=" objpicsurl_ "></tag>';
     equal(minify(input), input);
-
     throws(function() {
       minify('<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123></tag>');
     });
 
+    // https://github.com/kangax/html-minifier/issues/512
     input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"'
       + ' placeholder="YYYY-MM-DD"'
       + ' date-range-picker'
@@ -77,7 +78,6 @@
       + ' data-ng-pattern="vm.options.format"'
       + ' data-options="vm.datepickerOptions">';
     equal(minify(input), input);
-
     throws(function() {
       minify(
         '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"'
