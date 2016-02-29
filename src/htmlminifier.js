@@ -730,17 +730,18 @@
         uidIgnore,
         uidAttr;
 
-    if (~value.indexOf('<!-- htmlmin:ignore -->')) {
-      uidIgnore = '<!--!' + uniqueId(value) + '-->';
-      // temporarily replace ignored chunks with comments,
-      // so that we don't have to worry what's there.
-      // for all we care there might be
-      // completely-horribly-broken-alien-non-html-emoj-cthulhu-filled content
-      value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, function(match, group1) {
-        ignoredMarkupChunks.push(group1);
-        return uidIgnore;
-      });
-    }
+    // temporarily replace ignored chunks with comments,
+    // so that we don't have to worry what's there.
+    // for all we care there might be
+    // completely-horribly-broken-alien-non-html-emoj-cthulhu-filled content
+    value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, function(match, group1) {
+      if (!uidIgnore) {
+        uidIgnore = '<!--!' + uniqueId(value) + '-->';
+      }
+      var token = uidIgnore + ignoredMarkupChunks.length;
+      ignoredMarkupChunks.push(group1);
+      return token;
+    });
 
     var customFragments = (options.ignoreCustomFragments || [
       /<%[\s\S]*?%>/,
@@ -755,8 +756,9 @@
         if (!uidAttr) {
           uidAttr = uniqueId(value);
         }
+        var token = uidAttr + ignoredCustomMarkupChunks.length;
         ignoredCustomMarkupChunks.push(match);
-        return '\t' + uidAttr + '\t';
+        return '\t' + token + '\t';
       });
     }
 
@@ -1053,8 +1055,8 @@
     var str = joinResultSegments(results, options);
 
     if (uidAttr) {
-      str = str.replace(new RegExp('(\\s*)' + uidAttr + '(\\s*)', 'g'), function(match, prefix, suffix) {
-        var chunk = ignoredCustomMarkupChunks.shift();
+      str = str.replace(new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g'), function(match, prefix, index, suffix) {
+        var chunk = ignoredCustomMarkupChunks[+index];
         if (options.collapseWhitespace) {
           if (prefix !== '\t') {
             chunk = prefix + chunk;
@@ -1073,8 +1075,8 @@
       });
     }
     if (uidIgnore) {
-      str = str.replace(new RegExp(uidIgnore, 'g'), function() {
-        return ignoredMarkupChunks.shift();
+      str = str.replace(new RegExp(uidIgnore + '([0-9]+)', 'g'), function(match, index) {
+        return ignoredMarkupChunks[+index];
       });
     }
 
