@@ -72,13 +72,12 @@
   function startTagForHandler( handler ) {
     var customStartTagAttrs;
 
-    var startTagAttrs = new RegExp(
-        '(?:\\s*[\\w:\\.-]+'
-      +   '(?:\\s*'
-      +     '(?:' + joinSingleAttrAssigns(handler) + ')'
-      +     '\\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\\s]+)'
-      +   ')?'
-      + ')*'
+    var startTagAttr = new RegExp(
+        '[\\w:\\.-]+'
+      + '(?:\\s*'
+      +   '(?:' + joinSingleAttrAssigns(handler) + ')'
+      +   '\\s*(?:"[^"]*"+?|\'[^\']*\'+?|[^>\\s"\']+?)'
+      + ')?'
     );
 
     if ( handler.customAttrSurround ) {
@@ -86,23 +85,23 @@
 
       for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
         // Capture the custom attribute opening and closing markup surrounding the standard attribute rules
-        attrClauses[i] = '(?:\\s*'
+        attrClauses[i] = '(?:'
           + handler.customAttrSurround[i][0].source
           + '\\s*'
-          + startTagAttrs.source
+          + startTagAttr.source
           + '\\s*'
           + handler.customAttrSurround[i][1].source
           + ')';
       }
-      attrClauses.unshift(startTagAttrs.source);
+      attrClauses.unshift('(?:' + startTagAttr.source + ')');
 
       customStartTagAttrs = new RegExp(
-        '((?:' + attrClauses.join('|') + ')*)'
+        '((?:\\s*(?:' + attrClauses.join('|') + '))*)'
       );
     }
     else {
       // No custom attribute wrappers specified, so just capture the standard attribute rules
-      customStartTagAttrs = new RegExp('(' + startTagAttrs.source + ')');
+      customStartTagAttrs = new RegExp('((?:\\s*' + startTagAttr.source + ')*)');
     }
 
     return new RegExp(startTagOpen.source + customStartTagAttrs.source + startTagClose.source);
