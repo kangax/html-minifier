@@ -265,20 +265,43 @@
   });
 
   test('remove comments from scripts', function() {
-    input = '<script><!--alert(1)--><\/script>';
+    input = '<script>alert(1)<\/script>';
+    equal(minify(input, { removeCommentsFromCDATA: true }), input);
+
+    input = '<script><!--\nalert(2)\n--><\/script>';
+    output = '<script>alert(2)<\/script>';
+    equal(minify(input, { removeCommentsFromCDATA: true }), output);
+
+    input = '<script><!--\nalert(3)<\/script>';
+    output = '<script>alert(3)<\/script>';
+    equal(minify(input, { removeCommentsFromCDATA: true }), output);
+
+    input = '<script>alert(4)\n--><\/script>';
+    output = '<script>alert(4)<\/script>';
+    equal(minify(input, { removeCommentsFromCDATA: true }), output);
+
+    input = '<script><!--alert(5)--><\/script>';
     output = '<script><\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script><!--alert(1)<\/script>';
+    input = '<script><!--alert(6)<\/script>';
     output = '<script><\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script type="text/javascript"> <!--\nalert("-->"); -->\n\n   <\/script>';
-    output = '<script type="text/javascript">alert("-->");<\/script>';
+    input = '<script> //   <!--   \n  alert(7)   //  --> <\/script>';
+    output = '<script>alert(7)<\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script> //   <!--   \n  alert(1)   //  --> <\/script>';
-    output = '<script>  alert(1)<\/script>';
+    input = '<script type="text/javascript"> <!--\nalert("1 -->"); -->\n\n   <\/script>';
+    output = '<script type="text/javascript"><\/script>';
+    equal(minify(input, { removeCommentsFromCDATA: true }), output);
+
+    input = '<script type="text/javascript"> <!--\nalert("2 -->");\n -->\n\n   <\/script>';
+    output = '<script type="text/javascript">alert("2 -->");<\/script>';
+    equal(minify(input, { removeCommentsFromCDATA: true }), output);
+
+    input = '<script type="text/javascript"> <!--\nalert("3 -->"); //-->\n\n   <\/script>';
+    output = '<script type="text/javascript">alert("3 -->");<\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
   });
 
@@ -292,24 +315,35 @@
   });
 
   test('remove CDATA sections from scripts/styles', function() {
+    input = '<script>alert(1)<\/script>';
+    equal(minify(input, { removeCDATASectionsFromCDATA: true }), input);
+
     input = '<script>/*<![CDATA[*/alert(1)/*]]>*/<\/script>';
     output = '<script>alert(1)<\/script>';
     equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
     input = '<script>//<![CDATA[\nalert(1)\n//]]><\/script>';
-    output = '<script>\nalert(1)\n<\/script>';
+    output = '<script>alert(1)<\/script>';
+    equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
+
+    input = '<script>//<![CDATA[\nalert(1)<\/script>';
+    output = '<script>alert(1)<\/script>';
+    equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
+
+    input = '<script>alert(1)\n//]]><\/script>';
+    output = '<script>alert(1)<\/script>';
     equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
     input = '<script type="text/javascript"> /* \n\t  <![CDATA[  */ alert(1) /*  ]]>  */ \n <\/script>';
-    output = '<script type="text/javascript"> alert(1) <\/script>';
+    output = '<script type="text/javascript">alert(1)<\/script>';
     equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
     input = '<style>/* <![CDATA[ */p { color: red } // ]]><\/style>';
-    output = '<style>p { color: red } <\/style>';
+    output = '<style>p { color: red }<\/style>';
     equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
     input = '<script>\n\n//<![CDATA[\nalert(1)//]]><\/script>';
-    output = '<script>\nalert(1)<\/script>';
+    output = '<script>alert(1)<\/script>';
     equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
   });
@@ -814,6 +848,11 @@
       'Loop=foo Multiple=foo Muted=foo Nohref=foo Noresize=foo Noshade=foo Novalidate=foo Nowrap=foo Open=foo ' +
       'Pauseonexit=foo Readonly=foo Required=foo Reversed=foo Scoped=foo Seamless=foo Selected=foo Sortable=foo ' +
       'Truespeed=foo Typemustmatch=foo Visible=foo></div>';
+    output = '<div allowfullscreen async autofocus autoplay checked compact controls declare default defaultchecked ' +
+      'defaultmuted defaultselected defer disabled enabled formnovalidate hidden indeterminate inert ' +
+      'ismap itemscope loop multiple muted nohref noresize noshade novalidate nowrap open pauseonexit readonly ' +
+      'required reversed scoped seamless selected sortable truespeed typemustmatch visible></div>';
+    equal(minify(input, { collapseBooleanAttributes: true }), output);
     output = '<div Allowfullscreen Async Autofocus Autoplay Checked Compact Controls Declare Default Defaultchecked ' +
       'Defaultmuted Defaultselected Defer Disabled Enabled Formnovalidate Hidden Indeterminate Inert ' +
       'Ismap Itemscope Loop Multiple Muted Nohref Noresize Noshade Novalidate Nowrap Open Pauseonexit Readonly ' +
@@ -1276,6 +1315,11 @@
 
     input = '<script type="application/javascript;version=1.8">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
     output = '<script type="application/javascript;version=1.8">!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
+
+    equal(minify(input, { minifyJS: true }), output);
+
+    input = '<script type="application/javascript  ;charset=utf-8">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
+    output = '<script type="application/javascript  ;charset=utf-8">!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
 
     equal(minify(input, { minifyJS: true }), output);
 

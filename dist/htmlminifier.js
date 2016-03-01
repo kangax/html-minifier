@@ -72,7 +72,7 @@
   // Special Elements (can contain anything)
   var special = makeMap('script,style');
 
-  var reCache = {}, stackedTag, reStackedTag, tagMatch;
+  var reCache = {};
 
   function startTagForHandler( handler ) {
     var customStartTagAttrs;
@@ -151,93 +151,93 @@
   }
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
-    var index, match, stack = [], last = html, prevTag, nextTag;
-    stack.last = function() {
-      var last = this[ this.length - 1 ];
-      return last && last.tag;
-    };
-
+    var stack = [], lastTag;
     var startTag = startTagForHandler(handler);
     var attr = attrForHandler(handler);
-
+    var last, prevTag, nextTag;
     while ( html ) {
+      last = html;
       // Make sure we're not in a script or style element
-      if ( !stack.last() || !special[ stack.last() ] ) {
+      if ( !lastTag || !special[ lastTag ] ) {
+        var textEnd = html.indexOf('<');
+        if (textEnd === 0) {
+          // Comment:
+          if ( /^<!--/.test( html ) ) {
+            var commentEnd = html.indexOf('-->');
 
-        // Comment:
-        if ( /^<!--/.test( html ) ) {
-          index = html.indexOf('-->');
-
-          if ( index >= 0 ) {
-            if ( handler.comment ) {
-              handler.comment( html.substring( 4, index ) );
+            if ( commentEnd >= 0 ) {
+              if ( handler.comment ) {
+                handler.comment( html.substring( 4, commentEnd ) );
+              }
+              html = html.substring( commentEnd + 3 );
+              prevTag = '';
+              continue;
             }
-            html = html.substring( index + 3 );
+          }
+
+          // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+          if ( /^<!\[/.test( html ) ) {
+            var conditionalEnd = html.indexOf(']>');
+
+            if (conditionalEnd >= 0) {
+              if ( handler.comment ) {
+                handler.comment( html.substring(2, conditionalEnd + 1 ), true /* non-standard */ );
+              }
+              html = html.substring( conditionalEnd + 2 );
+              prevTag = '';
+              continue;
+            }
+          }
+
+          // Doctype:
+          var doctypeMatch = html.match( doctype );
+          if ( doctypeMatch ) {
+            if ( handler.doctype ) {
+              handler.doctype( doctypeMatch[0] );
+            }
+            html = html.substring( doctypeMatch[0].length );
             prevTag = '';
             continue;
           }
-        }
 
-        // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
-        if ( /^<!\[/.test( html ) ) {
-          index = html.indexOf(']>');
+          // End tag:
+          var endTagMatch = html.match( endTag );
+          if ( endTagMatch ) {
+            html = html.substring( endTagMatch[0].length );
+            endTagMatch[0].replace( endTag, parseEndTag );
+            prevTag = '/' + endTagMatch[1].toLowerCase();
+            continue;
+          }
 
-          if (index >= 0) {
-            if ( handler.comment ) {
-              handler.comment( html.substring(2, index + 1 ), true /* non-standard */ );
-            }
-            html = html.substring( index + 2 );
-            prevTag = '';
+          // Start tag:
+          var startTagMatch = html.match( startTag );
+          if ( startTagMatch ) {
+            html = html.substring( startTagMatch[0].length );
+            startTagMatch[0].replace( startTag, parseStartTag );
+            prevTag = startTagMatch[1].toLowerCase();
             continue;
           }
         }
 
-        // Doctype:
-        if ( (match = doctype.exec( html )) ) {
-          if ( handler.doctype ) {
-            handler.doctype( match[0] );
-          }
-          html = html.substring( match[0].length );
-          prevTag = '';
-          continue;
-        }
-
-        // End tag:
-        if ( /^<\//.test( html ) ) {
-          match = html.match( endTag );
-          if ( match ) {
-            html = html.substring( match[0].length );
-            match[0].replace( endTag, parseEndTag );
-            prevTag = '/' + match[1].toLowerCase();
-            continue;
-          }
-
-        }
-        // Start tag:
-        if ( /^</.test( html ) ) {
-          match = html.match( startTag );
-          if ( match ) {
-            html = html.substring( match[0].length );
-            match[0].replace( startTag, parseStartTag );
-            prevTag = match[1].toLowerCase();
-            continue;
-          }
-        }
-
-        index = html.indexOf('<');
-
-        var text = index < 0 ? html : html.substring( 0, index );
-        html = index < 0 ? '' : html.substring( index );
-
-        // next tag
-        tagMatch = html.match( startTag );
-        if (tagMatch) {
-          nextTag = tagMatch[1];
+        var text;
+        if (textEnd >= 0) {
+          text = html.substring( 0, textEnd );
+          html = html.substring( textEnd );
         }
         else {
-          tagMatch = html.match( endTag );
-          if (tagMatch) {
-            nextTag = '/' + tagMatch[1];
+          text = html;
+          html = '';
+        }
+
+        // next tag
+        var nextTagMatch = html.match( startTag );
+        if (nextTagMatch) {
+          nextTag = nextTagMatch[1];
+        }
+        else {
+          nextTagMatch = html.match( endTag );
+          if (nextTagMatch) {
+            nextTag = '/' + nextTagMatch[1];
           }
           else {
             nextTag = '';
@@ -251,9 +251,8 @@
 
       }
       else {
-
-        stackedTag = stack.last().toLowerCase();
-        reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
+        var stackedTag = lastTag.toLowerCase();
+        var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
 
         html = html.replace(reStackedTag, function(all, text) {
           if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
@@ -275,7 +274,6 @@
       if ( html === last ) {
         throw 'Parse Error: ' + html;
       }
-      last = html;
     }
 
     // Clean up any remaining tags
@@ -284,11 +282,11 @@
     function parseStartTag( tag, tagName, rest, unary ) {
       var unarySlash = false;
 
-      while ( !handler.html5 && stack.last() && inline[ stack.last() ]) {
-        parseEndTag( '', stack.last() );
+      while ( !handler.html5 && lastTag && inline[ lastTag ]) {
+        parseEndTag( '', lastTag );
       }
 
-      if ( closeSelf[ tagName ] && stack.last() === tagName ) {
+      if ( closeSelf[ tagName ] && lastTag === tagName ) {
         parseEndTag( '', tagName );
       }
 
@@ -351,6 +349,7 @@
 
       if ( !unary ) {
         stack.push( { tag: tagName, attrs: attrs } );
+        lastTag = tagName;
       }
       else {
         unarySlash = tag.match( endingSlash );
@@ -389,6 +388,7 @@
 
         // Remove the open elements from the stack
         stack.length = pos;
+        lastTag = pos && stack[ pos - 1 ].tag;
       }
     }
   };
@@ -743,7 +743,7 @@
     for (var i = 0, len = attrs.length; i < len; i++) {
       var attrName = attrs[i].name.toLowerCase();
       if (attrName === 'type') {
-        var attrValue = trimWhitespace(attrs[i].value).split(/;/, 2)[0].toLowerCase();
+        var attrValue = trimWhitespace(attrs[i].value.split(/;/, 2)[0]).toLowerCase();
         return attrValue === '' || executableScriptsMimetypes(attrValue);
       }
     }
@@ -758,23 +758,11 @@
     );
   }
 
-  var enumeratedAttributeValues = {
-    draggable: ['true', 'false'] // defaults to 'auto'
-  };
+  var isSimpleBoolean = createMapFromString('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,default,defaultchecked,defaultmuted,defaultselected,defer,disabled,enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,required,reversed,scoped,seamless,selected,sortable,truespeed,typemustmatch,visible');
+  var draggableBoolean = createMapFromString('true,false');
 
   function isBooleanAttribute(attrName, attrValue) {
-    var isSimpleBoolean = (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|truespeed|typemustmatch|visible)$/i).test(attrName);
-    if (isSimpleBoolean) {
-      return true;
-    }
-
-    var attrValueEnumeration = enumeratedAttributeValues[attrName.toLowerCase()];
-    if (!attrValueEnumeration) {
-      return false;
-    }
-    else {
-      return (-1 === attrValueEnumeration.indexOf(attrValue.toLowerCase()));
-    }
+    return isSimpleBoolean(attrName) || attrName === 'draggable' && !draggableBoolean(attrValue);
   }
 
   function isUriTypeAttribute(attrName, tag) {
@@ -900,9 +888,9 @@
   function removeCDATASections(text) {
     return text
       // "/* <![CDATA[ */" or "// <![CDATA["
-      .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
+      .replace(/^\/(?:\/.*?<!\[CDATA\[.*|\*[\s\S]*?(?!\*\/[\s\S]*?)<!\[CDATA\[[\s\S]*?\*\/)/, '')
       // "/* ]]> */" or "// ]]>"
-      .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
+      .replace(/\/(?:\*[\s\S]*?(?!\*\/[\s\S]*?)\]\]>[\s\S]*?\*\/|\/\s*\]\]>.*)$/, '');
   }
 
   function processScript(text, options, currentAttrs) {
@@ -915,17 +903,19 @@
     return text;
   }
 
-  var reStartDelimiter = {
-    // account for js + html comments (e.g.: //<!--)
-    script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
-    style: /^\s*<!--\s*/
-  };
-  var reEndDelimiter = {
-    script: /\s*(?:\/\/)?\s*-->\s*$/,
-    style: /\s*-->\s*$/
-  };
   function removeComments(text, tag) {
-    return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
+    switch (tag) {
+      case 'script':
+        return text
+          // "<!--" or "// <!--" or "/* <!-- */"
+          .replace(/^<!--.*|^\/(?:\/.*?<!--.*|\*[\s\S]*?(?!\*\/[\s\S]*?)<!--[\s\S]*?\*\/)/, '')
+          // "-->" or "// -->" or "/* --> */"
+          .replace(/(?!.*?\/\/).*?-->$|\/(?:\/\s*-->.*|\*[\s\S]*?(?!\*\/[\s\S]*?)-->[\s\S]*?\*\/)$/, '');
+      case 'style':
+        return text.replace(/^<!--|-->$/g, '');
+      default:
+        return text;
+    }
   }
 
   // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -1109,7 +1099,7 @@
     }
 
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
-        isBooleanAttribute(attrName, attrValue))) {
+        isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase()))) {
       attrFragment = attrName;
       if (!isLast) {
         attrFragment += ' ';
@@ -1536,11 +1526,12 @@
           }
         }
         if (currentTag === 'script' || currentTag === 'style') {
+          text = trimWhitespace(text);
           if (options.removeCommentsFromCDATA) {
-            text = removeComments(text, currentTag);
+            text = trimWhitespace(removeComments(text, currentTag));
           }
           if (options.removeCDATASectionsFromCDATA) {
-            text = removeCDATASections(text);
+            text = trimWhitespace(removeCDATASections(text));
           }
           if (options.processScripts) {
             text = processScript(text, options, currentAttrs);

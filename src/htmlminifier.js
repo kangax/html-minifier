@@ -205,7 +205,7 @@
     for (var i = 0, len = attrs.length; i < len; i++) {
       var attrName = attrs[i].name.toLowerCase();
       if (attrName === 'type') {
-        var attrValue = trimWhitespace(attrs[i].value).split(/;/, 2)[0].toLowerCase();
+        var attrValue = trimWhitespace(attrs[i].value.split(/;/, 2)[0]).toLowerCase();
         return attrValue === '' || executableScriptsMimetypes(attrValue);
       }
     }
@@ -220,23 +220,11 @@
     );
   }
 
-  var enumeratedAttributeValues = {
-    draggable: ['true', 'false'] // defaults to 'auto'
-  };
+  var isSimpleBoolean = createMapFromString('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,default,defaultchecked,defaultmuted,defaultselected,defer,disabled,enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,required,reversed,scoped,seamless,selected,sortable,truespeed,typemustmatch,visible');
+  var draggableBoolean = createMapFromString('true,false');
 
   function isBooleanAttribute(attrName, attrValue) {
-    var isSimpleBoolean = (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|truespeed|typemustmatch|visible)$/i).test(attrName);
-    if (isSimpleBoolean) {
-      return true;
-    }
-
-    var attrValueEnumeration = enumeratedAttributeValues[attrName.toLowerCase()];
-    if (!attrValueEnumeration) {
-      return false;
-    }
-    else {
-      return (-1 === attrValueEnumeration.indexOf(attrValue.toLowerCase()));
-    }
+    return isSimpleBoolean(attrName) || attrName === 'draggable' && !draggableBoolean(attrValue);
   }
 
   function isUriTypeAttribute(attrName, tag) {
@@ -362,9 +350,9 @@
   function removeCDATASections(text) {
     return text
       // "/* <![CDATA[ */" or "// <![CDATA["
-      .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
+      .replace(/^\/(?:\/.*?<!\[CDATA\[.*|\*[\s\S]*?(?!\*\/[\s\S]*?)<!\[CDATA\[[\s\S]*?\*\/)/, '')
       // "/* ]]> */" or "// ]]>"
-      .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
+      .replace(/\/(?:\*[\s\S]*?(?!\*\/[\s\S]*?)\]\]>[\s\S]*?\*\/|\/\s*\]\]>.*)$/, '');
   }
 
   function processScript(text, options, currentAttrs) {
@@ -377,17 +365,19 @@
     return text;
   }
 
-  var reStartDelimiter = {
-    // account for js + html comments (e.g.: //<!--)
-    script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
-    style: /^\s*<!--\s*/
-  };
-  var reEndDelimiter = {
-    script: /\s*(?:\/\/)?\s*-->\s*$/,
-    style: /\s*-->\s*$/
-  };
   function removeComments(text, tag) {
-    return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
+    switch (tag) {
+      case 'script':
+        return text
+          // "<!--" or "// <!--" or "/* <!-- */"
+          .replace(/^<!--.*|^\/(?:\/.*?<!--.*|\*[\s\S]*?(?!\*\/[\s\S]*?)<!--[\s\S]*?\*\/)/, '')
+          // "-->" or "// -->" or "/* --> */"
+          .replace(/(?!.*?\/\/).*?-->$|\/(?:\/\s*-->.*|\*[\s\S]*?(?!\*\/[\s\S]*?)-->[\s\S]*?\*\/)$/, '');
+      case 'style':
+        return text.replace(/^<!--|-->$/g, '');
+      default:
+        return text;
+    }
   }
 
   // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -571,7 +561,7 @@
     }
 
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
-        isBooleanAttribute(attrName, attrValue))) {
+        isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase()))) {
       attrFragment = attrName;
       if (!isLast) {
         attrFragment += ' ';
@@ -998,11 +988,12 @@
           }
         }
         if (currentTag === 'script' || currentTag === 'style') {
+          text = trimWhitespace(text);
           if (options.removeCommentsFromCDATA) {
-            text = removeComments(text, currentTag);
+            text = trimWhitespace(removeComments(text, currentTag));
           }
           if (options.removeCDATASectionsFromCDATA) {
-            text = removeCDATASections(text);
+            text = trimWhitespace(removeCDATASections(text));
           }
           if (options.processScripts) {
             text = processScript(text, options, currentAttrs);
