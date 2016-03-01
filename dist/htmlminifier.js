@@ -278,8 +278,10 @@
       last = html;
     }
 
-    // Clean up any remaining tags
-    parseEndTag();
+    if (!handler.partialMarkup) {
+      // Clean up any remaining tags
+      parseEndTag();
+    }
 
     function parseStartTag( tag, tagName, rest, unary ) {
       var unarySlash = false;
@@ -292,7 +294,7 @@
         parseEndTag( '', tagName );
       }
 
-      unary = empty[ tagName ] || !!unary;
+      unary = empty[ tagName ] || tagName === 'html' && stack.last() === 'head' || !!unary;
 
       var attrs = [];
 
@@ -881,7 +883,7 @@
 
   function cleanConditionalComment(comment, options) {
     return comment.replace(/^(\[if\s[^\]]+\]>)([\s\S]*?)(<!\[endif\])$/, function(match, prefix, text, suffix) {
-      return prefix + minify(text, options) + suffix;
+      return prefix + minify(text, options, true) + suffix;
     });
   }
 
@@ -1243,7 +1245,7 @@
     return id;
   }
 
-  function minify(value, options) {
+  function minify(value, options, partialMarkup) {
     options = options || {};
     var optionsStack = [];
     setDefaultTesters(options);
@@ -1323,6 +1325,7 @@
     }
 
     new HTMLParser(value, {
+      partialMarkup: partialMarkup,
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
 
       start: function(tag, attrs, unary, unarySlash) {
@@ -1570,11 +1573,11 @@
       comment: function(text, nonStandard) {
         var prefix = nonStandard ? '<!' : '<!--';
         var suffix = nonStandard ? '>' : '-->';
-        if (options.removeComments) {
-          if (isConditionalComment(text)) {
-            text = prefix + cleanConditionalComment(text, options) + suffix;
-          }
-          else if (isIgnoredComment(text, options)) {
+        if (isConditionalComment(text)) {
+          text = prefix + cleanConditionalComment(text, options) + suffix;
+        }
+        else if (options.removeComments) {
+          if (isIgnoredComment(text, options)) {
             text = '<!--' + text + '-->';
           }
           else {

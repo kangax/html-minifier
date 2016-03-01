@@ -273,6 +273,37 @@
       removeOptionalTags: true,
       removeScriptTypeAttributes: true
     }), output);
+
+    input = '<!DOCTYPE html>\n' +
+            '<html lang="en">\n' +
+            '  <head>\n' +
+            '    <meta http-equiv="X-UA-Compatible"\n' +
+            '          content="IE=edge,chrome=1">\n' +
+            '    <meta charset="utf-8">\n' +
+            '    <!--[if lt IE 7]><html class="no-js ie6"><![endif]-->\n' +
+            '    <!--[if IE 7]><html class="no-js ie7"><![endif]-->\n' +
+            '    <!--[if IE 8]><html class="no-js ie8"><![endif]-->\n' +
+            '    <!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->\n' +
+            '\n' +
+            '    <title>Document</title>\n' +
+            '  </head>\n' +
+            '  <body>\n' +
+            '  </body>\n' +
+            '</html>';
+    output = '<!DOCTYPE html>' +
+             '<html lang="en">' +
+             '<head>' +
+             '<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">' +
+             '<meta charset="utf-8">' +
+             '<!--[if lt IE 7]><html class="no-js ie6"><![endif]-->' +
+             '<!--[if IE 7]><html class="no-js ie7"><![endif]-->' +
+             '<!--[if IE 8]><html class="no-js ie8"><![endif]-->' +
+             ' <!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->' +
+             '<title>Document</title></head><body></body></html>';
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true
+    }), output);
   });
 
   test('collapsing space in conditional comments', function() {
