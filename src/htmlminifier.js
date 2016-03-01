@@ -220,23 +220,11 @@
     );
   }
 
-  var enumeratedAttributeValues = {
-    draggable: ['true', 'false'] // defaults to 'auto'
-  };
+  var isSimpleBoolean = createMapFromString('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,default,defaultchecked,defaultmuted,defaultselected,defer,disabled,enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,required,reversed,scoped,seamless,selected,sortable,truespeed,typemustmatch,visible');
+  var draggableBoolean = createMapFromString('true,false');
 
   function isBooleanAttribute(attrName, attrValue) {
-    var isSimpleBoolean = (/^(?:allowfullscreen|async|autofocus|autoplay|checked|compact|controls|declare|default|defaultchecked|defaultmuted|defaultselected|defer|disabled|enabled|formnovalidate|hidden|indeterminate|inert|ismap|itemscope|loop|multiple|muted|nohref|noresize|noshade|novalidate|nowrap|open|pauseonexit|readonly|required|reversed|scoped|seamless|selected|sortable|truespeed|typemustmatch|visible)$/i).test(attrName);
-    if (isSimpleBoolean) {
-      return true;
-    }
-
-    var attrValueEnumeration = enumeratedAttributeValues[attrName.toLowerCase()];
-    if (!attrValueEnumeration) {
-      return false;
-    }
-    else {
-      return (-1 === attrValueEnumeration.indexOf(attrValue.toLowerCase()));
-    }
+    return isSimpleBoolean(attrName) || attrName === 'draggable' && !draggableBoolean(attrValue);
   }
 
   function isUriTypeAttribute(attrName, tag) {
@@ -571,7 +559,7 @@
     }
 
     if (attrValue === undefined || (options.collapseBooleanAttributes &&
-        isBooleanAttribute(attrName, attrValue))) {
+        isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase()))) {
       attrFragment = attrName;
       if (!isLast) {
         attrFragment += ' ';
