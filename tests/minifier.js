@@ -268,32 +268,40 @@
     input = '<script>alert(1)<\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), input);
 
-    input = '<script><!--\nalert(1)\n--><\/script>';
-    output = '<script>alert(1)<\/script>';
+    input = '<script><!--\nalert(2)\n--><\/script>';
+    output = '<script>alert(2)<\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script><!--\nalert(1)<\/script>';
-    output = '<script>alert(1)<\/script>';
+    input = '<script><!--\nalert(3)<\/script>';
+    output = '<script>alert(3)<\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script>alert(1)\n--><\/script>';
-    output = '<script>alert(1)<\/script>';
+    input = '<script>alert(4)\n--><\/script>';
+    output = '<script>alert(4)<\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script><!--alert(1)--><\/script>';
+    input = '<script><!--alert(5)--><\/script>';
     output = '<script><\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script><!--alert(1)<\/script>';
+    input = '<script><!--alert(6)<\/script>';
     output = '<script><\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script type="text/javascript"> <!--\nalert("-->"); -->\n\n   <\/script>';
-    output = '<script type="text/javascript">alert("-->");<\/script>';
+    input = '<script> //   <!--   \n  alert(7)   //  --> <\/script>';
+    output = '<script>alert(7)<\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
-    input = '<script> //   <!--   \n  alert(1)   //  --> <\/script>';
-    output = '<script>alert(1)<\/script>';
+    input = '<script type="text/javascript"> <!--\nalert("1 -->"); -->\n\n   <\/script>';
+    output = '<script type="text/javascript"><\/script>';
+    equal(minify(input, { removeCommentsFromCDATA: true }), output);
+
+    input = '<script type="text/javascript"> <!--\nalert("2 -->");\n -->\n\n   <\/script>';
+    output = '<script type="text/javascript">alert("2 -->");<\/script>';
+    equal(minify(input, { removeCommentsFromCDATA: true }), output);
+
+    input = '<script type="text/javascript"> <!--\nalert("3 -->"); //-->\n\n   <\/script>';
+    output = '<script type="text/javascript">alert("3 -->");<\/script>';
     equal(minify(input, { removeCommentsFromCDATA: true }), output);
   });
 

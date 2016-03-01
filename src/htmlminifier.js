@@ -350,9 +350,9 @@
   function removeCDATASections(text) {
     return text
       // "/* <![CDATA[ */" or "// <![CDATA["
-      .replace(/^\/(?:\*\s*<!\[CDATA\[\s*\*\/|\/\s*<!\[CDATA\[.*)/, '')
+      .replace(/^\/(?:\/.*?<!\[CDATA\[.*|\*[\s\S]*?(?!\*\/[\s\S]*?)<!\[CDATA\[[\s\S]*?\*\/)/, '')
       // "/* ]]> */" or "// ]]>"
-      .replace(/\/(?:\*\s*\]\]>\s*\*\/|\/\s*\]\]>)$/, '');
+      .replace(/\/(?:\*[\s\S]*?(?!\*\/[\s\S]*?)\]\]>[\s\S]*?\*\/|\/\s*\]\]>.*)$/, '');
   }
 
   function processScript(text, options, currentAttrs) {
@@ -365,13 +365,19 @@
     return text;
   }
 
-  var reDelimiter = {
-    // account for js + html comments (e.g.: //<!--)
-    script: /^(?:\/\/)?\s*<!--.*|(?:\/\/)?\s*-->$/g,
-    style: /^<!--|-->$/g
-  };
   function removeComments(text, tag) {
-    return text.replace(reDelimiter[tag], '');
+    switch (tag) {
+      case 'script':
+        return text
+          // "<!--" or "// <!--" or "/* <!-- */"
+          .replace(/^<!--.*|^\/(?:\/.*?<!--.*|\*[\s\S]*?(?!\*\/[\s\S]*?)<!--[\s\S]*?\*\/)/, '')
+          // "-->" or "// -->" or "/* --> */"
+          .replace(/(?!.*?\/\/).*?-->$|\/(?:\/\s*-->.*|\*[\s\S]*?(?!\*\/[\s\S]*?)-->[\s\S]*?\*\/)$/, '');
+      case 'style':
+        return text.replace(/^<!--|-->$/g, '');
+      default:
+        return text;
+    }
   }
 
   // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
