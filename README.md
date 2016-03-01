@@ -3,7 +3,7 @@
 [![Dependency Status](https://img.shields.io/david/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier)
 [![devDependency Status](https://img.shields.io/david/dev/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
 
-[HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, Javascript-based HTML minifier, with lint-like capabilities.
+[HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, JavaScript-based HTML minifier, with lint-like capabilities.
 
 See [corresponding blog post](http://perfectionkills.com/experimenting-with-html-minifier/) for all the gory details of [how it works](http://perfectionkills.com/experimenting-with-html-minifier/#how_it_works), [description of each option](http://perfectionkills.com/experimenting-with-html-minifier/#options), [testing results](http://perfectionkills.com/experimenting-with-html-minifier/#field_testing) and [conclusions](http://perfectionkills.com/experimenting-with-html-minifier/#cost_and_benefits).
 
@@ -69,9 +69,10 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `customAttrCollapse`           | Regex that specifies custom attribute to strip newlines from (e.g. `/ng\-class/`) | |
 | `quoteCharacter`               | Type of quote to use for attribute values (' or ") | |
 
+
 ## Special cases
 
-### Ignoring chunks of markup.
+### Ignoring chunks of markup
 
 If you have chunks of markup you would like preserved, you can wrap them `<!-- htmlmin:ignore -->`.
 
@@ -99,6 +100,7 @@ Output of resulting markup (e.g. `<p>foo</p>`)
 
 HTMLMinifier can't know that original markup was only half of the tree; it does its best to try to parse it as a full tree and it loses information about tree being malformed or partial in the beginning. As a result, it can't create a partial/malformed tree at the time of the output.
 
+
 ## Installation Instructions
 
 From NPM for use as a command line app:
@@ -118,6 +120,7 @@ cd html-minifier
 npm link .
 ```
 
+
 ## Usage
 
 For command line usage please see `html-minifier --help`
@@ -131,6 +134,7 @@ var result = minify('<p title="blah" id="moo">foo</p>', {
 });
 result; // '<p title=blah id=moo>foo</p>'
 ```
+
 
 ## Running benchmarks
 
