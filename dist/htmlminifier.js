@@ -1515,10 +1515,10 @@
               }
             }
             if (prevTag && inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.substr(1) : prevTag)) {
-              text = collapseWhitespace(text, options, /(?:^| )$/.test(currentChars));
+              text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
             }
             text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
-            if (!text && / $/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
+            if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
               for (var index = buffer.length - 2, endTag = prevTag.substr(1); index >= 0 && _canTrimWhitespace(endTag); index--) {
                 var str = buffer[index];
                 var match = str.match(/^<\/([\w:-]+)>$/);
