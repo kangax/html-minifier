@@ -743,7 +743,7 @@
     for (var i = 0, len = attrs.length; i < len; i++) {
       var attrName = attrs[i].name.toLowerCase();
       if (attrName === 'type') {
-        var attrValue = trimWhitespace(attrs[i].value).split(/;/, 2)[0].toLowerCase();
+        var attrValue = trimWhitespace(attrs[i].value.split(/;/, 2)[0]).toLowerCase();
         return attrValue === '' || executableScriptsMimetypes(attrValue);
       }
     }
