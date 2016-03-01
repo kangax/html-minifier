@@ -639,7 +639,7 @@
   }
 
   function isConditionalComment(text) {
-    return ((/\[if[^\]]+\]/).test(text) || (/\s*((?:<!)?\[endif\])$/).test(text));
+    return /^\[if\s[^\]]+\]|\[endif\]$/.test(text);
   }
 
   function isIgnoredComment(text, options) {
@@ -879,10 +879,10 @@
     }
   }
 
-  function cleanConditionalComment(comment) {
-    return comment
-      .replace(/^(\[[^\]]+\]>)\s*/, '$1')
-      .replace(/\s*(<!\[endif\])$/, '$1');
+  function cleanConditionalComment(comment, options) {
+    return comment.replace(/^(\[if\s[^\]]+\]>)([\s\S]*?)(<!\[endif\])$/, function(match, prefix, text, suffix) {
+      return prefix + minify(text, options) + suffix;
+    });
   }
 
   function removeCDATASections(text) {
@@ -1572,7 +1572,7 @@
         var suffix = nonStandard ? '>' : '-->';
         if (options.removeComments) {
           if (isConditionalComment(text)) {
-            text = prefix + cleanConditionalComment(text) + suffix;
+            text = prefix + cleanConditionalComment(text, options) + suffix;
           }
           else if (isIgnoredComment(text, options)) {
             text = '<!--' + text + '-->';
