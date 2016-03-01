@@ -350,9 +350,9 @@
   function removeCDATASections(text) {
     return text
       // "/* <![CDATA[ */" or "// <![CDATA["
-      .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
+      .replace(/^\/(?:\*\s*<!\[CDATA\[\s*\*\/|\/\s*<!\[CDATA\[.*)/, '')
       // "/* ]]> */" or "// ]]>"
-      .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
+      .replace(/\/(?:\*\s*\]\]>\s*\*\/|\/\s*\]\]>)$/, '');
   }
 
   function processScript(text, options, currentAttrs) {
@@ -365,17 +365,13 @@
     return text;
   }
 
-  var reStartDelimiter = {
+  var reDelimiter = {
     // account for js + html comments (e.g.: //<!--)
-    script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
-    style: /^\s*<!--\s*/
-  };
-  var reEndDelimiter = {
-    script: /\s*(?:\/\/)?\s*-->\s*$/,
-    style: /\s*-->\s*$/
+    script: /^(?:\/\/)?\s*<!--.*|(?:\/\/)?\s*-->$/g,
+    style: /^<!--|-->$/g
   };
   function removeComments(text, tag) {
-    return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
+    return text.replace(reDelimiter[tag], '');
   }
 
   // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -986,11 +982,12 @@
           }
         }
         if (currentTag === 'script' || currentTag === 'style') {
+          text = trimWhitespace(text);
           if (options.removeCommentsFromCDATA) {
-            text = removeComments(text, currentTag);
+            text = trimWhitespace(removeComments(text, currentTag));
           }
           if (options.removeCDATASectionsFromCDATA) {
-            text = removeCDATASections(text);
+            text = trimWhitespace(removeCDATASections(text));
           }
           if (options.processScripts) {
             text = processScript(text, options, currentAttrs);
