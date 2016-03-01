@@ -173,6 +173,9 @@
       equal(minify(input, { removeComments: true, collapseWhitespace: true }), 'a <? b' + index + ' ?> c');
       equal(minify('<p>' + input + '</p>', { removeComments: true, collapseWhitespace: true }), '<p>a <? b' + index + ' ?> c</p>');
     });
+    input = '<div> <a href="#"> <span> <b> foo </b> <i> bar </i> </span> </a> </div>';
+    output = '<div><a href="#"><span><b>foo </b><i>bar</i></span></a></div>';
+    equal(minify(input, { collapseWhitespace: true }), output);
   });
 
   test('doctype normalization', function() {
@@ -1587,7 +1590,7 @@
 
   test('processScripts', function() {
     input = '<script type="text/ng-template"><!--test--><div>   <span> foobar </span> \n\n</div></script>';
-    output = '<script type="text/ng-template"><div><span>foobar </span></div></script>';
+    output = '<script type="text/ng-template"><div><span>foobar</span></div></script>';
 
     equal(minify(input, {
       collapseWhitespace: true,
@@ -1602,7 +1605,7 @@
             '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
 
     output = '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>' +
-            '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo </span></div>';
+            '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
 
     equal(minify(input, { collapseWhitespace: true }), output);
 

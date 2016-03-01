@@ -980,6 +980,18 @@
               text = collapseWhitespace(text, options, /(?:^| )$/.test(currentChars));
             }
             text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
+            if (!text && / $/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
+              for (var index = buffer.length - 2, endTag = prevTag.substr(1); index >= 0 && _canTrimWhitespace(endTag); index--) {
+                var str = buffer[index];
+                var match = str.match(/^<\/([\w:-]+)>$/);
+                if (match) {
+                  endTag = match[1];
+                }
+                else if (/>$/.test(str) || (buffer[index] = collapseWhitespaceSmart(str, null, nextTag, options))) {
+                  break;
+                }
+              }
+            }
           }
           if (!stackNoCollapseWhitespace.length) {
             text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespaceAll(text);
