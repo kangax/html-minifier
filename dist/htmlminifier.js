@@ -619,15 +619,22 @@
     return lineBreakBefore + str + lineBreakAfter;
   }
 
-  // array of non-empty element tags that will maintain a single space outside of them
+  // non-empty tags that will maintain whitespace around them
   var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
+  // non-empty tags that will maintain whitespace within them
+  var inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
+  // self-closing tags that will maintain whitespace around them
   var selfClosingInlineTags = createMapFromString('comment,img,input');
 
   function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
-    var trimLeft = prevTag && !selfClosingInlineTags(prevTag) &&
-      (options.collapseInlineTagWhitespace || prevTag.charAt(0) !== '/' || !inlineTags(prevTag.substr(1)));
-    var trimRight = nextTag && !selfClosingInlineTags(nextTag) &&
-      (options.collapseInlineTagWhitespace || nextTag.charAt(0) === '/' || !inlineTags(nextTag));
+    var trimLeft = prevTag && !selfClosingInlineTags(prevTag);
+    if (trimLeft && !options.collapseInlineTagWhitespace) {
+      trimLeft = prevTag.charAt(0) === '/' ? !inlineTags(prevTag.slice(1)) : !inlineTextTags(prevTag);
+    }
+    var trimRight = nextTag && !selfClosingInlineTags(nextTag);
+    if (trimRight && !options.collapseInlineTagWhitespace) {
+      trimRight = nextTag.charAt(0) === '/' ? !inlineTextTags(nextTag.slice(1)) : !inlineTags(nextTag);
+    }
     return collapseWhitespace(str, options, trimLeft, trimRight, prevTag && nextTag);
   }
 
@@ -1254,10 +1261,10 @@
     setDefaultTesters(options);
     value = options.collapseWhitespace ? trimWhitespace(value) : value;
 
-    var results = [ ],
-        buffer = [ ],
+    var buffer = [ ],
         charsPrevTag,
         currentChars = '',
+        hasChars,
         currentTag = '',
         currentAttrs = [],
         stackNoTrimWhitespace = [],
@@ -1348,7 +1355,10 @@
 
         currentTag = tag;
         charsPrevTag = tag;
-        currentChars = '';
+        if (!inlineTextTags(tag)) {
+          currentChars = '';
+        }
+        hasChars = false;
         currentAttrs = attrs;
 
         var optional = options.removeOptionalTags;
@@ -1452,7 +1462,7 @@
         var isElementEmpty = false;
         if (tag === currentTag) {
           currentTag = '';
-          isElementEmpty = currentChars === '';
+          isElementEmpty = !hasChars;
         }
 
         if (options.removeOptionalTags) {
@@ -1479,10 +1489,11 @@
         }
         else {
           // push out everything but the end tag
-          results.push.apply(results, buffer);
-          buffer = ['</' + tag + '>'];
+          buffer.push('</' + tag + '>');
           charsPrevTag = '/' + tag;
-          currentChars = '';
+          if (!inlineTextTags(tag)) {
+            currentChars = '';
+          }
         }
       },
       chars: function(text, prevTag, nextTag) {
@@ -1495,7 +1506,7 @@
               if (removed) {
                 prevTag = charsPrevTag;
               }
-              if (buffer.length > 1 && (removed || currentChars.charAt(currentChars.length - 1) === ' ')) {
+              if (buffer.length > 1 && (removed || / $/.test(currentChars))) {
                 var charsIndex = buffer.length - 2;
                 buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
                   text = trailingSpaces + text;
@@ -1503,7 +1514,22 @@
                 });
               }
             }
+            if (prevTag && inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
+              text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
+            }
             text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
+            if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
+              for (var index = buffer.length - 2, endTag = prevTag.slice(1); index >= 0 && _canTrimWhitespace(endTag); index--) {
+                var str = buffer[index];
+                var match = str.match(/^<\/([\w:-]+)>$/);
+                if (match) {
+                  endTag = match[1];
+                }
+                else if (/>$/.test(str) || (buffer[index] = collapseWhitespaceSmart(str, null, nextTag, options))) {
+                  break;
+                }
+              }
+            }
           }
           if (!stackNoCollapseWhitespace.length) {
             text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespaceAll(text);
@@ -1545,6 +1571,9 @@
         }
         charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
         currentChars += text;
+        if (text) {
+          hasChars = true;
+        }
         if (lint) {
           lint.testChars(text);
         }
@@ -1593,8 +1622,7 @@
       }
     }
 
-    results.push.apply(results, buffer);
-    var str = joinResultSegments(results, options);
+    var str = joinResultSegments(buffer, options);
 
     if (uidAttr) {
       str = str.replace(new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g'), function(match, prefix, index, suffix) {
