@@ -723,8 +723,7 @@
     setDefaultTesters(options);
     value = options.collapseWhitespace ? trimWhitespace(value) : value;
 
-    var results = [ ],
-        buffer = [ ],
+    var buffer = [ ],
         charsPrevTag,
         currentChars = '',
         hasChars,
@@ -952,8 +951,7 @@
         }
         else {
           // push out everything but the end tag
-          results.push.apply(results, buffer);
-          buffer = ['</' + tag + '>'];
+          buffer.push('</' + tag + '>');
           charsPrevTag = '/' + tag;
           if (!inlineTextTags(tag)) {
             currentChars = '';
@@ -1074,8 +1072,7 @@
       }
     }
 
-    results.push.apply(results, buffer);
-    var str = joinResultSegments(results, options);
+    var str = joinResultSegments(buffer, options);
 
     if (uidAttr) {
       str = str.replace(new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g'), function(match, prefix, index, suffix) {
