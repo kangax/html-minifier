@@ -127,10 +127,21 @@
     equal(minify(input, { collapseWhitespace: true }), output);
     // tags from collapseWhitespaceSmart()
     [
-      'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'button', 'cite',
-      'code', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'mark', 'math',
-      'q', 'rt', 'rp', 's', 'samp', 'small', 'span', 'strike', 'strong',
-      'sub', 'sup', 'svg', 'time', 'tt', 'u', 'var'
+      'a', 'abbr', 'acronym', 'b', 'big', 'del', 'em', 'font', 'i', 'ins', 'kbd',
+      'mark', 's', 'samp', 'small', 'span', 'strike', 'strong', 'sub', 'sup',
+      'time', 'tt', 'u', 'var'
+    ].forEach(function(el) {
+      equal(minify('<p>foo <' + el + '>baz</' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '> bar</p>');
+      equal(minify('<p>foo<' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '>bar</p>');
+      equal(minify('<p>foo <' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '>bar</p>');
+      equal(minify('<p>foo<' + el + '>baz</' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '> bar</p>');
+      equal(minify('<p>foo <' + el + '> baz </' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz </' + el + '>bar</p>');
+      equal(minify('<p>foo<' + el + '> baz </' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '> baz </' + el + '>bar</p>');
+      equal(minify('<p>foo <' + el + '> baz </' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz </' + el + '>bar</p>');
+      equal(minify('<p>foo<' + el + '> baz </' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '> baz </' + el + '>bar</p>');
+    });
+    [
+      'bdi', 'bdo', 'button', 'cite', 'code', 'dfn', 'math', 'q', 'rt', 'rp', 'svg'
     ].forEach(function(el) {
       equal(minify('<p>foo <' + el + '>baz</' + el + '> bar</p>', { collapseWhitespace: true }), '<p>foo <' + el + '>baz</' + el + '> bar</p>');
       equal(minify('<p>foo<' + el + '>baz</' + el + '>bar</p>', { collapseWhitespace: true }), '<p>foo<' + el + '>baz</' + el + '>bar</p>');
@@ -658,7 +669,7 @@
     equal(minify(input, { collapseWhitespace: true }), output);
 
     input = '<p> foo    <span>  blah     <i>   22</i>    </span> bar <img src=""></p>';
-    output = '<p>foo <span>blah <i>22</i></span> bar <img src=""></p>';
+    output = '<p>foo <span>blah <i>22</i> </span>bar <img src=""></p>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
     input = '<textarea> foo bar     baz \n\n   x \t    y </textarea>';
@@ -1114,7 +1125,7 @@
               '{{ form.name }}' +
               '{% if form.name.errors %}' +
               '{% for error in form.name.errors %} ' +
-              '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }}</span> ' +
+              '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }} </span>' +
               '{% endfor %}' +
               '{% endif %}' +
             '</p>';
@@ -1576,7 +1587,7 @@
 
   test('processScripts', function() {
     input = '<script type="text/ng-template"><!--test--><div>   <span> foobar </span> \n\n</div></script>';
-    output = '<script type="text/ng-template"><div><span>foobar</span></div></script>';
+    output = '<script type="text/ng-template"><div><span>foobar </span></div></script>';
 
     equal(minify(input, {
       collapseWhitespace: true,
@@ -1591,7 +1602,7 @@
             '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
 
     output = '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>' +
-            '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
+            '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo </span></div>';
 
     equal(minify(input, { collapseWhitespace: true }), output);
 
@@ -1823,12 +1834,10 @@
       // trailing </p> removed by minifier, but not by PHPTAL
       ['<p>foo bar baz', '<p>foo     \t bar\n\n\n baz</p>'],
       ['<p>foo bar<pre>  \tfoo\t   \nbar   </pre>', '<p>foo   \t\n bar</p><pre>  \tfoo\t   \nbar   </pre>'],
-      /* needs to handle whitespace within and around <a>
       ['<p>foo <a href="">bar </a>baz', '<p>foo <a href=""> bar </a> baz  </p>'],
       ['<p>foo <a href="">bar </a>baz', ' <p>foo <a href=""> bar </a>baz </p>'],
       ['<p>foo<a href=""> bar </a>baz', ' <p> foo<a href=""> bar </a>baz </p>  '],
       ['<p>foo <a href="">bar</a> baz', ' <p> foo <a href="">bar</a> baz</p>'],
-       */
       ['<p>foo<br>', '<p>foo <br/></p>'],
       // PHPTAL remove whitespace after 'foo' - problematic if <span> is used as icon font
       ['<p>foo <span></span>', '<p>foo <span></span></p>'],
