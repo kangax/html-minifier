@@ -1324,6 +1324,25 @@
       buffer.length = Math.max(0, index);
     }
 
+    // look for trailing whitespaces from previously processed text
+    // which may not be trimmed due to a following comment or an empty
+    // element which has now been removed
+    function squashTrailingWhitespace(nextTag) {
+      var charsIndex;
+      if (buffer.length > 1 && /^(?:<!|$)/.test(buffer[buffer.length - 1]) &&
+          /\s$/.test(buffer[buffer.length - 2])) {
+        charsIndex = buffer.length - 2;
+      }
+      else if (buffer.length > 0 && /\s$/.test(buffer[buffer.length - 1])) {
+        charsIndex = buffer.length - 1;
+      }
+      if (charsIndex > 0) {
+        buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(text) {
+          return collapseWhitespaceSmart(text, 'comment', nextTag, options);
+        });
+      }
+    }
+
     new HTMLParser(value, {
       partialMarkup: partialMarkup,
       html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
@@ -1376,6 +1395,9 @@
 
         // set whitespace flags for nested tags (eg. <code> within a <pre>)
         if (options.collapseWhitespace) {
+          if (!stackNoTrimWhitespace.length) {
+            squashTrailingWhitespace(tag);
+          }
           if (!_canTrimWhitespace(tag, attrs)) {
             stackNoTrimWhitespace.push(tag);
           }
@@ -1431,18 +1453,7 @@
             }
           }
           else {
-            var charsIndex;
-            if (buffer.length > 1 && buffer[buffer.length - 1] === '' && /\s+$/.test(buffer[buffer.length - 2])) {
-              charsIndex = buffer.length - 2;
-            }
-            else if (buffer.length > 0 && /\s+$/.test(buffer[buffer.length - 1])) {
-              charsIndex = buffer.length - 1;
-            }
-            if (charsIndex > 0) {
-              buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(text) {
-                return collapseWhitespaceSmart(text, 'comment', '/' + tag, options);
-              });
-            }
+            squashTrailingWhitespace('/' + tag);
           }
           if (stackNoCollapseWhitespace.length &&
             tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {

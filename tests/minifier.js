@@ -176,6 +176,12 @@
     input = '<div> <a href="#"> <span> <b> foo </b> <i> bar </i> </span> </a> </div>';
     output = '<div><a href="#"><span><b>foo </b><i>bar</i></span></a></div>';
     equal(minify(input, { collapseWhitespace: true }), output);
+    input = '<head> <!-- a --> <!-- b --><link> </head>';
+    output = '<head><!-- a --><!-- b --><link></head>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+    input = '<head> <!-- a --> <!-- b --> <!-- c --><link> </head>';
+    output = '<head><!-- a --><!-- b --><!-- c --><link></head>';
+    equal(minify(input, { collapseWhitespace: true }), output);
   });
 
   test('doctype normalization', function() {
@@ -298,7 +304,7 @@
              '<!--[if lt IE 7]><html class="no-js ie6"><![endif]-->' +
              '<!--[if IE 7]><html class="no-js ie7"><![endif]-->' +
              '<!--[if IE 8]><html class="no-js ie8"><![endif]-->' +
-             ' <!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->' +
+             '<!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->' +
              '<title>Document</title></head><body></body></html>';
     equal(minify(input, {
       removeComments: true,
@@ -834,24 +840,30 @@
     output = '<div>after </div>';
     equal(minify(input, { removeEmptyElements: true }), output);
     output = '<div>after</div>';
-    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+    equal(minify(input, { collapseWhitespace: true, removeEmptyElements: true }), output);
 
     input = '<div>before <span></span></div>';
     output = '<div>before </div>';
     equal(minify(input, { removeEmptyElements: true }), output);
     output = '<div>before</div>';
-    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+    equal(minify(input, { collapseWhitespace: true, removeEmptyElements: true }), output);
 
     input = '<div>both <span></span> </div>';
     output = '<div>both  </div>';
     equal(minify(input, { removeEmptyElements: true }), output);
     output = '<div>both</div>';
-    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+    equal(minify(input, { collapseWhitespace: true, removeEmptyElements: true }), output);
+
+    input = '<div>unary <span></span><link></div>';
+    output = '<div>unary <link></div>';
+    equal(minify(input, { removeEmptyElements: true }), output);
+    output = '<div>unary<link></div>';
+    equal(minify(input, { collapseWhitespace: true, removeEmptyElements: true }), output);
 
     input = '<div>Empty <!-- NOT --> </div>';
     equal(minify(input, { removeEmptyElements: true }), input);
     output = '<div>Empty<!-- NOT --></div>';
-    equal(minify(input, { collapseWhitespace:true, removeEmptyElements: true }), output);
+    equal(minify(input, { collapseWhitespace: true, removeEmptyElements: true }), output);
   });
 
   test('collapsing boolean attributes', function() {
