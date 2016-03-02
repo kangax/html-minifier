@@ -273,8 +273,10 @@
       last = html;
     }
 
-    // Clean up any remaining tags
-    parseEndTag();
+    if (!handler.partialMarkup) {
+      // Clean up any remaining tags
+      parseEndTag();
+    }
 
     function parseStartTag( tag, tagName, rest, unary ) {
       var unarySlash = false;
@@ -287,7 +289,7 @@
         parseEndTag( '', tagName );
       }
 
-      unary = empty[ tagName ] || !!unary;
+      unary = empty[ tagName ] || tagName === 'html' && stack.last() === 'head' || !!unary;
 
       var attrs = [];
 

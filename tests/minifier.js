@@ -236,7 +236,16 @@
   });
 
   test('conditional comments', function() {
+    input = '<![if IE 5]>test<![endif]>';
+    equal(minify(input, { removeComments: true }), input);
+
     input = '<!--[if IE 6]>test<![endif]-->';
+    equal(minify(input, { removeComments: true }), input);
+
+    input = '<!--[if IE 7]>-->test<!--<![endif]-->';
+    equal(minify(input, { removeComments: true }), input);
+
+    input = '<!--[if IE 8]><!-->test<!--<![endif]-->';
     equal(minify(input, { removeComments: true }), input);
 
     input = '<!--[if lt IE 5.5]>test<![endif]-->';
@@ -244,24 +253,80 @@
 
     input = '<!--[if (gt IE 5)&(lt IE 7)]>test<![endif]-->';
     equal(minify(input, { removeComments: true }), input);
+
+    input = '<html>\n' +
+            '  <head>\n' +
+            '    <!--[if lte IE 8]>\n' +
+            '      <script type="text/javascript">\n' +
+            '        alert("ie8!");\n' +
+            '      </script>\n' +
+            '    <![endif]-->\n' +
+            '  </head>\n' +
+            '  <body>\n' +
+            '  </body>\n' +
+            '</html>';
+    output = '<head><!--[if lte IE 8]><script>alert("ie8!")</script><![endif]-->';
+    equal(minify(input, {
+      minifyJS: true,
+      removeComments: true,
+      collapseWhitespace: true,
+      removeOptionalTags: true,
+      removeScriptTypeAttributes: true
+    }), output);
+
+    input = '<!DOCTYPE html>\n' +
+            '<html lang="en">\n' +
+            '  <head>\n' +
+            '    <meta http-equiv="X-UA-Compatible"\n' +
+            '          content="IE=edge,chrome=1">\n' +
+            '    <meta charset="utf-8">\n' +
+            '    <!--[if lt IE 7]><html class="no-js ie6"><![endif]-->\n' +
+            '    <!--[if IE 7]><html class="no-js ie7"><![endif]-->\n' +
+            '    <!--[if IE 8]><html class="no-js ie8"><![endif]-->\n' +
+            '    <!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->\n' +
+            '\n' +
+            '    <title>Document</title>\n' +
+            '  </head>\n' +
+            '  <body>\n' +
+            '  </body>\n' +
+            '</html>';
+    output = '<!DOCTYPE html>' +
+             '<html lang="en">' +
+             '<head>' +
+             '<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">' +
+             '<meta charset="utf-8">' +
+             '<!--[if lt IE 7]><html class="no-js ie6"><![endif]-->' +
+             '<!--[if IE 7]><html class="no-js ie7"><![endif]-->' +
+             '<!--[if IE 8]><html class="no-js ie8"><![endif]-->' +
+             ' <!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->' +
+             '<title>Document</title></head><body></body></html>';
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true
+    }), output);
   });
 
   test('collapsing space in conditional comments', function() {
     input = '<!--[if IE 7]>\n\n   \t\n   \t\t ' +
               '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />\n\t' +
             '<![endif]-->';
-    output = '<!--[if IE 7]>' +
-                '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />' +
-             '<![endif]-->';
+    output = '<!--[if IE 7]>\n\n   \t\n   \t\t ' +
+              '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css">\n\t' +
+            '<![endif]-->';
     equal(minify(input, { removeComments: true }), output);
+    output = '<!--[if IE 7]>' +
+                '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css">' +
+             '<![endif]-->';
+    equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
 
     input = '<!--[if lte IE 6]>\n    \n   \n\n\n\t' +
               '<p title=" sigificant     whitespace   ">blah blah</p>' +
             '<![endif]-->';
+    equal(minify(input, { removeComments: true }), input);
     output = '<!--[if lte IE 6]>' +
               '<p title=" sigificant     whitespace   ">blah blah</p>' +
             '<![endif]-->';
-    equal(minify(input, { removeComments: true }), output);
+    equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
   });
 
   test('remove comments from scripts', function() {
