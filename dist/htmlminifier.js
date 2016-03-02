@@ -719,14 +719,6 @@
     );
   }
 
-  function isScriptTypeAttribute(tag, attrName, attrValue) {
-    return (
-      tag === 'script' &&
-      attrName === 'type' &&
-      trimWhitespace(attrValue.toLowerCase()) === 'text/javascript'
-    );
-  }
-
   // https://mathiasbynens.be/demo/javascript-mime-type
   // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
   var executableScriptsMimetypes = createMap([
@@ -737,6 +729,14 @@
     'application/x-javascript',
     'application/ecmascript'
   ]);
+
+  function isScriptTypeAttribute(tag, attrName, attrValue) {
+    return (
+      tag === 'script' &&
+      attrName === 'type' &&
+      executableScriptsMimetypes(trimWhitespace(attrValue.toLowerCase()))
+    );
+  }
 
   function isExecutableScript(tag, attrs) {
     if (tag !== 'script') {
