@@ -1361,8 +1361,8 @@
 
     equal(minify(input, { minifyJS: true }), output);
 
-    input = '<script type="application/javascript  ;charset=utf-8">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
-    output = '<script type="application/javascript  ;charset=utf-8">!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
+    input = '<script type=" application/javascript  ; charset=utf-8 ">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
+    output = '<script type="application/javascript;charset=utf-8">!function(){var a=1,n=2;alert(a+" "+n)}()</script>';
 
     equal(minify(input, { minifyJS: true }), output);
 
