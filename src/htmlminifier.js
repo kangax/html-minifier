@@ -786,10 +786,10 @@
 
     function squashTrailingWhitespace(nextTag) {
       var charsIndex;
-      if (buffer.length > 1 && /^(?:<!|$)/.test(buffer[buffer.length - 1]) && /\s+$/.test(buffer[buffer.length - 2])) {
+      if (buffer.length > 1 && /^(?:<!|$)/.test(buffer[buffer.length - 1]) && /\s$/.test(buffer[buffer.length - 2])) {
         charsIndex = buffer.length - 2;
       }
-      else if (buffer.length > 0 && /\s+$/.test(buffer[buffer.length - 1])) {
+      else if (buffer.length > 0 && /\s$/.test(buffer[buffer.length - 1])) {
         charsIndex = buffer.length - 1;
       }
       if (charsIndex > 0) {
