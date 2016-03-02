@@ -1324,9 +1324,13 @@
       buffer.length = Math.max(0, index);
     }
 
+    // look for trailing whitespaces from previously processed text
+    // which may not be trimmed due to a following comment or an empty
+    // element which has now been removed
     function squashTrailingWhitespace(nextTag) {
       var charsIndex;
-      if (buffer.length > 1 && /^(?:<!|$)/.test(buffer[buffer.length - 1]) && /\s$/.test(buffer[buffer.length - 2])) {
+      if (buffer.length > 1 && /^(?:<!|$)/.test(buffer[buffer.length - 1]) &&
+          /\s$/.test(buffer[buffer.length - 2])) {
         charsIndex = buffer.length - 2;
       }
       else if (buffer.length > 0 && /\s$/.test(buffer[buffer.length - 1])) {
