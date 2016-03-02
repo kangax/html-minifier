@@ -1673,13 +1673,9 @@
     return options.collapseWhitespace ? trimWhitespace(str) : str;
   }
 
-  // for CommonJS enviroments, export everything
-  if (typeof exports !== 'undefined') {
-    exports.minify = minify;
-  }
-  else {
-    global.minify = minify;
-  }
+  global.minify = function(value, options) {
+    return minify(value, options);
+  };
 
 }(typeof exports === 'undefined' ? this : exports));
 
