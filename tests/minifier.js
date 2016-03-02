@@ -176,6 +176,12 @@
     input = '<div> <a href="#"> <span> <b> foo </b> <i> bar </i> </span> </a> </div>';
     output = '<div><a href="#"><span><b>foo </b><i>bar</i></span></a></div>';
     equal(minify(input, { collapseWhitespace: true }), output);
+    input = '<head> <!-- a --> <!-- b --><link> </head>';
+    output = '<head><!-- a --><!-- b --><link></head>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+    input = '<head> <!-- a --> <!-- b --> <!-- c --><link> </head>';
+    output = '<head><!-- a --><!-- b --><!-- c --><link></head>';
+    equal(minify(input, { collapseWhitespace: true }), output);
   });
 
   test('doctype normalization', function() {
@@ -298,7 +304,7 @@
              '<!--[if lt IE 7]><html class="no-js ie6"><![endif]-->' +
              '<!--[if IE 7]><html class="no-js ie7"><![endif]-->' +
              '<!--[if IE 8]><html class="no-js ie8"><![endif]-->' +
-             ' <!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->' +
+             '<!--[if gt IE 8]><!--><html class="no-js"><!--<![endif]-->' +
              '<title>Document</title></head><body></body></html>';
     equal(minify(input, {
       removeComments: true,
