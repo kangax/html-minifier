@@ -13,6 +13,8 @@ Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_mini
 
 ## Minification comparison
 
+[![Join the chat at https://gitter.im/kangax/html-minifier](https://badges.gitter.im/kangax/html-minifier.svg)](https://gitter.im/kangax/html-minifier?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Peavy](http://www.willpeavy.com/minifier/) (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as [htmlcompressor.com](http://htmlcompressor.com) and [minimize](https://github.com/Swaagie/minimize)?
 
 | Site                                                                        | Original size _(KB)_ | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
