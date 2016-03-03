@@ -2,6 +2,7 @@
 [![Build Status](https://img.shields.io/travis/kangax/html-minifier.svg)](https://travis-ci.org/kangax/html-minifier)
 [![Dependency Status](https://img.shields.io/david/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier)
 [![devDependency Status](https://img.shields.io/david/dev/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
+[![Gitter](https://img.shields.io/gitter/room/kangax/html-minifier.svg)](https://gitter.im/kangax/html-minifier)
 
 [HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, JavaScript-based HTML minifier, with lint-like capabilities.
 
@@ -12,8 +13,6 @@ See [corresponding blog post](http://perfectionkills.com/experimenting-with-html
 Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_minifier), and for Node.js, [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin), [Gulp module](https://github.com/jonschlinkert/gulp-htmlmin), and [Koa middleware wrapper](https://github.com/koajs/html-minifier).
 
 ## Minification comparison
-
-[![Join the chat at https://gitter.im/kangax/html-minifier](https://badges.gitter.im/kangax/html-minifier.svg)](https://gitter.im/kangax/html-minifier?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Peavy](http://www.willpeavy.com/minifier/) (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as [htmlcompressor.com](http://htmlcompressor.com) and [minimize](https://github.com/Swaagie/minimize)?
 
