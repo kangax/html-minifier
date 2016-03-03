@@ -18,6 +18,7 @@
       collapseWhitespace:             byId('collapse-whitespace').checked,
       conservativeCollapse:           byId('conservative-collapse').checked,
       collapseBooleanAttributes:      byId('collapse-boolean-attributes').checked,
+      removeTagWhitespace:            byId('remove-tag-whitespace').checked,
       removeAttributeQuotes:          byId('remove-attribute-quotes').checked,
       removeRedundantAttributes:      byId('remove-redundant-attributes').checked,
       useShortDoctype:                byId('use-short-doctype').checked,
