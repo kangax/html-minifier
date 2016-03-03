@@ -33,6 +33,7 @@
     "node": ">=0.10.0"
   },
   "scripts": {
+    "assets": "grunt assets",
     "assets/clean-css": "browserify --standalone CleanCSS node_modules/clean-css/index.js | uglifyjs --compress --mangle -o assets/cleancss-browser.js",
     "assets/relateurl": "browserify node_modules/relateurl/ --standalone RelateUrl | uglifyjs --compress --mangle -o assets/relateurl-browser.js",
     "assets/uglify-js": "uglifyjs --self --compress --mangle -o assets/uglify.js",
