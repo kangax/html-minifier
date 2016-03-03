@@ -686,6 +686,18 @@
       else if (UglifyJS.parse) {
         return function(text, options) {
           try {
+            options = UglifyJS.defaults(options, {
+              spidermonkey: false,
+              outSourceMap: null,
+              sourceRoot: null,
+              inSourceMap: null,
+              warnings: false,
+              mangle: {},
+              mangleProperties: false,
+              nameCache: null,
+              compress: {},
+              parse: {}
+            });
             UglifyJS.base54.reset();
             // 1. parse
             var toplevel = UglifyJS.parse(text, {
