@@ -100,14 +100,17 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt, { scope: 'devDependencies' });
   require('time-grunt')(grunt);
 
+  grunt.registerTask('assets', [
+    'exec:clean-css',
+    'exec:relateurl',
+    'exec:uglify-js'
+  ]);
+
   grunt.registerTask('build', [
     'concat'
   ]);
 
   grunt.registerTask('dist', [
-    'exec:clean-css',
-    'exec:relateurl',
-    'exec:uglify-js',
     'concat',
     'uglify'
   ]);
