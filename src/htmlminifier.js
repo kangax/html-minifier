@@ -687,10 +687,6 @@
         return function(text, options) {
           try {
             options = UglifyJS.defaults(options, {
-              spidermonkey: false,
-              outSourceMap: null,
-              sourceRoot: null,
-              inSourceMap: null,
               warnings: false,
               mangle: {},
               mangleProperties: false,
