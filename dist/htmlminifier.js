@@ -1202,69 +1202,20 @@
 
   var minifyJS = (function() {
     var UglifyJS = getModule('UglifyJS', 'uglify-js');
-    if (UglifyJS) {
-      if (UglifyJS.minify) {
-        return function(text, options) {
-          try {
-            return UglifyJS.minify(text, options).code;
-          }
-          catch (err) {
-            log(err);
-            return text;
-          }
-        };
-      }
-      else if (UglifyJS.parse) {
-        return function(text, options) {
-          try {
-            options = UglifyJS.defaults(options, {
-              warnings: false,
-              mangle: {},
-              mangleProperties: false,
-              nameCache: null,
-              compress: {},
-              parse: {}
-            });
-            UglifyJS.base54.reset();
-            // 1. parse
-            var toplevel = UglifyJS.parse(text, {
-              filename: 0,
-              toplevel: null,
-              bare_returns: options.parse ? options.parse.bare_returns : undefined
-            });
-            // 2. compress
-            if (options.compress) {
-              var compress = { warnings: options.warnings };
-              UglifyJS.merge(compress, options.compress);
-              toplevel.figure_out_scope();
-              var sq = UglifyJS.Compressor(compress);
-              toplevel = toplevel.transform(sq);
-            }
-            // 3. mangle properties
-            if (options.mangleProperties && options.nameCache) {
-              options.mangleProperties.cache = UglifyJS.readNameCache(options.nameCache, 'props');
-              toplevel = UglifyJS.mangle_properties(toplevel, options.mangleProperties);
-              UglifyJS.writeNameCache(options.nameCache, 'props', options.mangleProperties.cache);
-            }
-            // 4. mangle
-            if (options.mangle) {
-              toplevel.figure_out_scope(options.mangle);
-              toplevel.compute_char_frequency(options.mangle);
-              toplevel.mangle_names(options.mangle);
-            }
-            // 5. output
-            var stream = UglifyJS.OutputStream(options.output);
-            toplevel.print(stream);
-            return stream.toString();
-          }
-          catch (err) {
-            log(err);
-            return text;
-          }
-        };
-      }
+    if (UglifyJS && UglifyJS.minify) {
+      return function(text, options) {
+        try {
+          return UglifyJS.minify(text, options).code;
+        }
+        catch (err) {
+          log(err);
+          return text;
+        }
+      };
     }
-    return noop;
+    else {
+      return noop;
+    }
   })();
 
   var minifyCSS = (function() {
