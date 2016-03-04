@@ -200,34 +200,34 @@ cli.main(function(args, options) {
       fs.mkdirSync(path);
     }
     catch (e) {
-      if (e.code === 'EEXIST') {
-        return;
+      if (e.code !== 'EEXIST') {
+        cli.fatal('Can not create directory ' + path);
+        return 3;
       }
-      cli.fatal('Can not create directory ' + path);
-      cli.exit(3);
     }
+    return 0;
   }
 
   function processDirectory(inputDir, outputDir) {
-    createDirectory(outputDir);
     var fileList = fs.readdirSync(inputDir);
-    var status = 0;
+    var status = createDirectory(outputDir);
 
-    fileList.forEach(function(fileName) {
+    for (var i = 0; status === 0 && i < fileList.length; i++) {
+      var fileName = fileList[i];
       var inputFilePath = inputDir + '/' + fileName;
       var outputFilePath = outputDir + '/' + fileName;
 
       var stat = fs.statSync(inputFilePath);
       if (stat.isDirectory()) {
-        processDirectory(inputFilePath, outputFilePath);
-        return;
+        status = processDirectory(inputFilePath, outputFilePath);
       }
+      else {
+        var originalContent = fs.readFileSync(inputFilePath, 'utf8');
+        status = runMinify(originalContent, outputFilePath);
+      }
+    }
 
-      var originalContent = fs.readFileSync(inputFilePath, 'utf8');
-      status = runMinify(originalContent, outputFilePath);
-    });
-
-    cli.exit(status);
+    return status;
   }
 
   if (options.version) {
@@ -318,16 +318,13 @@ cli.main(function(args, options) {
     }
 
     try {
-      processDirectory(inputDir, outputDir);
+      cli.exit(processDirectory(inputDir, outputDir));
     }
     catch (e) {
       cli.error('Error while processing input files');
       cli.error(e);
       cli.exit(3);
     }
-
-    cli.exit(0);
-    return;
   }
 
   if (options.output) {
