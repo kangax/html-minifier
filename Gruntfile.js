@@ -72,12 +72,49 @@ module.exports = function(grunt) {
           'dist/htmlminifier.min.js': '<%= concat.dist.dest %>'
         }
       }
+    },
+
+    web: {
+      htmllint: 'tests/lint-tests.html',
+      htmlminifier: 'tests/index.html'
     }
 
   });
 
-  require('load-grunt-tasks')(grunt, { scope: 'devDependencies' });
+  require('load-grunt-tasks')(grunt, {
+    pattern: [ 'grunt-*', '!grunt-lib-*' ],
+    scope: 'devDependencies'
+  });
   require('time-grunt')(grunt);
+  var phantomjs = require('grunt-lib-phantomjs').init(grunt);
+  var webErrors;
+  phantomjs.on('fail.load', function() {
+    phantomjs.halt();
+    webErrors++;
+    grunt.log.error('page failed to load');
+  }).on('fail.timeout', function() {
+    phantomjs.halt();
+    webErrors++;
+    grunt.log.error('timed out');
+  }).on('qunit.done', function(details) {
+    phantomjs.halt();
+    grunt.log.writeln('completed in ' + details.runtime + 'ms');
+    webErrors += details.failed;
+    grunt.log[webErrors ? 'error' : 'ok'](details.passed + ' of ' + details.total + ' passed, ' + details.failed + ' failed');
+  });
+
+  grunt.registerMultiTask('web', function() {
+    var done = this.async();
+    webErrors = 0;
+    phantomjs.spawn(this.data, {
+      done: function() {
+        done(!webErrors);
+      },
+      options: {
+        inject: 'tests/inject.js'
+      }
+    });
+  });
 
   grunt.registerTask('assets', [
     'exec:clean-css',
@@ -98,7 +135,8 @@ module.exports = function(grunt) {
   grunt.registerTask('test', [
     'dist',
     'eslint',
-    'exec:test'
+    'exec:test',
+    'web'
   ]);
 
   grunt.registerTask('default', 'test');
