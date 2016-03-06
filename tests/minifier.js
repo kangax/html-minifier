@@ -796,7 +796,6 @@
   });
 
   test('removing empty elements', function() {
-
     equal(minify('<p>x</p>', { removeEmptyElements: true }), '<p>x</p>');
     equal(minify('<p></p>', { removeEmptyElements: true }), '');
 
@@ -808,13 +807,32 @@
     output = '';
     equal(minify(input, { removeEmptyElements: true }), output);
 
-    input = '<textarea cols="10" rows="10"></textarea>';
-    output = '<textarea cols="10" rows="10"></textarea>';
+    input = '<iframe></iframe>';
+    output = '';
     equal(minify(input, { removeEmptyElements: true }), output);
 
-    input = '<div>hello<span>world</span></div>';
-    output = '<div>hello<span>world</span></div>';
+    input = '<iframe src="page.html"></iframe>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+
+    input = '<video></video>';
+    output = '';
     equal(minify(input, { removeEmptyElements: true }), output);
+
+    input = '<video src="preview.ogg"></video>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+
+    input = '<audio autoplay></audio>';
+    output = '';
+    equal(minify(input, { removeEmptyElements: true }), output);
+
+    input = '<audio src="startup.mp3" autoplay></audio>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+
+    input = '<textarea cols="10" rows="10"></textarea>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+
+    input = '<div>hello<span>world</span></div>';
+    equal(minify(input, { removeEmptyElements: true }), input);
 
     input = '<p>x<span title="<" class="blah-moo"></span></p>';
     output = '<p>x</p>';

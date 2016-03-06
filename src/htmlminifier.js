@@ -481,18 +481,19 @@
   }
 
   function canRemoveElement(tag, attrs) {
-    if (tag === 'textarea') {
-      return false;
-    }
-
-    if (tag === 'script') {
-      for (var i = attrs.length - 1; i >= 0; i--) {
-        if (attrs[i].name === 'src') {
-          return false;
+    switch (tag) {
+      case 'textarea':
+        return false;
+      case 'audio':
+      case 'iframe':
+      case 'script':
+      case 'video':
+        for (var i = attrs.length - 1; i >= 0; i--) {
+          if (attrs[i].name === 'src') {
+            return false;
+          }
         }
-      }
     }
-
     return true;
   }
 
