@@ -480,8 +480,16 @@
     return false;
   }
 
+  function hasAttrName(name, attrs) {
+    for (var i = attrs.length - 1; i >= 0; i--) {
+      if (attrs[i].name === name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function canRemoveElement(tag, attrs) {
-    var i;
     switch (tag) {
       case 'textarea':
         return false;
@@ -489,17 +497,18 @@
       case 'iframe':
       case 'script':
       case 'video':
-        for (i = attrs.length - 1; i >= 0; i--) {
-          if (attrs[i].name === 'src') {
-            return false;
-          }
+        if (hasAttrName('src', attrs)) {
+          return false;
         }
         break;
       case 'object':
-        for (i = attrs.length - 1; i >= 0; i--) {
-          if (attrs[i].name === 'data') {
-            return false;
-          }
+        if (hasAttrName('data', attrs)) {
+          return false;
+        }
+        break;
+      case 'applet':
+        if (hasAttrName('code', attrs)) {
+          return false;
         }
         break;
     }

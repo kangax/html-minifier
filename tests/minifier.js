@@ -835,6 +835,13 @@
     input = '<object data="game.swf" type="application/x-shockwave-flash"></object>';
     equal(minify(input, { removeEmptyElements: true }), input);
 
+    input = '<applet archive="game.zip" width="250" height="150"></applet>';
+    output = '';
+    equal(minify(input, { removeEmptyElements: true }), output);
+
+    input = '<applet code="game.class" archive="game.zip" width="250" height="150"></applet>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+
     input = '<textarea cols="10" rows="10"></textarea>';
     equal(minify(input, { removeEmptyElements: true }), input);
 
