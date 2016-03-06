@@ -1021,6 +1021,7 @@
   }
 
   function canRemoveElement(tag, attrs) {
+    var i;
     switch (tag) {
       case 'textarea':
         return false;
@@ -1028,11 +1029,19 @@
       case 'iframe':
       case 'script':
       case 'video':
-        for (var i = attrs.length - 1; i >= 0; i--) {
+        for (i = attrs.length - 1; i >= 0; i--) {
           if (attrs[i].name === 'src') {
             return false;
           }
         }
+        break;
+      case 'object':
+        for (i = attrs.length - 1; i >= 0; i--) {
+          if (attrs[i].name === 'data') {
+            return false;
+          }
+        }
+        break;
     }
     return true;
   }

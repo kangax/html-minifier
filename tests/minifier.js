@@ -828,6 +828,13 @@
     input = '<audio src="startup.mp3" autoplay></audio>';
     equal(minify(input, { removeEmptyElements: true }), input);
 
+    input = '<object type="application/x-shockwave-flash"></object>';
+    output = '';
+    equal(minify(input, { removeEmptyElements: true }), output);
+
+    input = '<object data="game.swf" type="application/x-shockwave-flash"></object>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+
     input = '<textarea cols="10" rows="10"></textarea>';
     equal(minify(input, { removeEmptyElements: true }), input);
 
