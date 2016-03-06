@@ -494,10 +494,14 @@
       case 'textarea':
         return false;
       case 'audio':
-      case 'iframe':
       case 'script':
       case 'video':
         if (hasAttrName('src', attrs)) {
+          return false;
+        }
+        break;
+      case 'iframe':
+        if (hasAttrName('src', attrs) || hasAttrName('srcdoc', attrs)) {
           return false;
         }
         break;

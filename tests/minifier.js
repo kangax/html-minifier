@@ -814,6 +814,9 @@
     input = '<iframe src="page.html"></iframe>';
     equal(minify(input, { removeEmptyElements: true }), input);
 
+    input = '<iframe srcdoc="<h1>Foo</h1>"></iframe>';
+    equal(minify(input, { removeEmptyElements: true }), input);
+
     input = '<video></video>';
     output = '';
     equal(minify(input, { removeEmptyElements: true }), output);
