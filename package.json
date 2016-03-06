@@ -61,7 +61,7 @@
     "grunt-exec": "0.4.x",
     "grunt-jscs": "2.8.x",
     "load-grunt-tasks": "3.4.x",
-    "lzma": "2.2.x",
+    "lzma": "2.3.x",
     "minimize": "1.8.x",
     "progress": "1.1.x",
     "qunit": "0.9.x",
