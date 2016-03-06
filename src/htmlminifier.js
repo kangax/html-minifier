@@ -480,19 +480,38 @@
     return false;
   }
 
-  function canRemoveElement(tag, attrs) {
-    if (tag === 'textarea') {
-      return false;
-    }
-
-    if (tag === 'script') {
-      for (var i = attrs.length - 1; i >= 0; i--) {
-        if (attrs[i].name === 'src') {
-          return false;
-        }
+  function hasAttrName(name, attrs) {
+    for (var i = attrs.length - 1; i >= 0; i--) {
+      if (attrs[i].name === name) {
+        return true;
       }
     }
+    return false;
+  }
 
+  function canRemoveElement(tag, attrs) {
+    switch (tag) {
+      case 'textarea':
+        return false;
+      case 'audio':
+      case 'iframe':
+      case 'script':
+      case 'video':
+        if (hasAttrName('src', attrs)) {
+          return false;
+        }
+        break;
+      case 'object':
+        if (hasAttrName('data', attrs)) {
+          return false;
+        }
+        break;
+      case 'applet':
+        if (hasAttrName('code', attrs)) {
+          return false;
+        }
+        break;
+    }
     return true;
   }
 
