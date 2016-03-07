@@ -12,7 +12,8 @@ testrunner.run({
   tests: [
     './tests/minifier.js',
     './tests/lint.js'
-  ]
+  ],
+  maxBlockDuration: 30000
 }, function(err, report) {
   if (report.failed > 0) {
     process.on('exit', function() {

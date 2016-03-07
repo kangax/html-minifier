@@ -37,13 +37,16 @@
   'use strict';
 
   // Regular Expressions for parsing tags and attributes
-  var singleAttrIdentifier = /([\w:\.-]+)/,
+  var singleAttrIdentifier = /([^\s"'<>\/=]+)/,
       singleAttrAssign = /=/,
       singleAttrAssigns = [ singleAttrAssign ],
       singleAttrValues = [
-        /"((?:\\.|[^"])*)"/.source, // attr value double quotes
-        /'((?:\\.|[^'])*)'/.source, // attr value, single quotes
-        /([^>\s]+)/.source          // attr value, no quotes
+        // attr value double quotes
+        /"([^"]*)"+?/.source,
+        // attr value, single quotes
+        /'([^']*)'+?/.source,
+        // attr value, no quotes
+        /([^\s"'=<>`]+)/.source
       ],
       startTagOpen = /^<([\w:-]+)/,
       startTagClose = /\s*(\/?)>/,
@@ -82,10 +85,10 @@
     var customStartTagAttrs;
 
     var startTagAttr = new RegExp(
-        '[\\w:\\.-]+'
+        singleAttrIdentifier.source.replace(/\(|\)/g, '')
       + '(?:\\s*'
       +   '(?:' + joinSingleAttrAssigns(handler) + ')'
-      +   '\\s*(?:"[^"]*"+?|\'[^\']*\'+?|[^>\\s"\']+?)'
+      +   '\\s*(?:' + singleAttrValues.join('|').replace(/\(|\)/g, '') + ')'
       + ')?'
     );
 
@@ -137,7 +140,7 @@
           + '\\s*(' + handler.customAttrSurround[i][1].source + ')'
           + ')';
       }
-      attrClauses.unshift('(?:' + singleAttr.source + ')');
+      attrClauses.push('(?:' + singleAttr.source + ')');
 
       return new RegExp(attrClauses.join('|'), 'g');
     }
@@ -317,32 +320,27 @@
           if (arguments[5] === '') { arguments[5] = undefined; }
         }
 
-        name = arguments[1];
-        if ( name ) {
-          customAssign = arguments[2];
-          fallbackValue = arguments[3];
-          value = fallbackValue || arguments[4] || arguments[5];
-
-          if (customAssign) {
-            quote = arguments[0].charAt(name.length + customAssign.length);
-            quote = (quote === '\'' || quote === '"') ? quote : '';
-          }
-
-        }
-        else if ( handler.customAttrSurround ) {
-          for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-            name = arguments[i * ncp + 7];
-            customAssign = arguments[i * ncp + 8];
-            if ( name ) {
-              fallbackValue = arguments[i * ncp + 9];
-              value = fallbackValue
-                || arguments[i * ncp + 10]
-                || arguments[i * ncp + 11];
-              customOpen = arguments[i * ncp + 6];
-              customClose = arguments[i * ncp + 12];
+        var j = 1;
+        if (handler.customAttrSurround) {
+          for (var i = 0, l = handler.customAttrSurround.length; i < l; i++, j += ncp) {
+            name = arguments[j + 1];
+            customAssign = arguments[j + 2];
+            if (name) {
+              fallbackValue = arguments[j + 3];
+              value = fallbackValue || arguments[j + 4] || arguments[j + 5];
+              quote = fallbackValue ? '"' : value ? '\'' : '';
+              customOpen = arguments[j];
+              customClose = arguments[j + 6];
               break;
             }
           }
+        }
+
+        if (!name && (name = arguments[j])) {
+          customAssign = arguments[j + 1];
+          fallbackValue = arguments[j + 2];
+          value = fallbackValue || arguments[j + 3] || arguments[j + 4];
+          quote = fallbackValue ? '"' : value ? '\'' : '';
         }
 
         if ( value === undefined ) {
@@ -366,7 +364,6 @@
       else {
         unarySlash = tag.match( endingSlash );
       }
-
 
       if ( handler.start ) {
         handler.start( tagName, attrs, unary, unarySlash );
