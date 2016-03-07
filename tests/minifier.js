@@ -52,6 +52,9 @@
     input = '<html ⚡></html>';
     equal(minify(input), input);
 
+    input = '<begriffs.pagination ng-init="perPage=20" collection="logs" url="\'/api/logs?user=-1\'" per-page="perPage" per-page-presets="[10,20,50,100]" template-url="/assets/paginate-anything.html"></begriffs.pagination>';
+    equal(minify(input), input);
+
     // https://github.com/kangax/html-minifier/issues/41
     equal(minify('<some-tag-1></some-tag-1><some-tag-2></some-tag-2>'),
       '<some-tag-1></some-tag-1><some-tag-2></some-tag-2>'

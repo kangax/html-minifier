@@ -43,9 +43,9 @@
         // attr value, no quotes
         /([^\s"'=<>`]+)/.source
       ],
-      startTagOpen = /^<([\w:-]+)/,
+      startTagOpen = /^<([:A-Za-z_][:\w\-\.]*)/,
       startTagClose = /^\s*(\/?)>/,
-      endTag = /^<\/([\w:-]+)[^>]*>/,
+      endTag = /^<\/([:A-Za-z_][:\w\-\.]*)[^>]*>/,
       doctype = /^<!DOCTYPE [^>]+>/i;
 
   var IS_REGEX_CAPTURING_BROKEN = false;
