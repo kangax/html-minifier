@@ -1639,12 +1639,15 @@ test('style attribute minification', function() {
 test('url attribute minification', function() {
   input = '<link rel="stylesheet" href="http://website.com/style.css"><form action="http://website.com/folder/folder2/index.html"><a href="http://website.com/folder/file.html">link</a></form>';
   output = '<link rel="stylesheet" href="/style.css"><form action="folder2/"><a href="file.html">link</a></form>';
-
   equal(minify(input, { minifyURLs: { site: 'http://website.com/folder/' } }), output);
 
   input = '<link rel="canonical" href="http://website.com/">';
-
   equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
+
+  input = '<style>body { background: url("http://website.com/bg.png") }</style>';
+  equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
+  output = '<style>body{background:url(bg.png)}</style>';
+  equal(minify(input, { minifyURLs: { site: 'http://website.com/' }, minifyCSS: true }), output);
 });
 
 test('valueless attributes', function() {
@@ -1816,7 +1819,7 @@ test('ignore', function() {
           '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
 
   output = '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>' +
-          '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
+           '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
 
   equal(minify(input, { collapseWhitespace: true }), output);
 
