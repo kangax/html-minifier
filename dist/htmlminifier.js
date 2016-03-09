@@ -72,6 +72,10 @@
   // Special Elements (can contain anything)
   var special = makeMap('script,style');
 
+  // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
+  var phrasingOnly = makeMap('abbr,b,bdi,bdo,button,cite,code,data,dfn,em,h1,h2,h3,h4,h5,h6,i,kbd,label,legend,mark,meter,output,p,pre,progress,q,rp,rt,s,samp,small,span,strong,sub,sup,time,u,var');
+  var phrasing = makeMap('a,abbr,area,audio,b,bdi,bdo,br,button,canvas,cite,code,data,datalist,del,dfn,em,embed,i,iframe,img,input,ins,kbd,keygen,label,link,main,map,mark,math,menu,meter,nav,noscript,object,ol,output,p,picture,pre,progress,q,ruby,s,samp,script,section,select,small,span,strong,sub,sup,svg,table,template,textarea,time,u,ul,var,video,wbr');
+
   var reCache = {};
 
   function startTagForHandler( handler ) {
@@ -284,8 +288,14 @@
     function parseStartTag( tag, tagName, rest, unary ) {
       var unarySlash = false;
 
-      while ( !handler.html5 && lastTag && inline[ lastTag ]) {
+      if (handler.html5 && lastTag && phrasingOnly[lastTag] && !phrasing[tagName]) {
         parseEndTag( '', lastTag );
+      }
+
+      if (!handler.html5) {
+        while (lastTag && inline[ lastTag ]) {
+          parseEndTag( '', lastTag );
+        }
       }
 
       if ( closeSelf[ tagName ] && lastTag === tagName ) {
