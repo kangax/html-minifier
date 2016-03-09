@@ -44,6 +44,14 @@
       '<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>'
     );
 
+    // will cause test to time-out if fail
+    input = '<p>For more information, read <a href=https://stackoverflow.com/questions/17408815/fieldset-resizes-wrong-appears-to-have-unremovable-min-width-min-content/17863685#17863685>this Stack Overflow answer</a>.</p>';
+    output = '<p>For more information, read <a href="https://stackoverflow.com/questions/17408815/fieldset-resizes-wrong-appears-to-have-unremovable-min-width-min-content/17863685#17863685">this Stack Overflow answer</a>.</p>';
+    equal(minify(input), output);
+
+    input = '<html ⚡></html>';
+    equal(minify(input), input);
+
     // https://github.com/kangax/html-minifier/issues/41
     equal(minify('<some-tag-1></some-tag-1><some-tag-2></some-tag-2>'),
       '<some-tag-1></some-tag-1><some-tag-2></some-tag-2>'
@@ -71,7 +79,7 @@
     equal(minify(input), input);
     throws(function() {
       minify('<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123></tag>');
-    });
+    }, 'invalid attribute name');
 
     // https://github.com/kangax/html-minifier/issues/512
     input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"'
@@ -93,7 +101,7 @@
         + ' data-ng-pattern="vm.options.format"'
         + ' data-options="vm.datepickerOptions">'
       );
-    });
+    }, 'HTML comment inside tag');
   });
 
   test('options', function() {
@@ -1960,6 +1968,57 @@
     input = '<input checked="checked" data-attr="example" value="hello world!"/>';
     output = '<input checked data-attr=example value="hello world!"/>';
     equal(minify(input, options), output);
+  });
+
+  test('markups from Angular 2', function() {
+    input = '<template ngFor #hero [ngForOf]="heroes">\n' +
+            '  <hero-detail *ngIf="hero" [hero]="hero"></hero-detail>\n' +
+            '</template>\n' +
+            '<form (ngSubmit)="onSubmit(theForm)" #theForm="ngForm">\n' +
+            '  <div class="form-group">\n' +
+            '    <label for="name">Name</label>\n' +
+            '    <input class="form-control" required ngControl="firstName"\n' +
+            '      [(ngModel)]="currentHero.firstName">\n' +
+            '  </div>\n' +
+            '  <button type="submit" [disabled]="!theForm.form.valid">Submit</button>\n' +
+            '</form>';
+    output = '<template ngFor #hero [ngForOf]="heroes">\n' +
+             '  <hero-detail *ngIf="hero" [hero]="hero"></hero-detail>\n' +
+             '</template>\n' +
+             '<form (ngSubmit)="onSubmit(theForm)" #theForm="ngForm">\n' +
+             '  <div class="form-group">\n' +
+             '    <label for="name">Name</label>\n' +
+             '    <input class="form-control" required ngControl="firstName" [(ngModel)]="currentHero.firstName">\n' +
+             '  </div>\n' +
+             '  <button type="submit" [disabled]="!theForm.form.valid">Submit</button>\n' +
+             '</form>';
+    equal(minify(input, { caseSensitive: true }), output);
+    output = '<template ngFor #hero [ngForOf]=heroes>' +
+             '<hero-detail *ngIf=hero [hero]=hero></hero-detail>' +
+             '</template>' +
+             '<form (ngSubmit)=onSubmit(theForm) #theForm=ngForm>' +
+             '<div class=form-group>' +
+             '<label for=name>Name</label>' +
+             '<input class=form-control required ngControl=firstName [(ngModel)]=currentHero.firstName>' +
+             '</div>' +
+             '<button type=submit [disabled]=!theForm.form.valid>Submit</button>' +
+             '</form>';
+    equal(minify(input, {
+      caseSensitive: true,
+      collapseBooleanAttributes: true,
+      collapseWhitespace: true,
+      removeAttributeQuotes: true,
+      removeCDATASectionsFromCDATA: true,
+      removeComments: true,
+      removeCommentsFromCDATA: true,
+      removeEmptyAttributes: true,
+      removeOptionalTags: true,
+      removeRedundantAttributes: true,
+      removeScriptTypeAttributes: true,
+      removeStyleLinkTypeAttributes: true,
+      removeTagWhitespace: true,
+      useShortDoctype: true
+    }), output);
   });
 
   test('tests from PHPTAL', function() {

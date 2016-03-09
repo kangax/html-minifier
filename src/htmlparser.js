@@ -32,18 +32,20 @@
   'use strict';
 
   // Regular Expressions for parsing tags and attributes
-  var singleAttrIdentifier = /([\w:\.-]+)/,
+  var singleAttrIdentifier = /([^\s"'<>\/=]+)/,
       singleAttrAssign = /=/,
       singleAttrAssigns = [ singleAttrAssign ],
       singleAttrValues = [
-        /"((?:\\.|[^"])*)"/.source, // attr value double quotes
-        /'((?:\\.|[^'])*)'/.source, // attr value, single quotes
-        /([^>\s]+)/.source          // attr value, no quotes
+        // attr value double quotes
+        /"([^"]*)"+/.source,
+        // attr value, single quotes
+        /'([^']*)'+/.source,
+        // attr value, no quotes
+        /([^\s"'=<>`]+)/.source
       ],
       startTagOpen = /^<([\w:-]+)/,
-      startTagClose = /\s*(\/?)>/,
+      startTagClose = /^\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
-      endingSlash = /\/>$/,
       doctype = /^<!DOCTYPE [^>]+>/i;
 
   var IS_REGEX_CAPTURING_BROKEN = false;
@@ -73,72 +75,23 @@
 
   var reCache = {};
 
-  function startTagForHandler( handler ) {
-    var customStartTagAttrs;
-
-    var startTagAttr = new RegExp(
-        '[\\w:\\.-]+'
-      + '(?:\\s*'
-      +   '(?:' + joinSingleAttrAssigns(handler) + ')'
-      +   '\\s*(?:"[^"]*"+?|\'[^\']*\'+?|[^>\\s"\']+?)'
-      + ')?'
-    );
-
-    if ( handler.customAttrSurround ) {
-      var attrClauses = [];
-
-      for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-        // Capture the custom attribute opening and closing markup surrounding the standard attribute rules
-        attrClauses[i] = '(?:'
-          + handler.customAttrSurround[i][0].source
-          + '\\s*'
-          + startTagAttr.source
-          + '\\s*'
-          + handler.customAttrSurround[i][1].source
-          + ')';
-      }
-      attrClauses.unshift('(?:' + startTagAttr.source + ')');
-
-      customStartTagAttrs = new RegExp(
-        '((?:\\s*(?:' + attrClauses.join('|') + '))*)'
-      );
-    }
-    else {
-      // No custom attribute wrappers specified, so just capture the standard attribute rules
-      customStartTagAttrs = new RegExp('((?:\\s*' + startTagAttr.source + ')*)');
-    }
-
-    return new RegExp(startTagOpen.source + customStartTagAttrs.source + startTagClose.source);
-  }
-
-  function attrForHandler( handler ) {
-    var singleAttr = new RegExp(
-      singleAttrIdentifier.source
-      + '(?:\\s*'
-      + '(' + joinSingleAttrAssigns( handler ) + ')'
-      + '\\s*'
-      + '(?:'
-      + singleAttrValues.join('|')
-      + ')'
-      + ')?'
-    );
-
-    if ( handler.customAttrSurround ) {
+  function attrForHandler(handler) {
+    var pattern = singleAttrIdentifier.source
+      + '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')'
+      + '\\s*(?:' + singleAttrValues.join('|') + '))?';
+    if (handler.customAttrSurround) {
       var attrClauses = [];
       for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
         attrClauses[i] = '(?:'
           + '(' + handler.customAttrSurround[i][0].source + ')\\s*'
-          + singleAttr.source
+          + pattern
           + '\\s*(' + handler.customAttrSurround[i][1].source + ')'
           + ')';
       }
-      attrClauses.unshift('(?:' + singleAttr.source + ')');
-
-      return new RegExp(attrClauses.join('|'), 'g');
+      attrClauses.push('(?:' + pattern + ')');
+      pattern = '(?:' + attrClauses.join('|') + ')';
     }
-    else {
-      return new RegExp(singleAttr.source, 'g');
-    }
+    return new RegExp('^\\s*' + pattern);
   }
 
   function joinSingleAttrAssigns( handler ) {
@@ -151,8 +104,7 @@
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
     var stack = [], lastTag;
-    var startTag = startTagForHandler(handler);
-    var attr = attrForHandler(handler);
+    var attribute = attrForHandler(handler);
     var last, prevTag, nextTag;
     while ( html ) {
       last = html;
@@ -209,11 +161,11 @@
           }
 
           // Start tag:
-          var startTagMatch = html.match( startTag );
+          var startTagMatch = parseStartTag(html);
           if ( startTagMatch ) {
-            html = html.substring( startTagMatch[0].length );
-            startTagMatch[0].replace( startTag, parseStartTag );
-            prevTag = startTagMatch[1].toLowerCase();
+            html = startTagMatch.rest;
+            handleStartTag(startTagMatch);
+            prevTag = startTagMatch.tagName.toLowerCase();
             continue;
           }
         }
@@ -229,9 +181,9 @@
         }
 
         // next tag
-        var nextTagMatch = html.match( startTag );
+        var nextTagMatch = parseStartTag(html);
         if (nextTagMatch) {
-          nextTag = nextTagMatch[1];
+          nextTag = nextTagMatch.tagName;
         }
         else {
           nextTagMatch = html.match( endTag );
@@ -280,8 +232,30 @@
       parseEndTag();
     }
 
-    function parseStartTag( tag, tagName, rest, unary ) {
-      var unarySlash = false;
+    function parseStartTag(input) {
+      var start = input.match(startTagOpen);
+      if (start) {
+        var match = {
+          tagName: start[1],
+          attrs: []
+        };
+        input = input.slice(start[0].length);
+        var end, attr;
+        while (!(end = input.match(startTagClose)) && (attr = input.match(attribute))) {
+          input = input.slice(attr[0].length);
+          match.attrs.push(attr);
+        }
+        if (end) {
+          match.unarySlash = end[1];
+          match.rest = input.slice(end[0].length);
+          return match;
+        }
+      }
+    }
+
+    function handleStartTag(match) {
+      var tagName = match.tagName;
+      var unarySlash = match.unarySlash;
 
       if (handler.html5 && lastTag && phrasingOnly[lastTag] && !phrasing[tagName]) {
         parseEndTag( '', lastTag );
@@ -297,71 +271,61 @@
         parseEndTag( '', tagName );
       }
 
-      unary = empty[ tagName ] || tagName === 'html' && lastTag === 'head' || !!unary;
+      var unary = empty[ tagName ] || tagName === 'html' && lastTag === 'head' || !!unarySlash;
 
-      var attrs = [];
-
-      rest.replace(attr, function () {
+      var attrs = match.attrs.map(function(args) {
         var name, value, fallbackValue, customOpen, customClose, customAssign, quote;
         var ncp = 7; // number of captured parts, scalar
 
         // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
-        if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
-          if (arguments[3] === '') { arguments[3] = undefined; }
-          if (arguments[4] === '') { arguments[4] = undefined; }
-          if (arguments[5] === '') { arguments[5] = undefined; }
+        if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
+          if (args[3] === '') { args[3] = undefined; }
+          if (args[4] === '') { args[4] = undefined; }
+          if (args[5] === '') { args[5] = undefined; }
         }
 
-        name = arguments[1];
-        if ( name ) {
-          customAssign = arguments[2];
-          fallbackValue = arguments[3];
-          value = fallbackValue || arguments[4] || arguments[5];
-
-          if (customAssign) {
-            quote = arguments[0].charAt(name.length + customAssign.length);
-            quote = (quote === '\'' || quote === '"') ? quote : '';
-          }
-
-        }
-        else if ( handler.customAttrSurround ) {
-          for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-            name = arguments[i * ncp + 7];
-            customAssign = arguments[i * ncp + 8];
-            if ( name ) {
-              fallbackValue = arguments[i * ncp + 9];
-              value = fallbackValue
-                || arguments[i * ncp + 10]
-                || arguments[i * ncp + 11];
-              customOpen = arguments[i * ncp + 6];
-              customClose = arguments[i * ncp + 12];
+        var j = 1;
+        if (handler.customAttrSurround) {
+          for (var i = 0, l = handler.customAttrSurround.length; i < l; i++, j += ncp) {
+            name = args[j + 1];
+            customAssign = args[j + 2];
+            if (name) {
+              fallbackValue = args[j + 3];
+              value = fallbackValue || args[j + 4] || args[j + 5];
+              quote = fallbackValue ? '"' : value ? '\'' : '';
+              customOpen = args[j];
+              customClose = args[j + 6];
               break;
             }
           }
         }
 
-        if ( value === undefined ) {
+        if (!name && (name = args[j])) {
+          customAssign = args[j + 1];
+          fallbackValue = args[j + 2];
+          value = fallbackValue || args[j + 3] || args[j + 4];
+          quote = fallbackValue ? '"' : value ? '\'' : '';
+        }
+
+        if (value === undefined) {
           value = fillAttrs[name] ? name : fallbackValue;
         }
 
-        attrs.push({
+        return {
           name: name,
           value: value,
           customAssign: customAssign || '=',
           customOpen:  customOpen || '',
           customClose: customClose || '',
           quote: quote || ''
-        });
+        };
       });
 
       if ( !unary ) {
         stack.push( { tag: tagName, attrs: attrs } );
         lastTag = tagName;
+        unarySlash = '';
       }
-      else {
-        unarySlash = tag.match( endingSlash );
-      }
-
 
       if ( handler.start ) {
         handler.start( tagName, attrs, unary, unarySlash );
