@@ -18,6 +18,7 @@
       collapseWhitespace:             byId('collapse-whitespace').checked,
       conservativeCollapse:           byId('conservative-collapse').checked,
       collapseBooleanAttributes:      byId('collapse-boolean-attributes').checked,
+      removeTagWhitespace:            byId('remove-tag-whitespace').checked,
       removeAttributeQuotes:          byId('remove-attribute-quotes').checked,
       removeRedundantAttributes:      byId('remove-redundant-attributes').checked,
       useShortDoctype:                byId('use-short-doctype').checked,
@@ -97,6 +98,7 @@
     var inputEls = byId('options').getElementsByTagName('input');
     inputEls[10].checked = false;
     inputEls[11].checked = false;
+    inputEls[13].checked = false;
     inputEls[18].checked = false;
     return false;
   };

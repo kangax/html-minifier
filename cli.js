@@ -4,7 +4,7 @@
  *
  * The MIT License (MIT)
  *
- *  Copyright (c) 2014-2015 Zoltan Frombach
+ *  Copyright (c) 2014-2016 Zoltan Frombach
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of
  *  this software and associated documentation files (the "Software"), to deal in
@@ -47,8 +47,8 @@ cli.option_width = 40;
 cli.setApp(appName, appVersion);
 
 var usage = appName + ' [OPTIONS] [FILE(s)]\n\n';
-usage += '  If no input file(s) specified then STDIN will be used for input.\n';
-usage += '  If more than one input file specified those will be concatenated and minified together.\n\n';
+usage += '  If no input files are specified then STDIN will be used for input.\n';
+usage += '  If more than one input file is specified then those will be concatenated and minified together.\n\n';
 usage += '  When you specify a config file with the --config-file option (see sample-cli-config-file.conf for format)\n';
 usage += '    you can still override some of its contents by providing individual command line options, too.\n\n';
 usage += '  When you want to provide an array of strings for --ignore-custom-comments or --process-scripts options\n';
@@ -65,6 +65,7 @@ var mainOptions = {
   preserveLineBreaks: [[false, 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.']],
   collapseInlineTagWhitespace: [[false, 'Collapse white space around inline tag']],
   collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes']],
+  removeTagWhitespace: [[false, 'Remove space between attributes whenever possible.']],
   removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
   removeRedundantAttributes: [[false, 'Remove attributes when value matches default.']],
   preventAttributesEscaping: [[false, 'Prevents the escaping of the values of attributes.']],
@@ -79,10 +80,12 @@ var mainOptions = {
   caseSensitive: [[false, 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)']],
   minifyJS: [[false, 'Minify Javascript in script elements and on* attributes (uses UglifyJS)']],
   minifyCSS: [[false, 'Minify CSS in style elements and style attributes (uses clean-css)']],
-  minifyURLs: [[false, 'Minify URLs in various attributes (uses relateurl)']],
+  minifyURLs: [[false, 'Minify URLs in various attributes (uses relateurl)', 'string'], 'site-url'],
   ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json-regex'],
-  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json-regex'],
+  ignoreCustomFragments: [[false, 'Array of regex\'es that allow to ignore certain fragments, when matched (e.g. <?php ... ?>, {{ ... }})', 'string'], 'json-regex'],
+  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json'],
   maxLineLength: [[false, 'Max line length', 'number'], true],
+  customEventAttributes: [[false, 'Arrays of regex\'es that allow to support custom event attributes for minifyJS (e.g. ng-click)', 'string'], 'json-regex'],
   customAttrAssign: [[false, 'Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', 'string'], 'json-regex'],
   customAttrSurround: [[false, 'Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', 'string'], 'json-regex'],
   customAttrCollapse: [[false, 'Regex that specifies custom attribute to strip newlines from (e.g. /ng\-class/)', 'string'], 'string-regex']
@@ -165,7 +168,7 @@ cli.main(function(args, options) {
     catch (e) {
       status = 3;
       cli.error('Minification error');
-      process.stderr.write(e);
+      process.stderr.write((e.stack || e).toString());
     }
 
     if (minifyOptions.lint) {
@@ -175,7 +178,7 @@ cli.main(function(args, options) {
     if (minified !== null) {
       // Write the output
       try {
-        if (output !== null) {
+        if (output != null) {
           fs.writeFileSync(path.resolve(output), minified);
         }
         else {
@@ -189,7 +192,7 @@ cli.main(function(args, options) {
       }
     }
 
-    cli.exit(status);
+    return status;
   }
 
   function createDirectory(path) {
@@ -197,31 +200,34 @@ cli.main(function(args, options) {
       fs.mkdirSync(path);
     }
     catch (e) {
-      if (e.code === 'EEXIST') {
-        return;
+      if (e.code !== 'EEXIST') {
+        cli.fatal('Can not create directory ' + path);
+        return 3;
       }
-      cli.fatal('Can not create directory ' + path);
-      cli.exit(3);
     }
+    return 0;
   }
 
   function processDirectory(inputDir, outputDir) {
-    createDirectory(outputDir);
     var fileList = fs.readdirSync(inputDir);
+    var status = createDirectory(outputDir);
 
-    fileList.forEach(function(fileName) {
+    for (var i = 0; status === 0 && i < fileList.length; i++) {
+      var fileName = fileList[i];
       var inputFilePath = inputDir + '/' + fileName;
       var outputFilePath = outputDir + '/' + fileName;
 
       var stat = fs.statSync(inputFilePath);
       if (stat.isDirectory()) {
-        processDirectory(inputFilePath, outputFilePath);
-        return;
+        status = processDirectory(inputFilePath, outputFilePath);
       }
+      else {
+        var originalContent = fs.readFileSync(inputFilePath, 'utf8');
+        status = runMinify(originalContent, outputFilePath);
+      }
+    }
 
-      var originalContent = fs.readFileSync(inputFilePath, 'utf8');
-      runMinify(originalContent, outputFilePath);
-    });
+    return status;
   }
 
   if (options.version) {
@@ -233,13 +239,13 @@ cli.main(function(args, options) {
     var fileOptions;
     var fileOptionsPath = path.resolve(options['config-file']);
     try {
-      fs.accessSync(fileOptionsPath, fs.R_OK);
+      fileOptions = fs.readFileSync(fileOptionsPath, { encoding: 'utf8' });
     }
     catch (e) {
       cli.fatal('The specified config file doesn’t exist or is unreadable:\n' + fileOptionsPath);
     }
     try {
-      fileOptions = JSON.parse(fs.readFileSync(fileOptionsPath), 'utf8');
+      fileOptions = JSON.parse(fileOptions);
     }
     catch (je) {
       try {
@@ -268,6 +274,9 @@ cli.main(function(args, options) {
         case 'string-regex':
           minifyOptions[key] = stringToRegExp(value);
           break;
+        case 'site-url':
+          minifyOptions[key] = { site: value };
+          break;
         case true:
           minifyOptions[key] = value;
           break;
@@ -290,7 +299,7 @@ cli.main(function(args, options) {
     var outputDir = options['output-dir'];
 
     if (!inputDir) {
-      cli.error('The option output-dir need to be use with the option include-dir. If you are working with only 1 file, use -o.');
+      cli.error('The option output-dir needs to be used with the option input-dir. If you are working with a single file, use -o.');
       cli.exit(2);
     }
 
@@ -298,7 +307,7 @@ cli.main(function(args, options) {
       fs.statSync(inputDir);
     }
     catch (e) {
-      cli.error('The input directory does not exits');
+      cli.error('The input directory does not exist');
       cli.exit(2);
     }
 
@@ -309,16 +318,13 @@ cli.main(function(args, options) {
     }
 
     try {
-      processDirectory(inputDir, outputDir);
+      cli.exit(processDirectory(inputDir, outputDir));
     }
     catch (e) {
-      cli.error('Something wrong happened');
+      cli.error('Error while processing input files');
       cli.error(e);
       cli.exit(3);
     }
-
-    cli.exit(0);
-    return;
   }
 
   if (options.output) {
@@ -339,7 +345,7 @@ cli.main(function(args, options) {
       }
     });
 
-    runMinify(original, output);
+    cli.exit(runMinify(original, output));
 
   }
   else { // Minifying input coming from STDIN

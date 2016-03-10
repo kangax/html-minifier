@@ -32,18 +32,20 @@
   'use strict';
 
   // Regular Expressions for parsing tags and attributes
-  var singleAttrIdentifier = /([\w:\.-]+)/,
+  var singleAttrIdentifier = /([^\s"'<>\/=]+)/,
       singleAttrAssign = /=/,
       singleAttrAssigns = [ singleAttrAssign ],
       singleAttrValues = [
-        /"((?:\\.|[^"])*)"/.source, // attr value double quotes
-        /'((?:\\.|[^'])*)'/.source, // attr value, single quotes
-        /([^>\s]+)/.source          // attr value, no quotes
+        // attr value double quotes
+        /"([^"]*)"+/.source,
+        // attr value, single quotes
+        /'([^']*)'+/.source,
+        // attr value, no quotes
+        /([^\s"'=<>`]+)/.source
       ],
       startTagOpen = /^<([\w:-]+)/,
-      startTagClose = /\s*(\/?)>/,
+      startTagClose = /^\s*(\/?)>/,
       endTag = /^<\/([\w:-]+)[^>]*>/,
-      endingSlash = /\/>$/,
       doctype = /^<!DOCTYPE [^>]+>/i;
 
   var IS_REGEX_CAPTURING_BROKEN = false;
@@ -51,13 +53,10 @@
     IS_REGEX_CAPTURING_BROKEN = g === '';
   });
 
-  // Empty Elements - HTML 4.01
-  var empty = makeMap('area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed,wbr');
+  // Empty Elements
+  var empty = makeMap('area,base,basefont,br,col,embed,frame,hr,img,input,isindex,keygen,link,meta,param,source,track,wbr');
 
-  // Block Elements - HTML 4.01
-  // var block = makeMap('address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul');
-
-  // Inline Elements - HTML 4.01
+  // Inline Elements
   var inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var');
 
   // Elements that you can, intentionally, leave open
@@ -70,73 +69,29 @@
   // Special Elements (can contain anything)
   var special = makeMap('script,style');
 
-  var reCache = {}, stackedTag, reStackedTag, tagMatch;
+  // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
+  var phrasingOnly = makeMap('abbr,b,bdi,bdo,button,cite,code,data,dfn,em,h1,h2,h3,h4,h5,h6,i,kbd,label,legend,mark,meter,output,p,pre,progress,q,rp,rt,s,samp,small,span,strong,sub,sup,time,u,var');
+  var phrasing = makeMap('a,abbr,area,audio,b,bdi,bdo,br,button,canvas,cite,code,data,datalist,del,dfn,em,embed,i,iframe,img,input,ins,kbd,keygen,label,link,main,map,mark,math,menu,meter,nav,noscript,object,ol,output,p,picture,pre,progress,q,ruby,s,samp,script,section,select,small,span,strong,sub,sup,svg,table,template,textarea,time,u,ul,var,video,wbr');
 
-  function startTagForHandler( handler ) {
-    var customStartTagAttrs;
+  var reCache = {};
 
-    var startTagAttrs = new RegExp(
-        '(?:\\s*[\\w:\\.-]+'
-      +   '(?:\\s*'
-      +     '(?:' + joinSingleAttrAssigns(handler) + ')'
-      +     '\\s*(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>\\s]+)'
-      +   ')?'
-      + ')*'
-    );
-
-    if ( handler.customAttrSurround ) {
-      var attrClauses = [];
-
-      for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-        // Capture the custom attribute opening and closing markup surrounding the standard attribute rules
-        attrClauses[i] = '(?:\\s*'
-          + handler.customAttrSurround[i][0].source
-          + startTagAttrs.source
-          + handler.customAttrSurround[i][1].source
-          + ')';
-      }
-      attrClauses.unshift(startTagAttrs.source);
-
-      customStartTagAttrs = new RegExp(
-        '((?:' + attrClauses.join('|') + ')*)'
-      );
-    }
-    else {
-      // No custom attribute wrappers specified, so just capture the standard attribute rules
-      customStartTagAttrs = new RegExp('(' + startTagAttrs.source + ')');
-    }
-
-    return new RegExp(startTagOpen.source + customStartTagAttrs.source + startTagClose.source);
-  }
-
-  function attrForHandler( handler ) {
-    var singleAttr = new RegExp(
-      singleAttrIdentifier.source
-      + '(?:\\s*'
-      + '(' + joinSingleAttrAssigns( handler ) + ')'
-      + '\\s*'
-      + '(?:'
-      + singleAttrValues.join('|')
-      + ')'
-      + ')?'
-    );
-
-    if ( handler.customAttrSurround ) {
+  function attrForHandler(handler) {
+    var pattern = singleAttrIdentifier.source
+      + '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')'
+      + '\\s*(?:' + singleAttrValues.join('|') + '))?';
+    if (handler.customAttrSurround) {
       var attrClauses = [];
       for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
         attrClauses[i] = '(?:'
-          + '(' + handler.customAttrSurround[i][0].source + ')'
-          + singleAttr.source
-          + '(' + handler.customAttrSurround[i][1].source + ')'
+          + '(' + handler.customAttrSurround[i][0].source + ')\\s*'
+          + pattern
+          + '\\s*(' + handler.customAttrSurround[i][1].source + ')'
           + ')';
       }
-      attrClauses.unshift('(?:' + singleAttr.source + ')');
-
-      return new RegExp(attrClauses.join('|'), 'g');
+      attrClauses.push('(?:' + pattern + ')');
+      pattern = '(?:' + attrClauses.join('|') + ')';
     }
-    else {
-      return new RegExp(singleAttr.source, 'g');
-    }
+    return new RegExp('^\\s*' + pattern);
   }
 
   function joinSingleAttrAssigns( handler ) {
@@ -148,132 +103,107 @@
   }
 
   var HTMLParser = global.HTMLParser = function( html, handler ) {
-    var index, chars, match, stack = [], last = html, prevTag, nextTag;
-    stack.last = function() {
-      var last = this[ this.length - 1 ];
-      return last && last.tag;
-    };
-
-    var startTag = startTagForHandler(handler);
-    var attr = attrForHandler(handler);
-
+    var stack = [], lastTag;
+    var attribute = attrForHandler(handler);
+    var last, prevTag, nextTag;
     while ( html ) {
-      chars = true;
-
+      last = html;
       // Make sure we're not in a script or style element
-      if ( !stack.last() || !special[ stack.last() ] ) {
+      if ( !lastTag || !special[ lastTag ] ) {
+        var textEnd = html.indexOf('<');
+        if (textEnd === 0) {
+          // Comment:
+          if ( /^<!--/.test( html ) ) {
+            var commentEnd = html.indexOf('-->');
 
-        // Comment:
-        if ( /^<!--/.test( html ) ) {
-          index = html.indexOf('-->');
-
-          if ( index >= 0 ) {
-            if ( handler.comment ) {
-              handler.comment( html.substring( 4, index ) );
+            if ( commentEnd >= 0 ) {
+              if ( handler.comment ) {
+                handler.comment( html.substring( 4, commentEnd ) );
+              }
+              html = html.substring( commentEnd + 3 );
+              prevTag = '';
+              continue;
             }
-            html = html.substring( index + 3 );
-            chars = false;
           }
-        }
 
-        // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
-        if ( /^<!\[/.test( html ) ) {
-          index = html.indexOf(']>');
+          // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+          if ( /^<!\[/.test( html ) ) {
+            var conditionalEnd = html.indexOf(']>');
 
-          if (index >= 0) {
-            if ( handler.comment ) {
-              handler.comment( html.substring(2, index + 1 ), true /* non-standard */ );
+            if (conditionalEnd >= 0) {
+              if ( handler.comment ) {
+                handler.comment( html.substring(2, conditionalEnd + 1 ), true /* non-standard */ );
+              }
+              html = html.substring( conditionalEnd + 2 );
+              prevTag = '';
+              continue;
             }
-            html = html.substring( index + 2 );
-            chars = false;
           }
-        }
 
-        // Ignored elements?
-        else if ( /^<\?/.test( html ) ) {
-          index = html.indexOf( '?>', 2 );
-          if ( index >= 0 ) {
-            if ( handler.chars ) {
-              handler.chars( html.substring( 0, index + 2 ) );
+          // Doctype:
+          var doctypeMatch = html.match( doctype );
+          if ( doctypeMatch ) {
+            if ( handler.doctype ) {
+              handler.doctype( doctypeMatch[0] );
             }
-            html = html.substring( index + 2 );
+            html = html.substring( doctypeMatch[0].length );
+            prevTag = '';
+            continue;
+          }
+
+          // End tag:
+          var endTagMatch = html.match( endTag );
+          if ( endTagMatch ) {
+            html = html.substring( endTagMatch[0].length );
+            endTagMatch[0].replace( endTag, parseEndTag );
+            prevTag = '/' + endTagMatch[1].toLowerCase();
+            continue;
+          }
+
+          // Start tag:
+          var startTagMatch = parseStartTag(html);
+          if ( startTagMatch ) {
+            html = startTagMatch.rest;
+            handleStartTag(startTagMatch);
+            prevTag = startTagMatch.tagName.toLowerCase();
+            continue;
           }
         }
 
-        else if ( /^<%/.test( html ) ) {
-          index = html.indexOf( '%>', 2 );
-          if ( index >= 0 ) {
-            if ( handler.chars ) {
-              handler.chars(html.substring( 0, index + 2) );
-            }
-            html = html.substring( index + 2 );
-          }
+        var text;
+        if (textEnd >= 0) {
+          text = html.substring( 0, textEnd );
+          html = html.substring( textEnd );
+        }
+        else {
+          text = html;
+          html = '';
         }
 
-        // Doctype:
-        else if ( (match = doctype.exec( html )) ) {
-          if ( handler.doctype ) {
-            handler.doctype( match[0] );
-          }
-          html = html.substring( match[0].length );
-          chars = false;
+        // next tag
+        var nextTagMatch = parseStartTag(html);
+        if (nextTagMatch) {
+          nextTag = nextTagMatch.tagName;
         }
-
-        // End tag:
-        else if ( /^<\//.test( html ) ) {
-          match = html.match( endTag );
-
-          if ( match ) {
-            html = html.substring( match[0].length );
-            match[0].replace( endTag, parseEndTag );
-            prevTag = '/' + match[1].toLowerCase();
-            chars = false;
-          }
-
-        }
-        // Start tag:
-        else if ( /^</.test( html ) ) {
-          match = html.match( startTag );
-          if ( match ) {
-            html = html.substring( match[0].length );
-            match[0].replace( startTag, parseStartTag );
-            prevTag = match[1].toLowerCase();
-            chars = false;
-          }
-        }
-
-        if ( chars ) {
-          index = html.indexOf('<');
-
-          var text = index < 0 ? html : html.substring( 0, index );
-          html = index < 0 ? '' : html.substring( index );
-
-          // next tag
-          tagMatch = html.match( startTag );
-          if (tagMatch) {
-            nextTag = tagMatch[1];
+        else {
+          nextTagMatch = html.match( endTag );
+          if (nextTagMatch) {
+            nextTag = '/' + nextTagMatch[1];
           }
           else {
-            tagMatch = html.match( endTag );
-            if (tagMatch) {
-              nextTag = '/' + tagMatch[1];
-            }
-            else {
-              nextTag = '';
-            }
+            nextTag = '';
           }
-
-          if ( handler.chars ) {
-            handler.chars(text, prevTag, nextTag);
-          }
-
         }
+
+        if ( handler.chars ) {
+          handler.chars(text, prevTag, nextTag);
+        }
+        prevTag = '';
 
       }
       else {
-
-        stackedTag = stack.last().toLowerCase();
-        reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
+        var stackedTag = lastTag.toLowerCase();
+        var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
 
         html = html.replace(reStackedTag, function(all, text) {
           if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
@@ -289,96 +219,113 @@
           return '';
         });
 
-        parseEndTag( '', stackedTag );
+        parseEndTag( '</' + stackedTag + '>', stackedTag );
       }
 
       if ( html === last ) {
         throw 'Parse Error: ' + html;
       }
-      last = html;
     }
 
-    // Clean up any remaining tags
-    parseEndTag();
+    if (!handler.partialMarkup) {
+      // Clean up any remaining tags
+      parseEndTag();
+    }
 
-    function parseStartTag( tag, tagName, rest, unary ) {
-      var unarySlash = false;
+    function parseStartTag(input) {
+      var start = input.match(startTagOpen);
+      if (start) {
+        var match = {
+          tagName: start[1],
+          attrs: []
+        };
+        input = input.slice(start[0].length);
+        var end, attr;
+        while (!(end = input.match(startTagClose)) && (attr = input.match(attribute))) {
+          input = input.slice(attr[0].length);
+          match.attrs.push(attr);
+        }
+        if (end) {
+          match.unarySlash = end[1];
+          match.rest = input.slice(end[0].length);
+          return match;
+        }
+      }
+    }
 
-      while ( !handler.html5 && stack.last() && inline[ stack.last() ]) {
-        parseEndTag( '', stack.last() );
+    function handleStartTag(match) {
+      var tagName = match.tagName;
+      var unarySlash = match.unarySlash;
+
+      if (handler.html5 && lastTag && phrasingOnly[lastTag] && !phrasing[tagName]) {
+        parseEndTag( '', lastTag );
       }
 
-      if ( closeSelf[ tagName ] && stack.last() === tagName ) {
+      if (!handler.html5) {
+        while (lastTag && inline[ lastTag ]) {
+          parseEndTag( '', lastTag );
+        }
+      }
+
+      if ( closeSelf[ tagName ] && lastTag === tagName ) {
         parseEndTag( '', tagName );
       }
 
-      unary = empty[ tagName ] || !!unary;
+      var unary = empty[ tagName ] || tagName === 'html' && lastTag === 'head' || !!unarySlash;
 
-      var attrs = [];
-
-      rest.replace(attr, function () {
+      var attrs = match.attrs.map(function(args) {
         var name, value, fallbackValue, customOpen, customClose, customAssign, quote;
         var ncp = 7; // number of captured parts, scalar
 
         // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
-        if (IS_REGEX_CAPTURING_BROKEN && arguments[0].indexOf('""') === -1) {
-          if (arguments[3] === '') { arguments[3] = undefined; }
-          if (arguments[4] === '') { arguments[4] = undefined; }
-          if (arguments[5] === '') { arguments[5] = undefined; }
+        if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
+          if (args[3] === '') { args[3] = undefined; }
+          if (args[4] === '') { args[4] = undefined; }
+          if (args[5] === '') { args[5] = undefined; }
         }
 
-        name = arguments[1];
-        if ( name ) {
-          customAssign = arguments[2];
-          fallbackValue = arguments[3];
-          value = fallbackValue || arguments[4] || arguments[5];
-
-          if (customAssign) {
-            quote = arguments[0].charAt(name.length + customAssign.length);
-            quote = (quote === '\'' || quote === '"') ? quote : '';
-          }
-
-        }
-        else if ( handler.customAttrSurround ) {
-          for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
-            name = arguments[i * ncp + 7];
-            customAssign = arguments[i * ncp + 8];
-            if ( name ) {
-              fallbackValue = arguments[i * ncp + 9];
-              value = fallbackValue
-                || arguments[i * ncp + 10]
-                || arguments[i * ncp + 11];
-              customOpen = arguments[i * ncp + 6];
-              customClose = arguments[i * ncp + 12];
+        var j = 1;
+        if (handler.customAttrSurround) {
+          for (var i = 0, l = handler.customAttrSurround.length; i < l; i++, j += ncp) {
+            name = args[j + 1];
+            customAssign = args[j + 2];
+            if (name) {
+              fallbackValue = args[j + 3];
+              value = fallbackValue || args[j + 4] || args[j + 5];
+              quote = fallbackValue ? '"' : value ? '\'' : '';
+              customOpen = args[j];
+              customClose = args[j + 6];
               break;
             }
           }
         }
 
-        if ( value === undefined ) {
+        if (!name && (name = args[j])) {
+          customAssign = args[j + 1];
+          fallbackValue = args[j + 2];
+          value = fallbackValue || args[j + 3] || args[j + 4];
+          quote = fallbackValue ? '"' : value ? '\'' : '';
+        }
+
+        if (value === undefined) {
           value = fillAttrs[name] ? name : fallbackValue;
         }
 
-        attrs.push({
+        return {
           name: name,
           value: value,
-          escaped: value && value.replace(/(^|.)("+)/g, function(match) {
-            return match.replace(/"/g, '&quot;');
-          }),
           customAssign: customAssign || '=',
           customOpen:  customOpen || '',
           customClose: customClose || '',
           quote: quote || ''
-        });
+        };
       });
 
       if ( !unary ) {
         stack.push( { tag: tagName, attrs: attrs } );
+        lastTag = tagName;
+        unarySlash = '';
       }
-      else {
-        unarySlash = tag.match( endingSlash );
-      }
-
 
       if ( handler.start ) {
         handler.start( tagName, attrs, unary, unarySlash );
@@ -406,12 +353,13 @@
         // Close all the open elements, up the stack
         for ( var i = stack.length - 1; i >= pos; i-- ) {
           if ( handler.end ) {
-            handler.end( stack[ i ].tag, stack[ i ].attrs );
+            handler.end( stack[ i ].tag, stack[ i ].attrs, i > pos || !tag );
           }
         }
 
         // Remove the open elements from the stack
         stack.length = pos;
+        lastTag = pos && stack[ pos - 1 ].tag;
       }
     }
   };
@@ -424,7 +372,7 @@
         results += '<' + tag;
 
         for ( var i = 0; i < attrs.length; i++ ) {
-          results += ' ' + attrs[i].name + '="' + attrs[i].escaped + '"';
+          results += ' ' + attrs[i].name + '="' + (attrs[i].value || '').replace(/"/g, '&#34;') + '"';
         }
 
         results += (unary ? '/' : '') + '>';

@@ -30,7 +30,7 @@ module.exports = function(grunt) {
         src: 'assets/master.js'
       },
       other: {
-        src: 'benchmark.js'
+        src: ['backtest.js', 'benchmark.js']
       }
     },
 
@@ -56,8 +56,17 @@ module.exports = function(grunt) {
     },
 
     exec: {
+      'clean-css': {
+        command: 'npm run assets/clean-css'
+      },
+      relateurl: {
+        command: 'npm run assets/relateurl'
+      },
       test: {
         command: 'node ./test.js'
+      },
+      'uglify-js': {
+        command: 'npm run assets/uglify-js'
       }
     },
 
@@ -91,6 +100,12 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt, { scope: 'devDependencies' });
   require('time-grunt')(grunt);
 
+  grunt.registerTask('assets', [
+    'exec:clean-css',
+    'exec:relateurl',
+    'exec:uglify-js'
+  ]);
+
   grunt.registerTask('build', [
     'concat'
   ]);
@@ -104,7 +119,7 @@ module.exports = function(grunt) {
     'dist',
     'jshint',
     'jscs',
-    'exec'
+    'exec:test'
   ]);
 
   grunt.registerTask('default', 'test');
