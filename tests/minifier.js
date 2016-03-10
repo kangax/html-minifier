@@ -418,103 +418,103 @@
 
   test('cleaning class/style attributes', function() {
     input = '<p class=" foo bar  ">foo bar baz</p>';
-    equal(minify(input, { cleanAttributes: true }), '<p class="foo bar">foo bar baz</p>');
+    equal(minify(input), '<p class="foo bar">foo bar baz</p>');
 
     input = '<p class=" foo      ">foo bar baz</p>';
-    equal(minify(input, { cleanAttributes: true }), '<p class="foo">foo bar baz</p>');
-    equal(minify(input, { cleanAttributes: true, removeAttributeQuotes: true }), '<p class=foo>foo bar baz</p>');
+    equal(minify(input), '<p class="foo">foo bar baz</p>');
+    equal(minify(input, { removeAttributeQuotes: true }), '<p class=foo>foo bar baz</p>');
 
     input = '<p class="\n  \n foo   \n\n\t  \t\n   ">foo bar baz</p>';
     output = '<p class="foo">foo bar baz</p>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<p class="\n  \n foo   \n\n\t  \t\n  class1 class-23 ">foo bar baz</p>';
     output = '<p class="foo class1 class-23">foo bar baz</p>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<p style="    color: red; background-color: rgb(100, 75, 200);  "></p>';
     output = '<p style="color: red; background-color: rgb(100, 75, 200)"></p>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<p style="font-weight: bold  ; "></p>';
     output = '<p style="font-weight: bold"></p>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
   });
 
   test('cleaning URI-based attributes', function() {
     input = '<a href="   http://example.com  ">x</a>';
     output = '<a href="http://example.com">x</a>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<a href="  \t\t  \n \t  ">x</a>';
     output = '<a href="">x</a>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<img src="   http://example.com  " title="bleh   " longdesc="  http://example.com/longdesc \n\n   \t ">';
     output = '<img src="http://example.com" title="bleh   " longdesc="http://example.com/longdesc">';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<img src="" usemap="   http://example.com  ">';
     output = '<img src="" usemap="http://example.com">';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<form action="  somePath/someSubPath/someAction?foo=bar&baz=qux     "></form>';
     output = '<form action="somePath/someSubPath/someAction?foo=bar&baz=qux"></form>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<BLOCKQUOTE cite=" \n\n\n http://www.mycom.com/tolkien/twotowers.html     "><P>foobar</P></BLOCKQUOTE>';
     output = '<blockquote cite="http://www.mycom.com/tolkien/twotowers.html"><p>foobar</p></blockquote>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<head profile="       http://gmpg.org/xfn/11    "></head>';
     output = '<head profile="http://gmpg.org/xfn/11"></head>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<object codebase="   http://example.com  "></object>';
     output = '<object codebase="http://example.com"></object>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<span profile="   1, 2, 3  ">foo</span>';
-    equal(minify(input, { cleanAttributes: true }), input);
+    equal(minify(input), input);
 
     input = '<div action="  foo-bar-baz ">blah</div>';
-    equal(minify(input, { cleanAttributes: true }), input);
+    equal(minify(input), input);
   });
 
   test('cleaning Number-based attributes', function() {
     input = '<a href="#" tabindex="   1  ">x</a><button tabindex="   2  ">y</button>';
     output = '<a href="#" tabindex="1">x</a><button tabindex="2">y</button>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<input value="" maxlength="     5 ">';
     output = '<input value="" maxlength="5">';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<select size="  10   \t\t "><option>x</option></select>';
     output = '<select size="10"><option>x</option></select>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<textarea rows="   20  " cols="  30      "></textarea>';
     output = '<textarea rows="20" cols="30"></textarea>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<COLGROUP span="   40  "><COL span="  39 "></COLGROUP>';
     output = '<colgroup span="40"><col span="39"></colgroup>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<tr><td colspan="    2   ">x</td><td rowspan="   3 "></td></tr>';
     output = '<tr><td colspan="2">x</td><td rowspan="3"></td></tr>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
   });
 
   test('cleaning other attributes', function() {
     input = '<a href="#" onclick="  window.prompt(\'boo\'); " onmouseover=" \n\n alert(123)  \t \n\t  ">blah</a>';
     output = '<a href="#" onclick="window.prompt(\'boo\')" onmouseover="alert(123)">blah</a>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
 
     input = '<body onload="  foo();   bar() ;  "><p>x</body>';
     output = '<body onload="foo();   bar()"><p>x</p></body>';
-    equal(minify(input, { cleanAttributes: true }), output);
+    equal(minify(input), output);
   });
 
   test('removing redundant attributes (&lt;form method="get" ...>)', function() {
@@ -579,16 +579,16 @@
 
   test('removing redundant attributes (&lt;... = "javascript: ..." ...>)', function() {
     input = '<p onclick="javascript:alert(1)">x</p>';
-    equal(minify(input, { cleanAttributes: true }), '<p onclick="alert(1)">x</p>');
+    equal(minify(input), '<p onclick="alert(1)">x</p>');
 
     input = '<p onclick="javascript:x">x</p>';
-    equal(minify(input, { cleanAttributes: true, removeAttributeQuotes: true }), '<p onclick=x>x</p>');
+    equal(minify(input, { removeAttributeQuotes: true }), '<p onclick=x>x</p>');
 
     input = '<p onclick=" JavaScript: x">x</p>';
-    equal(minify(input, { cleanAttributes: true }), '<p onclick="x">x</p>');
+    equal(minify(input), '<p onclick="x">x</p>');
 
     input = '<p title="javascript:(function() { /* some stuff here */ })()">x</p>';
-    equal(minify(input, { cleanAttributes: true }), input);
+    equal(minify(input), input);
   });
 
   test('removing type="text/javascript" attributes', function() {
@@ -2019,6 +2019,27 @@
       removeTagWhitespace: true,
       useShortDoctype: true
     }), output);
+  });
+
+  test('auto-generated tags', function() {
+    input = '<p id=""class=""title="">x';
+    output = '<p id="" class="" title="">x';
+    equal(minify(input, { includeAutoGeneratedTags: false }), output);
+    output = '<p id="" class="" title="">x</p>';
+    equal(minify(input), output);
+    equal(minify(input, { includeAutoGeneratedTags: true }), output);
+
+    input = '<body onload="  foo();   bar() ;  "><p>x</body>';
+    output = '<body onload="foo();   bar()"><p>x</body>';
+    equal(minify(input, { includeAutoGeneratedTags: false }), output);
+
+    input = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
+    output = '<a href="#"><div>Well, look at me! I\'m a div!</div>';
+
+    equal(minify(input, { html5: false, includeAutoGeneratedTags: false }), output);
+
+    var options = { maxLineLength: 25, includeAutoGeneratedTags: false };
+    equal(minify('<p id=""class=""title="">x', options), '<p id="" class="" \ntitle="">x');
   });
 
   test('tests from PHPTAL', function() {
