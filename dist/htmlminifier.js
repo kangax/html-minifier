@@ -48,9 +48,26 @@
         // attr value, no quotes
         /([^\s"'=<>`]+)/.source
       ],
-      startTagOpen = /^<([:A-Za-z_][:\w\-\.]*)/,
+      // https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
+      qnameCapture = (function() {
+        var ncname;
+        if (typeof require === 'function') {
+          ncname = require('ncname');
+        }
+        else {
+          ncname = global.NCName;
+        }
+        if (ncname) {
+          ncname = ncname.source.slice(1, -1);
+        }
+        else {
+          ncname = '[:A-Za-z_][:\\w\\-\\.]*';
+        }
+        return '((?:' + ncname + '\\:)?' + ncname + ')';
+      })(),
+      startTagOpen = new RegExp('^<' + qnameCapture),
       startTagClose = /^\s*(\/?)>/,
-      endTag = /^<\/([:A-Za-z_][:\w\-\.]*)[^>]*>/,
+      endTag = new RegExp('^<\\/' + qnameCapture + '[^>]*>'),
       doctype = /^<!DOCTYPE [^>]+>/i;
 
   var IS_REGEX_CAPTURING_BROKEN = false;
