@@ -59,6 +59,9 @@ module.exports = function(grunt) {
       'clean-css': {
         command: 'npm run assets/clean-css'
       },
+      ncname: {
+        command: 'npm run assets/ncname'
+      },
       relateurl: {
         command: 'npm run assets/relateurl'
       },
@@ -102,6 +105,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('assets', [
     'exec:clean-css',
+    'exec:ncname',
     'exec:relateurl',
     'exec:uglify-js'
   ]);

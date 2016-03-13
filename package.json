@@ -35,6 +35,7 @@
   "scripts": {
     "assets": "grunt assets",
     "assets/clean-css": "browserify --standalone CleanCSS node_modules/clean-css/index.js | uglifyjs --compress --mangle -o assets/cleancss-browser.js",
+    "assets/ncname": "browserify node_modules/ncname/ --standalone NCName | uglifyjs --compress --mangle -o assets/ncname-browser.js",
     "assets/relateurl": "browserify node_modules/relateurl/ --standalone RelateUrl | uglifyjs --compress --mangle -o assets/relateurl-browser.js",
     "assets/uglify-js": "uglifyjs --self --compress --mangle -o assets/uglify.js",
     "test": "grunt test"
@@ -44,6 +45,7 @@
     "clean-css": "3.4.x",
     "cli": "0.11.x",
     "concat-stream": "1.5.x",
+    "ncname": "1.0.x",
     "relateurl": "0.2.x",
     "uglify-js": "2.6.x"
   },
