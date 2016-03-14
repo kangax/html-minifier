@@ -565,8 +565,12 @@
     };
   }
 
+  function compressWhitespace(spaces) {
+    return spaces === '\t' ? spaces : ' ';
+  }
+
   function collapseWhitespaceAll(str) {
-    return str ? str.replace(/[\t\n\r ]+/g, ' ') : str;
+    return str ? str.replace(/[\t\n\r ]+/g, compressWhitespace) : str;
   }
 
   function createMap(values) {
@@ -597,11 +601,11 @@
     }
 
     if (trimLeft) {
-      str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? compressWhitespace : '');
     }
 
     if (trimRight) {
-      str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? ' ' : '');
+      str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? compressWhitespace : '');
     }
 
     if (collapseAll) {
