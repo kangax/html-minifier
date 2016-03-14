@@ -784,7 +784,12 @@
         }
         var token = uidAttr + ignoredCustomMarkupChunks.length;
         ignoredCustomMarkupChunks.push(match);
-        return '\t' + token + '\t';
+        if (options.removeCustomFragmentsWrap === true) {
+          return token;
+        }
+        else {
+          return '\t' + token + '\t';
+        }
       });
     }
 
