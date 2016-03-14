@@ -1334,6 +1334,12 @@
     }), output);
   });
 
+  test('custom fragments space wrap', function() {
+    input = '<img src="{$assets}img/logo.png" class="class1{if !$something} class2{/if} class3" alt="Logo">';
+    output = '<img src="{$assets}img/logo.png" class="class1{if !$something} class2{/if} class3" alt="Logo">';
+    equal(minify(input, { removeCustomFragmentsWrap: true, ignoreCustomFragments: [/\{\/?.*?\}\s?/] }), output);
+  });
+
   test('bootstrap\'s span > button > span', function() {
     input = '<span class="input-group-btn">' +
       '\n  <button class="btn btn-default" type="button">' +
