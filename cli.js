@@ -25,8 +25,6 @@
  *
  */
 
-/* globals JSON:true */
-
 'use strict';
 
 var cli = require('cli');

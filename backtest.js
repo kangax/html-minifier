@@ -121,7 +121,7 @@ if (process.argv.length > 2) {
         return hash;
       });
       var nThreads = os.cpus().length;
-      var running = 0, ready = true;
+      var running = 0;
       var progress = new Progress('[:bar] :etas', {
         width: 50,
         total: commits.length * 2
@@ -141,7 +141,6 @@ if (process.argv.length > 2) {
           task.on('message', function(data) {
             if (data === 'ready') {
               progress.tick(1);
-              ready = true;
               fork();
             }
             else {
@@ -198,7 +197,6 @@ else {
                 throw err;
               }
               else {
-                /* global JSON: true */
                 minify(hash, JSON.parse(data));
               }
             });
