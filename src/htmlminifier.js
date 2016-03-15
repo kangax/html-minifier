@@ -357,9 +357,9 @@
   function removeCDATASections(text) {
     return text
       // "/* <![CDATA[ */" or "// <![CDATA["
-      .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
+      .replace(/^\/(?:\/.*?<!\[CDATA\[.*|\*[\s\S]*?(?!\*\/[\s\S]*?)<!\[CDATA\[[\s\S]*?\*\/)/, '')
       // "/* ]]> */" or "// ]]>"
-      .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
+      .replace(/\/(?:\*[\s\S]*?(?!\*\/[\s\S]*?)\]\]>[\s\S]*?\*\/|\/\s*\]\]>.*)$/, '');
   }
 
   function processScript(text, options, currentAttrs) {
@@ -372,17 +372,19 @@
     return text;
   }
 
-  var reStartDelimiter = {
-    // account for js + html comments (e.g.: //<!--)
-    script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
-    style: /^\s*<!--\s*/
-  };
-  var reEndDelimiter = {
-    script: /\s*(?:\/\/)?\s*-->\s*$/,
-    style: /\s*-->\s*$/
-  };
   function removeComments(text, tag) {
-    return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
+    switch (tag) {
+      case 'script':
+        return text
+          // "<!--" or "// <!--" or "/* <!-- */"
+          .replace(/^<!--.*|^\/(?:\/.*?<!--.*|\*[\s\S]*?(?!\*\/[\s\S]*?)<!--[\s\S]*?\*\/)/, '')
+          // "-->" or "// -->" or "/* --> */"
+          .replace(/(?!.*?\/\/).*?-->$|\/(?:\/\s*-->.*|\*[\s\S]*?(?!\*\/[\s\S]*?)-->[\s\S]*?\*\/)$/, '');
+      case 'style':
+        return text.replace(/^<!--|-->$/g, '');
+      default:
+        return text;
+    }
   }
 
   // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -1014,11 +1016,12 @@
           }
         }
         if (currentTag === 'script' || currentTag === 'style') {
+          text = trimWhitespace(text);
           if (options.removeCommentsFromCDATA) {
-            text = removeComments(text, currentTag);
+            text = trimWhitespace(removeComments(text, currentTag));
           }
           if (options.removeCDATASectionsFromCDATA) {
-            text = removeCDATASections(text);
+            text = trimWhitespace(removeCDATASections(text));
           }
           if (options.processScripts) {
             text = processScript(text, options, currentAttrs);
