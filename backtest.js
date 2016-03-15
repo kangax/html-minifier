@@ -197,7 +197,6 @@ else {
                 throw err;
               }
               else {
-                /* global JSON: true */
                 minify(hash, JSON.parse(data));
               }
             });

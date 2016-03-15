@@ -1,5 +1,3 @@
-/* jshint qunit:true */
-
 (function(global) {
   'use strict';
 

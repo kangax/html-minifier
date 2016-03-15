@@ -260,7 +260,6 @@ run(fileNames.map(function (fileName) {
           res.on('data', function (chunk) {
             response += chunk;
           }).on('end', function () {
-            /* global JSON: true */
             response = JSON.parse(response);
             var info = infos.compressor;
             if (response.success) {

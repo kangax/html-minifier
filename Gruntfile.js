@@ -31,48 +31,6 @@ module.exports = function(grunt) {
       }
     },
 
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc'
-      },
-      grunt: {
-        src: 'Gruntfile.js'
-      },
-      src: {
-        src: ['cli.js', 'src/**/*.js']
-      },
-      tests: {
-        src: ['tests/*.js', 'test.js']
-      },
-      web: {
-        src: 'assets/master.js'
-      },
-      other: {
-        src: ['backtest.js', 'benchmark.js']
-      }
-    },
-
-    jscs: {
-      options: {
-        config: '.jscsrc'
-      },
-      grunt: {
-        src: '<%= jshint.grunt.src %>'
-      },
-      src: {
-        src: '<%= jshint.src.src %>'
-      },
-      tests: {
-        src: '<%= jshint.tests.src %>'
-      },
-      web: {
-        src: '<%= jshint.web.src %>'
-      },
-      other: {
-        src: '<%= jshint.other.src %>'
-      }
-    },
-
     exec: {
       'clean-css': {
         command: 'npm run assets/clean-css'
@@ -140,8 +98,6 @@ module.exports = function(grunt) {
   grunt.registerTask('test', [
     'dist',
     'eslint',
-    'jshint',
-    'jscs',
     'exec:test'
   ]);
 
