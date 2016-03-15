@@ -1254,6 +1254,7 @@
     input = '<p{% if form.name.errors %}class=\'error\'{% endif %}>' +
               '{{ form.name.label_tag }}' +
               '{{ form.name }}' +
+              ' <label>{{ label }}</label> ' +
               '{% if form.name.errors %}' +
               '{% for error in form.name.errors %}' +
               '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }}</span>' +
@@ -1268,14 +1269,15 @@
       quoteCharacter: '\''
     }), input);
     output = '<p {% if form.name.errors %} class=\'error\' {% endif %}>' +
-              '{{ form.name.label_tag }}' +
-              '{{ form.name }}' +
-              '{% if form.name.errors %}' +
-              '{% for error in form.name.errors %} ' +
-              '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }} </span>' +
-              '{% endfor %}' +
-              '{% endif %}' +
-            '</p>';
+               '{{ form.name.label_tag }}' +
+               '{{ form.name }}' +
+               ' <label>{{ label }}</label> ' +
+               '{% if form.name.errors %}' +
+               '{% for error in form.name.errors %}' +
+               '<span class=\'error_msg\' style=\'color:#ff0000\'>{{ error }}</span>' +
+               '{% endfor %}' +
+               '{% endif %}' +
+             '</p>';
     equal(minify(input, {
       ignoreCustomFragments: [
         /\{\%[\s\S]*?\%\}/g,
@@ -1315,6 +1317,12 @@
       ignoreCustomFragments: [
         /\{\%[^\%]*?\%\}/g
       ]
+    }), input);
+
+    input = '<img class="titi.<%=tsItem_[0]%>">';
+    equal(minify(input), input);
+    equal(minify(input, {
+      collapseWhitespace: true
     }), input);
 
     input = '<table id="<?php echo $this->escapeHtmlAttr($this->table_id); ?>"></table>';
