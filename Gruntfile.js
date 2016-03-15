@@ -13,6 +13,24 @@ module.exports = function(grunt) {
             ' * Licensed under the <%= pkg.license %> license\n' +
             ' */\n',
 
+    eslint: {
+      grunt: {
+        src: 'Gruntfile.js'
+      },
+      src: {
+        src: ['cli.js', 'src/**/*.js']
+      },
+      tests: {
+        src: ['tests/*.js', 'test.js']
+      },
+      web: {
+        src: 'assets/master.js'
+      },
+      other: {
+        src: ['backtest.js', 'benchmark.js']
+      }
+    },
+
     jshint: {
       options: {
         jshintrc: '.jshintrc'
@@ -121,6 +139,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', [
     'dist',
+    'eslint',
     'jshint',
     'jscs',
     'exec:test'
