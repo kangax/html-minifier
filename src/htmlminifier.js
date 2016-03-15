@@ -615,119 +615,101 @@
         };
       }
     }
+
+    if (options.minifyURLs && typeof options.minifyURLs !== 'object') {
+      options.minifyURLs = { };
+    }
+
+    if (options.minifyJS) {
+      if (typeof options.minifyJS !== 'object') {
+        options.minifyJS = { };
+      }
+      options.minifyJS.fromString = true;
+      (options.minifyJS.output || (options.minifyJS.output = { })).inline_script = true;
+    }
+
+    if (options.minifyCSS) {
+      if (typeof options.minifyCSS !== 'object') {
+        options.minifyCSS = { };
+      }
+      if (typeof options.minifyCSS.advanced === 'undefined') {
+        options.minifyCSS.advanced = false;
+      }
+    }
   }
 
-  function minifyURLs(text, options) {
-    if (typeof options !== 'object') {
-      options = { };
-    }
-
-    try {
-      // try to get global reference first
-      var __RelateUrl = global.RelateUrl;
-
-      if (typeof __RelateUrl === 'undefined' && typeof require === 'function') {
-        __RelateUrl = require('relateurl');
-      }
-
-      // noop
-      if (!__RelateUrl) {
-        return text;
-      }
-
-      if (__RelateUrl.relate) {
-        return __RelateUrl.relate(text, options);
-      }
-      else {
-        return text;
-      }
-    }
-    catch (err) {
-      log(err);
-    }
+  function noop(text) {
     return text;
   }
 
-  function minifyJS(text, options) {
-    if (typeof options !== 'object') {
-      options = { };
+  function getModule(name, path) {
+    // try to get global reference first
+    var result = global[name];
+    if (typeof result === 'undefined' && typeof require === 'function') {
+      result = require(path);
     }
-    options.fromString = true;
-    var outputOptions = options.output || {};
-    outputOptions.inline_script = true;
-    options.output = outputOptions;
+    return result;
+  }
 
-    try {
-      // try to get global reference first
-      var __UglifyJS = global.UglifyJS;
-
-      if (typeof __UglifyJS === 'undefined' && typeof require === 'function') {
-        __UglifyJS = require('uglify-js');
-      }
-
-      // noop
-      if (!__UglifyJS) {
-        return text;
-      }
-
-      if (__UglifyJS.minify) {
-        return __UglifyJS.minify(text, options).code;
-      }
-      else if (__UglifyJS.parse) {
-
-        var ast = __UglifyJS.parse(text);
-        ast.figure_out_scope();
-
-        var compressor = __UglifyJS.Compressor();
-        var compressedAst = ast.transform(compressor);
-
-        compressedAst.figure_out_scope();
-        compressedAst.compute_char_frequency();
-
-        if (options.mangle !== false) {
-          compressedAst.mangle_names();
+  var minifyURLs = (function() {
+    var RelateUrl = getModule('RelateUrl', 'relateurl');
+    if (RelateUrl && RelateUrl.relate) {
+      return function(text, options) {
+        try {
+          return RelateUrl.relate(text, options);
         }
+        catch (err) {
+          log(err);
+          return text;
+        }
+      };
+    }
+    else {
+      return noop;
+    }
+  })();
 
-        var stream = __UglifyJS.OutputStream(options.output);
-        compressedAst.print(stream);
+  var minifyJS = (function() {
+    var UglifyJS = getModule('UglifyJS', 'uglify-js');
+    if (UglifyJS && UglifyJS.minify) {
+      return function(text, options) {
+        try {
+          return UglifyJS.minify(text, options).code;
+        }
+        catch (err) {
+          log(err);
+          return text;
+        }
+      };
+    }
+    else {
+      return noop;
+    }
+  })();
 
-        return stream.toString();
-      }
-      else {
-        return text;
-      }
+  var minifyCSS = (function() {
+    var CleanCSS = getModule('CleanCSS', 'clean-css');
+    if (CleanCSS) {
+      return function(text, options, inline) {
+        try {
+          var cleanCSS = new CleanCSS(options);
+          if (inline) {
+            return unwrapCSS(cleanCSS.minify(wrapCSS(text)).styles);
+          }
+          else {
+            return cleanCSS.minify(text).styles;
+          }
+        }
+        catch (err) {
+          log(err);
+          return text;
+        }
+      };
     }
-    catch (err) {
-      log(err);
+    else {
+      return noop;
     }
-    return text;
-  }
-
-  function minifyCSS(text, options, inline) {
-    if (typeof options !== 'object') {
-      options = { };
-    }
-    if (typeof options.advanced === 'undefined') {
-      options.advanced = false;
-    }
-    try {
-      var CleanCSS = global.CleanCSS;
-      if (typeof CleanCSS === 'undefined' && typeof require === 'function') {
-        CleanCSS = require('clean-css');
-      }
-      var cleanCSS = new CleanCSS(options);
-      if (inline) {
-        return unwrapCSS(cleanCSS.minify(wrapCSS(text)).styles);
-      }
-      else {
-        return cleanCSS.minify(text).styles;
-      }
-    }
-    catch (err) {
-      log(err);
-    }
-    return text;
-  }
+  })();
 
   function uniqueId(value) {
     var id;
