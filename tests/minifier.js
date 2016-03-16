@@ -1189,6 +1189,12 @@
     equal(minify(input, { html5: false }), output);
   });
 
+  test('phrasing content with Web Components', function() {
+    input = '<span><phrasing-element></phrasing-element></span>';
+    output = '<span><phrasing-element></phrasing-element></span>';
+    equal(minify(input, { html5: true }), output);
+  });
+
   // https://github.com/kangax/html-minifier/issues/10
   test('Ignore custom fragments', function() {
     var reFragments = [ /<\?[^\?]+\?>/, /<%[^%]+%>/, /\{\{[^\}]*\}\}/ ];
