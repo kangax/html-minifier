@@ -243,7 +243,7 @@
       }
 
       if ( html === last ) {
-        throw 'Parse Error: ' + html;
+        throw new Error('Parse Error: ' + html);
       }
     }
 
