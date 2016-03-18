@@ -883,9 +883,9 @@
   }
 
   function cleanConditionalComment(comment, options) {
-    return comment.replace(/^(\[if\s[^\]]+\]>)([\s\S]*?)(<!\[endif\])$/, function(match, prefix, text, suffix) {
+    return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+\]>)([\s\S]*?)(<!\[endif\])$/, function(match, prefix, text, suffix) {
       return prefix + minify(text, options, true) + suffix;
-    });
+    }) : comment;
   }
 
   function removeCDATASections(text) {
