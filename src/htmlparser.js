@@ -86,12 +86,9 @@
   // Special Elements (can contain anything)
   var special = makeMap('script,style');
 
+  // HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
   // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
-  var phrasingOnly = makeMap('abbr,b,bdi,bdo,button,cite,code,data,dfn,em,h1,h2,h3,h4,h5,h6,i,kbd,label,legend,mark,meter,output,p,pre,progress,q,rp,rt,s,samp,small,span,strong,sub,sup,time,u,var');
-  var phrasing = makeMap('a,abbr,area,audio,b,bdi,bdo,br,button,canvas,cite,code,data,datalist,del,dfn,em,embed,i,iframe,img,input,ins,kbd,keygen,label,link,main,map,mark,math,menu,meter,nav,noscript,object,ol,output,p,picture,pre,progress,q,ruby,s,samp,script,section,select,small,span,strong,sub,sup,svg,table,template,textarea,time,u,ul,var,video,wbr');
-
-  // List comes from https://html.spec.whatwg.org/multipage/indices.html#elements-3
-  var html5Tags = makeMap('a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,head,header,hgroup,hr,html,i,iframe,img,input,ins,kbd,keygen,label,legend,li,link,main,map,mark,math,menu,menuitem,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,small,source,source,span,strong,style,sub,summary,sup,svg,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,ul,var,video,wbr');
+  var nonPhrasing = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,title,tr,track');
 
   var reCache = {};
 
@@ -277,7 +274,7 @@
       var tagName = match.tagName;
       var unarySlash = match.unarySlash;
 
-      if (handler.html5 && lastTag && phrasingOnly[lastTag] && !phrasing[tagName] && html5Tags[tagName]) {
+      if (handler.html5 && lastTag === 'p' && nonPhrasing[tagName]) {
         parseEndTag( '', lastTag );
       }
 

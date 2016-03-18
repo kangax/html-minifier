@@ -1227,6 +1227,9 @@
     equal(minify(input, { html5: true }), output);
     output = '<p>a<div>b</div></p>';
     equal(minify(input, { html5: false }), output);
+
+    input = '<label>a<div>b</div>c</label>';
+    equal(minify(input, { html5: true }), input);
   });
 
   test('phrasing content with Web Components', function() {
