@@ -10,8 +10,10 @@
   });
 
   test('parsing non-trivial markup', function() {
-    equal(minify('</p>'), '<p></p>');
     equal(minify('</td>'), '');
+    equal(minify('</p>'), '<p></p>');
+    equal(minify('</br>'), '<br>');
+    equal(minify('<br>x</br>'), '<br>x<br>');
     equal(minify('<p title="</p>">x</p>'), '<p title="</p>">x</p>');
     equal(minify('<p title=" <!-- hello world --> ">x</p>'), '<p title=" <!-- hello world --> ">x</p>');
     equal(minify('<p title=" <![CDATA[ \n\n foobar baz ]]> ">x</p>'), '<p title=" <![CDATA[ \n\n foobar baz ]]> ">x</p>');
