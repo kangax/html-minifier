@@ -378,6 +378,14 @@
         stack.length = pos;
         lastTag = pos && stack[ pos - 1 ].tag;
       }
+      else if (tagName.toLowerCase() === 'p') {
+        if (handler.start) {
+          handler.start(tagName, [], false, '', true);
+        }
+        if (handler.end) {
+          handler.end(tagName, []);
+        }
+      }
     }
   };
 
