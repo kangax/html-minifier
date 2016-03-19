@@ -33,11 +33,7 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "assets": "grunt assets",
-    "assets/clean-css": "browserify node_modules/clean-css/ --standalone CleanCSS | uglifyjs --compress --mangle -o assets/cleancss-browser.js",
-    "assets/ncname": "browserify node_modules/ncname/ --standalone NCName | uglifyjs --compress --mangle -o assets/ncname-browser.js",
-    "assets/relateurl": "browserify node_modules/relateurl/ --standalone RelateUrl | uglifyjs --compress --mangle -o assets/relateurl-browser.js",
-    "assets/uglify-js": "browserify node_modules/uglify-js/ --standalone UglifyJS | uglifyjs --compress --mangle -o assets/uglify-browser.js",
+    "dist": "grunt dist",
     "test": "grunt test"
   },
   "dependencies": {
@@ -50,13 +46,12 @@
     "uglify-js": "2.6.x"
   },
   "devDependencies": {
-    "browserify": "13.0.x",
     "brotli": "1.1.x",
     "chalk": "1.1.x",
     "cli-table": "0.3.x",
     "grunt": "0.4.x",
+    "grunt-browserify": "5.0.x",
     "grunt-cli": "1.1.x",
-    "grunt-contrib-concat": "1.0.x",
     "grunt-contrib-uglify": "1.0.x",
     "grunt-eslint": "18.0.x",
     "grunt-exec": "0.4.x",

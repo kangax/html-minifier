@@ -1,6 +1,8 @@
-/* global HTMLLint, minify */
 (function() {
   'use strict';
+
+  var minify = require('html-minifier').minify;
+  var HTMLLint = require('html-minifier/src/htmllint').HTMLLint;
 
   function byId(id) {
     return document.getElementById(id);
