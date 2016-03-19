@@ -11,6 +11,7 @@
         "allowSingleLine": true
       }
     ],
-    "no-console": "off"
+    "no-console": "off",
+    "no-throw-literal": "error"
   }
 }
