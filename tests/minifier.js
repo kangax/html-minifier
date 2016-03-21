@@ -190,6 +190,17 @@
       equal(minify(input, { removeComments: true, collapseWhitespace: true }), 'a <? b' + index + ' ?> c');
       equal(minify('<p>' + input + '</p>', { removeComments: true, collapseWhitespace: true }), '<p>a <? b' + index + ' ?> c</p>');
     });
+    input = '<li><i></i> <b></b> foo</li>';
+    output = '<li><i></i> <b></b> foo</li>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+    input = '<li><i> </i> <b></b> foo</li>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+    input = '<li> <i></i> <b></b> foo</li>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+    input = '<li><i></i> <b> </b> foo</li>';
+    equal(minify(input, { collapseWhitespace: true }), output);
+    input = '<li> <i> </i> <b> </b> foo</li>';
+    equal(minify(input, { collapseWhitespace: true }), output);
     input = '<div> <a href="#"> <span> <b> foo </b> <i> bar </i> </span> </a> </div>';
     output = '<div><a href="#"><span><b>foo </b><i>bar</i></span></a></div>';
     equal(minify(input, { collapseWhitespace: true }), output);
