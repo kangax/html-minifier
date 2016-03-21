@@ -1761,7 +1761,6 @@
   });
 
   test('ignore', function() {
-
     input = '<!-- htmlmin:ignore --><div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div><!-- htmlmin:ignore -->' +
             '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
 
@@ -1797,6 +1796,10 @@
 
     equal(minify(input, { ignoreCustomFragments: [ /<\?php[\s\S]*?\?>/ ] }), output);
 
+    input = 'a\n<!-- htmlmin:ignore -->b<!-- htmlmin:ignore -->';
+    output = 'a b';
+
+    equal(minify(input, { collapseWhitespace: true }), output);
   });
 
   test('meta viewport', function() {

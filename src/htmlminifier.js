@@ -754,9 +754,9 @@
     // completely-horribly-broken-alien-non-html-emoj-cthulhu-filled content
     value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, function(match, group1) {
       if (!uidIgnore) {
-        uidIgnore = '<!--!' + uniqueId(value) + '-->';
+        uidIgnore = uniqueId(value);
       }
-      var token = uidIgnore + ignoredMarkupChunks.length;
+      var token = '<!--!' + uidIgnore + ignoredMarkupChunks.length + '-->';
       ignoredMarkupChunks.push(group1);
       return token;
     });
@@ -1129,7 +1129,7 @@
       });
     }
     if (uidIgnore) {
-      str = str.replace(new RegExp(uidIgnore + '([0-9]+)', 'g'), function(match, index) {
+      str = str.replace(new RegExp('<!--!' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
         return ignoredMarkupChunks[+index];
       });
     }
