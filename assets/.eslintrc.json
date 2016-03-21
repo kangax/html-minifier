@@ -1,5 +1,11 @@
 {
   "env": {
     "browser": true
+  },
+  "rules": {
+    "strict": [
+      "error",
+      "function"
+    ]
   }
 }

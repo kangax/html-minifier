@@ -1,3 +1,5 @@
+'use strict';
+
 function createMap(values, ignoreCase) {
   var map = {};
   values.forEach(function(value) {

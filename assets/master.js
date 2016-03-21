@@ -106,7 +106,7 @@
   };
 
 })();
-
+/* eslint-disable */
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-1128111-22']);
 _gaq.push(['_trackPageview']);

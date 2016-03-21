@@ -87,6 +87,7 @@
         ]
       }
     ],
+    "strict": "error",
     "wrap-iife": [
       "error",
       "inside"
