@@ -176,6 +176,7 @@ cli.main(function(args, options) {
     if (minified !== null) {
       // Write the output
       try {
+        // eslint-disable-next-line eqeqeq
         if (output != null) {
           fs.writeFileSync(path.resolve(output), minified);
         }

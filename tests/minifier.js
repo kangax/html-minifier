@@ -777,21 +777,21 @@
     output = '<div><pRe>$foo = "baz";</pRe></div>';
     equal(minify(input, { collapseWhitespace: true, caseSensitive: true }), output);
 
-    input = '<script type=\"text\/javascript\">var = \"hello\";<\/script>\r\n\r\n\r\n'               +
-             '<style type=\"text\/css\">#foo { color: red;        }          <\/style>\r\n\r\n\r\n'  +
-             '<div>\r\n  <div>\r\n    <div><!-- hello -->\r\n      <div>'                            +
-             '<!--! hello -->\r\n        <div>\r\n          <div class=\"\">\r\n\r\n            '    +
-             '<textarea disabled=\"disabled\">     this is a textarea <\/textarea>\r\n          '    +
-             '<\/div>\r\n        <\/div>\r\n      <\/div>\r\n    <\/div>\r\n  <\/div>\r\n<\/div>'    +
-             '<pre>       \r\nxxxx<\/pre><span>x<\/span> <span>Hello<\/span> <b>billy<\/b>     \r\n' +
-             '<input type=\"text\">\r\n<textarea><\/textarea>\r\n<pre><\/pre>';
-    output = '<script type="text/javascript">var = "hello";</script>'                                +
-             '<style type="text/css">#foo { color: red;        }</style>'                            +
-             '<div><div><div>'                                                                       +
-             '<!-- hello --><div><!--! hello --><div><div class="">'                                 +
-             '<textarea disabled="disabled">     this is a textarea </textarea>'                     +
-             '</div></div></div></div></div></div>'                                                  +
-             '<pre>       \r\nxxxx</pre><span>x</span> <span>Hello</span> <b>billy</b> '             +
+    input = '<script type=\"text\/javascript\">var = \"hello\";<\/script>\r\n\r\n\r\n' +
+            '<style type=\"text\/css\">#foo { color: red;        }          <\/style>\r\n\r\n\r\n' +
+            '<div>\r\n  <div>\r\n    <div><!-- hello -->\r\n      <div>' +
+            '<!--! hello -->\r\n        <div>\r\n          <div class=\"\">\r\n\r\n            ' +
+            '<textarea disabled=\"disabled\">     this is a textarea <\/textarea>\r\n          ' +
+            '<\/div>\r\n        <\/div>\r\n      <\/div>\r\n    <\/div>\r\n  <\/div>\r\n<\/div>' +
+            '<pre>       \r\nxxxx<\/pre><span>x<\/span> <span>Hello<\/span> <b>billy<\/b>     \r\n' +
+            '<input type=\"text\">\r\n<textarea><\/textarea>\r\n<pre><\/pre>';
+    output = '<script type="text/javascript">var = "hello";</script>' +
+             '<style type="text/css">#foo { color: red;        }</style>'+
+             '<div><div><div>' +
+             '<!-- hello --><div><!--! hello --><div><div class="">' +
+             '<textarea disabled="disabled">     this is a textarea </textarea>' +
+             '</div></div></div></div></div></div>' +
+             '<pre>       \r\nxxxx</pre><span>x</span> <span>Hello</span> <b>billy</b> ' +
              '<input type="text"><textarea></textarea><pre></pre>';
     equal(minify(input, { collapseWhitespace: true }), output);
 
