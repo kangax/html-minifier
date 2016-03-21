@@ -277,7 +277,7 @@ run(fileNames.map(function (fileName) {
             }
           });
         }).end(querystring.stringify({
-          code_type:'html',
+          code_type: 'html',
           verbose: 1,
           html_level: 1,
           minimize_style: 1,

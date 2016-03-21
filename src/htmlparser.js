@@ -335,7 +335,7 @@
           name: name,
           value: value,
           customAssign: customAssign || '=',
-          customOpen:  customOpen || '',
+          customOpen: customOpen || '',
           customClose: customClose || '',
           quote: quote || ''
         };
@@ -443,8 +443,8 @@
     }
 
     var elems = [],
-      documentElement = doc.documentElement ||
-        doc.getDocumentElement && doc.getDocumentElement();
+        documentElement = doc.documentElement ||
+          doc.getDocumentElement && doc.getDocumentElement();
 
     // If we're dealing with an empty document then we
     // need to pre-populate it with the HTML document structure
@@ -506,7 +506,7 @@
       chars: function( text ) {
         curParentNode.appendChild( doc.createTextNode( text ) );
       },
-      comment: function( /*text*/ ) {
+      comment: function( /* text */ ) {
         // create comment node
       },
       ignore: function( /* text */ ) {

@@ -32,7 +32,7 @@
       minifyJS:                       byId('minify-js').checked,
       processScripts:                 byId('minify-js-templates').checked ? byId('minify-js-templates-type').value : false,
       minifyCSS:                      byId('minify-css').checked,
-      minifyURLs:                     byId('minify-urls').checked ? { site:byId('minify-urls-siteurl').value } : false,
+      minifyURLs:                     byId('minify-urls').checked ? { site: byId('minify-urls-siteurl').value } : false,
       lint:                           byId('use-htmllint').checked ? new HTMLLint() : null,
       maxLineLength:                  parseInt(byId('max-line-length').value, 10)
     };
@@ -113,6 +113,6 @@ _gaq.push(['_trackPageview']);
   var ga = document.createElement('script');
   ga.type = 'text/javascript';
   ga.async = true;
-  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  ga.src = (document.location.protocol === 'https:' ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
   document.getElementsByTagName('head')[0].appendChild(ga);
 })();
