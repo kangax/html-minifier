@@ -642,17 +642,13 @@
     return text;
   }
 
-  function getModule(name, path) {
-    // try to get global reference first
-    var result = global[name];
-    if (typeof result === 'undefined' && typeof require === 'function') {
-      result = require(path);
-    }
-    return result;
-  }
-
   var minifyURLs = (function() {
-    var RelateUrl = getModule('RelateUrl', 'relateurl');
+    // try to get global reference first
+    var RelateUrl = global.RelateUrl;
+    if (typeof RelateUrl === 'undefined' && typeof require === 'function') {
+      RelateUrl = require('relateurl');
+    }
+
     if (RelateUrl && RelateUrl.relate) {
       return function(text, options) {
         try {
@@ -670,7 +666,12 @@
   })();
 
   var minifyJS = (function() {
-    var UglifyJS = getModule('UglifyJS', 'uglify-js');
+    // try to get global reference first
+    var UglifyJS = global.UglifyJS;
+    if (typeof UglifyJS === 'undefined' && typeof require === 'function') {
+      UglifyJS = require('uglify-js');
+    }
+
     if (UglifyJS && UglifyJS.minify) {
       return function(text, options) {
         try {
@@ -688,7 +689,12 @@
   })();
 
   var minifyCSS = (function() {
-    var CleanCSS = getModule('CleanCSS', 'clean-css');
+    // try to get global reference first
+    var CleanCSS = global.CleanCSS;
+    if (typeof CleanCSS === 'undefined' && typeof require === 'function') {
+      CleanCSS = require('clean-css');
+    }
+
     if (CleanCSS) {
       return function(text, options, inline) {
         try {
