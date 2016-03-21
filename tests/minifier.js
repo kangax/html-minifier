@@ -299,13 +299,26 @@
             '  <body>\n' +
             '  </body>\n' +
             '</html>';
-    output = '<head><!--[if lte IE 8]><script>alert("ie8!")</script><![endif]-->';
+    output = '<head><!--[if lte IE 8]>\n' +
+             '      <script type="text/javascript">\n' +
+             '        alert("ie8!");\n' +
+             '      </script>\n' +
+             '    <![endif]-->';
     equal(minify(input, {
       minifyJS: true,
       removeComments: true,
       collapseWhitespace: true,
       removeOptionalTags: true,
       removeScriptTypeAttributes: true
+    }), output);
+    output = '<head><!--[if lte IE 8]><script>alert("ie8!")</script><![endif]-->';
+    equal(minify(input, {
+      minifyJS: true,
+      removeComments: true,
+      collapseWhitespace: true,
+      removeOptionalTags: true,
+      removeScriptTypeAttributes: true,
+      processConditionalComments: true
     }), output);
 
     input = '<!DOCTYPE html>\n' +
@@ -338,29 +351,45 @@
       removeComments: true,
       collapseWhitespace: true
     }), output);
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true,
+      processConditionalComments: true
+    }), output);
   });
 
   test('collapsing space in conditional comments', function() {
     input = '<!--[if IE 7]>\n\n   \t\n   \t\t ' +
               '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css" />\n\t' +
             '<![endif]-->';
+    equal(minify(input, { removeComments: true }), input);
+    equal(minify(input, { removeComments: true, collapseWhitespace: true }), input);
     output = '<!--[if IE 7]>\n\n   \t\n   \t\t ' +
               '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css">\n\t' +
             '<![endif]-->';
-    equal(minify(input, { removeComments: true }), output);
+    equal(minify(input, { removeComments: true, processConditionalComments: true }), output);
     output = '<!--[if IE 7]>' +
                 '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css">' +
              '<![endif]-->';
-    equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true,
+      processConditionalComments: true
+    }), output);
 
     input = '<!--[if lte IE 6]>\n    \n   \n\n\n\t' +
               '<p title=" sigificant     whitespace   ">blah blah</p>' +
             '<![endif]-->';
     equal(minify(input, { removeComments: true }), input);
+    equal(minify(input, { removeComments: true, collapseWhitespace: true }), input);
     output = '<!--[if lte IE 6]>' +
               '<p title=" sigificant     whitespace   ">blah blah</p>' +
             '<![endif]-->';
-    equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
+    equal(minify(input, {
+      removeComments: true,
+      collapseWhitespace: true,
+      processConditionalComments: true
+    }), output);
   });
 
   test('remove comments from scripts', function() {
