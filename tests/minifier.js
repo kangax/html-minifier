@@ -406,7 +406,22 @@ test('remove comments from scripts', function() {
   equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
   input = '<script><!--alert(1)<\/script>';
-  output = '<script><\/script>';
+  equal(minify(input, { removeCommentsFromCDATA: true }), input);
+
+  input = '<script>alert(1)--><\/script>';
+  equal(minify(input, { removeCommentsFromCDATA: true }), input);
+
+  input = '<script>alert(1)<!-- comment --><\/script>';
+  equal(minify(input, { removeCommentsFromCDATA: true }), input);
+
+  input = '<script><!-- comment -->alert(1)<\/script>';
+  equal(minify(input, { removeCommentsFromCDATA: true }), input);
+
+  input = '<script>alert(1)<!-- comment -->alert(2)<\/script>';
+  equal(minify(input, { removeCommentsFromCDATA: true }), input);
+
+  input = '<script type="text/template"><!--\n<div>foo</div>\n<!-- comment --> bar\n--><\/script>';
+  output = '<script type="text/template"><div>foo</div>\n<!-- comment --> bar<\/script>';
   equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
   input = '<script type="text/javascript"> <!--\nalert("-->"); -->\n\n   <\/script>';
@@ -414,7 +429,7 @@ test('remove comments from scripts', function() {
   equal(minify(input, { removeCommentsFromCDATA: true }), output);
 
   input = '<script> //   <!--   \n  alert(1)   //  --> <\/script>';
-  output = '<script>  alert(1)<\/script>';
+  output = '<script>alert(1)<\/script>';
   equal(minify(input, { removeCommentsFromCDATA: true }), output);
 });
 
@@ -433,21 +448,20 @@ test('remove CDATA sections from scripts/styles', function() {
   equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
   input = '<script>//<![CDATA[\nalert(1)\n//]]><\/script>';
-  output = '<script>\nalert(1)\n<\/script>';
+  output = '<script>alert(1)<\/script>';
   equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
   input = '<script type="text/javascript"> /* \n\t  <![CDATA[  */ alert(1) /*  ]]>  */ \n <\/script>';
-  output = '<script type="text/javascript"> alert(1) <\/script>';
+  output = '<script type="text/javascript">alert(1)<\/script>';
   equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
   input = '<style>/* <![CDATA[ */p { color: red } // ]]><\/style>';
-  output = '<style>p { color: red } <\/style>';
+  output = '<style>p { color: red }<\/style>';
   equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
 
   input = '<script>\n\n//<![CDATA[\nalert(1)//]]><\/script>';
-  output = '<script>\nalert(1)<\/script>';
+  output = '<script>alert(1)<\/script>';
   equal(minify(input, { removeCDATASectionsFromCDATA: true }), output);
-
 });
 
 test('empty attributes', function() {
@@ -1816,7 +1830,7 @@ test('ignore', function() {
           '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
 
   output = '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>' +
-          '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
+           '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
 
   equal(minify(input, { collapseWhitespace: true }), output);
 
