@@ -55,7 +55,7 @@
     "chalk": "1.1.x",
     "cli-table": "0.3.x",
     "grunt": "0.4.x",
-    "grunt-cli": "0.1.x",
+    "grunt-cli": "1.0.x",
     "grunt-contrib-concat": "1.0.x",
     "grunt-contrib-uglify": "1.0.x",
     "grunt-eslint": "18.0.x",
