@@ -978,7 +978,7 @@
             buffer.push('</' + tag + '>');
           }
           charsPrevTag = '/' + tag;
-          if (!inlineTextTags(tag)) {
+          if (!inlineTags(tag)) {
             currentChars = '';
           }
           else if (isElementEmpty) {
