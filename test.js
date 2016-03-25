@@ -10,8 +10,8 @@ testrunner.run({
   deps: ['./src/htmlparser.js', './src/htmllint.js'],
   code: './src/htmlminifier.js',
   tests: [
-    './tests/minifier.js',
-    './tests/lint.js'
+    './tests/lint.js',
+    './tests/minifier.js'
   ],
   maxBlockDuration: 5000
 }, function(err, report) {

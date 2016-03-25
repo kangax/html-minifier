@@ -1,6 +1,6 @@
-module.exports = function(grunt) {
-  'use strict';
+'use strict';
 
+module.exports = function(grunt) {
   // Force use of Unix newlines
   grunt.util.linefeed = '\n';
 
@@ -12,6 +12,21 @@ module.exports = function(grunt) {
             ' * Copyright 2010-<%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
             ' * Licensed under the <%= pkg.license %> license\n' +
             ' */\n',
+
+    browserify: {
+      src: {
+        options: {
+          banner: '<%= banner %>',
+          require: [
+            './src/htmllint.js:html-minifier/src/htmllint',
+            './src/htmlminifier.js:html-minifier',
+            './src/htmlparser.js:html-minifier/src/htmlparser'
+          ]
+        },
+        src: 'src/htmlminifier.js',
+        dest: 'dist/htmlminifier.js'
+      }
+    },
 
     eslint: {
       grunt: {
@@ -32,30 +47,8 @@ module.exports = function(grunt) {
     },
 
     exec: {
-      'clean-css': {
-        command: 'npm run assets/clean-css'
-      },
-      ncname: {
-        command: 'npm run assets/ncname'
-      },
-      relateurl: {
-        command: 'npm run assets/relateurl'
-      },
       test: {
         command: 'node ./test.js'
-      },
-      'uglify-js': {
-        command: 'npm run assets/uglify-js'
-      }
-    },
-
-    concat: {
-      options: {
-        banner: '<%= banner %>'
-      },
-      dist: {
-        src: ['src/htmlparser.js', 'src/htmlminifier.js', 'src/htmllint.js'],
-        dest: 'dist/htmlminifier.js'
       }
     },
 
@@ -69,7 +62,7 @@ module.exports = function(grunt) {
       },
       minify: {
         files: {
-          'dist/htmlminifier.min.js': '<%= concat.dist.dest %>'
+          'dist/htmlminifier.min.js': '<%= browserify.src.dest %>'
         }
       }
     },
@@ -116,19 +109,8 @@ module.exports = function(grunt) {
     });
   });
 
-  grunt.registerTask('assets', [
-    'exec:clean-css',
-    'exec:ncname',
-    'exec:relateurl',
-    'exec:uglify-js'
-  ]);
-
-  grunt.registerTask('build', [
-    'concat'
-  ]);
-
   grunt.registerTask('dist', [
-    'concat',
+    'browserify',
     'uglify'
   ]);
 
