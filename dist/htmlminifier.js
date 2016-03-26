@@ -32121,19 +32121,6 @@ function processScript(text, options, currentAttrs) {
   return text;
 }
 
-var reStartDelimiter = {
-  // account for js + html comments (e.g.: //<!--)
-  script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
-  style: /^\s*<!--\s*/
-};
-var reEndDelimiter = {
-  script: /\s*(?:\/\/)?\s*-->\s*$/,
-  style: /\s*-->\s*$/
-};
-function removeComments(text, tag) {
-  return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
-}
-
 // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
 // with the following deviations:
 // - retain <body> if followed by <noscript>
@@ -32398,8 +32385,10 @@ function minifyURLs(text, options) {
 }
 
 function minifyJS(text, options) {
+  var start = text.match(/^\s*<!--.*/);
+  var code = start ? text.slice(start[0].length).replace(/\n\s*-->\s*$/, '') : text;
   try {
-    return UglifyJS.minify(text, options).code;
+    return UglifyJS.minify(code, options).code;
   }
   catch (err) {
     log(err);
@@ -32408,13 +32397,15 @@ function minifyJS(text, options) {
 }
 
 function minifyCSS(text, options, inline) {
+  var start = text.match(/^\s*<!--/);
+  var style = start ? text.slice(start[0].length).replace(/-->\s*$/, '') : text;
   try {
     var cleanCSS = new CleanCSS(options);
     if (inline) {
-      return unwrapCSS(cleanCSS.minify(wrapCSS(text)).styles);
+      return unwrapCSS(cleanCSS.minify(wrapCSS(style)).styles);
     }
     else {
-      return cleanCSS.minify(text).styles;
+      return cleanCSS.minify(style).styles;
     }
   }
   catch (err) {
@@ -32732,9 +32723,6 @@ function minify(value, options, partialMarkup) {
         }
       }
       if (currentTag === 'script' || currentTag === 'style') {
-        if (options.removeCommentsFromCDATA) {
-          text = removeComments(text, currentTag);
-        }
         if (options.removeCDATASectionsFromCDATA) {
           text = removeCDATASections(text);
         }

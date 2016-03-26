@@ -373,12 +373,12 @@ test('collapsing space in conditional comments', function() {
   equal(minify(input, { removeComments: true }), input);
   equal(minify(input, { removeComments: true, collapseWhitespace: true }), input);
   output = '<!--[if IE 7]>\n\n   \t\n   \t\t ' +
-            '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css">\n\t' +
-          '<![endif]-->';
+             '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css">\n\t' +
+           '<![endif]-->';
   equal(minify(input, { removeComments: true, processConditionalComments: true }), output);
   output = '<!--[if IE 7]>' +
-              '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css">' +
-            '<![endif]-->';
+             '<link rel="stylesheet" href="/css/ie7-fixes.css" type="text/css">' +
+           '<![endif]-->';
   equal(minify(input, {
     removeComments: true,
     collapseWhitespace: true,
@@ -391,8 +391,8 @@ test('collapsing space in conditional comments', function() {
   equal(minify(input, { removeComments: true }), input);
   equal(minify(input, { removeComments: true, collapseWhitespace: true }), input);
   output = '<!--[if lte IE 6]>' +
-            '<p title=" sigificant     whitespace   ">blah blah</p>' +
-          '<![endif]-->';
+             '<p title=" sigificant     whitespace   ">blah blah</p>' +
+           '<![endif]-->';
   equal(minify(input, {
     removeComments: true,
     collapseWhitespace: true,
@@ -401,30 +401,89 @@ test('collapsing space in conditional comments', function() {
 });
 
 test('remove comments from scripts', function() {
-  input = '<script><!--alert(1)--><\/script>';
-  output = '<script><\/script>';
-  equal(minify(input, { removeCommentsFromCDATA: true }), output);
+  input = '<script><!--\nalert(1);\n--><\/script>';
+  equal(minify(input), input);
+  output = '<script>alert(1)<\/script>';
+  equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script><!--alert(1)<\/script>';
+  input = '<script><!--alert(2);--><\/script>';
+  equal(minify(input), input);
   output = '<script><\/script>';
-  equal(minify(input, { removeCommentsFromCDATA: true }), output);
+  equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script type="text/javascript"> <!--\nalert("-->"); -->\n\n   <\/script>';
-  output = '<script type="text/javascript">alert("-->");<\/script>';
-  equal(minify(input, { removeCommentsFromCDATA: true }), output);
+  input = '<script><!--alert(3);\n--><\/script>';
+  equal(minify(input), input);
+  output = '<script><\/script>';
+  equal(minify(input, { minifyJS: true }), output);
+
+  input = '<script><!--\nalert(4);--><\/script>';
+  equal(minify(input), input);
+  equal(minify(input, { minifyJS: true }), input);
+
+  input = '<script><!--alert(5);\nalert(6);\nalert(7);--><\/script>';
+  equal(minify(input), input);
+  equal(minify(input, { minifyJS: true }), input);
+
+  input = '<script><!--alert(8)<\/script>';
+  equal(minify(input), input);
+  output = '<script><\/script>';
+  equal(minify(input, { minifyJS: true }), output);
+
+  input = '<script type="text/javascript"> \n <!--\nalert("-->"); -->\n\n   <\/script>';
+  equal(minify(input), input);
+  equal(minify(input, { minifyJS: true }), input);
+
+  input = '<script type="text/javascript"> \n <!--\nalert("-->");\n -->\n\n   <\/script>';
+  equal(minify(input), input);
+  output = '<script type="text/javascript">alert("--\\x3e")<\/script>';
+  equal(minify(input, { minifyJS: true }), output);
 
   input = '<script> //   <!--   \n  alert(1)   //  --> <\/script>';
-  output = '<script>  alert(1)<\/script>';
-  equal(minify(input, { removeCommentsFromCDATA: true }), output);
+  equal(minify(input), input);
+  output = '<script>alert(1)<\/script>';
+  equal(minify(input, { minifyJS: true }), output);
 });
 
 test('remove comments from styles', function() {
+  input = '<style><!--\np.a{background:red}\n--></style>';
+  equal(minify(input), input);
+  output = '<style>p.a{background:red}</style>';
+  equal(minify(input, { minifyCSS: true }), output);
+
+  input = '<style><!--p.b{background:red}--></style>';
+  equal(minify(input), input);
+  output = '<style>p.b{background:red}</style>';
+  equal(minify(input, { minifyCSS: true }), output);
+
+  input = '<style><!--p.c{background:red}\n--></style>';
+  equal(minify(input), input);
+  output = '<style>p.c{background:red}</style>';
+  equal(minify(input, { minifyCSS: true }), output);
+
+  input = '<style><!--\np.d{background:red}--></style>';
+  equal(minify(input), input);
+  output = '<style>p.d{background:red}</style>';
+  equal(minify(input, { minifyCSS: true }), output);
+
+  input = '<style><!--p.e{background:red}\np.f{background:red}\np.g{background:red}--></style>';
+  equal(minify(input), input);
+  output = '<style>p.e{background:red}p.f{background:red}p.g{background:red}</style>';
+  equal(minify(input, { minifyCSS: true }), output);
+
+  input = '<style>p.h{background:red}<!--\np.i{background:red}\n-->p.j{background:red}</style>';
+  equal(minify(input), input);
+  output = '<style>p.h{background:red}<!-- p.i{background:red}-->p.j{background:red}</style>';
+  equal(minify(input, { minifyCSS: true }), output);
+
   input = '<style type="text/css"><!-- p { color: red } --><\/style>';
-  output = '<style type="text/css">p { color: red }<\/style>';
-  equal(minify(input, { removeCommentsFromCDATA: true }), output);
+  equal(minify(input), input);
+  output = '<style type="text/css">p{color:red}<\/style>';
+  equal(minify(input, { minifyCSS: true }), output);
 
   input = '<style type="text/css">p::before { content: "<!--" }<\/style>';
-  equal(minify(input, { removeCommentsFromCDATA: true }), input);
+  equal(minify(input), input);
+  output = '<style type="text/css">p::before{content:"<!--"}<\/style>';
+  equal(minify(input, { minifyCSS: true }), output);
 });
 
 test('remove CDATA sections from scripts/styles', function() {
@@ -1507,10 +1566,7 @@ test('script minification', function() {
           '</script>';
   output = '<script>Platform.Mobile.Bootstrap.init(function(){Platform.Mobile.Core.Navigation.go("Login",{error:""})})</script>';
 
-  equal(minify(input, {
-    removeCommentsFromCDATA: true,
-    minifyJS: true
-  }), output);
+  equal(minify(input, { minifyJS: true }), output);
 });
 
 test('minification of scripts with different mimetypes', function() {
@@ -2087,7 +2143,6 @@ test('markups from Angular 2', function() {
     removeAttributeQuotes: true,
     removeCDATASectionsFromCDATA: true,
     removeComments: true,
-    removeCommentsFromCDATA: true,
     removeEmptyAttributes: true,
     removeOptionalTags: true,
     removeRedundantAttributes: true,
@@ -2209,7 +2264,6 @@ test('tests from PHPTAL', function() {
       removeAttributeQuotes: true,
       removeCDATASectionsFromCDATA: true,
       removeComments: true,
-      removeCommentsFromCDATA: true,
       removeEmptyAttributes: true,
       removeOptionalTags: true,
       removeRedundantAttributes: true,

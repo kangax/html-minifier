@@ -81,7 +81,6 @@ var mainOptions = {
   removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
   removeCDATASectionsFromCDATA: [[false, 'Remove CDATA sections from script and style elements']],
   removeComments: [[false, 'Strip HTML comments']],
-  removeCommentsFromCDATA: [[false, 'Strip HTML comments from scripts and styles']],
   removeEmptyAttributes: [[false, 'Remove all attributes with whitespace-only values']],
   removeEmptyElements: [[false, 'Remove all elements with empty contents']],
   removeOptionalTags: [[false, 'Remove unrequired tags']],
