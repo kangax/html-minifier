@@ -37,8 +37,7 @@ var appVersion = require('./package.json').version;
 var minify = require('.').minify;
 var HTMLLint = require('./src/htmllint').HTMLLint;
 var minifyOptions = {};
-var input = null;
-var output = null;
+var output;
 
 cli.width = 100;
 cli.option_width = 40;
@@ -178,19 +177,17 @@ cli.main(function(args, options) {
 
     if (minified !== null) {
       // Write the output
-      try {
-        // eslint-disable-next-line eqeqeq
-        if (output != null) {
+      if (output) {
+        try {
           fs.writeFileSync(path.resolve(output), minified);
         }
-        else {
-          process.stdout.write(minified);
+        catch (e) {
+          status = 4;
+          cli.error('Cannot write to ' + output);
         }
       }
-      catch (e) {
-        status = 4;
-        console.log(output);
-        cli.error('Cannot write to output');
+      else {
+        process.stdout.write(minified);
       }
     }
 
@@ -292,10 +289,6 @@ cli.main(function(args, options) {
     minifyOptions.lint = new HTMLLint();
   }
 
-  if (args.length) {
-    input = args;
-  }
-
   if (options['input-dir'] || options['output-dir']) {
     var inputDir = options['input-dir'];
     var outputDir = options['output-dir'];
@@ -333,11 +326,10 @@ cli.main(function(args, options) {
     output = options.output;
   }
 
-  if (input !== null) { // Minifying one or more files specified on the CMD line
-
+  if (args.length) { // Minifying one or more files specified on the CMD line
     var original = '';
 
-    input.forEach(function(afile) {
+    args.forEach(function(afile) {
       try {
         original += fs.readFileSync(afile, 'utf8');
       }
@@ -348,11 +340,10 @@ cli.main(function(args, options) {
     });
 
     cli.exit(runMinify(original, output));
-
   }
   else { // Minifying input coming from STDIN
     process.stdin.pipe(concat({ encoding: 'string' }, function(content) {
-      runMinify(content, output);
+      cli.exit(runMinify(content, output));
     }));
   }
 });
