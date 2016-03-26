@@ -232,8 +232,9 @@ run(fileNames.map(function (fileName) {
             // Extract result from <textarea/>
             var start = response.indexOf('>', response.indexOf('<textarea'));
             var end = response.lastIndexOf('</textarea>');
+            var result = response.slice(start + 1, end).replace(/<\\\//g, '</');
             var info = infos.willpeavy;
-            writeText(info.filePath, response.substring(start + 1, end), function () {
+            writeText(info.filePath, result, function () {
               readSizes(info, done);
             });
           });
