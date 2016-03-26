@@ -28,9 +28,10 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | [MSN](http://www.msn.com/)                                                  | 157                  | **130**      | 138      | 145        | 138                |
 | [Stackoverflow](http://stackoverflow.com/)                                  | 200                  | **159**      | 165      | 174        | 166                |
 | [Amazon](http://www.amazon.com/)                                            | 246                  | **204**      | 234      | 230        | 219                |
+| [Bootstrap CSS](http://getbootstrap.com/css/)                               | 278                  | **269**      | 275      | 233        | 278                |
 | [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 401                  | **367**      | 388      | 400        | n/a                |
 | [Eloquent Javascript](http://eloquentjavascript.net/1st_edition/print.html) | 870                  | **827**      | 840      | 864        | n/a                |
-| [ES6 draft](https://tc39.github.io/ecma262/)                                | 3678                 | **2990**     | 3079     | 3204       | n/a                |
+| [ES6 draft](https://tc39.github.io/ecma262/)                                | 3678                 | **2991**     | 3079     | 3204       | n/a                |
 
 ## Options Quick Reference
 
