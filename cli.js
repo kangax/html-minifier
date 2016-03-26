@@ -137,13 +137,12 @@ cli.main(function(args, options) {
     }
   }
 
-  function parseJSONOption(value, options) {
-    var opts = options || {};
+  function parseJSONOption(value, regexArray) {
     if (value !== null) {
       var jsonArray;
       try {
         jsonArray = JSON.parse(value);
-        if (opts.regexArray) {
+        if (regexArray) {
           jsonArray = jsonArray.map(function (regexString) {
             return stringToRegExp(regexString);
           });
@@ -266,13 +265,13 @@ cli.main(function(args, options) {
   mainOptionKeys.forEach(function(key) {
     var paramKey = changeCase.paramCase(key);
     var value = options[paramKey];
-    if (options[paramKey] !== null) {
+    if (value !== null) {
       switch (mainOptions[key][1]) {
         case 'json':
           minifyOptions[key] = parseJSONOption(value);
           break;
         case 'json-regex':
-          minifyOptions[key] = parseJSONOption(value, { regexArray: true });
+          minifyOptions[key] = parseJSONOption(value, true);
           break;
         case 'string-regex':
           minifyOptions[key] = stringToRegExp(value);
