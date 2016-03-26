@@ -79,7 +79,6 @@ var mainOptions = {
   processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json'],
   quoteCharacter: [[false, 'Type of quote to use for attribute values (\' or ")', 'string'], true],
   removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
-  removeCDATASectionsFromCDATA: [[false, 'Remove CDATA sections from script and style elements']],
   removeComments: [[false, 'Strip HTML comments']],
   removeEmptyAttributes: [[false, 'Remove all attributes with whitespace-only values']],
   removeEmptyElements: [[false, 'Remove all elements with empty contents']],

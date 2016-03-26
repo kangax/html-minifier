@@ -15,7 +15,6 @@
   function getOptions() {
     return {
       removeComments:                 byId('remove-comments').checked,
-      removeCDATASectionsFromCDATA:   byId('remove-cdata-sections-from-cdata').checked,
       collapseWhitespace:             byId('collapse-whitespace').checked,
       conservativeCollapse:           byId('conservative-collapse').checked,
       collapseBooleanAttributes:      byId('collapse-boolean-attributes').checked,

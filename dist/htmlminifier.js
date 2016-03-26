@@ -32103,14 +32103,6 @@ function cleanConditionalComment(comment, options) {
   }) : comment;
 }
 
-function removeCDATASections(text) {
-  return text
-    // "/* <![CDATA[ */" or "// <![CDATA["
-    .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
-    // "/* ]]> */" or "// ]]>"
-    .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
-}
-
 function processScript(text, options, currentAttrs) {
   for (var i = 0, len = currentAttrs.length; i < len; i++) {
     if (currentAttrs[i].name.toLowerCase() === 'type' &&
@@ -32722,13 +32714,8 @@ function minify(value, options, partialMarkup) {
           text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespaceAll(text);
         }
       }
-      if (currentTag === 'script' || currentTag === 'style') {
-        if (options.removeCDATASectionsFromCDATA) {
-          text = removeCDATASections(text);
-        }
-        if (options.processScripts) {
-          text = processScript(text, options, currentAttrs);
-        }
+      if (options.processScripts && (currentTag === 'script' || currentTag === 'style')) {
+        text = processScript(text, options, currentAttrs);
       }
       if (options.minifyJS && isExecutableScript(currentTag, currentAttrs)) {
         text = minifyJS(text, options.minifyJS);
