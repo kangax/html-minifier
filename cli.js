@@ -142,20 +142,13 @@ cli.main(function(args, options) {
       try {
         jsonArray = JSON.parse(value);
         if (regexArray) {
-          jsonArray = jsonArray.map(function (regexString) {
-            return stringToRegExp(regexString);
-          });
+          jsonArray = jsonArray.map(stringToRegExp);
         }
       }
       catch (e) {
         cli.fatal('Could not parse JSON value \'' + value + '\'');
       }
-      if (jsonArray instanceof Array) {
-        return jsonArray;
-      }
-      else {
-        return [value];
-      }
+      return Array.isArray(jsonArray) ? jsonArray : [value];
     }
   }
 
@@ -235,28 +228,39 @@ cli.main(function(args, options) {
   }
 
   if (options['config-file']) {
-    var fileOptions;
-    var fileOptionsPath = path.resolve(options['config-file']);
+    var configPath = path.resolve(options['config-file']);
     try {
-      fileOptions = fs.readFileSync(fileOptionsPath, { encoding: 'utf8' });
-    }
-    catch (e) {
-      cli.fatal('The specified config file doesn’t exist or is unreadable:\n' + fileOptionsPath);
-    }
-    try {
-      fileOptions = JSON.parse(fileOptions);
+      var configData;
+      try {
+        configData = fs.readFileSync(configPath, { encoding: 'utf8' });
+      }
+      catch (e) {
+        cli.fatal('The specified config file doesn’t exist or is unreadable:\n' + configPath);
+      }
+      configData = JSON.parse(configData);
+      mainOptionKeys.forEach(function(key) {
+        var value = configData[key];
+        if (value !== undefined) {
+          switch (mainOptions[key][1]) {
+            case 'json-regex':
+              minifyOptions[key] = value.map(stringToRegExp);
+              break;
+            case 'string-regex':
+              minifyOptions[key] = stringToRegExp(value);
+              break;
+            default:
+              minifyOptions[key] = value;
+          }
+        }
+      });
     }
     catch (je) {
       try {
-        fileOptions = require(fileOptionsPath);
+        minifyOptions = require(configPath);
       }
       catch (ne) {
-        cli.fatal('Cannot read the specified config file. \nAs JSON: ' + je.message + '\nAs module: ' + ne.message);
+        cli.fatal('Cannot read the specified config file.\nAs JSON: ' + je.message + '\nAs module: ' + ne.message);
       }
-    }
-
-    if (fileOptions && typeof fileOptions === 'object') {
-      minifyOptions = fileOptions;
     }
   }
   mainOptionKeys.forEach(function(key) {
