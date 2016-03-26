@@ -442,6 +442,10 @@ test('remove comments from scripts', function() {
   equal(minify(input), input);
   output = '<script>alert(1)<\/script>';
   equal(minify(input, { minifyJS: true }), output);
+
+  input = '<script type="text/html">\n<div>\n</div>\n<!-- aa -->\n<\/script>';
+  equal(minify(input), input);
+  equal(minify(input, { minifyJS: true }), input);
 });
 
 test('remove comments from styles', function() {
@@ -484,6 +488,10 @@ test('remove comments from styles', function() {
   equal(minify(input), input);
   output = '<style type="text/css">p::before{content:"<!--"}<\/style>';
   equal(minify(input, { minifyCSS: true }), output);
+
+  input = '<style type="text/html">\n<div>\n</div>\n<!-- aa -->\n<\/style>';
+  equal(minify(input), input);
+  equal(minify(input, { minifyCSS: true }), input);
 });
 
 test('remove CDATA sections from scripts/styles', function() {
@@ -561,6 +569,10 @@ test('remove CDATA sections from scripts/styles', function() {
   equal(minify(input), input);
   output = '<style>p{color:red} // ]]><\/style>';
   equal(minify(input, { minifyCSS: true }), output);
+
+  input = '<style type="text/html">\n<div>\n</div>\n<![CDATA[ aa ]]>\n<\/style>';
+  equal(minify(input), input);
+  equal(minify(input, { minifyCSS: true }), input);
 });
 
 test('empty attributes', function() {

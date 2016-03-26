@@ -31965,6 +31965,20 @@ function isExecutableScript(tag, attrs) {
   return true;
 }
 
+function isStyleSheet(tag, attrs) {
+  if (tag !== 'style') {
+    return false;
+  }
+  for (var i = 0, len = attrs.length; i < len; i++) {
+    var attrName = attrs[i].name.toLowerCase();
+    if (attrName === 'type') {
+      var attrValue = trimWhitespace(attrs[i].value).toLowerCase();
+      return attrValue === '' || attrValue === 'text/css';
+    }
+  }
+  return true;
+}
+
 function isStyleLinkTypeAttribute(tag, attrName, attrValue) {
   return (
     (tag === 'style' || tag === 'link') &&
@@ -32723,7 +32737,7 @@ function minify(value, options, partialMarkup) {
           text = text.slice(0, -1);
         }
       }
-      if (currentTag === 'style' && options.minifyCSS) {
+      if (options.minifyCSS && isStyleSheet(currentTag, currentAttrs)) {
         text = minifyCSS(text, options.minifyCSS);
       }
       if (options.removeOptionalTags && text) {
