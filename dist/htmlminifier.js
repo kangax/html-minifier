@@ -32104,11 +32104,10 @@ function cleanConditionalComment(comment, options) {
 }
 
 function removeCDATASections(text) {
-  return text
-    // "/* <![CDATA[ */" or "// <![CDATA["
-    .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
-    // "/* ]]> */" or "// ]]>"
-    .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
+  // "/* <![CDATA[ */" or "// <![CDATA["
+  // together with
+  // "/* ]]> */" or "// ]]>"
+  return text.replace(/^(?:\/\*\s*<!\[CDATA\[\s*\*\/|\/\/\s*<!\[CDATA\[.*)([\s\S]*?)(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)$/, '$1');
 }
 
 function processScript(text, options, currentAttrs) {
@@ -32121,17 +32120,16 @@ function processScript(text, options, currentAttrs) {
   return text;
 }
 
-var reStartDelimiter = {
-  // account for js + html comments (e.g.: //<!--)
-  script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
-  style: /^\s*<!--\s*/
-};
-var reEndDelimiter = {
-  script: /\s*(?:\/\/)?\s*-->\s*$/,
-  style: /\s*-->\s*$/
-};
-function removeComments(text, tag) {
-  return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
+function removeCommentsFromScript(text) {
+  // "<!--" or "// <!--"
+  // together with
+  // "-->" or "// -->"
+  return text.replace(/^(?:\/\/\s*)?<!--.*([\s\S]*?)(?:\/\/\s*)?-->$/, '$1');
+}
+
+function removeCommentsFromStyle(text) {
+  // "<!--" together with "-->"
+  return text.replace(/^<!--([\s\S]*?)-->$/, '$1');
 }
 
 // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -32732,11 +32730,17 @@ function minify(value, options, partialMarkup) {
         }
       }
       if (currentTag === 'script' || currentTag === 'style') {
+        text = trimWhitespace(text);
         if (options.removeCommentsFromCDATA) {
-          text = removeComments(text, currentTag);
+          if (currentTag === 'script') {
+            text = trimWhitespace(removeCommentsFromScript(text));
+          }
+          else {
+            text = trimWhitespace(removeCommentsFromStyle(text));
+          }
         }
         if (options.removeCDATASectionsFromCDATA) {
-          text = removeCDATASections(text);
+          text = trimWhitespace(removeCDATASections(text));
         }
         if (options.processScripts) {
           text = processScript(text, options, currentAttrs);
