@@ -11,7 +11,8 @@ testrunner.run({
   code: './src/htmlminifier.js',
   tests: [
     './tests/lint.js',
-    './tests/minifier.js'
+    './tests/minifier.js',
+    './tests/remove.js'
   ],
   maxBlockDuration: 5000
 }, function(err, report) {

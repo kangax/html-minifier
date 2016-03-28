@@ -703,6 +703,10 @@ function minify(value, options, partialMarkup) {
     return token;
   });
 
+  // Remove specific comment chunks. Usefull to delete markup that isn't wanted
+  // in dist(ex: browsersync or livereload)
+  value = value.replace(/<!-- htmlmin:remove -->[\s\S]*?<!-- htmlmin:remove -->/g, '');
+
   var customFragments = (options.ignoreCustomFragments || [
     /<%[\s\S]*?%>/,
     /<\?[\s\S]*?\?>/
