@@ -46,7 +46,7 @@
     "uglify-js": "2.6.x"
   },
   "devDependencies": {
-    "brotli": "1.1.x",
+    "brotli": "1.2.x",
     "chalk": "1.1.x",
     "cli-table": "0.3.x",
     "grunt": "0.4.x",
