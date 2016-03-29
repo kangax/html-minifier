@@ -3,8 +3,9 @@
 var CleanCSS = require('clean-css');
 var HTMLParser = require('./htmlparser').HTMLParser;
 var RelateUrl = require('relateurl');
-var UglifyJS = require('uglify-js');
 var utils = require('./utils');
+
+var defaultJSMinifier = "uglify-js";
 
 var log;
 if (typeof window !== 'undefined' && typeof console !== 'undefined' && typeof console.log === 'function') {
@@ -635,7 +636,8 @@ function minifyURLs(text, options) {
 
 function minifyJS(text, options) {
   try {
-    return UglifyJS.minify(text, options).code;
+    var Minifier = require( options.minifier ? options.minifier : defaultJSMinifier );
+    return Minifier.minify(text, options).code;
   }
   catch (err) {
     log(err);
