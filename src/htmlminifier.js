@@ -635,7 +635,12 @@ function minifyURLs(text, options) {
 
 function minifyJS(text, options) {
   try {
-    return UglifyJS.minify(text, options).code;
+	if( options.minifier ){
+      return options.minifier.call( this, text, options );
+	}
+	else {
+      return UglifyJS.minify(text, options).code;
+	}
   }
   catch (err) {
     log(err);
