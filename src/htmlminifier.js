@@ -201,6 +201,20 @@ function isExecutableScript(tag, attrs) {
   return true;
 }
 
+function isStyleSheet(tag, attrs) {
+  if (tag !== 'style') {
+    return false;
+  }
+  for (var i = 0, len = attrs.length; i < len; i++) {
+    var attrName = attrs[i].name.toLowerCase();
+    if (attrName === 'type') {
+      var attrValue = trimWhitespace(attrs[i].value).toLowerCase();
+      return attrValue === '' || attrValue === 'text/css';
+    }
+  }
+  return true;
+}
+
 function isStyleLinkTypeAttribute(tag, attrName, attrValue) {
   return (
     (tag === 'style' || tag === 'link') &&
@@ -339,14 +353,6 @@ function cleanConditionalComment(comment, options) {
   }) : comment;
 }
 
-function removeCDATASections(text) {
-  return text
-    // "/* <![CDATA[ */" or "// <![CDATA["
-    .replace(/^(?:\s*\/\*\s*<!\[CDATA\[\s*\*\/|\s*\/\/\s*<!\[CDATA\[.*)/, '')
-    // "/* ]]> */" or "// ]]>"
-    .replace(/(?:\/\*\s*\]\]>\s*\*\/|\/\/\s*\]\]>)\s*$/, '');
-}
-
 function processScript(text, options, currentAttrs) {
   for (var i = 0, len = currentAttrs.length; i < len; i++) {
     if (currentAttrs[i].name.toLowerCase() === 'type' &&
@@ -355,19 +361,6 @@ function processScript(text, options, currentAttrs) {
     }
   }
   return text;
-}
-
-var reStartDelimiter = {
-  // account for js + html comments (e.g.: //<!--)
-  script: /^\s*(?:\/\/)?\s*<!--.*\n?/,
-  style: /^\s*<!--\s*/
-};
-var reEndDelimiter = {
-  script: /\s*(?:\/\/)?\s*-->\s*$/,
-  style: /\s*-->\s*$/
-};
-function removeComments(text, tag) {
-  return text.replace(reStartDelimiter[tag], '').replace(reEndDelimiter[tag], '');
 }
 
 // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -634,8 +627,10 @@ function minifyURLs(text, options) {
 }
 
 function minifyJS(text, options) {
+  var start = text.match(/^\s*<!--.*/);
+  var code = start ? text.slice(start[0].length).replace(/\n\s*-->\s*$/, '') : text;
   try {
-    return UglifyJS.minify(text, options).code;
+    return UglifyJS.minify(code, options).code;
   }
   catch (err) {
     log(err);
@@ -644,13 +639,15 @@ function minifyJS(text, options) {
 }
 
 function minifyCSS(text, options, inline) {
+  var start = text.match(/^\s*<!--/);
+  var style = start ? text.slice(start[0].length).replace(/-->\s*$/, '') : text;
   try {
     var cleanCSS = new CleanCSS(options);
     if (inline) {
-      return unwrapCSS(cleanCSS.minify(wrapCSS(text)).styles);
+      return unwrapCSS(cleanCSS.minify(wrapCSS(style)).styles);
     }
     else {
-      return cleanCSS.minify(text).styles;
+      return cleanCSS.minify(style).styles;
     }
   }
   catch (err) {
@@ -967,16 +964,8 @@ function minify(value, options, partialMarkup) {
           text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespaceAll(text);
         }
       }
-      if (currentTag === 'script' || currentTag === 'style') {
-        if (options.removeCommentsFromCDATA) {
-          text = removeComments(text, currentTag);
-        }
-        if (options.removeCDATASectionsFromCDATA) {
-          text = removeCDATASections(text);
-        }
-        if (options.processScripts) {
-          text = processScript(text, options, currentAttrs);
-        }
+      if (options.processScripts && (currentTag === 'script' || currentTag === 'style')) {
+        text = processScript(text, options, currentAttrs);
       }
       if (options.minifyJS && isExecutableScript(currentTag, currentAttrs)) {
         text = minifyJS(text, options.minifyJS);
@@ -984,7 +973,7 @@ function minify(value, options, partialMarkup) {
           text = text.slice(0, -1);
         }
       }
-      if (currentTag === 'style' && options.minifyCSS) {
+      if (options.minifyCSS && isStyleSheet(currentTag, currentAttrs)) {
         text = minifyCSS(text, options.minifyCSS);
       }
       if (options.removeOptionalTags && text) {
