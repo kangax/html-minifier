@@ -834,7 +834,7 @@ function minify(value, options, partialMarkup) {
 
       var parts = [ ];
       var token, isLast = true;
-      for (var i = attrs.length; --i >= 0; ) {
+      for (var i = attrs.length; --i >= 0;) {
         if (lint) {
           lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].value);
         }

@@ -78,7 +78,7 @@
 
   function setCheckedAttrOnCheckboxes(attrValue) {
     var checkboxes = byId('options').getElementsByTagName('input');
-    for (var i = checkboxes.length; i--; ) {
+    for (var i = checkboxes.length; i--;) {
       checkboxes[i].checked = attrValue;
     }
   }

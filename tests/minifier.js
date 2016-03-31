@@ -2104,7 +2104,7 @@ test('custom attribute collapse with empty attribute value', function() {
   input = '<div ng-some\n\n></div>';
   output = '<div ng-some></div>';
 
-  equal(minify( input, { customAttrCollapse: /.+/ }), output);
+  equal(minify(input, { customAttrCollapse: /.+/ }), output);
 });
 
 test('custom attribute collapse with newlines, whitespace, and carriage returns', function() {
