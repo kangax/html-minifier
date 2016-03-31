@@ -31077,58 +31077,55 @@ exports.createMapFromString = function(values, ignoreCase) {
 'use strict';
 
 function isPresentationalElement(tag) {
-  return (/^(?:big|small|hr|blink|marquee)$/).test(tag);
+  return /^(?:big|small|hr|blink|marquee)$/.test(tag);
 }
 function isDeprecatedElement(tag) {
-  return (/^(?:applet|basefont|center|dir|font|isindex|strike)$/).test(tag);
+  return /^(?:applet|basefont|center|dir|font|isindex|strike)$/.test(tag);
 }
 function isEventAttribute(attrName) {
-  return (/^on[a-z]+/).test(attrName);
+  return /^on[a-z]+/.test(attrName);
 }
 function isStyleAttribute(attrName) {
-  return (attrName.toLowerCase() === 'style');
+  return attrName.toLowerCase() === 'style';
 }
 function isDeprecatedAttribute(tag, attrName) {
   return (
-    (attrName === 'align' &&
-    (/^(?:caption|applet|iframe|img|imput|object|legend|table|hr|div|h[1-6]|p)$/).test(tag)) ||
-    (attrName === 'alink' && tag === 'body') ||
-    (attrName === 'alt' && tag === 'applet') ||
-    (attrName === 'archive' && tag === 'applet') ||
-    (attrName === 'background' && tag === 'body') ||
-    (attrName === 'bgcolor' && (/^(?:table|t[rdh]|body)$/).test(tag)) ||
-    (attrName === 'border' && (/^(?:img|object)$/).test(tag)) ||
-    (attrName === 'clear' && tag === 'br') ||
-    (attrName === 'code' && tag === 'applet') ||
-    (attrName === 'codebase' && tag === 'applet') ||
-    (attrName === 'color' && (/^(?:base(?:font)?)$/).test(tag)) ||
-    (attrName === 'compact' && (/^(?:dir|[dou]l|menu)$/).test(tag)) ||
-    (attrName === 'face' && (/^base(?:font)?$/).test(tag)) ||
-    (attrName === 'height' && (/^(?:t[dh]|applet)$/).test(tag)) ||
-    (attrName === 'hspace' && (/^(?:applet|img|object)$/).test(tag)) ||
-    (attrName === 'language' && tag === 'script') ||
-    (attrName === 'link' && tag === 'body') ||
-    (attrName === 'name' && tag === 'applet') ||
-    (attrName === 'noshade' && tag === 'hr') ||
-    (attrName === 'nowrap' && (/^t[dh]$/).test(tag)) ||
-    (attrName === 'object' && tag === 'applet') ||
-    (attrName === 'prompt' && tag === 'isindex') ||
-    (attrName === 'size' && (/^(?:hr|font|basefont)$/).test(tag)) ||
-    (attrName === 'start' && tag === 'ol') ||
-    (attrName === 'text' && tag === 'body') ||
-    (attrName === 'type' && (/^(?:li|ol|ul)$/).test(tag)) ||
-    (attrName === 'value' && tag === 'li') ||
-    (attrName === 'version' && tag === 'html') ||
-    (attrName === 'vlink' && tag === 'body') ||
-    (attrName === 'vspace' && (/^(?:applet|img|object)$/).test(tag)) ||
-    (attrName === 'width' && (/^(?:hr|td|th|applet|pre)$/).test(tag))
+    attrName === 'align' &&
+    /^(?:caption|applet|iframe|img|imput|object|legend|table|hr|div|h[1-6]|p)$/.test(tag) ||
+    attrName === 'alink' && tag === 'body' ||
+    attrName === 'alt' && tag === 'applet' ||
+    attrName === 'archive' && tag === 'applet' ||
+    attrName === 'background' && tag === 'body' ||
+    attrName === 'bgcolor' && /^(?:table|t[rdh]|body)$/.test(tag) ||
+    attrName === 'border' && /^(?:img|object)$/.test(tag) ||
+    attrName === 'clear' && tag === 'br' ||
+    attrName === 'code' && tag === 'applet' ||
+    attrName === 'codebase' && tag === 'applet' ||
+    attrName === 'color' && /^(?:base(?:font)?)$/.test(tag) ||
+    attrName === 'compact' && /^(?:dir|[dou]l|menu)$/.test(tag) ||
+    attrName === 'face' && /^base(?:font)?$/.test(tag) ||
+    attrName === 'height' && /^(?:t[dh]|applet)$/.test(tag) ||
+    attrName === 'hspace' && /^(?:applet|img|object)$/.test(tag) ||
+    attrName === 'language' && tag === 'script' ||
+    attrName === 'link' && tag === 'body' ||
+    attrName === 'name' && tag === 'applet' ||
+    attrName === 'noshade' && tag === 'hr' ||
+    attrName === 'nowrap' && /^t[dh]$/.test(tag) ||
+    attrName === 'object' && tag === 'applet' ||
+    attrName === 'prompt' && tag === 'isindex' ||
+    attrName === 'size' && /^(?:hr|font|basefont)$/.test(tag) ||
+    attrName === 'start' && tag === 'ol' ||
+    attrName === 'text' && tag === 'body' ||
+    attrName === 'type' && /^(?:li|ol|ul)$/.test(tag) ||
+    attrName === 'value' && tag === 'li' ||
+    attrName === 'version' && tag === 'html' ||
+    attrName === 'vlink' && tag === 'body' ||
+    attrName === 'vspace' && /^(?:applet|img|object)$/.test(tag) ||
+    attrName === 'width' && /^(?:hr|td|th|applet|pre)$/.test(tag)
   );
 }
 function isInaccessibleAttribute(attrName, attrValue) {
-  return (
-    attrName === 'href' &&
-    (/^\s*javascript\s*:\s*void\s*(\s+0|\(\s*0\s*\))\s*$/i).test(attrValue)
-  );
+  return attrName === 'href' && /^\s*javascript\s*:\s*void\s*(\s+0|\(\s*0\s*\))\s*$/i.test(attrValue);
 }
 
 function Lint() {
@@ -31326,7 +31323,7 @@ function attrForHandler(handler) {
     + '\\s*(?:' + singleAttrValues.join('|') + '))?';
   if (handler.customAttrSurround) {
     var attrClauses = [];
-    for ( var i = handler.customAttrSurround.length - 1; i >= 0; i-- ) {
+    for (var i = handler.customAttrSurround.length - 1; i >= 0; i--) {
       attrClauses[i] = '(?:'
         + '(' + handler.customAttrSurround[i][0].source + ')\\s*'
         + pattern
@@ -31339,7 +31336,7 @@ function attrForHandler(handler) {
   return new RegExp('^\\s*' + pattern);
 }
 
-function joinSingleAttrAssigns( handler ) {
+function joinSingleAttrAssigns(handler) {
   return singleAttrAssigns.concat(
     handler.customAttrAssign || []
   ).map(function (assign) {
@@ -31347,67 +31344,67 @@ function joinSingleAttrAssigns( handler ) {
   }).join('|');
 }
 
-function HTMLParser( html, handler ) {
+function HTMLParser(html, handler) {
   var stack = [], lastTag;
   var attribute = attrForHandler(handler);
   var last, prevTag, nextTag;
-  while ( html ) {
+  while (html) {
     last = html;
     // Make sure we're not in a script or style element
-    if ( !lastTag || !special(lastTag) ) {
+    if (!lastTag || !special(lastTag)) {
       var textEnd = html.indexOf('<');
       if (textEnd === 0) {
         // Comment:
-        if ( /^<!--/.test( html ) ) {
+        if (/^<!--/.test(html)) {
           var commentEnd = html.indexOf('-->');
 
-          if ( commentEnd >= 0 ) {
-            if ( handler.comment ) {
-              handler.comment( html.substring( 4, commentEnd ) );
+          if (commentEnd >= 0) {
+            if (handler.comment) {
+              handler.comment(html.substring(4, commentEnd));
             }
-            html = html.substring( commentEnd + 3 );
+            html = html.substring(commentEnd + 3);
             prevTag = '';
             continue;
           }
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
-        if ( /^<!\[/.test( html ) ) {
+        if (/^<!\[/.test(html)) {
           var conditionalEnd = html.indexOf(']>');
 
           if (conditionalEnd >= 0) {
-            if ( handler.comment ) {
-              handler.comment( html.substring(2, conditionalEnd + 1 ), true /* non-standard */ );
+            if (handler.comment) {
+              handler.comment(html.substring(2, conditionalEnd + 1), true /* non-standard */);
             }
-            html = html.substring( conditionalEnd + 2 );
+            html = html.substring(conditionalEnd + 2);
             prevTag = '';
             continue;
           }
         }
 
         // Doctype:
-        var doctypeMatch = html.match( doctype );
-        if ( doctypeMatch ) {
-          if ( handler.doctype ) {
-            handler.doctype( doctypeMatch[0] );
+        var doctypeMatch = html.match(doctype);
+        if (doctypeMatch) {
+          if (handler.doctype) {
+            handler.doctype(doctypeMatch[0]);
           }
-          html = html.substring( doctypeMatch[0].length );
+          html = html.substring(doctypeMatch[0].length);
           prevTag = '';
           continue;
         }
 
         // End tag:
-        var endTagMatch = html.match( endTag );
-        if ( endTagMatch ) {
-          html = html.substring( endTagMatch[0].length );
-          endTagMatch[0].replace( endTag, parseEndTag );
+        var endTagMatch = html.match(endTag);
+        if (endTagMatch) {
+          html = html.substring(endTagMatch[0].length);
+          endTagMatch[0].replace(endTag, parseEndTag);
           prevTag = '/' + endTagMatch[1].toLowerCase();
           continue;
         }
 
         // Start tag:
         var startTagMatch = parseStartTag(html);
-        if ( startTagMatch ) {
+        if (startTagMatch) {
           html = startTagMatch.rest;
           handleStartTag(startTagMatch);
           prevTag = startTagMatch.tagName.toLowerCase();
@@ -31417,8 +31414,8 @@ function HTMLParser( html, handler ) {
 
       var text;
       if (textEnd >= 0) {
-        text = html.substring( 0, textEnd );
-        html = html.substring( textEnd );
+        text = html.substring(0, textEnd);
+        html = html.substring(textEnd);
       }
       else {
         text = html;
@@ -31431,7 +31428,7 @@ function HTMLParser( html, handler ) {
         nextTag = nextTagMatch.tagName;
       }
       else {
-        nextTagMatch = html.match( endTag );
+        nextTagMatch = html.match(endTag);
         if (nextTagMatch) {
           nextTag = '/' + nextTagMatch[1];
         }
@@ -31440,7 +31437,7 @@ function HTMLParser( html, handler ) {
         }
       }
 
-      if ( handler.chars ) {
+      if (handler.chars) {
         handler.chars(text, prevTag, nextTag);
       }
       prevTag = '';
@@ -31457,17 +31454,17 @@ function HTMLParser( html, handler ) {
             .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
         }
 
-        if ( handler.chars ) {
-          handler.chars( text );
+        if (handler.chars) {
+          handler.chars(text);
         }
 
         return '';
       });
 
-      parseEndTag( '</' + stackedTag + '>', stackedTag );
+      parseEndTag('</' + stackedTag + '>', stackedTag);
     }
 
-    if ( html === last ) {
+    if (html === last) {
       throw new Error('Parse Error: ' + html);
     }
   }
@@ -31503,17 +31500,17 @@ function HTMLParser( html, handler ) {
     var unarySlash = match.unarySlash;
 
     if (handler.html5 && lastTag === 'p' && nonPhrasing(tagName)) {
-      parseEndTag( '', lastTag );
+      parseEndTag('', lastTag);
     }
 
     if (!handler.html5) {
       while (lastTag && inline(lastTag)) {
-        parseEndTag( '', lastTag );
+        parseEndTag('', lastTag);
       }
     }
 
-    if ( closeSelf(tagName) && lastTag === tagName ) {
-      parseEndTag( '', tagName );
+    if (closeSelf(tagName) && lastTag === tagName) {
+      parseEndTag('', tagName);
     }
 
     var unary = empty(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash;
@@ -31566,45 +31563,45 @@ function HTMLParser( html, handler ) {
       };
     });
 
-    if ( !unary ) {
-      stack.push( { tag: tagName, attrs: attrs } );
+    if (!unary) {
+      stack.push({ tag: tagName, attrs: attrs });
       lastTag = tagName;
       unarySlash = '';
     }
 
-    if ( handler.start ) {
-      handler.start( tagName, attrs, unary, unarySlash );
+    if (handler.start) {
+      handler.start(tagName, attrs, unary, unarySlash);
     }
   }
 
-  function parseEndTag( tag, tagName ) {
+  function parseEndTag(tag, tagName) {
     var pos;
 
     // If no tag name is provided, clean shop
-    if ( !tagName ) {
+    if (!tagName) {
       pos = 0;
     }
     else {
       // Find the closest opened tag of the same type
       var needle = tagName.toLowerCase();
-      for ( pos = stack.length - 1; pos >= 0; pos-- ) {
-        if ( stack[ pos ].tag.toLowerCase() === needle ) {
+      for (pos = stack.length - 1; pos >= 0; pos--) {
+        if (stack[pos].tag.toLowerCase() === needle) {
           break;
         }
       }
     }
 
-    if ( pos >= 0 ) {
+    if (pos >= 0) {
       // Close all the open elements, up the stack
-      for ( var i = stack.length - 1; i >= pos; i-- ) {
-        if ( handler.end ) {
-          handler.end( stack[ i ].tag, stack[ i ].attrs, i > pos || !tag );
+      for (var i = stack.length - 1; i >= pos; i--) {
+        if (handler.end) {
+          handler.end(stack[i].tag, stack[i].attrs, i > pos || !tag);
         }
       }
 
       // Remove the open elements from the stack
       stack.length = pos;
-      lastTag = pos && stack[ pos - 1 ].tag;
+      lastTag = pos && stack[pos - 1].tag;
     }
     else if (tagName.toLowerCase() === 'br') {
       if (handler.start) {
@@ -31623,26 +31620,26 @@ function HTMLParser( html, handler ) {
 }
 
 exports.HTMLParser = HTMLParser;
-exports.HTMLtoXML = function( html ) {
+exports.HTMLtoXML = function(html) {
   var results = '';
 
   new HTMLParser(html, {
-    start: function( tag, attrs, unary ) {
+    start: function(tag, attrs, unary) {
       results += '<' + tag;
 
-      for ( var i = 0; i < attrs.length; i++ ) {
+      for (var i = 0; i < attrs.length; i++) {
         results += ' ' + attrs[i].name + '="' + (attrs[i].value || '').replace(/"/g, '&#34;') + '"';
       }
 
       results += (unary ? '/' : '') + '>';
     },
-    end: function( tag ) {
+    end: function(tag) {
       results += '</' + tag + '>';
     },
-    chars: function( text ) {
+    chars: function(text) {
       results += text;
     },
-    comment: function( text ) {
+    comment: function(text) {
       results += '<!--' + text + '-->';
     },
     ignore: function(text) {
@@ -31653,7 +31650,7 @@ exports.HTMLtoXML = function( html ) {
   return results;
 };
 
-exports.HTMLtoDOM = function( html, doc ) {
+exports.HTMLtoDOM = function(html, doc) {
   // There can be only one of these elements
   var one = {
     html: true,
@@ -31668,14 +31665,14 @@ exports.HTMLtoDOM = function( html, doc ) {
     base: 'head'
   };
 
-  if ( !doc ) {
-    if ( typeof DOMDocument !== 'undefined' ) {
+  if (!doc) {
+    if (typeof DOMDocument !== 'undefined') {
       doc = new DOMDocument();
     }
-    else if ( typeof document !== 'undefined' && document.implementation && document.implementation.createDocument ) {
+    else if (typeof document !== 'undefined' && document.implementation && document.implementation.createDocument) {
       doc = document.implementation.createDocument('', '', null);
     }
-    else if ( typeof ActiveX !== 'undefined' ) {
+    else if (typeof ActiveX !== 'undefined') {
       doc = new ActiveXObject('Msxml.DOMDocument');
     }
 
@@ -31692,21 +31689,21 @@ exports.HTMLtoDOM = function( html, doc ) {
 
   // If we're dealing with an empty document then we
   // need to pre-populate it with the HTML document structure
-  if ( !documentElement && doc.createElement ) {
+  if (!documentElement && doc.createElement) {
     (function() {
       var html = doc.createElement('html');
       var head = doc.createElement('head');
-      head.appendChild( doc.createElement('title') );
-      html.appendChild( head );
-      html.appendChild( doc.createElement('body') );
-      doc.appendChild( html );
+      head.appendChild(doc.createElement('title'));
+      html.appendChild(head);
+      html.appendChild(doc.createElement('body'));
+      doc.appendChild(html);
     })();
   }
 
   // Find all the unique elements
-  if ( doc.getElementsByTagName ) {
-    for ( var i in one ) {
-      one[ i ] = doc.getElementsByTagName( i )[0];
+  if (doc.getElementsByTagName) {
+    for (var i in one) {
+      one[i] = doc.getElementsByTagName(i)[0];
     }
   }
 
@@ -31714,46 +31711,46 @@ exports.HTMLtoDOM = function( html, doc ) {
   // the body element
   var curParentNode = one.body;
 
-  new HTMLParser( html, {
-    start: function( tagName, attrs, unary ) {
+  new HTMLParser(html, {
+    start: function(tagName, attrs, unary) {
       // If it's a pre-built element, then we can ignore
       // its construction
-      if ( one[ tagName ] ) {
-        curParentNode = one[ tagName ];
+      if (one[tagName]) {
+        curParentNode = one[tagName];
         return;
       }
 
-      var elem = doc.createElement( tagName );
+      var elem = doc.createElement(tagName);
 
-      for ( var attr in attrs ) {
-        elem.setAttribute( attrs[ attr ].name, attrs[ attr ].value );
+      for (var attr in attrs) {
+        elem.setAttribute(attrs[attr].name, attrs[attr].value);
       }
 
-      if ( structure[ tagName ] && typeof one[ structure[ tagName ] ] !== 'boolean' ) {
-        one[ structure[ tagName ] ].appendChild( elem );
+      if (structure[tagName] && typeof one[structure[tagName]] !== 'boolean') {
+        one[structure[tagName]].appendChild(elem);
       }
-      else if ( curParentNode && curParentNode.appendChild ) {
-        curParentNode.appendChild( elem );
+      else if (curParentNode && curParentNode.appendChild) {
+        curParentNode.appendChild(elem);
       }
 
-      if ( !unary ) {
-        elems.push( elem );
+      if (!unary) {
+        elems.push(elem);
         curParentNode = elem;
       }
     },
-    end: function( /* tag */ ) {
+    end: function(/* tag */) {
       elems.length -= 1;
 
       // Init the new parentNode
-      curParentNode = elems[ elems.length - 1 ];
+      curParentNode = elems[elems.length - 1];
     },
-    chars: function( text ) {
-      curParentNode.appendChild( doc.createTextNode( text ) );
+    chars: function(text) {
+      curParentNode.appendChild(doc.createTextNode(text));
     },
-    comment: function( /* text */ ) {
+    comment: function(/* text */) {
       // create comment node
     },
-    ignore: function( /* text */ ) {
+    ignore: function(/* text */) {
       // What to do here?
     }
   });
@@ -31884,13 +31881,13 @@ function isEventAttribute(attrName, options) {
     return false;
   }
   else {
-    return (/^on[a-z]{3,}$/).test(attrName);
+    return /^on[a-z]{3,}$/.test(attrName);
   }
 }
 
 function canRemoveAttributeQuotes(value) {
   // http://mathiasbynens.be/notes/unquoted-attribute-values
-  return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value);
+  return /^[^\x20\t\n\f\r"'`=<>]+$/.test(value);
 }
 
 function attributesInclude(attributes, attribute) {
@@ -31906,29 +31903,29 @@ function isAttributeRedundant(tag, attrName, attrValue, attrs) {
   attrValue = attrValue ? trimWhitespace(attrValue.toLowerCase()) : '';
 
   return (
-      (tag === 'script' &&
+      tag === 'script' &&
       attrName === 'language' &&
-      attrValue === 'javascript') ||
+      attrValue === 'javascript' ||
 
-      (tag === 'form' &&
+      tag === 'form' &&
       attrName === 'method' &&
-      attrValue === 'get') ||
+      attrValue === 'get' ||
 
-      (tag === 'input' &&
+      tag === 'input' &&
       attrName === 'type' &&
-      attrValue === 'text') ||
+      attrValue === 'text' ||
 
-      (tag === 'script' &&
+      tag === 'script' &&
       attrName === 'charset' &&
-      !attributesInclude(attrs, 'src')) ||
+      !attributesInclude(attrs, 'src') ||
 
-      (tag === 'a' &&
+      tag === 'a' &&
       attrName === 'name' &&
-      attributesInclude(attrs, 'id')) ||
+      attributesInclude(attrs, 'id') ||
 
-      (tag === 'area' &&
+      tag === 'area' &&
       attrName === 'shape' &&
-      attrValue === 'rect')
+      attrValue === 'rect'
   );
 }
 
@@ -31996,28 +31993,28 @@ function isBooleanAttribute(attrName, attrValue) {
 
 function isUriTypeAttribute(attrName, tag) {
   return (
-    ((/^(?:a|area|link|base)$/).test(tag) && attrName === 'href') ||
-    (tag === 'img' && (/^(?:src|longdesc|usemap)$/).test(attrName)) ||
-    (tag === 'object' && (/^(?:classid|codebase|data|usemap)$/).test(attrName)) ||
-    (tag === 'q' && attrName === 'cite') ||
-    (tag === 'blockquote' && attrName === 'cite') ||
-    ((tag === 'ins' || tag === 'del') && attrName === 'cite') ||
-    (tag === 'form' && attrName === 'action') ||
-    (tag === 'input' && (attrName === 'src' || attrName === 'usemap')) ||
-    (tag === 'head' && attrName === 'profile') ||
-    (tag === 'script' && (attrName === 'src' || attrName === 'for'))
+    /^(?:a|area|link|base)$/.test(tag) && attrName === 'href' ||
+    tag === 'img' && /^(?:src|longdesc|usemap)$/.test(attrName) ||
+    tag === 'object' && /^(?:classid|codebase|data|usemap)$/.test(attrName) ||
+    tag === 'q' && attrName === 'cite' ||
+    tag === 'blockquote' && attrName === 'cite' ||
+    (tag === 'ins' || tag === 'del') && attrName === 'cite' ||
+    tag === 'form' && attrName === 'action' ||
+    tag === 'input' && (attrName === 'src' || attrName === 'usemap') ||
+    tag === 'head' && attrName === 'profile' ||
+    tag === 'script' && (attrName === 'src' || attrName === 'for')
   );
 }
 
 function isNumberTypeAttribute(attrName, tag) {
   return (
-    ((/^(?:a|area|object|button)$/).test(tag) && attrName === 'tabindex') ||
-    (tag === 'input' && (attrName === 'maxlength' || attrName === 'tabindex')) ||
-    (tag === 'select' && (attrName === 'size' || attrName === 'tabindex')) ||
-    (tag === 'textarea' && (/^(?:rows|cols|tabindex)$/).test(attrName)) ||
-    (tag === 'colgroup' && attrName === 'span') ||
-    (tag === 'col' && attrName === 'span') ||
-    ((tag === 'th' || tag === 'td') && (attrName === 'rowspan' || attrName === 'colspan'))
+    /^(?:a|area|object|button)$/.test(tag) && attrName === 'tabindex' ||
+    tag === 'input' && (attrName === 'maxlength' || attrName === 'tabindex') ||
+    tag === 'select' && (attrName === 'size' || attrName === 'tabindex') ||
+    tag === 'textarea' && /^(?:rows|cols|tabindex)$/.test(attrName) ||
+    tag === 'colgroup' && attrName === 'span' ||
+    tag === 'col' && attrName === 'span' ||
+    (tag === 'th' || tag === 'td') && (attrName === 'rowspan' || attrName === 'colspan')
   );
 }
 
@@ -32217,11 +32214,9 @@ var reEmptyAttribute = new RegExp(
     '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
 function canDeleteEmptyAttribute(tag, attrName, attrValue) {
-  var isValueEmpty = !attrValue || (/^\s*$/).test(attrValue);
+  var isValueEmpty = !attrValue || /^\s*$/.test(attrValue);
   if (isValueEmpty) {
-    return (
-      (tag === 'input' && attrName === 'value') ||
-      reEmptyAttribute.test(attrName));
+    return tag === 'input' && attrName === 'value' || reEmptyAttribute.test(attrName);
   }
   return false;
 }
@@ -32266,11 +32261,11 @@ function canRemoveElement(tag, attrs) {
 }
 
 function canCollapseWhitespace(tag) {
-  return !(/^(?:script|style|pre|textarea)$/.test(tag));
+  return !/^(?:script|style|pre|textarea)$/.test(tag);
 }
 
 function canTrimWhitespace(tag) {
-  return !(/^(?:pre|textarea)$/.test(tag));
+  return !/^(?:pre|textarea)$/.test(tag);
 }
 
 function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isLast) {
@@ -32281,14 +32276,14 @@ function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isL
       attrFragment,
       emittedAttrValue;
 
-  if ((options.removeRedundantAttributes &&
-    isAttributeRedundant(tag, attrName, attrValue, attrs))
+  if (options.removeRedundantAttributes &&
+    isAttributeRedundant(tag, attrName, attrValue, attrs)
     ||
-    (options.removeScriptTypeAttributes &&
-    isScriptTypeAttribute(tag, attrName, attrValue))
+    options.removeScriptTypeAttributes &&
+    isScriptTypeAttribute(tag, attrName, attrValue)
     ||
-    (options.removeStyleLinkTypeAttributes &&
-    isStyleLinkTypeAttribute(tag, attrName, attrValue))) {
+    options.removeStyleLinkTypeAttributes &&
+    isStyleLinkTypeAttribute(tag, attrName, attrValue)) {
     return '';
   }
 
@@ -32330,8 +32325,8 @@ function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isL
     emittedAttrValue = attrValue + ' ';
   }
 
-  if (attrValue === undefined || (options.collapseBooleanAttributes &&
-      isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase()))) {
+  if (attrValue === undefined || options.collapseBooleanAttributes &&
+      isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase())) {
     attrFragment = attrName;
     if (!isLast) {
       attrFragment += ' ';
@@ -32349,7 +32344,7 @@ function processOptions(options) {
     options.includeAutoGeneratedTags = true;
   }
 
-  var defaultTesters = ['canCollapseWhitespace', 'canTrimWhitespace'];
+  var defaultTesters = [ 'canCollapseWhitespace', 'canTrimWhitespace' ];
   for (var i = 0, len = defaultTesters.length; i < len; i++) {
     if (!options[defaultTesters[i]]) {
       options[defaultTesters[i]] = function() {
@@ -32600,7 +32595,7 @@ function minify(value, options, partialMarkup) {
 
       var parts = [ ];
       var token, isLast = true;
-      for (var i = attrs.length; --i >= 0; ) {
+      for (var i = attrs.length; --i >= 0;) {
         if (lint) {
           lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].value);
         }

@@ -959,7 +959,7 @@ test('collapsing whitespace', function() {
           '<pre>       \r\nxxxx<\/pre><span>x<\/span> <span>Hello<\/span> <b>billy<\/b>     \r\n' +
           '<input type=\"text\">\r\n<textarea><\/textarea>\r\n<pre><\/pre>';
   output = '<script type="text/javascript">var = "hello";</script>' +
-           '<style type="text/css">#foo { color: red;        }</style>'+
+           '<style type="text/css">#foo { color: red;        }</style>' +
            '<div><div><div>' +
            '<!-- hello --><div><!--! hello --><div><div class="">' +
            '<textarea disabled="disabled">     this is a textarea </textarea>' +
@@ -1429,7 +1429,7 @@ test('Ignore custom fragments', function() {
   input = '<img src="{% static "images/logo.png" %}">';
   output = '<img src="{% static "images/logo.png" %}">';
 
-  equal(minify(input, { ignoreCustomFragments: [ (/\{\%[^\%]*?\%\}/g) ] }), output);
+  equal(minify(input, { ignoreCustomFragments: [ /\{\%[^\%]*?\%\}/g ] }), output);
 
   input = '<p{% if form.name.errors %}class=\'error\'{% endif %}>' +
             '{{ form.name.label_tag }}' +
@@ -2104,7 +2104,7 @@ test('custom attribute collapse with empty attribute value', function() {
   input = '<div ng-some\n\n></div>';
   output = '<div ng-some></div>';
 
-  equal(minify( input, { customAttrCollapse: /.+/ }), output);
+  equal(minify(input, { customAttrCollapse: /.+/ }), output);
 });
 
 test('custom attribute collapse with newlines, whitespace, and carriage returns', function() {
@@ -2245,33 +2245,33 @@ test('auto-generated tags', function() {
 test('tests from PHPTAL', function() {
   [
     // trailing </p> removed by minifier, but not by PHPTAL
-    ['<p>foo bar baz', '<p>foo     \t bar\n\n\n baz</p>'],
-    ['<p>foo bar<pre>  \tfoo\t   \nbar   </pre>', '<p>foo   \t\n bar</p><pre>  \tfoo\t   \nbar   </pre>'],
-    ['<p>foo <a href="">bar </a>baz', '<p>foo <a href=""> bar </a> baz  </p>'],
-    ['<p>foo <a href="">bar </a>baz', ' <p>foo <a href=""> bar </a>baz </p>'],
-    ['<p>foo<a href=""> bar </a>baz', ' <p> foo<a href=""> bar </a>baz </p>  '],
-    ['<p>foo <a href="">bar</a> baz', ' <p> foo <a href="">bar</a> baz</p>'],
-    ['<p>foo<br>', '<p>foo <br/></p>'],
+    [ '<p>foo bar baz', '<p>foo     \t bar\n\n\n baz</p>' ],
+    [ '<p>foo bar<pre>  \tfoo\t   \nbar   </pre>', '<p>foo   \t\n bar</p><pre>  \tfoo\t   \nbar   </pre>' ],
+    [ '<p>foo <a href="">bar </a>baz', '<p>foo <a href=""> bar </a> baz  </p>' ],
+    [ '<p>foo <a href="">bar </a>baz', ' <p>foo <a href=""> bar </a>baz </p>' ],
+    [ '<p>foo<a href=""> bar </a>baz', ' <p> foo<a href=""> bar </a>baz </p>  ' ],
+    [ '<p>foo <a href="">bar</a> baz', ' <p> foo <a href="">bar</a> baz</p>' ],
+    [ '<p>foo<br>', '<p>foo <br/></p>' ],
     // PHPTAL remove whitespace after 'foo' - problematic if <span> is used as icon font
-    ['<p>foo <span></span>', '<p>foo <span></span></p>'],
-    ['<p>foo <span></span>', '<p>foo <span></span> </p>'],
+    [ '<p>foo <span></span>', '<p>foo <span></span></p>' ],
+    [ '<p>foo <span></span>', '<p>foo <span></span> </p>' ],
     // comments removed by minifier, but not by PHPTAL
-    ['<p>foo', '<p>foo <!-- --> </p>'],
-    ['<div>a<div>b</div>c<div>d</div>e</div>', '<div>a <div>b</div> c <div> d </div> e </div>'],
+    [ '<p>foo', '<p>foo <!-- --> </p>' ],
+    [ '<div>a<div>b</div>c<div>d</div>e</div>', '<div>a <div>b</div> c <div> d </div> e </div>' ],
     // unary slashes removed by minifier, but not by PHPTAL
-    ['<div><img></div>', '<div> <img/> </div>'],
-    ['<div>x <img></div>', '<div> x <img/> </div>'],
-    ['<div>x <img> y</div>', '<div> x <img/> y </div>'],
-    ['<div><img> y</div>', '<div><img/> y </div>'],
-    ['<div><button>Z</button></div>', '<div> <button>Z</button> </div>'],
-    ['<div>x <button>Z</button></div>', '<div> x <button>Z</button> </div>'],
-    ['<div>x <button>Z</button> y</div>', '<div> x <button>Z</button> y </div>'],
-    ['<div><button>Z</button> y</div>', '<div><button>Z</button> y </div>'],
-    ['<div><button>Z</button></div>', '<div> <button> Z </button> </div>'],
-    ['<div>x <button>Z</button></div>', '<div> x <button> Z </button> </div>'],
-    ['<div>x <button>Z</button> y</div>', '<div> x <button> Z </button> y </div>'],
-    ['<div><button>Z</button> y</div>', '<div><button> Z </button> y </div>'],
-    ['<script>//foo\nbar()</script>', '<script>//foo\nbar()</script>'],
+    [ '<div><img></div>', '<div> <img/> </div>' ],
+    [ '<div>x <img></div>', '<div> x <img/> </div>' ],
+    [ '<div>x <img> y</div>', '<div> x <img/> y </div>' ],
+    [ '<div><img> y</div>', '<div><img/> y </div>' ],
+    [ '<div><button>Z</button></div>', '<div> <button>Z</button> </div>' ],
+    [ '<div>x <button>Z</button></div>', '<div> x <button>Z</button> </div>' ],
+    [ '<div>x <button>Z</button> y</div>', '<div> x <button>Z</button> y </div>' ],
+    [ '<div><button>Z</button> y</div>', '<div><button>Z</button> y </div>' ],
+    [ '<div><button>Z</button></div>', '<div> <button> Z </button> </div>' ],
+    [ '<div>x <button>Z</button></div>', '<div> x <button> Z </button> </div>' ],
+    [ '<div>x <button>Z</button> y</div>', '<div> x <button> Z </button> y </div>' ],
+    [ '<div><button>Z</button> y</div>', '<div><button> Z </button> y </div>' ],
+    [ '<script>//foo\nbar()</script>', '<script>//foo\nbar()</script>' ],
     // optional tags removed by minifier, but not by PHPTAL
     // parser cannot handle <script/>
     [
@@ -2282,23 +2282,23 @@ test('tests from PHPTAL', function() {
       '  > </style >\n' +
       '   </head > </html>'
     ],
-    ['<div><p>test 123<p>456<ul><li>x</ul></div>', '<div> <p> test 123 </p> <p> 456 </p> <ul> <li>x</li> </ul> </div>'],
-    ['<div><p>test 123<pre> 456 </pre><p>x</div>', '<div> <p> test 123 </p> <pre> 456 </pre> <p> x </p> </div>'],
+    [ '<div><p>test 123<p>456<ul><li>x</ul></div>', '<div> <p> test 123 </p> <p> 456 </p> <ul> <li>x</li> </ul> </div>' ],
+    [ '<div><p>test 123<pre> 456 </pre><p>x</div>', '<div> <p> test 123 </p> <pre> 456 </pre> <p> x </p> </div>' ],
     /* minifier does not assume <li> as "display: inline"
     ['<div><ul><li><a>a </a></li><li>b </li><li>c</li></ul></div>', '<div> <ul> <li> <a> a </a> </li> <li> b </li> <li> c </li> </ul> </div>'],
       */
-    ['<table>x<tr>x<td>foo</td>x</tr>x</table>', '<table> x <tr> x <td> foo </td> x </tr> x </table>'],
-    ['<select>x<option></option>x<optgroup>x<option></option>x</optgroup>x</select>', '<select> x <option> </option> x <optgroup> x <option> </option> x </optgroup> x </select> '],
+    [ '<table>x<tr>x<td>foo</td>x</tr>x</table>', '<table> x <tr> x <td> foo </td> x </tr> x </table>' ],
+    [ '<select>x<option></option>x<optgroup>x<option></option>x</optgroup>x</select>', '<select> x <option> </option> x <optgroup> x <option> </option> x </optgroup> x </select> ' ],
     /* minifier does not reorder attributes
     ['<img src="foo" width="10" height="5" alt="x"/>', '<img width="10" height="5" src="foo" alt="x" />'],
     ['<img alpha="1" beta="2" gamma="3"/>', '<img gamma="3" alpha="1" beta="2" />'],
       */
-    ['<pre>\n\n\ntest</pre>', '<pre>\n\n\ntest</pre>'],
+    [ '<pre>\n\n\ntest</pre>', '<pre>\n\n\ntest</pre>' ],
     /* single line-break preceding <pre> is redundant, assuming <pre> is block element
     ['<pre>test</pre>', '<pre>\ntest</pre>'],
       */
     // optional attribute quotes removed by minifier, but not by PHPTAL
-    ['<meta http-equiv=Content-Type content="text/plain;charset=UTF-8">', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>'],
+    [ '<meta http-equiv=Content-Type content="text/plain;charset=UTF-8">', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>' ],
     /* minifier does not optimise <meta/> in HTML5 mode
     ['<meta charset=utf-8>', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>'],
       */
@@ -2309,7 +2309,7 @@ test('tests from PHPTAL', function() {
       'language=\'javascript\'></script><style type=\'text/css\'></style>'
     ],
       */
-    ['<script type="text/javascript;e4x=1"></script><script type=text/hack></script>', '<script type="text/javascript;e4x=1"></script><script type="text/hack"></script>']
+    [ '<script type="text/javascript;e4x=1"></script><script type=text/hack></script>', '<script type="text/javascript;e4x=1"></script><script type="text/hack"></script>' ]
     /* trim "title" attribute value in <a>
     [
       '<title>Foo</title><p><a title=\"x\"href=test>x </a>xu</p><br>foo',
