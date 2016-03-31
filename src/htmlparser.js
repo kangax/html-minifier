@@ -363,13 +363,13 @@ function HTMLParser(html, handler) {
       // Close all the open elements, up the stack
       for (var i = stack.length - 1; i >= pos; i--) {
         if (handler.end) {
-          handler.end(stack[ i ].tag, stack[ i ].attrs, i > pos || !tag);
+          handler.end(stack[i].tag, stack[i].attrs, i > pos || !tag);
         }
       }
 
       // Remove the open elements from the stack
       stack.length = pos;
-      lastTag = pos && stack[ pos - 1 ].tag;
+      lastTag = pos && stack[pos - 1].tag;
     }
     else if (tagName.toLowerCase() === 'br') {
       if (handler.start) {
@@ -510,7 +510,7 @@ exports.HTMLtoDOM = function(html, doc) {
       elems.length -= 1;
 
       // Init the new parentNode
-      curParentNode = elems[ elems.length - 1 ];
+      curParentNode = elems[elems.length - 1];
     },
     chars: function(text) {
       curParentNode.appendChild(doc.createTextNode(text));

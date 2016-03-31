@@ -22,6 +22,7 @@
       "error",
       "last"
     ],
+    "computed-property-spacing": "error",
     "curly": "error",
     "eol-last": "error",
     "eqeqeq": "error",
