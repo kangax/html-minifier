@@ -31077,58 +31077,55 @@ exports.createMapFromString = function(values, ignoreCase) {
 'use strict';
 
 function isPresentationalElement(tag) {
-  return (/^(?:big|small|hr|blink|marquee)$/).test(tag);
+  return /^(?:big|small|hr|blink|marquee)$/.test(tag);
 }
 function isDeprecatedElement(tag) {
-  return (/^(?:applet|basefont|center|dir|font|isindex|strike)$/).test(tag);
+  return /^(?:applet|basefont|center|dir|font|isindex|strike)$/.test(tag);
 }
 function isEventAttribute(attrName) {
-  return (/^on[a-z]+/).test(attrName);
+  return /^on[a-z]+/.test(attrName);
 }
 function isStyleAttribute(attrName) {
-  return (attrName.toLowerCase() === 'style');
+  return attrName.toLowerCase() === 'style';
 }
 function isDeprecatedAttribute(tag, attrName) {
   return (
-    (attrName === 'align' &&
-    (/^(?:caption|applet|iframe|img|imput|object|legend|table|hr|div|h[1-6]|p)$/).test(tag)) ||
-    (attrName === 'alink' && tag === 'body') ||
-    (attrName === 'alt' && tag === 'applet') ||
-    (attrName === 'archive' && tag === 'applet') ||
-    (attrName === 'background' && tag === 'body') ||
-    (attrName === 'bgcolor' && (/^(?:table|t[rdh]|body)$/).test(tag)) ||
-    (attrName === 'border' && (/^(?:img|object)$/).test(tag)) ||
-    (attrName === 'clear' && tag === 'br') ||
-    (attrName === 'code' && tag === 'applet') ||
-    (attrName === 'codebase' && tag === 'applet') ||
-    (attrName === 'color' && (/^(?:base(?:font)?)$/).test(tag)) ||
-    (attrName === 'compact' && (/^(?:dir|[dou]l|menu)$/).test(tag)) ||
-    (attrName === 'face' && (/^base(?:font)?$/).test(tag)) ||
-    (attrName === 'height' && (/^(?:t[dh]|applet)$/).test(tag)) ||
-    (attrName === 'hspace' && (/^(?:applet|img|object)$/).test(tag)) ||
-    (attrName === 'language' && tag === 'script') ||
-    (attrName === 'link' && tag === 'body') ||
-    (attrName === 'name' && tag === 'applet') ||
-    (attrName === 'noshade' && tag === 'hr') ||
-    (attrName === 'nowrap' && (/^t[dh]$/).test(tag)) ||
-    (attrName === 'object' && tag === 'applet') ||
-    (attrName === 'prompt' && tag === 'isindex') ||
-    (attrName === 'size' && (/^(?:hr|font|basefont)$/).test(tag)) ||
-    (attrName === 'start' && tag === 'ol') ||
-    (attrName === 'text' && tag === 'body') ||
-    (attrName === 'type' && (/^(?:li|ol|ul)$/).test(tag)) ||
-    (attrName === 'value' && tag === 'li') ||
-    (attrName === 'version' && tag === 'html') ||
-    (attrName === 'vlink' && tag === 'body') ||
-    (attrName === 'vspace' && (/^(?:applet|img|object)$/).test(tag)) ||
-    (attrName === 'width' && (/^(?:hr|td|th|applet|pre)$/).test(tag))
+    attrName === 'align' &&
+    /^(?:caption|applet|iframe|img|imput|object|legend|table|hr|div|h[1-6]|p)$/.test(tag) ||
+    attrName === 'alink' && tag === 'body' ||
+    attrName === 'alt' && tag === 'applet' ||
+    attrName === 'archive' && tag === 'applet' ||
+    attrName === 'background' && tag === 'body' ||
+    attrName === 'bgcolor' && /^(?:table|t[rdh]|body)$/.test(tag) ||
+    attrName === 'border' && /^(?:img|object)$/.test(tag) ||
+    attrName === 'clear' && tag === 'br' ||
+    attrName === 'code' && tag === 'applet' ||
+    attrName === 'codebase' && tag === 'applet' ||
+    attrName === 'color' && /^(?:base(?:font)?)$/.test(tag) ||
+    attrName === 'compact' && /^(?:dir|[dou]l|menu)$/.test(tag) ||
+    attrName === 'face' && /^base(?:font)?$/.test(tag) ||
+    attrName === 'height' && /^(?:t[dh]|applet)$/.test(tag) ||
+    attrName === 'hspace' && /^(?:applet|img|object)$/.test(tag) ||
+    attrName === 'language' && tag === 'script' ||
+    attrName === 'link' && tag === 'body' ||
+    attrName === 'name' && tag === 'applet' ||
+    attrName === 'noshade' && tag === 'hr' ||
+    attrName === 'nowrap' && /^t[dh]$/.test(tag) ||
+    attrName === 'object' && tag === 'applet' ||
+    attrName === 'prompt' && tag === 'isindex' ||
+    attrName === 'size' && /^(?:hr|font|basefont)$/.test(tag) ||
+    attrName === 'start' && tag === 'ol' ||
+    attrName === 'text' && tag === 'body' ||
+    attrName === 'type' && /^(?:li|ol|ul)$/.test(tag) ||
+    attrName === 'value' && tag === 'li' ||
+    attrName === 'version' && tag === 'html' ||
+    attrName === 'vlink' && tag === 'body' ||
+    attrName === 'vspace' && /^(?:applet|img|object)$/.test(tag) ||
+    attrName === 'width' && /^(?:hr|td|th|applet|pre)$/.test(tag)
   );
 }
 function isInaccessibleAttribute(attrName, attrValue) {
-  return (
-    attrName === 'href' &&
-    (/^\s*javascript\s*:\s*void\s*(\s+0|\(\s*0\s*\))\s*$/i).test(attrValue)
-  );
+  return attrName === 'href' && /^\s*javascript\s*:\s*void\s*(\s+0|\(\s*0\s*\))\s*$/i.test(attrValue);
 }
 
 function Lint() {
@@ -31884,13 +31881,13 @@ function isEventAttribute(attrName, options) {
     return false;
   }
   else {
-    return (/^on[a-z]{3,}$/).test(attrName);
+    return /^on[a-z]{3,}$/.test(attrName);
   }
 }
 
 function canRemoveAttributeQuotes(value) {
   // http://mathiasbynens.be/notes/unquoted-attribute-values
-  return (/^[^\x20\t\n\f\r"'`=<>]+$/).test(value);
+  return /^[^\x20\t\n\f\r"'`=<>]+$/.test(value);
 }
 
 function attributesInclude(attributes, attribute) {
@@ -31906,29 +31903,29 @@ function isAttributeRedundant(tag, attrName, attrValue, attrs) {
   attrValue = attrValue ? trimWhitespace(attrValue.toLowerCase()) : '';
 
   return (
-      (tag === 'script' &&
+      tag === 'script' &&
       attrName === 'language' &&
-      attrValue === 'javascript') ||
+      attrValue === 'javascript' ||
 
-      (tag === 'form' &&
+      tag === 'form' &&
       attrName === 'method' &&
-      attrValue === 'get') ||
+      attrValue === 'get' ||
 
-      (tag === 'input' &&
+      tag === 'input' &&
       attrName === 'type' &&
-      attrValue === 'text') ||
+      attrValue === 'text' ||
 
-      (tag === 'script' &&
+      tag === 'script' &&
       attrName === 'charset' &&
-      !attributesInclude(attrs, 'src')) ||
+      !attributesInclude(attrs, 'src') ||
 
-      (tag === 'a' &&
+      tag === 'a' &&
       attrName === 'name' &&
-      attributesInclude(attrs, 'id')) ||
+      attributesInclude(attrs, 'id') ||
 
-      (tag === 'area' &&
+      tag === 'area' &&
       attrName === 'shape' &&
-      attrValue === 'rect')
+      attrValue === 'rect'
   );
 }
 
@@ -31996,28 +31993,28 @@ function isBooleanAttribute(attrName, attrValue) {
 
 function isUriTypeAttribute(attrName, tag) {
   return (
-    ((/^(?:a|area|link|base)$/).test(tag) && attrName === 'href') ||
-    (tag === 'img' && (/^(?:src|longdesc|usemap)$/).test(attrName)) ||
-    (tag === 'object' && (/^(?:classid|codebase|data|usemap)$/).test(attrName)) ||
-    (tag === 'q' && attrName === 'cite') ||
-    (tag === 'blockquote' && attrName === 'cite') ||
-    ((tag === 'ins' || tag === 'del') && attrName === 'cite') ||
-    (tag === 'form' && attrName === 'action') ||
-    (tag === 'input' && (attrName === 'src' || attrName === 'usemap')) ||
-    (tag === 'head' && attrName === 'profile') ||
-    (tag === 'script' && (attrName === 'src' || attrName === 'for'))
+    /^(?:a|area|link|base)$/.test(tag) && attrName === 'href' ||
+    tag === 'img' && /^(?:src|longdesc|usemap)$/.test(attrName) ||
+    tag === 'object' && /^(?:classid|codebase|data|usemap)$/.test(attrName) ||
+    tag === 'q' && attrName === 'cite' ||
+    tag === 'blockquote' && attrName === 'cite' ||
+    (tag === 'ins' || tag === 'del') && attrName === 'cite' ||
+    tag === 'form' && attrName === 'action' ||
+    tag === 'input' && (attrName === 'src' || attrName === 'usemap') ||
+    tag === 'head' && attrName === 'profile' ||
+    tag === 'script' && (attrName === 'src' || attrName === 'for')
   );
 }
 
 function isNumberTypeAttribute(attrName, tag) {
   return (
-    ((/^(?:a|area|object|button)$/).test(tag) && attrName === 'tabindex') ||
-    (tag === 'input' && (attrName === 'maxlength' || attrName === 'tabindex')) ||
-    (tag === 'select' && (attrName === 'size' || attrName === 'tabindex')) ||
-    (tag === 'textarea' && (/^(?:rows|cols|tabindex)$/).test(attrName)) ||
-    (tag === 'colgroup' && attrName === 'span') ||
-    (tag === 'col' && attrName === 'span') ||
-    ((tag === 'th' || tag === 'td') && (attrName === 'rowspan' || attrName === 'colspan'))
+    /^(?:a|area|object|button)$/.test(tag) && attrName === 'tabindex' ||
+    tag === 'input' && (attrName === 'maxlength' || attrName === 'tabindex') ||
+    tag === 'select' && (attrName === 'size' || attrName === 'tabindex') ||
+    tag === 'textarea' && /^(?:rows|cols|tabindex)$/.test(attrName) ||
+    tag === 'colgroup' && attrName === 'span' ||
+    tag === 'col' && attrName === 'span' ||
+    (tag === 'th' || tag === 'td') && (attrName === 'rowspan' || attrName === 'colspan')
   );
 }
 
@@ -32217,11 +32214,9 @@ var reEmptyAttribute = new RegExp(
     '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
 function canDeleteEmptyAttribute(tag, attrName, attrValue) {
-  var isValueEmpty = !attrValue || (/^\s*$/).test(attrValue);
+  var isValueEmpty = !attrValue || /^\s*$/.test(attrValue);
   if (isValueEmpty) {
-    return (
-      (tag === 'input' && attrName === 'value') ||
-      reEmptyAttribute.test(attrName));
+    return tag === 'input' && attrName === 'value' || reEmptyAttribute.test(attrName);
   }
   return false;
 }
@@ -32266,11 +32261,11 @@ function canRemoveElement(tag, attrs) {
 }
 
 function canCollapseWhitespace(tag) {
-  return !(/^(?:script|style|pre|textarea)$/.test(tag));
+  return !/^(?:script|style|pre|textarea)$/.test(tag);
 }
 
 function canTrimWhitespace(tag) {
-  return !(/^(?:pre|textarea)$/.test(tag));
+  return !/^(?:pre|textarea)$/.test(tag);
 }
 
 function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isLast) {
@@ -32281,14 +32276,14 @@ function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isL
       attrFragment,
       emittedAttrValue;
 
-  if ((options.removeRedundantAttributes &&
-    isAttributeRedundant(tag, attrName, attrValue, attrs))
+  if (options.removeRedundantAttributes &&
+    isAttributeRedundant(tag, attrName, attrValue, attrs)
     ||
-    (options.removeScriptTypeAttributes &&
-    isScriptTypeAttribute(tag, attrName, attrValue))
+    options.removeScriptTypeAttributes &&
+    isScriptTypeAttribute(tag, attrName, attrValue)
     ||
-    (options.removeStyleLinkTypeAttributes &&
-    isStyleLinkTypeAttribute(tag, attrName, attrValue))) {
+    options.removeStyleLinkTypeAttributes &&
+    isStyleLinkTypeAttribute(tag, attrName, attrValue)) {
     return '';
   }
 
@@ -32330,8 +32325,8 @@ function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isL
     emittedAttrValue = attrValue + ' ';
   }
 
-  if (attrValue === undefined || (options.collapseBooleanAttributes &&
-      isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase()))) {
+  if (attrValue === undefined || options.collapseBooleanAttributes &&
+      isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase())) {
     attrFragment = attrName;
     if (!isLast) {
       attrFragment += ' ';

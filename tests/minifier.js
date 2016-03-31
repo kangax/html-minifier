@@ -1429,7 +1429,7 @@ test('Ignore custom fragments', function() {
   input = '<img src="{% static "images/logo.png" %}">';
   output = '<img src="{% static "images/logo.png" %}">';
 
-  equal(minify(input, { ignoreCustomFragments: [ (/\{\%[^\%]*?\%\}/g) ] }), output);
+  equal(minify(input, { ignoreCustomFragments: [ /\{\%[^\%]*?\%\}/g ] }), output);
 
   input = '<p{% if form.name.errors %}class=\'error\'{% endif %}>' +
             '{{ form.name.label_tag }}' +

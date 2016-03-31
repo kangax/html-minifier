@@ -9,58 +9,55 @@
 'use strict';
 
 function isPresentationalElement(tag) {
-  return (/^(?:big|small|hr|blink|marquee)$/).test(tag);
+  return /^(?:big|small|hr|blink|marquee)$/.test(tag);
 }
 function isDeprecatedElement(tag) {
-  return (/^(?:applet|basefont|center|dir|font|isindex|strike)$/).test(tag);
+  return /^(?:applet|basefont|center|dir|font|isindex|strike)$/.test(tag);
 }
 function isEventAttribute(attrName) {
-  return (/^on[a-z]+/).test(attrName);
+  return /^on[a-z]+/.test(attrName);
 }
 function isStyleAttribute(attrName) {
-  return (attrName.toLowerCase() === 'style');
+  return attrName.toLowerCase() === 'style';
 }
 function isDeprecatedAttribute(tag, attrName) {
   return (
-    (attrName === 'align' &&
-    (/^(?:caption|applet|iframe|img|imput|object|legend|table|hr|div|h[1-6]|p)$/).test(tag)) ||
-    (attrName === 'alink' && tag === 'body') ||
-    (attrName === 'alt' && tag === 'applet') ||
-    (attrName === 'archive' && tag === 'applet') ||
-    (attrName === 'background' && tag === 'body') ||
-    (attrName === 'bgcolor' && (/^(?:table|t[rdh]|body)$/).test(tag)) ||
-    (attrName === 'border' && (/^(?:img|object)$/).test(tag)) ||
-    (attrName === 'clear' && tag === 'br') ||
-    (attrName === 'code' && tag === 'applet') ||
-    (attrName === 'codebase' && tag === 'applet') ||
-    (attrName === 'color' && (/^(?:base(?:font)?)$/).test(tag)) ||
-    (attrName === 'compact' && (/^(?:dir|[dou]l|menu)$/).test(tag)) ||
-    (attrName === 'face' && (/^base(?:font)?$/).test(tag)) ||
-    (attrName === 'height' && (/^(?:t[dh]|applet)$/).test(tag)) ||
-    (attrName === 'hspace' && (/^(?:applet|img|object)$/).test(tag)) ||
-    (attrName === 'language' && tag === 'script') ||
-    (attrName === 'link' && tag === 'body') ||
-    (attrName === 'name' && tag === 'applet') ||
-    (attrName === 'noshade' && tag === 'hr') ||
-    (attrName === 'nowrap' && (/^t[dh]$/).test(tag)) ||
-    (attrName === 'object' && tag === 'applet') ||
-    (attrName === 'prompt' && tag === 'isindex') ||
-    (attrName === 'size' && (/^(?:hr|font|basefont)$/).test(tag)) ||
-    (attrName === 'start' && tag === 'ol') ||
-    (attrName === 'text' && tag === 'body') ||
-    (attrName === 'type' && (/^(?:li|ol|ul)$/).test(tag)) ||
-    (attrName === 'value' && tag === 'li') ||
-    (attrName === 'version' && tag === 'html') ||
-    (attrName === 'vlink' && tag === 'body') ||
-    (attrName === 'vspace' && (/^(?:applet|img|object)$/).test(tag)) ||
-    (attrName === 'width' && (/^(?:hr|td|th|applet|pre)$/).test(tag))
+    attrName === 'align' &&
+    /^(?:caption|applet|iframe|img|imput|object|legend|table|hr|div|h[1-6]|p)$/.test(tag) ||
+    attrName === 'alink' && tag === 'body' ||
+    attrName === 'alt' && tag === 'applet' ||
+    attrName === 'archive' && tag === 'applet' ||
+    attrName === 'background' && tag === 'body' ||
+    attrName === 'bgcolor' && /^(?:table|t[rdh]|body)$/.test(tag) ||
+    attrName === 'border' && /^(?:img|object)$/.test(tag) ||
+    attrName === 'clear' && tag === 'br' ||
+    attrName === 'code' && tag === 'applet' ||
+    attrName === 'codebase' && tag === 'applet' ||
+    attrName === 'color' && /^(?:base(?:font)?)$/.test(tag) ||
+    attrName === 'compact' && /^(?:dir|[dou]l|menu)$/.test(tag) ||
+    attrName === 'face' && /^base(?:font)?$/.test(tag) ||
+    attrName === 'height' && /^(?:t[dh]|applet)$/.test(tag) ||
+    attrName === 'hspace' && /^(?:applet|img|object)$/.test(tag) ||
+    attrName === 'language' && tag === 'script' ||
+    attrName === 'link' && tag === 'body' ||
+    attrName === 'name' && tag === 'applet' ||
+    attrName === 'noshade' && tag === 'hr' ||
+    attrName === 'nowrap' && /^t[dh]$/.test(tag) ||
+    attrName === 'object' && tag === 'applet' ||
+    attrName === 'prompt' && tag === 'isindex' ||
+    attrName === 'size' && /^(?:hr|font|basefont)$/.test(tag) ||
+    attrName === 'start' && tag === 'ol' ||
+    attrName === 'text' && tag === 'body' ||
+    attrName === 'type' && /^(?:li|ol|ul)$/.test(tag) ||
+    attrName === 'value' && tag === 'li' ||
+    attrName === 'version' && tag === 'html' ||
+    attrName === 'vlink' && tag === 'body' ||
+    attrName === 'vspace' && /^(?:applet|img|object)$/.test(tag) ||
+    attrName === 'width' && /^(?:hr|td|th|applet|pre)$/.test(tag)
   );
 }
 function isInaccessibleAttribute(attrName, attrValue) {
-  return (
-    attrName === 'href' &&
-    (/^\s*javascript\s*:\s*void\s*(\s+0|\(\s*0\s*\))\s*$/i).test(attrValue)
-  );
+  return attrName === 'href' && /^\s*javascript\s*:\s*void\s*(\s+0|\(\s*0\s*\))\s*$/i.test(attrValue);
 }
 
 function Lint() {

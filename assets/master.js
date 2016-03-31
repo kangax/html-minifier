@@ -52,7 +52,7 @@
           originalValue = byId('input').value,
           minifiedValue = minify(originalValue, options),
           diff = originalValue.length - minifiedValue.length,
-          savings = originalValue.length ? ((100 * diff) / originalValue.length).toFixed(2) : 0;
+          savings = originalValue.length ? (100 * diff / originalValue.length).toFixed(2) : 0;
 
       byId('output').value = minifiedValue;
 

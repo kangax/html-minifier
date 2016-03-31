@@ -40,6 +40,7 @@
     "new-parens": "error",
     "no-array-constructor": "error",
     "no-console": "off",
+    "no-extra-parens": "error",
     "no-floating-decimal": "error",
     "no-lone-blocks": "error",
     "no-lonely-if": "error",
