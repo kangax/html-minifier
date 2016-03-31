@@ -79,6 +79,7 @@
     "semi": "error",
     "semi-spacing": "error",
     "space-before-blocks": "error",
+    "space-infix-ops": "error",
     "space-unary-ops": "error",
     "space-in-parens": "error",
     "spaced-comment": [

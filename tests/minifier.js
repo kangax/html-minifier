@@ -959,7 +959,7 @@ test('collapsing whitespace', function() {
           '<pre>       \r\nxxxx<\/pre><span>x<\/span> <span>Hello<\/span> <b>billy<\/b>     \r\n' +
           '<input type=\"text\">\r\n<textarea><\/textarea>\r\n<pre><\/pre>';
   output = '<script type="text/javascript">var = "hello";</script>' +
-           '<style type="text/css">#foo { color: red;        }</style>'+
+           '<style type="text/css">#foo { color: red;        }</style>' +
            '<div><div><div>' +
            '<!-- hello --><div><!--! hello --><div><div class="">' +
            '<textarea disabled="disabled">     this is a textarea </textarea>' +
