@@ -308,8 +308,8 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,require('_process'),"/node_modules/amdefine/amdefine.js")
-},{"_process":79,"path":77}],2:[function(require,module,exports){
+}).call(this,require('_process'),"/node_modules\\amdefine\\amdefine.js")
+},{"_process":78,"path":76}],2:[function(require,module,exports){
 'use strict'
 
 exports.toByteArray = toByteArray
@@ -320,17 +320,12 @@ var revLookup = []
 var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
 
 function init () {
-  var i
   var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-  var len = code.length
-
-  for (i = 0; i < len; i++) {
+  for (var i = 0, len = code.length; i < len; ++i) {
     lookup[i] = code[i]
-  }
-
-  for (i = 0; i < len; ++i) {
     revLookup[code.charCodeAt(i)] = i
   }
+
   revLookup['-'.charCodeAt(0)] = 62
   revLookup['_'.charCodeAt(0)] = 63
 }
@@ -362,8 +357,8 @@ function toByteArray (b64) {
 
   for (i = 0, j = 0; i < l; i += 4, j += 3) {
     tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
-    arr[L++] = (tmp & 0xFF0000) >> 16
-    arr[L++] = (tmp & 0xFF00) >> 8
+    arr[L++] = (tmp >> 16) & 0xFF
+    arr[L++] = (tmp >> 8) & 0xFF
     arr[L++] = tmp & 0xFF
   }
 
@@ -718,17 +713,12 @@ Buffer.compare = function compare (a, b) {
   var x = a.length
   var y = b.length
 
-  var i = 0
-  var len = Math.min(x, y)
-  while (i < len) {
-    if (a[i] !== b[i]) break
-
-    ++i
-  }
-
-  if (i !== len) {
-    x = a[i]
-    y = b[i]
+  for (var i = 0, len = Math.min(x, y); i < len; ++i) {
+    if (a[i] !== b[i]) {
+      x = a[i]
+      y = b[i]
+      break
+    }
   }
 
   if (x < y) return -1
@@ -889,7 +879,6 @@ Buffer.prototype.inspect = function inspect () {
 
 Buffer.prototype.compare = function compare (b) {
   if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
-  if (this === b) return 0
   return Buffer.compare(this, b)
 }
 
@@ -1895,14 +1884,7 @@ function blitBuffer (src, dst, offset, length) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":2,"ieee754":71,"isarray":6}],6:[function(require,module,exports){
-var toString = {}.toString;
-
-module.exports = Array.isArray || function (arr) {
-  return toString.call(arr) == '[object Array]';
-};
-
-},{}],7:[function(require,module,exports){
+},{"base64-js":2,"ieee754":70,"isarray":73}],6:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -1967,10 +1949,10 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = require('./lib/clean');
 
-},{"./lib/clean":9}],9:[function(require,module,exports){
+},{"./lib/clean":8}],8:[function(require,module,exports){
 (function (process){
 /**
  * Clean-css - https://github.com/jakubpawlowicz/clean-css
@@ -2205,7 +2187,7 @@ function minify(context, data) {
 }
 
 }).call(this,require('_process'))
-},{"./imports/inliner":13,"./properties/validator":27,"./selectors/advanced":30,"./selectors/simple":43,"./stringifier/simple":47,"./stringifier/source-maps":48,"./text/comments-processor":49,"./text/expressions-processor":51,"./text/free-text-processor":52,"./text/urls-processor":53,"./tokenizer/tokenize":56,"./urls/rebase":57,"./utils/compatibility":61,"./utils/input-source-map-tracker":62,"./utils/object":63,"./utils/source-reader":65,"./utils/source-tracker":66,"_process":79,"fs":4,"path":77,"url":141}],10:[function(require,module,exports){
+},{"./imports/inliner":12,"./properties/validator":26,"./selectors/advanced":29,"./selectors/simple":42,"./stringifier/simple":46,"./stringifier/source-maps":47,"./text/comments-processor":48,"./text/expressions-processor":50,"./text/free-text-processor":51,"./text/urls-processor":52,"./tokenizer/tokenize":55,"./urls/rebase":56,"./utils/compatibility":60,"./utils/input-source-map-tracker":61,"./utils/object":62,"./utils/source-reader":64,"./utils/source-tracker":65,"_process":78,"fs":4,"path":76,"url":140}],9:[function(require,module,exports){
 var HexNameShortener = {};
 
 var COLORS = {
@@ -2393,7 +2375,7 @@ HexNameShortener.shorten = function (value) {
 
 module.exports = HexNameShortener;
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 // HSL to RGB converter. Both methods adapted from:
 // http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
 
@@ -2462,7 +2444,7 @@ HSLColor.prototype.toHex = function () {
 
 module.exports = HSLColor;
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 function RGB(red, green, blue) {
   this.red = red;
   this.green = green;
@@ -2480,7 +2462,7 @@ RGB.prototype.toHex = function () {
 
 module.exports = RGB;
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (process){
 var fs = require('fs');
 var path = require('path');
@@ -2875,7 +2857,7 @@ function restoreImport(importedUrl, mediaQuery, context) {
 module.exports = ImportInliner;
 
 }).call(this,require('_process'))
-},{"../urls/rewrite":59,"../utils/object.js":63,"../utils/split":67,"_process":79,"fs":4,"http":123,"https":70,"path":77,"url":141}],14:[function(require,module,exports){
+},{"../urls/rewrite":58,"../utils/object.js":62,"../utils/split":66,"_process":78,"fs":4,"http":122,"https":69,"path":76,"url":140}],13:[function(require,module,exports){
 var wrapSingle = require('./wrap-for-optimizing').single;
 
 var split = require('../utils/split');
@@ -3206,7 +3188,7 @@ module.exports = {
   outline: widthStyleColor
 };
 
-},{"../utils/split":67,"./wrap-for-optimizing":29}],15:[function(require,module,exports){
+},{"../utils/split":66,"./wrap-for-optimizing":28}],14:[function(require,module,exports){
 // Functions that decide what value can override what.
 // The main purpose is to disallow removing CSS fallbacks.
 // A separate implementation is needed for every different kind of CSS property.
@@ -3333,7 +3315,7 @@ module.exports = {
   unit: unit
 };
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var wrapSingle = require('./wrap-for-optimizing').single;
 
 function deep(property) {
@@ -3361,7 +3343,7 @@ module.exports = {
   shallow: shallow
 };
 
-},{"./wrap-for-optimizing":29}],17:[function(require,module,exports){
+},{"./wrap-for-optimizing":28}],16:[function(require,module,exports){
 // Contains the interpretation of CSS properties, as used by the property optimizer
 
 var breakUp = require('./break-up');
@@ -3648,7 +3630,7 @@ for (var property in compactable) {
 
 module.exports = compactable;
 
-},{"./break-up":14,"./can-override":15,"./restore":25}],18:[function(require,module,exports){
+},{"./break-up":13,"./can-override":14,"./restore":24}],17:[function(require,module,exports){
 var shallowClone = require('./clone').shallow;
 
 var MULTIPLEX_SEPARATOR = ',';
@@ -3674,7 +3656,7 @@ function everyCombination(fn, left, right, validator) {
 
 module.exports = everyCombination;
 
-},{"./clone":16}],19:[function(require,module,exports){
+},{"./clone":15}],18:[function(require,module,exports){
 function hasInherit(property) {
   for (var i = property.value.length - 1; i >= 0; i--) {
     if (property.value[i][0] == 'inherit')
@@ -3686,7 +3668,7 @@ function hasInherit(property) {
 
 module.exports = hasInherit;
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var compactable = require('./compactable');
 var wrapForOptimizing = require('./wrap-for-optimizing').all;
 var populateComponents = require('./populate-components');
@@ -3900,7 +3882,7 @@ function optimize(selector, properties, mergeAdjacent, withCompacting, options, 
 
 module.exports = optimize;
 
-},{"../stringifier/one-time":46,"./compactable":17,"./override-compactor":21,"./populate-components":22,"./remove-unused":23,"./restore-from-optimizing":24,"./shorthand-compactor":26,"./wrap-for-optimizing":29}],21:[function(require,module,exports){
+},{"../stringifier/one-time":45,"./compactable":16,"./override-compactor":20,"./populate-components":21,"./remove-unused":22,"./restore-from-optimizing":23,"./shorthand-compactor":25,"./wrap-for-optimizing":28}],20:[function(require,module,exports){
 var canOverride = require('./can-override');
 var compactable = require('./compactable');
 var deepClone = require('./clone').deep;
@@ -4281,7 +4263,7 @@ function compactOverrides(properties, compatibility, validator) {
 
 module.exports = compactOverrides;
 
-},{"../stringifier/one-time":46,"./can-override":15,"./clone":16,"./compactable":17,"./every-combination":18,"./has-inherit":19,"./restore-from-optimizing":24,"./vendor-prefixes":28}],22:[function(require,module,exports){
+},{"../stringifier/one-time":45,"./can-override":14,"./clone":15,"./compactable":16,"./every-combination":17,"./has-inherit":18,"./restore-from-optimizing":23,"./vendor-prefixes":27}],21:[function(require,module,exports){
 var compactable = require('./compactable');
 
 function populateComponents(properties, validator) {
@@ -4304,7 +4286,7 @@ function populateComponents(properties, validator) {
 
 module.exports = populateComponents;
 
-},{"./compactable":17}],23:[function(require,module,exports){
+},{"./compactable":16}],22:[function(require,module,exports){
 function removeUnused(properties) {
   for (var i = properties.length - 1; i >= 0; i--) {
     var property = properties[i];
@@ -4316,7 +4298,7 @@ function removeUnused(properties) {
 
 module.exports = removeUnused;
 
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var compactable = require('./compactable');
 
 var BACKSLASH_HACK = '\\9';
@@ -4378,7 +4360,7 @@ function restoreFromOptimizing(properties, simpleMode) {
 
 module.exports = restoreFromOptimizing;
 
-},{"./compactable":17}],25:[function(require,module,exports){
+},{"./compactable":16}],24:[function(require,module,exports){
 var shallowClone = require('./clone').shallow;
 var MULTIPLEX_SEPARATOR = ',';
 var SIZE_POSITION_SEPARATOR = '/';
@@ -4609,7 +4591,7 @@ module.exports = {
   withoutDefaults: withoutDefaults
 };
 
-},{"./clone":16}],26:[function(require,module,exports){
+},{"./clone":15}],25:[function(require,module,exports){
 var compactable = require('./compactable');
 var deepClone = require('./clone').deep;
 var hasInherit = require('./has-inherit');
@@ -4745,7 +4727,7 @@ function compactShortands(properties, sourceMaps, validator) {
 
 module.exports = compactShortands;
 
-},{"./clone":16,"./compactable":17,"./every-combination":18,"./has-inherit":19,"./populate-components":22,"./wrap-for-optimizing":29}],27:[function(require,module,exports){
+},{"./clone":15,"./compactable":16,"./every-combination":17,"./has-inherit":18,"./populate-components":21,"./wrap-for-optimizing":28}],26:[function(require,module,exports){
 // Validates various CSS property values
 
 var split = require('../utils/split');
@@ -4944,7 +4926,7 @@ Validator.prototype.areSameFunction = function (a, b) {
 
 module.exports = Validator;
 
-},{"../utils/split":67}],28:[function(require,module,exports){
+},{"../utils/split":66}],27:[function(require,module,exports){
 var VENDOR_PREFIX_PATTERN = /$\-moz\-|\-ms\-|\-o\-|\-webkit\-/;
 
 function prefixesIn(tokens) {
@@ -4972,7 +4954,7 @@ module.exports = {
   same: same
 };
 
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var BACKSLASH_HACK = '\\';
 var IMPORTANT_TOKEN = '!important';
 var STAR_HACK = '*';
@@ -5085,7 +5067,7 @@ module.exports = {
   single: wrapSingle
 };
 
-},{}],30:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var optimizeProperties = require('../properties/optimizer');
 
 var removeDuplicates = require('./remove-duplicates');
@@ -5173,13 +5155,22 @@ function optimize(tokens, options, validator, withRestructuring) {
 
 module.exports = optimize;
 
-},{"../properties/optimizer":20,"./merge-adjacent":34,"./merge-media-queries":35,"./merge-non-adjacent-by-body":36,"./merge-non-adjacent-by-selector":37,"./reduce-non-adjacent":38,"./remove-duplicate-media-queries":39,"./remove-duplicates":40,"./restructure":42}],31:[function(require,module,exports){
+},{"../properties/optimizer":19,"./merge-adjacent":33,"./merge-media-queries":34,"./merge-non-adjacent-by-body":35,"./merge-non-adjacent-by-selector":36,"./reduce-non-adjacent":37,"./remove-duplicate-media-queries":38,"./remove-duplicates":39,"./restructure":41}],30:[function(require,module,exports){
 function removeWhitespace(match, value) {
   return '[' + value.replace(/ /g, '') + ']';
 }
 
 function selectorSorter(s1, s2) {
   return s1[0] > s2[0] ? 1 : -1;
+}
+
+function whitespaceReplacements(_, p1, p2, p3) {
+  if (p1 && p2 && p3.length)
+    return p1 + p2 + ' ';
+  else if (p1 && p2)
+    return p1 + p2;
+  else
+    return p2;
 }
 
 var CleanUp = {
@@ -5192,7 +5183,7 @@ var CleanUp = {
       var reduced = selector[0]
         .replace(/\s+/g, ' ')
         .replace(/ ?, ?/g, ',')
-        .replace(/\s*([>\+\~])\s*/g, '$1')
+        .replace(/\s*(\\)?([>+~])(\s*)/g, whitespaceReplacements)
         .trim();
 
       if (adjacentSpace && reduced.indexOf('nav') > 0)
@@ -5255,7 +5246,7 @@ var CleanUp = {
 
 module.exports = CleanUp;
 
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 // This extractor is used in advanced optimizations
 // IMPORTANT: Mind Token class and this code is not related!
 // Properties will be tokenized in one step, see #429
@@ -5326,14 +5317,14 @@ function findNameRoot(name) {
 
 module.exports = extract;
 
-},{"../stringifier/one-time":46}],33:[function(require,module,exports){
+},{"../stringifier/one-time":45}],32:[function(require,module,exports){
 function isSpecial(options, selector) {
   return options.compatibility.selectors.special.test(selector);
 }
 
 module.exports = isSpecial;
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var optimizeProperties = require('../properties/optimizer');
 
 var stringifyBody = require('../stringifier/one-time').body;
@@ -5370,7 +5361,7 @@ function mergeAdjacent(tokens, options, validator) {
 
 module.exports = mergeAdjacent;
 
-},{"../properties/optimizer":20,"../stringifier/one-time":46,"./clean-up":31,"./is-special":33}],35:[function(require,module,exports){
+},{"../properties/optimizer":19,"../stringifier/one-time":45,"./clean-up":30,"./is-special":32}],34:[function(require,module,exports){
 var canReorder = require('./reorderable').canReorder;
 var extractProperties = require('./extractor');
 
@@ -5436,7 +5427,7 @@ function mergeMediaQueries(tokens) {
 
 module.exports = mergeMediaQueries;
 
-},{"./extractor":32,"./reorderable":41}],36:[function(require,module,exports){
+},{"./extractor":31,"./reorderable":40}],35:[function(require,module,exports){
 var stringifyBody = require('../stringifier/one-time').body;
 var stringifySelectors = require('../stringifier/one-time').selectors;
 var cleanUpSelectors = require('./clean-up').selectors;
@@ -5499,7 +5490,7 @@ function mergeNonAdjacentByBody(tokens, options) {
 
 module.exports = mergeNonAdjacentByBody;
 
-},{"../stringifier/one-time":46,"./clean-up":31,"./is-special":33}],37:[function(require,module,exports){
+},{"../stringifier/one-time":45,"./clean-up":30,"./is-special":32}],36:[function(require,module,exports){
 var optimizeProperties = require('../properties/optimizer');
 var stringifySelectors = require('../stringifier/one-time').selectors;
 var extractProperties = require('./extractor');
@@ -5577,7 +5568,7 @@ function mergeNonAdjacentBySelector(tokens, options, validator) {
 
 module.exports = mergeNonAdjacentBySelector;
 
-},{"../properties/optimizer":20,"../stringifier/one-time":46,"./extractor":32,"./reorderable":41}],38:[function(require,module,exports){
+},{"../properties/optimizer":19,"../stringifier/one-time":45,"./extractor":31,"./reorderable":40}],37:[function(require,module,exports){
 var optimizeProperties = require('../properties/optimizer');
 var stringifyBody = require('../stringifier/one-time').body;
 var stringifySelectors = require('../stringifier/one-time').selectors;
@@ -5751,7 +5742,7 @@ function reduceSelector(tokens, selector, data, context, options, validator) {
 
 module.exports = reduceNonAdjacent;
 
-},{"../properties/optimizer":20,"../stringifier/one-time":46,"../utils/clone-array":60,"./is-special":33}],39:[function(require,module,exports){
+},{"../properties/optimizer":19,"../stringifier/one-time":45,"../utils/clone-array":59,"./is-special":32}],38:[function(require,module,exports){
 var stringifyAll = require('../stringifier/one-time').all;
 
 function removeDuplicateMediaQueries(tokens) {
@@ -5774,7 +5765,7 @@ function removeDuplicateMediaQueries(tokens) {
 
 module.exports = removeDuplicateMediaQueries;
 
-},{"../stringifier/one-time":46}],40:[function(require,module,exports){
+},{"../stringifier/one-time":45}],39:[function(require,module,exports){
 var stringifyBody = require('../stringifier/one-time').body;
 var stringifySelectors = require('../stringifier/one-time').selectors;
 
@@ -5817,7 +5808,7 @@ function removeDuplicates(tokens) {
 
 module.exports = removeDuplicates;
 
-},{"../stringifier/one-time":46}],41:[function(require,module,exports){
+},{"../stringifier/one-time":45}],40:[function(require,module,exports){
 // TODO: it'd be great to merge it with the other canReorder functionality
 
 var FLEX_PROPERTIES = /align\-items|box\-align|box\-pack|flex|justify/;
@@ -5914,7 +5905,7 @@ module.exports = {
   canReorderSingle: canReorderSingle
 };
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var extractProperties = require('./extractor');
 var canReorderSingle = require('./reorderable').canReorderSingle;
 var stringifyBody = require('../stringifier/one-time').body;
@@ -6285,7 +6276,7 @@ function restructure(tokens, options) {
 
 module.exports = restructure;
 
-},{"../stringifier/one-time":46,"../utils/clone-array":60,"./clean-up":31,"./extractor":32,"./is-special":33,"./reorderable":41}],43:[function(require,module,exports){
+},{"../stringifier/one-time":45,"../utils/clone-array":59,"./clean-up":30,"./extractor":31,"./is-special":32,"./reorderable":40}],42:[function(require,module,exports){
 var cleanUpSelectors = require('./clean-up').selectors;
 var cleanUpBlock = require('./clean-up').block;
 var cleanUpAtRule = require('./clean-up').atRule;
@@ -6731,7 +6722,7 @@ function optimize(tokens, options) {
 
 module.exports = optimize;
 
-},{"../colors/hex-name-shortener":10,"../colors/hsl":11,"../colors/rgb":12,"../properties/remove-unused":23,"../properties/restore-from-optimizing":24,"../properties/wrap-for-optimizing":29,"../utils/split":67,"./clean-up":31}],44:[function(require,module,exports){
+},{"../colors/hex-name-shortener":9,"../colors/hsl":10,"../colors/rgb":11,"../properties/remove-unused":22,"../properties/restore-from-optimizing":23,"../properties/wrap-for-optimizing":28,"../utils/split":66,"./clean-up":30}],43:[function(require,module,exports){
 var escapePrefix = '__ESCAPED_';
 
 function trackPrefix(value, context, interestingContent) {
@@ -6852,7 +6843,7 @@ function track(data, context, snapshotMetadata, fallbacks) {
 
 module.exports = track;
 
-},{}],45:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var lineBreak = require('os').EOL;
 
 var AT_RULE = 'at-rule';
@@ -7024,7 +7015,7 @@ module.exports = {
   value: value
 };
 
-},{"os":76}],46:[function(require,module,exports){
+},{"os":75}],45:[function(require,module,exports){
 var helpers = require('./helpers');
 
 function store(token, context) {
@@ -7076,7 +7067,7 @@ module.exports = {
   value: value
 };
 
-},{"./helpers":45}],47:[function(require,module,exports){
+},{"./helpers":44}],46:[function(require,module,exports){
 var all = require('./helpers').all;
 
 function store(token, context) {
@@ -7100,7 +7091,7 @@ function stringify(tokens, options, restoreCallback) {
 
 module.exports = stringify;
 
-},{"./helpers":45}],48:[function(require,module,exports){
+},{"./helpers":44}],47:[function(require,module,exports){
 (function (process){
 var SourceMapGenerator = require('source-map').SourceMapGenerator;
 var all = require('./helpers').all;
@@ -7200,7 +7191,7 @@ function stringify(tokens, options, restoreCallback, inputMapTracker) {
 module.exports = stringify;
 
 }).call(this,require('_process'))
-},{"./helpers":45,"_process":79,"source-map":111}],49:[function(require,module,exports){
+},{"./helpers":44,"_process":78,"source-map":110}],48:[function(require,module,exports){
 var EscapeStore = require('./escape-store');
 var QuoteScanner = require('../utils/quote-scanner');
 
@@ -7333,7 +7324,7 @@ CommentsProcessor.prototype.restore = function (data) {
 
 module.exports = CommentsProcessor;
 
-},{"../utils/quote-scanner":64,"./escape-store":50,"os":76}],50:[function(require,module,exports){
+},{"../utils/quote-scanner":63,"./escape-store":49,"os":75}],49:[function(require,module,exports){
 var placeholderBrace = '__';
 
 function EscapeStore(placeholderRoot) {
@@ -7388,7 +7379,7 @@ EscapeStore.prototype.restore = function (placeholder) {
 
 module.exports = EscapeStore;
 
-},{}],51:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 var EscapeStore = require('./escape-store');
 
 var EXPRESSION_NAME = 'expression';
@@ -7507,7 +7498,7 @@ ExpressionsProcessor.prototype.restore = function (data) {
 
 module.exports = ExpressionsProcessor;
 
-},{"./escape-store":50,"os":76}],52:[function(require,module,exports){
+},{"./escape-store":49,"os":75}],51:[function(require,module,exports){
 var EscapeStore = require('./escape-store');
 var QuoteScanner = require('../utils/quote-scanner');
 
@@ -7607,7 +7598,7 @@ FreeTextProcessor.prototype.restore = function (data, prefixContext) {
 
 module.exports = FreeTextProcessor;
 
-},{"../utils/quote-scanner":64,"./escape-store":50,"os":76}],53:[function(require,module,exports){
+},{"../utils/quote-scanner":63,"./escape-store":49,"os":75}],52:[function(require,module,exports){
 var EscapeStore = require('./escape-store');
 var reduceUrls = require('../urls/reduce');
 
@@ -7681,7 +7672,7 @@ UrlsProcessor.prototype.restore = function (data) {
 
 module.exports = UrlsProcessor;
 
-},{"../urls/reduce":58,"./escape-store":50,"os":76}],54:[function(require,module,exports){
+},{"../urls/reduce":57,"./escape-store":49,"os":75}],53:[function(require,module,exports){
 var split = require('../utils/split');
 
 var COMMA = ',';
@@ -7871,7 +7862,7 @@ function extractProperties(string, selectors, context) {
 
 module.exports = extractProperties;
 
-},{"../utils/split":67}],55:[function(require,module,exports){
+},{"../utils/split":66}],54:[function(require,module,exports){
 var split = require('../utils/split');
 
 function extractSelectors(string, context) {
@@ -7890,7 +7881,7 @@ function extractSelectors(string, context) {
 
 module.exports = extractSelectors;
 
-},{"../utils/split":67}],56:[function(require,module,exports){
+},{"../utils/split":66}],55:[function(require,module,exports){
 var extractProperties = require('./extract-properties');
 var extractSelectors = require('./extract-selectors');
 var track = require('../source-maps/track');
@@ -8156,7 +8147,7 @@ function intoTokens(context) {
 
 module.exports = tokenize;
 
-},{"../source-maps/track":44,"../utils/split":67,"./extract-properties":54,"./extract-selectors":55,"path":77}],57:[function(require,module,exports){
+},{"../source-maps/track":43,"../utils/split":66,"./extract-properties":53,"./extract-selectors":54,"path":76}],56:[function(require,module,exports){
 var path = require('path');
 
 var rewriteUrls = require('./rewrite');
@@ -8188,7 +8179,7 @@ function rebaseUrls(data, context) {
 
 module.exports = rebaseUrls;
 
-},{"./rewrite":59,"path":77}],58:[function(require,module,exports){
+},{"./rewrite":58,"path":76}],57:[function(require,module,exports){
 var URL_PREFIX = 'url(';
 var UPPERCASE_URL_PREFIX = 'URL(';
 var URL_SUFFIX = ')';
@@ -8342,7 +8333,7 @@ function reduceAll(data, context, callback) {
 
 module.exports = reduceAll;
 
-},{}],59:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 (function (process){
 var path = require('path');
 var url = require('url');
@@ -8453,7 +8444,7 @@ function rewriteUrls(data, options, context) {
 module.exports = rewriteUrls;
 
 }).call(this,require('_process'))
-},{"./reduce":58,"_process":79,"path":77,"url":141}],60:[function(require,module,exports){
+},{"./reduce":57,"_process":78,"path":76,"url":140}],59:[function(require,module,exports){
 function cloneArray(array) {
   var cloned = array.slice(0);
 
@@ -8467,7 +8458,7 @@ function cloneArray(array) {
 
 module.exports = cloneArray;
 
-},{}],61:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 var util = require('util');
 
 var DEFAULTS = {
@@ -8631,7 +8622,7 @@ Compatibility.prototype.toOptions = function () {
 
 module.exports = Compatibility;
 
-},{"util":145}],62:[function(require,module,exports){
+},{"util":144}],61:[function(require,module,exports){
 (function (process,global,Buffer){
 var SourceMapConsumer = require('source-map').SourceMapConsumer;
 
@@ -8919,7 +8910,7 @@ InputSourceMapStore.prototype.resolveSources = function (whenDone) {
 module.exports = InputSourceMapStore;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"../utils/object.js":63,"_process":79,"buffer":5,"fs":4,"http":123,"https":70,"path":77,"source-map":111,"url":141}],63:[function(require,module,exports){
+},{"../utils/object.js":62,"_process":78,"buffer":5,"fs":4,"http":122,"https":69,"path":76,"source-map":110,"url":140}],62:[function(require,module,exports){
 module.exports = {
   override: function (source1, source2) {
     var target = {};
@@ -8932,7 +8923,7 @@ module.exports = {
   }
 };
 
-},{}],64:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 function QuoteScanner(data) {
   this.data = data;
 }
@@ -9036,7 +9027,7 @@ QuoteScanner.prototype.each = function (callback) {
 
 module.exports = QuoteScanner;
 
-},{}],65:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 (function (Buffer){
 var path = require('path');
 var rewriteUrls = require('../urls/rewrite');
@@ -9136,7 +9127,7 @@ function fromHash(self) {
 module.exports = SourceReader;
 
 }).call(this,{"isBuffer":require("../../../is-buffer/index.js")})
-},{"../../../is-buffer/index.js":73,"../urls/rewrite":59,"path":77}],66:[function(require,module,exports){
+},{"../../../is-buffer/index.js":72,"../urls/rewrite":58,"path":76}],65:[function(require,module,exports){
 function SourceTracker() {
   this.sources = [];
 }
@@ -9169,7 +9160,7 @@ SourceTracker.prototype.removeAll = function (data) {
 
 module.exports = SourceTracker;
 
-},{}],67:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 function split(value, separator, includeSeparator, openLevel, closeLevel) {
   var withRegex = typeof separator != 'string';
   var hasSeparator = withRegex ?
@@ -9220,7 +9211,7 @@ function split(value, separator, includeSeparator, openLevel, closeLevel) {
 
 module.exports = split;
 
-},{}],68:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9331,7 +9322,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":73}],69:[function(require,module,exports){
+},{"../../is-buffer/index.js":72}],68:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9631,7 +9622,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],70:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -9647,7 +9638,7 @@ https.request = function (params, cb) {
     return http.request.call(this, params, cb);
 }
 
-},{"http":123}],71:[function(require,module,exports){
+},{"http":122}],70:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -9733,7 +9724,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],72:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -9758,7 +9749,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],73:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 /**
  * Determine if an object is Buffer
  *
@@ -9777,12 +9768,14 @@ module.exports = function (obj) {
     ))
 }
 
-},{}],74:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
+var toString = {}.toString;
+
 module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
+  return toString.call(arr) == '[object Array]';
 };
 
-},{}],75:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 'use strict';
 var xmlChars = require('xml-char-classes');
 
@@ -9793,7 +9786,7 @@ function getRange(re) {
 // http://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-NCName
 module.exports = new RegExp('^[' + getRange(xmlChars.letter) + '_][' + getRange(xmlChars.letter) + getRange(xmlChars.digit) + '\\.\\-_' + getRange(xmlChars.combiningChar) + getRange(xmlChars.extender) + ']*$');
 
-},{"xml-char-classes":146}],76:[function(require,module,exports){
+},{"xml-char-classes":145}],75:[function(require,module,exports){
 exports.endianness = function () { return 'LE' };
 
 exports.hostname = function () {
@@ -9840,7 +9833,7 @@ exports.tmpdir = exports.tmpDir = function () {
 
 exports.EOL = '\n';
 
-},{}],77:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10068,7 +10061,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":79}],78:[function(require,module,exports){
+},{"_process":78}],77:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -10092,7 +10085,7 @@ function nextTick(fn) {
 }
 
 }).call(this,require('_process'))
-},{"_process":79}],79:[function(require,module,exports){
+},{"_process":78}],78:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -10185,9 +10178,9 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],80:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 (function (global){
-/*! https://mths.be/punycode v1.4.0 by @mathias */
+/*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
 
 	/** Detect free variables */
@@ -10675,7 +10668,7 @@ process.umask = function() { return 0; };
 		 * @memberOf punycode
 		 * @type String
 		 */
-		'version': '1.3.2',
+		'version': '1.4.1',
 		/**
 		 * An object of methods to convert from JavaScript's internal character
 		 * representation (UCS-2) to Unicode code points, and back.
@@ -10722,7 +10715,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],81:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10808,7 +10801,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],82:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10895,16 +10888,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],83:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":81,"./encode":82}],84:[function(require,module,exports){
+},{"./decode":80,"./encode":81}],83:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":85}],85:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":84}],84:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
@@ -10913,21 +10906,20 @@ module.exports = require("./lib/_stream_duplex.js")
 'use strict';
 
 /*<replacement>*/
+
 var objectKeys = Object.keys || function (obj) {
   var keys = [];
-  for (var key in obj) keys.push(key);
-  return keys;
-}
+  for (var key in obj) {
+    keys.push(key);
+  }return keys;
+};
 /*</replacement>*/
-
 
 module.exports = Duplex;
 
 /*<replacement>*/
 var processNextTick = require('process-nextick-args');
 /*</replacement>*/
-
-
 
 /*<replacement>*/
 var util = require('core-util-is');
@@ -10942,26 +10934,21 @@ util.inherits(Duplex, Readable);
 var keys = objectKeys(Writable.prototype);
 for (var v = 0; v < keys.length; v++) {
   var method = keys[v];
-  if (!Duplex.prototype[method])
-    Duplex.prototype[method] = Writable.prototype[method];
+  if (!Duplex.prototype[method]) Duplex.prototype[method] = Writable.prototype[method];
 }
 
 function Duplex(options) {
-  if (!(this instanceof Duplex))
-    return new Duplex(options);
+  if (!(this instanceof Duplex)) return new Duplex(options);
 
   Readable.call(this, options);
   Writable.call(this, options);
 
-  if (options && options.readable === false)
-    this.readable = false;
+  if (options && options.readable === false) this.readable = false;
 
-  if (options && options.writable === false)
-    this.writable = false;
+  if (options && options.writable === false) this.writable = false;
 
   this.allowHalfOpen = true;
-  if (options && options.allowHalfOpen === false)
-    this.allowHalfOpen = false;
+  if (options && options.allowHalfOpen === false) this.allowHalfOpen = false;
 
   this.once('end', onend);
 }
@@ -10970,8 +10957,7 @@ function Duplex(options) {
 function onend() {
   // if we allow half-open state, or if the writable side ended,
   // then we're ok.
-  if (this.allowHalfOpen || this._writableState.ended)
-    return;
+  if (this.allowHalfOpen || this._writableState.ended) return;
 
   // no more data can be written.
   // But allow more writes to happen in this tick.
@@ -10982,13 +10968,12 @@ function onEndNT(self) {
   self.end();
 }
 
-function forEach (xs, f) {
+function forEach(xs, f) {
   for (var i = 0, l = xs.length; i < l; i++) {
     f(xs[i], i);
   }
 }
-
-},{"./_stream_readable":87,"./_stream_writable":89,"core-util-is":68,"inherits":72,"process-nextick-args":78}],86:[function(require,module,exports){
+},{"./_stream_readable":86,"./_stream_writable":88,"core-util-is":67,"inherits":71,"process-nextick-args":77}],85:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
@@ -11007,17 +10992,15 @@ util.inherits = require('inherits');
 util.inherits(PassThrough, Transform);
 
 function PassThrough(options) {
-  if (!(this instanceof PassThrough))
-    return new PassThrough(options);
+  if (!(this instanceof PassThrough)) return new PassThrough(options);
 
   Transform.call(this, options);
 }
 
-PassThrough.prototype._transform = function(chunk, encoding, cb) {
+PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-
-},{"./_stream_transform":88,"core-util-is":68,"inherits":72}],87:[function(require,module,exports){
+},{"./_stream_transform":87,"core-util-is":67,"inherits":71}],86:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -11027,11 +11010,9 @@ module.exports = Readable;
 var processNextTick = require('process-nextick-args');
 /*</replacement>*/
 
-
 /*<replacement>*/
 var isArray = require('isarray');
 /*</replacement>*/
-
 
 /*<replacement>*/
 var Buffer = require('buffer').Buffer;
@@ -11042,21 +11023,20 @@ Readable.ReadableState = ReadableState;
 var EE = require('events');
 
 /*<replacement>*/
-var EElistenerCount = function(emitter, type) {
+var EElistenerCount = function (emitter, type) {
   return emitter.listeners(type).length;
 };
 /*</replacement>*/
 
-
-
 /*<replacement>*/
 var Stream;
-(function (){try{
-  Stream = require('st' + 'ream');
-}catch(_){}finally{
-  if (!Stream)
-    Stream = require('events').EventEmitter;
-}}())
+(function () {
+  try {
+    Stream = require('st' + 'ream');
+  } catch (_) {} finally {
+    if (!Stream) Stream = require('events').EventEmitter;
+  }
+})();
 /*</replacement>*/
 
 var Buffer = require('buffer').Buffer;
@@ -11066,11 +11046,9 @@ var util = require('core-util-is');
 util.inherits = require('inherits');
 /*</replacement>*/
 
-
-
 /*<replacement>*/
 var debugUtil = require('util');
-var debug;
+var debug = undefined;
 if (debugUtil && debugUtil.debuglog) {
   debug = debugUtil.debuglog('stream');
 } else {
@@ -11092,17 +11070,16 @@ function ReadableState(options, stream) {
   // make all the buffer merging and length checks go away
   this.objectMode = !!options.objectMode;
 
-  if (stream instanceof Duplex)
-    this.objectMode = this.objectMode || !!options.readableObjectMode;
+  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.readableObjectMode;
 
   // the point at which it stops calling _read() to fill the buffer
   // Note: 0 is a valid value, means "don't call _read preemptively ever"
   var hwm = options.highWaterMark;
   var defaultHwm = this.objectMode ? 16 : 16 * 1024;
-  this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;
+  this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
 
   // cast to ints.
-  this.highWaterMark = ~~this.highWaterMark;
+  this.highWaterMark = ~ ~this.highWaterMark;
 
   this.buffer = [];
   this.length = 0;
@@ -11124,6 +11101,7 @@ function ReadableState(options, stream) {
   this.needReadable = false;
   this.emittedReadable = false;
   this.readableListening = false;
+  this.resumeScheduled = false;
 
   // Crypto is kind of old and crusty.  Historically, its default string
   // encoding is 'binary' so we have to make this configurable.
@@ -11143,8 +11121,7 @@ function ReadableState(options, stream) {
   this.decoder = null;
   this.encoding = null;
   if (options.encoding) {
-    if (!StringDecoder)
-      StringDecoder = require('string_decoder/').StringDecoder;
+    if (!StringDecoder) StringDecoder = require('string_decoder/').StringDecoder;
     this.decoder = new StringDecoder(options.encoding);
     this.encoding = options.encoding;
   }
@@ -11154,16 +11131,14 @@ var Duplex;
 function Readable(options) {
   Duplex = Duplex || require('./_stream_duplex');
 
-  if (!(this instanceof Readable))
-    return new Readable(options);
+  if (!(this instanceof Readable)) return new Readable(options);
 
   this._readableState = new ReadableState(options, this);
 
   // legacy
   this.readable = true;
 
-  if (options && typeof options.read === 'function')
-    this._read = options.read;
+  if (options && typeof options.read === 'function') this._read = options.read;
 
   Stream.call(this);
 }
@@ -11172,7 +11147,7 @@ function Readable(options) {
 // This returns true if the highWaterMark has not been hit yet,
 // similar to how Writable.write() returns true if you should
 // write() some more.
-Readable.prototype.push = function(chunk, encoding) {
+Readable.prototype.push = function (chunk, encoding) {
   var state = this._readableState;
 
   if (!state.objectMode && typeof chunk === 'string') {
@@ -11187,12 +11162,12 @@ Readable.prototype.push = function(chunk, encoding) {
 };
 
 // Unshift should *always* be something directly out of read()
-Readable.prototype.unshift = function(chunk) {
+Readable.prototype.unshift = function (chunk) {
   var state = this._readableState;
   return readableAddChunk(this, state, chunk, '', true);
 };
 
-Readable.prototype.isPaused = function() {
+Readable.prototype.isPaused = function () {
   return this._readableState.flowing === false;
 };
 
@@ -11211,26 +11186,28 @@ function readableAddChunk(stream, state, chunk, encoding, addToFront) {
       var e = new Error('stream.unshift() after end event');
       stream.emit('error', e);
     } else {
-      if (state.decoder && !addToFront && !encoding)
+      var skipAdd;
+      if (state.decoder && !addToFront && !encoding) {
         chunk = state.decoder.write(chunk);
+        skipAdd = !state.objectMode && chunk.length === 0;
+      }
 
-      if (!addToFront)
-        state.reading = false;
+      if (!addToFront) state.reading = false;
 
-      // if we want the data now, just emit it.
-      if (state.flowing && state.length === 0 && !state.sync) {
-        stream.emit('data', chunk);
-        stream.read(0);
-      } else {
-        // update the buffer info.
-        state.length += state.objectMode ? 1 : chunk.length;
-        if (addToFront)
-          state.buffer.unshift(chunk);
-        else
-          state.buffer.push(chunk);
+      // Don't add to the buffer if we've decoded to an empty string chunk and
+      // we're not in object mode
+      if (!skipAdd) {
+        // if we want the data now, just emit it.
+        if (state.flowing && state.length === 0 && !state.sync) {
+          stream.emit('data', chunk);
+          stream.read(0);
+        } else {
+          // update the buffer info.
+          state.length += state.objectMode ? 1 : chunk.length;
+          if (addToFront) state.buffer.unshift(chunk);else state.buffer.push(chunk);
 
-        if (state.needReadable)
-          emitReadable(stream);
+          if (state.needReadable) emitReadable(stream);
+        }
       }
 
       maybeReadMore(stream, state);
@@ -11242,7 +11219,6 @@ function readableAddChunk(stream, state, chunk, encoding, addToFront) {
   return needMoreData(state);
 }
 
-
 // if it's past the high water mark, we can push in some more.
 // Also, if we have no data yet, we can stand some
 // more bytes.  This is to work around cases where hwm=0,
@@ -11251,16 +11227,12 @@ function readableAddChunk(stream, state, chunk, encoding, addToFront) {
 // needReadable was set, then we ought to push more, so that another
 // 'readable' event will be triggered.
 function needMoreData(state) {
-  return !state.ended &&
-         (state.needReadable ||
-          state.length < state.highWaterMark ||
-          state.length === 0);
+  return !state.ended && (state.needReadable || state.length < state.highWaterMark || state.length === 0);
 }
 
 // backwards compatibility.
-Readable.prototype.setEncoding = function(enc) {
-  if (!StringDecoder)
-    StringDecoder = require('string_decoder/').StringDecoder;
+Readable.prototype.setEncoding = function (enc) {
+  if (!StringDecoder) StringDecoder = require('string_decoder/').StringDecoder;
   this._readableState.decoder = new StringDecoder(enc);
   this._readableState.encoding = enc;
   return this;
@@ -11285,29 +11257,22 @@ function computeNewHighWaterMark(n) {
 }
 
 function howMuchToRead(n, state) {
-  if (state.length === 0 && state.ended)
-    return 0;
+  if (state.length === 0 && state.ended) return 0;
 
-  if (state.objectMode)
-    return n === 0 ? 0 : 1;
+  if (state.objectMode) return n === 0 ? 0 : 1;
 
   if (n === null || isNaN(n)) {
     // only flow one buffer at a time
-    if (state.flowing && state.buffer.length)
-      return state.buffer[0].length;
-    else
-      return state.length;
+    if (state.flowing && state.buffer.length) return state.buffer[0].length;else return state.length;
   }
 
-  if (n <= 0)
-    return 0;
+  if (n <= 0) return 0;
 
   // If we're asking for more than the target buffer level,
   // then raise the water mark.  Bump up to the next highest
   // power of 2, to prevent increasing it excessively in tiny
   // amounts.
-  if (n > state.highWaterMark)
-    state.highWaterMark = computeNewHighWaterMark(n);
+  if (n > state.highWaterMark) state.highWaterMark = computeNewHighWaterMark(n);
 
   // don't have that much.  return null, unless we've ended.
   if (n > state.length) {
@@ -11323,25 +11288,19 @@ function howMuchToRead(n, state) {
 }
 
 // you can override either this method, or the async _read(n) below.
-Readable.prototype.read = function(n) {
+Readable.prototype.read = function (n) {
   debug('read', n);
   var state = this._readableState;
   var nOrig = n;
 
-  if (typeof n !== 'number' || n > 0)
-    state.emittedReadable = false;
+  if (typeof n !== 'number' || n > 0) state.emittedReadable = false;
 
   // if we're doing read(0) to trigger a readable event, but we
   // already have a bunch of data in the buffer, then just trigger
   // the 'readable' event and move on.
-  if (n === 0 &&
-      state.needReadable &&
-      (state.length >= state.highWaterMark || state.ended)) {
+  if (n === 0 && state.needReadable && (state.length >= state.highWaterMark || state.ended)) {
     debug('read: emitReadable', state.length, state.ended);
-    if (state.length === 0 && state.ended)
-      endReadable(this);
-    else
-      emitReadable(this);
+    if (state.length === 0 && state.ended) endReadable(this);else emitReadable(this);
     return null;
   }
 
@@ -11349,8 +11308,7 @@ Readable.prototype.read = function(n) {
 
   // if we've ended, and we're now clear, then finish it up.
   if (n === 0 && state.ended) {
-    if (state.length === 0)
-      endReadable(this);
+    if (state.length === 0) endReadable(this);
     return null;
   }
 
@@ -11398,8 +11356,7 @@ Readable.prototype.read = function(n) {
     state.reading = true;
     state.sync = true;
     // if the length is currently zero, then we *need* a readable event.
-    if (state.length === 0)
-      state.needReadable = true;
+    if (state.length === 0) state.needReadable = true;
     // call internal read method
     this._read(state.highWaterMark);
     state.sync = false;
@@ -11407,14 +11364,10 @@ Readable.prototype.read = function(n) {
 
   // If _read pushed data synchronously, then `reading` will be false,
   // and we need to re-evaluate how much data we can return to the user.
-  if (doRead && !state.reading)
-    n = howMuchToRead(nOrig, state);
+  if (doRead && !state.reading) n = howMuchToRead(nOrig, state);
 
   var ret;
-  if (n > 0)
-    ret = fromList(n, state);
-  else
-    ret = null;
+  if (n > 0) ret = fromList(n, state);else ret = null;
 
   if (ret === null) {
     state.needReadable = true;
@@ -11425,31 +11378,23 @@ Readable.prototype.read = function(n) {
 
   // If we have nothing in the buffer, then we want to know
   // as soon as we *do* get something into the buffer.
-  if (state.length === 0 && !state.ended)
-    state.needReadable = true;
+  if (state.length === 0 && !state.ended) state.needReadable = true;
 
   // If we tried to read() past the EOF, then emit end on the next tick.
-  if (nOrig !== n && state.ended && state.length === 0)
-    endReadable(this);
+  if (nOrig !== n && state.ended && state.length === 0) endReadable(this);
 
-  if (ret !== null)
-    this.emit('data', ret);
+  if (ret !== null) this.emit('data', ret);
 
   return ret;
 };
 
 function chunkInvalid(state, chunk) {
   var er = null;
-  if (!(Buffer.isBuffer(chunk)) &&
-      typeof chunk !== 'string' &&
-      chunk !== null &&
-      chunk !== undefined &&
-      !state.objectMode) {
+  if (!Buffer.isBuffer(chunk) && typeof chunk !== 'string' && chunk !== null && chunk !== undefined && !state.objectMode) {
     er = new TypeError('Invalid non-string/buffer chunk');
   }
   return er;
 }
-
 
 function onEofChunk(stream, state) {
   if (state.ended) return;
@@ -11475,10 +11420,7 @@ function emitReadable(stream) {
   if (!state.emittedReadable) {
     debug('emitReadable', state.flowing);
     state.emittedReadable = true;
-    if (state.sync)
-      processNextTick(emitReadable_, stream);
-    else
-      emitReadable_(stream);
+    if (state.sync) processNextTick(emitReadable_, stream);else emitReadable_(stream);
   }
 }
 
@@ -11487,7 +11429,6 @@ function emitReadable_(stream) {
   stream.emit('readable');
   flow(stream);
 }
-
 
 // at this point, the user has presumably seen the 'readable' event,
 // and called read() to consume some data.  that may have triggered
@@ -11504,15 +11445,12 @@ function maybeReadMore(stream, state) {
 
 function maybeReadMore_(stream, state) {
   var len = state.length;
-  while (!state.reading && !state.flowing && !state.ended &&
-         state.length < state.highWaterMark) {
+  while (!state.reading && !state.flowing && !state.ended && state.length < state.highWaterMark) {
     debug('maybeReadMore read 0');
     stream.read(0);
     if (len === state.length)
       // didn't get any data, stop spinning.
-      break;
-    else
-      len = state.length;
+      break;else len = state.length;
   }
   state.readingMore = false;
 }
@@ -11521,11 +11459,11 @@ function maybeReadMore_(stream, state) {
 // call cb(er, data) where data is <= n in length.
 // for virtual (non-string, non-buffer) streams, "length" is somewhat
 // arbitrary, and perhaps not very meaningful.
-Readable.prototype._read = function(n) {
+Readable.prototype._read = function (n) {
   this.emit('error', new Error('not implemented'));
 };
 
-Readable.prototype.pipe = function(dest, pipeOpts) {
+Readable.prototype.pipe = function (dest, pipeOpts) {
   var src = this;
   var state = this._readableState;
 
@@ -11543,15 +11481,10 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
   state.pipesCount += 1;
   debug('pipe count=%d opts=%j', state.pipesCount, pipeOpts);
 
-  var doEnd = (!pipeOpts || pipeOpts.end !== false) &&
-              dest !== process.stdout &&
-              dest !== process.stderr;
+  var doEnd = (!pipeOpts || pipeOpts.end !== false) && dest !== process.stdout && dest !== process.stderr;
 
   var endFn = doEnd ? onend : cleanup;
-  if (state.endEmitted)
-    processNextTick(endFn);
-  else
-    src.once('end', endFn);
+  if (state.endEmitted) processNextTick(endFn);else src.once('end', endFn);
 
   dest.on('unpipe', onunpipe);
   function onunpipe(readable) {
@@ -11593,9 +11526,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     // flowing again.
     // So, if this is awaiting a drain, then we just call it now.
     // If we don't know, then assume that we are waiting for one.
-    if (state.awaitDrain &&
-        (!dest._writableState || dest._writableState.needDrain))
-      ondrain();
+    if (state.awaitDrain && (!dest._writableState || dest._writableState.needDrain)) ondrain();
   }
 
   src.on('data', ondata);
@@ -11606,10 +11537,7 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
       // If the user unpiped during `dest.write()`, it is possible
       // to get stuck in a permanently paused state if that write
       // also returned false.
-      if (state.pipesCount === 1 &&
-          state.pipes[0] === dest &&
-          src.listenerCount('data') === 1 &&
-          !cleanedUp) {
+      if (state.pipesCount === 1 && state.pipes[0] === dest && src.listenerCount('data') === 1 && !cleanedUp) {
         debug('false write response, pause', src._readableState.awaitDrain);
         src._readableState.awaitDrain++;
       }
@@ -11623,18 +11551,11 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
     debug('onerror', er);
     unpipe();
     dest.removeListener('error', onerror);
-    if (EElistenerCount(dest, 'error') === 0)
-      dest.emit('error', er);
+    if (EElistenerCount(dest, 'error') === 0) dest.emit('error', er);
   }
   // This is a brutally ugly hack to make sure that our error handler
   // is attached before any userland ones.  NEVER DO THIS.
-  if (!dest._events || !dest._events.error)
-    dest.on('error', onerror);
-  else if (isArray(dest._events.error))
-    dest._events.error.unshift(onerror);
-  else
-    dest._events.error = [onerror, dest._events.error];
-
+  if (!dest._events || !dest._events.error) dest.on('error', onerror);else if (isArray(dest._events.error)) dest._events.error.unshift(onerror);else dest._events.error = [onerror, dest._events.error];
 
   // Both close and finish should trigger unpipe, but only once.
   function onclose() {
@@ -11667,11 +11588,10 @@ Readable.prototype.pipe = function(dest, pipeOpts) {
 };
 
 function pipeOnDrain(src) {
-  return function() {
+  return function () {
     var state = src._readableState;
     debug('pipeOnDrain', state.awaitDrain);
-    if (state.awaitDrain)
-      state.awaitDrain--;
+    if (state.awaitDrain) state.awaitDrain--;
     if (state.awaitDrain === 0 && EElistenerCount(src, 'data')) {
       state.flowing = true;
       flow(src);
@@ -11679,29 +11599,24 @@ function pipeOnDrain(src) {
   };
 }
 
-
-Readable.prototype.unpipe = function(dest) {
+Readable.prototype.unpipe = function (dest) {
   var state = this._readableState;
 
   // if we're not piping anywhere, then do nothing.
-  if (state.pipesCount === 0)
-    return this;
+  if (state.pipesCount === 0) return this;
 
   // just one destination.  most common case.
   if (state.pipesCount === 1) {
     // passed in one, but it's not the right one.
-    if (dest && dest !== state.pipes)
-      return this;
+    if (dest && dest !== state.pipes) return this;
 
-    if (!dest)
-      dest = state.pipes;
+    if (!dest) dest = state.pipes;
 
     // got a match.
     state.pipes = null;
     state.pipesCount = 0;
     state.flowing = false;
-    if (dest)
-      dest.emit('unpipe', this);
+    if (dest) dest.emit('unpipe', this);
     return this;
   }
 
@@ -11715,20 +11630,18 @@ Readable.prototype.unpipe = function(dest) {
     state.pipesCount = 0;
     state.flowing = false;
 
-    for (var i = 0; i < len; i++)
-      dests[i].emit('unpipe', this);
-    return this;
+    for (var _i = 0; _i < len; _i++) {
+      dests[_i].emit('unpipe', this);
+    }return this;
   }
 
   // try to find the right one.
   var i = indexOf(state.pipes, dest);
-  if (i === -1)
-    return this;
+  if (i === -1) return this;
 
   state.pipes.splice(i, 1);
   state.pipesCount -= 1;
-  if (state.pipesCount === 1)
-    state.pipes = state.pipes[0];
+  if (state.pipesCount === 1) state.pipes = state.pipes[0];
 
   dest.emit('unpipe', this);
 
@@ -11737,7 +11650,7 @@ Readable.prototype.unpipe = function(dest) {
 
 // set up data events if they are asked for
 // Ensure readable listeners eventually get something
-Readable.prototype.on = function(ev, fn) {
+Readable.prototype.on = function (ev, fn) {
   var res = Stream.prototype.on.call(this, ev, fn);
 
   // If listening to data, and it has not explicitly been paused,
@@ -11746,7 +11659,7 @@ Readable.prototype.on = function(ev, fn) {
     this.resume();
   }
 
-  if (ev === 'readable' && this.readable) {
+  if (ev === 'readable' && !this._readableState.endEmitted) {
     var state = this._readableState;
     if (!state.readableListening) {
       state.readableListening = true;
@@ -11771,7 +11684,7 @@ function nReadingNextTick(self) {
 
 // pause() and resume() are remnants of the legacy readable stream API
 // If the user uses them, then switch into old mode.
-Readable.prototype.resume = function() {
+Readable.prototype.resume = function () {
   var state = this._readableState;
   if (!state.flowing) {
     debug('resume');
@@ -11797,11 +11710,10 @@ function resume_(stream, state) {
   state.resumeScheduled = false;
   stream.emit('resume');
   flow(stream);
-  if (state.flowing && !state.reading)
-    stream.read(0);
+  if (state.flowing && !state.reading) stream.read(0);
 }
 
-Readable.prototype.pause = function() {
+Readable.prototype.pause = function () {
   debug('call pause flowing=%j', this._readableState.flowing);
   if (false !== this._readableState.flowing) {
     debug('pause');
@@ -11824,32 +11736,27 @@ function flow(stream) {
 // wrap an old-style stream as the async data source.
 // This is *not* part of the readable stream interface.
 // It is an ugly unfortunate mess of history.
-Readable.prototype.wrap = function(stream) {
+Readable.prototype.wrap = function (stream) {
   var state = this._readableState;
   var paused = false;
 
   var self = this;
-  stream.on('end', function() {
+  stream.on('end', function () {
     debug('wrapped end');
     if (state.decoder && !state.ended) {
       var chunk = state.decoder.end();
-      if (chunk && chunk.length)
-        self.push(chunk);
+      if (chunk && chunk.length) self.push(chunk);
     }
 
     self.push(null);
   });
 
-  stream.on('data', function(chunk) {
+  stream.on('data', function (chunk) {
     debug('wrapped data');
-    if (state.decoder)
-      chunk = state.decoder.write(chunk);
+    if (state.decoder) chunk = state.decoder.write(chunk);
 
     // don't skip over falsy values in objectMode
-    if (state.objectMode && (chunk === null || chunk === undefined))
-      return;
-    else if (!state.objectMode && (!chunk || !chunk.length))
-      return;
+    if (state.objectMode && (chunk === null || chunk === undefined)) return;else if (!state.objectMode && (!chunk || !chunk.length)) return;
 
     var ret = self.push(chunk);
     if (!ret) {
@@ -11862,21 +11769,23 @@ Readable.prototype.wrap = function(stream) {
   // important when wrapping filters and duplexes.
   for (var i in stream) {
     if (this[i] === undefined && typeof stream[i] === 'function') {
-      this[i] = function(method) { return function() {
-        return stream[method].apply(stream, arguments);
-      }; }(i);
+      this[i] = function (method) {
+        return function () {
+          return stream[method].apply(stream, arguments);
+        };
+      }(i);
     }
   }
 
   // proxy certain important events.
   var events = ['error', 'close', 'destroy', 'pause', 'resume'];
-  forEach(events, function(ev) {
+  forEach(events, function (ev) {
     stream.on(ev, self.emit.bind(self, ev));
   });
 
   // when we try to consume some more bytes, simply unpause the
   // underlying stream.
-  self._read = function(n) {
+  self._read = function (n) {
     debug('wrapped _read', n);
     if (paused) {
       paused = false;
@@ -11886,7 +11795,6 @@ Readable.prototype.wrap = function(stream) {
 
   return self;
 };
-
 
 // exposed for testing purposes only.
 Readable._fromList = fromList;
@@ -11901,21 +11809,11 @@ function fromList(n, state) {
   var ret;
 
   // nothing in the list, definitely empty.
-  if (list.length === 0)
-    return null;
+  if (list.length === 0) return null;
 
-  if (length === 0)
-    ret = null;
-  else if (objectMode)
-    ret = list.shift();
-  else if (!n || n >= length) {
+  if (length === 0) ret = null;else if (objectMode) ret = list.shift();else if (!n || n >= length) {
     // read it all, truncate the array.
-    if (stringMode)
-      ret = list.join('');
-    else if (list.length === 1)
-      ret = list[0];
-    else
-      ret = Buffer.concat(list, length);
+    if (stringMode) ret = list.join('');else if (list.length === 1) ret = list[0];else ret = Buffer.concat(list, length);
     list.length = 0;
   } else {
     // read just some of it.
@@ -11931,25 +11829,16 @@ function fromList(n, state) {
     } else {
       // complex case.
       // we have enough to cover it, but it spans past the first buffer.
-      if (stringMode)
-        ret = '';
-      else
-        ret = new Buffer(n);
+      if (stringMode) ret = '';else ret = new Buffer(n);
 
       var c = 0;
       for (var i = 0, l = list.length; i < l && c < n; i++) {
         var buf = list[0];
         var cpy = Math.min(n - c, buf.length);
 
-        if (stringMode)
-          ret += buf.slice(0, cpy);
-        else
-          buf.copy(ret, c, 0, cpy);
+        if (stringMode) ret += buf.slice(0, cpy);else buf.copy(ret, c, 0, cpy);
 
-        if (cpy < buf.length)
-          list[0] = buf.slice(cpy);
-        else
-          list.shift();
+        if (cpy < buf.length) list[0] = buf.slice(cpy);else list.shift();
 
         c += cpy;
       }
@@ -11964,8 +11853,7 @@ function endReadable(stream) {
 
   // If we get here before consuming all the bytes, then that is a
   // bug in node.  Should never happen.
-  if (state.length > 0)
-    throw new Error('endReadable called on non-empty stream');
+  if (state.length > 0) throw new Error('endReadable called on non-empty stream');
 
   if (!state.endEmitted) {
     state.ended = true;
@@ -11982,21 +11870,20 @@ function endReadableNT(state, stream) {
   }
 }
 
-function forEach (xs, f) {
+function forEach(xs, f) {
   for (var i = 0, l = xs.length; i < l; i++) {
     f(xs[i], i);
   }
 }
 
-function indexOf (xs, x) {
+function indexOf(xs, x) {
   for (var i = 0, l = xs.length; i < l; i++) {
     if (xs[i] === x) return i;
   }
   return -1;
 }
-
 }).call(this,require('_process'))
-},{"./_stream_duplex":85,"_process":79,"buffer":5,"core-util-is":68,"events":69,"inherits":72,"isarray":74,"process-nextick-args":78,"string_decoder/":127,"util":3}],88:[function(require,module,exports){
+},{"./_stream_duplex":84,"_process":78,"buffer":5,"core-util-is":67,"events":68,"inherits":71,"isarray":73,"process-nextick-args":77,"string_decoder/":126,"util":3}],87:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -12052,9 +11939,8 @@ util.inherits = require('inherits');
 
 util.inherits(Transform, Duplex);
 
-
 function TransformState(stream) {
-  this.afterTransform = function(er, data) {
+  this.afterTransform = function (er, data) {
     return afterTransform(stream, er, data);
   };
 
@@ -12062,6 +11948,7 @@ function TransformState(stream) {
   this.transforming = false;
   this.writecb = null;
   this.writechunk = null;
+  this.writeencoding = null;
 }
 
 function afterTransform(stream, er, data) {
@@ -12070,17 +11957,14 @@ function afterTransform(stream, er, data) {
 
   var cb = ts.writecb;
 
-  if (!cb)
-    return stream.emit('error', new Error('no writecb in Transform class'));
+  if (!cb) return stream.emit('error', new Error('no writecb in Transform class'));
 
   ts.writechunk = null;
   ts.writecb = null;
 
-  if (data !== null && data !== undefined)
-    stream.push(data);
+  if (data !== null && data !== undefined) stream.push(data);
 
-  if (cb)
-    cb(er);
+  cb(er);
 
   var rs = stream._readableState;
   rs.reading = false;
@@ -12089,10 +11973,8 @@ function afterTransform(stream, er, data) {
   }
 }
 
-
 function Transform(options) {
-  if (!(this instanceof Transform))
-    return new Transform(options);
+  if (!(this instanceof Transform)) return new Transform(options);
 
   Duplex.call(this, options);
 
@@ -12110,24 +11992,19 @@ function Transform(options) {
   this._readableState.sync = false;
 
   if (options) {
-    if (typeof options.transform === 'function')
-      this._transform = options.transform;
+    if (typeof options.transform === 'function') this._transform = options.transform;
 
-    if (typeof options.flush === 'function')
-      this._flush = options.flush;
+    if (typeof options.flush === 'function') this._flush = options.flush;
   }
 
-  this.once('prefinish', function() {
-    if (typeof this._flush === 'function')
-      this._flush(function(er) {
-        done(stream, er);
-      });
-    else
-      done(stream);
+  this.once('prefinish', function () {
+    if (typeof this._flush === 'function') this._flush(function (er) {
+      done(stream, er);
+    });else done(stream);
   });
 }
 
-Transform.prototype.push = function(chunk, encoding) {
+Transform.prototype.push = function (chunk, encoding) {
   this._transformState.needTransform = false;
   return Duplex.prototype.push.call(this, chunk, encoding);
 };
@@ -12142,28 +12019,25 @@ Transform.prototype.push = function(chunk, encoding) {
 // Call `cb(err)` when you are done with this chunk.  If you pass
 // an error, then that'll put the hurt on the whole operation.  If you
 // never call cb(), then you'll never get another chunk.
-Transform.prototype._transform = function(chunk, encoding, cb) {
+Transform.prototype._transform = function (chunk, encoding, cb) {
   throw new Error('not implemented');
 };
 
-Transform.prototype._write = function(chunk, encoding, cb) {
+Transform.prototype._write = function (chunk, encoding, cb) {
   var ts = this._transformState;
   ts.writecb = cb;
   ts.writechunk = chunk;
   ts.writeencoding = encoding;
   if (!ts.transforming) {
     var rs = this._readableState;
-    if (ts.needTransform ||
-        rs.needReadable ||
-        rs.length < rs.highWaterMark)
-      this._read(rs.highWaterMark);
+    if (ts.needTransform || rs.needReadable || rs.length < rs.highWaterMark) this._read(rs.highWaterMark);
   }
 };
 
 // Doesn't matter what the args are here.
 // _transform does all the work.
 // That we got here means that the readable side wants more data.
-Transform.prototype._read = function(n) {
+Transform.prototype._read = function (n) {
   var ts = this._transformState;
 
   if (ts.writechunk !== null && ts.writecb && !ts.transforming) {
@@ -12176,26 +12050,22 @@ Transform.prototype._read = function(n) {
   }
 };
 
-
 function done(stream, er) {
-  if (er)
-    return stream.emit('error', er);
+  if (er) return stream.emit('error', er);
 
   // if there's nothing in the write buffer, then that means
   // that nothing more will ever be provided
   var ws = stream._writableState;
   var ts = stream._transformState;
 
-  if (ws.length)
-    throw new Error('calling transform done when ws.length != 0');
+  if (ws.length) throw new Error('calling transform done when ws.length != 0');
 
-  if (ts.transforming)
-    throw new Error('calling transform done when still transforming');
+  if (ts.transforming) throw new Error('calling transform done when still transforming');
 
   return stream.push(null);
 }
-
-},{"./_stream_duplex":85,"core-util-is":68,"inherits":72}],89:[function(require,module,exports){
+},{"./_stream_duplex":84,"core-util-is":67,"inherits":71}],88:[function(require,module,exports){
+(function (process){
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
@@ -12208,6 +12078,9 @@ module.exports = Writable;
 var processNextTick = require('process-nextick-args');
 /*</replacement>*/
 
+/*<replacement>*/
+var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
+/*</replacement>*/
 
 /*<replacement>*/
 var Buffer = require('buffer').Buffer;
@@ -12215,12 +12088,10 @@ var Buffer = require('buffer').Buffer;
 
 Writable.WritableState = WritableState;
 
-
 /*<replacement>*/
 var util = require('core-util-is');
 util.inherits = require('inherits');
 /*</replacement>*/
-
 
 /*<replacement>*/
 var internalUtil = {
@@ -12228,16 +12099,15 @@ var internalUtil = {
 };
 /*</replacement>*/
 
-
-
 /*<replacement>*/
 var Stream;
-(function (){try{
-  Stream = require('st' + 'ream');
-}catch(_){}finally{
-  if (!Stream)
-    Stream = require('events').EventEmitter;
-}}())
+(function () {
+  try {
+    Stream = require('st' + 'ream');
+  } catch (_) {} finally {
+    if (!Stream) Stream = require('events').EventEmitter;
+  }
+})();
 /*</replacement>*/
 
 var Buffer = require('buffer').Buffer;
@@ -12263,18 +12133,17 @@ function WritableState(options, stream) {
   // contains buffers or objects.
   this.objectMode = !!options.objectMode;
 
-  if (stream instanceof Duplex)
-    this.objectMode = this.objectMode || !!options.writableObjectMode;
+  if (stream instanceof Duplex) this.objectMode = this.objectMode || !!options.writableObjectMode;
 
   // the point at which write() starts returning false
   // Note: 0 is a valid value, means that we always return false if
   // the entire buffer is not flushed immediately on write()
   var hwm = options.highWaterMark;
   var defaultHwm = this.objectMode ? 16 : 16 * 1024;
-  this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;
+  this.highWaterMark = hwm || hwm === 0 ? hwm : defaultHwm;
 
   // cast to ints.
-  this.highWaterMark = ~~this.highWaterMark;
+  this.highWaterMark = ~ ~this.highWaterMark;
 
   this.needDrain = false;
   // at the start of calling end()
@@ -12318,7 +12187,7 @@ function WritableState(options, stream) {
   this.bufferProcessing = false;
 
   // the callback that's passed to _write(chunk,cb)
-  this.onwrite = function(er) {
+  this.onwrite = function (er) {
     onwrite(stream, er);
   };
 
@@ -12341,6 +12210,14 @@ function WritableState(options, stream) {
 
   // True if the error was already emitted and should not be thrown again
   this.errorEmitted = false;
+
+  // count buffered requests
+  this.bufferedRequestCount = 0;
+
+  // create the two objects needed to store the corked requests
+  // they are not a linked list, as no new elements are inserted in there
+  this.corkedRequestsFree = new CorkedRequest(this);
+  this.corkedRequestsFree.next = new CorkedRequest(this);
 }
 
 WritableState.prototype.getBuffer = function writableStateGetBuffer() {
@@ -12353,15 +12230,15 @@ WritableState.prototype.getBuffer = function writableStateGetBuffer() {
   return out;
 };
 
-(function (){try {
-Object.defineProperty(WritableState.prototype, 'buffer', {
-  get: internalUtil.deprecate(function() {
-    return this.getBuffer();
-  }, '_writableState.buffer is deprecated. Use _writableState.getBuffer ' +
-     'instead.')
-});
-}catch(_){}}());
-
+(function () {
+  try {
+    Object.defineProperty(WritableState.prototype, 'buffer', {
+      get: internalUtil.deprecate(function () {
+        return this.getBuffer();
+      }, '_writableState.buffer is deprecated. Use _writableState.getBuffer ' + 'instead.')
+    });
+  } catch (_) {}
+})();
 
 var Duplex;
 function Writable(options) {
@@ -12369,8 +12246,7 @@ function Writable(options) {
 
   // Writable ctor is applied to Duplexes, though they're not
   // instanceof Writable, they're instanceof Readable.
-  if (!(this instanceof Writable) && !(this instanceof Duplex))
-    return new Writable(options);
+  if (!(this instanceof Writable) && !(this instanceof Duplex)) return new Writable(options);
 
   this._writableState = new WritableState(options, this);
 
@@ -12378,21 +12254,18 @@ function Writable(options) {
   this.writable = true;
 
   if (options) {
-    if (typeof options.write === 'function')
-      this._write = options.write;
+    if (typeof options.write === 'function') this._write = options.write;
 
-    if (typeof options.writev === 'function')
-      this._writev = options.writev;
+    if (typeof options.writev === 'function') this._writev = options.writev;
   }
 
   Stream.call(this);
 }
 
 // Otherwise people can pipe Writable streams, which is just wrong.
-Writable.prototype.pipe = function() {
+Writable.prototype.pipe = function () {
   this.emit('error', new Error('Cannot pipe. Not readable.'));
 };
-
 
 function writeAfterEnd(stream, cb) {
   var er = new Error('write after end');
@@ -12409,11 +12282,7 @@ function writeAfterEnd(stream, cb) {
 function validChunk(stream, state, chunk, cb) {
   var valid = true;
 
-  if (!(Buffer.isBuffer(chunk)) &&
-      typeof chunk !== 'string' &&
-      chunk !== null &&
-      chunk !== undefined &&
-      !state.objectMode) {
+  if (!Buffer.isBuffer(chunk) && typeof chunk !== 'string' && chunk !== null && chunk !== undefined && !state.objectMode) {
     var er = new TypeError('Invalid non-string/buffer chunk');
     stream.emit('error', er);
     processNextTick(cb, er);
@@ -12422,7 +12291,7 @@ function validChunk(stream, state, chunk, cb) {
   return valid;
 }
 
-Writable.prototype.write = function(chunk, encoding, cb) {
+Writable.prototype.write = function (chunk, encoding, cb) {
   var state = this._writableState;
   var ret = false;
 
@@ -12431,17 +12300,11 @@ Writable.prototype.write = function(chunk, encoding, cb) {
     encoding = null;
   }
 
-  if (Buffer.isBuffer(chunk))
-    encoding = 'buffer';
-  else if (!encoding)
-    encoding = state.defaultEncoding;
+  if (Buffer.isBuffer(chunk)) encoding = 'buffer';else if (!encoding) encoding = state.defaultEncoding;
 
-  if (typeof cb !== 'function')
-    cb = nop;
+  if (typeof cb !== 'function') cb = nop;
 
-  if (state.ended)
-    writeAfterEnd(this, cb);
-  else if (validChunk(this, state, chunk, cb)) {
+  if (state.ended) writeAfterEnd(this, cb);else if (validChunk(this, state, chunk, cb)) {
     state.pendingcb++;
     ret = writeOrBuffer(this, state, chunk, encoding, cb);
   }
@@ -12449,42 +12312,31 @@ Writable.prototype.write = function(chunk, encoding, cb) {
   return ret;
 };
 
-Writable.prototype.cork = function() {
+Writable.prototype.cork = function () {
   var state = this._writableState;
 
   state.corked++;
 };
 
-Writable.prototype.uncork = function() {
+Writable.prototype.uncork = function () {
   var state = this._writableState;
 
   if (state.corked) {
     state.corked--;
 
-    if (!state.writing &&
-        !state.corked &&
-        !state.finished &&
-        !state.bufferProcessing &&
-        state.bufferedRequest)
-      clearBuffer(this, state);
+    if (!state.writing && !state.corked && !state.finished && !state.bufferProcessing && state.bufferedRequest) clearBuffer(this, state);
   }
 };
 
 Writable.prototype.setDefaultEncoding = function setDefaultEncoding(encoding) {
   // node::ParseEncoding() requires lower case.
-  if (typeof encoding === 'string')
-    encoding = encoding.toLowerCase();
-  if (!(['hex', 'utf8', 'utf-8', 'ascii', 'binary', 'base64',
-'ucs2', 'ucs-2','utf16le', 'utf-16le', 'raw']
-.indexOf((encoding + '').toLowerCase()) > -1))
-    throw new TypeError('Unknown encoding: ' + encoding);
+  if (typeof encoding === 'string') encoding = encoding.toLowerCase();
+  if (!(['hex', 'utf8', 'utf-8', 'ascii', 'binary', 'base64', 'ucs2', 'ucs-2', 'utf16le', 'utf-16le', 'raw'].indexOf((encoding + '').toLowerCase()) > -1)) throw new TypeError('Unknown encoding: ' + encoding);
   this._writableState.defaultEncoding = encoding;
 };
 
 function decodeChunk(state, chunk, encoding) {
-  if (!state.objectMode &&
-      state.decodeStrings !== false &&
-      typeof chunk === 'string') {
+  if (!state.objectMode && state.decodeStrings !== false && typeof chunk === 'string') {
     chunk = new Buffer(chunk, encoding);
   }
   return chunk;
@@ -12496,16 +12348,14 @@ function decodeChunk(state, chunk, encoding) {
 function writeOrBuffer(stream, state, chunk, encoding, cb) {
   chunk = decodeChunk(state, chunk, encoding);
 
-  if (Buffer.isBuffer(chunk))
-    encoding = 'buffer';
+  if (Buffer.isBuffer(chunk)) encoding = 'buffer';
   var len = state.objectMode ? 1 : chunk.length;
 
   state.length += len;
 
   var ret = state.length < state.highWaterMark;
   // we must ensure that previous needDrain will not be reset to false.
-  if (!ret)
-    state.needDrain = true;
+  if (!ret) state.needDrain = true;
 
   if (state.writing || state.corked) {
     var last = state.lastBufferedRequest;
@@ -12515,6 +12365,7 @@ function writeOrBuffer(stream, state, chunk, encoding, cb) {
     } else {
       state.bufferedRequest = state.lastBufferedRequest;
     }
+    state.bufferedRequestCount += 1;
   } else {
     doWrite(stream, state, false, len, chunk, encoding, cb);
   }
@@ -12527,19 +12378,13 @@ function doWrite(stream, state, writev, len, chunk, encoding, cb) {
   state.writecb = cb;
   state.writing = true;
   state.sync = true;
-  if (writev)
-    stream._writev(chunk, state.onwrite);
-  else
-    stream._write(chunk, encoding, state.onwrite);
+  if (writev) stream._writev(chunk, state.onwrite);else stream._write(chunk, encoding, state.onwrite);
   state.sync = false;
 }
 
 function onwriteError(stream, state, sync, er, cb) {
   --state.pendingcb;
-  if (sync)
-    processNextTick(cb, er);
-  else
-    cb(er);
+  if (sync) processNextTick(cb, er);else cb(er);
 
   stream._writableState.errorEmitted = true;
   stream.emit('error', er);
@@ -12559,30 +12404,26 @@ function onwrite(stream, er) {
 
   onwriteStateUpdate(state);
 
-  if (er)
-    onwriteError(stream, state, sync, er, cb);
-  else {
+  if (er) onwriteError(stream, state, sync, er, cb);else {
     // Check if we're actually ready to finish, but don't emit yet
     var finished = needFinish(state);
 
-    if (!finished &&
-        !state.corked &&
-        !state.bufferProcessing &&
-        state.bufferedRequest) {
+    if (!finished && !state.corked && !state.bufferProcessing && state.bufferedRequest) {
       clearBuffer(stream, state);
     }
 
     if (sync) {
-      processNextTick(afterWrite, stream, state, finished, cb);
+      /*<replacement>*/
+      asyncWrite(afterWrite, stream, state, finished, cb);
+      /*</replacement>*/
     } else {
-      afterWrite(stream, state, finished, cb);
-    }
+        afterWrite(stream, state, finished, cb);
+      }
   }
 }
 
 function afterWrite(stream, state, finished, cb) {
-  if (!finished)
-    onwriteDrain(stream, state);
+  if (!finished) onwriteDrain(stream, state);
   state.pendingcb--;
   cb();
   finishMaybe(stream, state);
@@ -12598,7 +12439,6 @@ function onwriteDrain(stream, state) {
   }
 }
 
-
 // if there's something in the buffer waiting, then process it
 function clearBuffer(stream, state) {
   state.bufferProcessing = true;
@@ -12606,26 +12446,26 @@ function clearBuffer(stream, state) {
 
   if (stream._writev && entry && entry.next) {
     // Fast case, write everything using _writev()
-    var buffer = [];
-    var cbs = [];
+    var l = state.bufferedRequestCount;
+    var buffer = new Array(l);
+    var holder = state.corkedRequestsFree;
+    holder.entry = entry;
+
+    var count = 0;
     while (entry) {
-      cbs.push(entry.callback);
-      buffer.push(entry);
+      buffer[count] = entry;
       entry = entry.next;
+      count += 1;
     }
 
-    // count the one we are adding, as well.
-    // TODO(isaacs) clean this up
+    doWrite(stream, state, true, state.length, buffer, '', holder.finish);
+
+    // doWrite is always async, defer these to save a bit of time
+    // as the hot path ends with doWrite
     state.pendingcb++;
     state.lastBufferedRequest = null;
-    doWrite(stream, state, true, state.length, buffer, '', function(err) {
-      for (var i = 0; i < cbs.length; i++) {
-        state.pendingcb--;
-        cbs[i](err);
-      }
-    });
-
-    // Clear buffer
+    state.corkedRequestsFree = holder.next;
+    holder.next = null;
   } else {
     // Slow case, write chunks one-by-one
     while (entry) {
@@ -12645,20 +12485,21 @@ function clearBuffer(stream, state) {
       }
     }
 
-    if (entry === null)
-      state.lastBufferedRequest = null;
+    if (entry === null) state.lastBufferedRequest = null;
   }
+
+  state.bufferedRequestCount = 0;
   state.bufferedRequest = entry;
   state.bufferProcessing = false;
 }
 
-Writable.prototype._write = function(chunk, encoding, cb) {
+Writable.prototype._write = function (chunk, encoding, cb) {
   cb(new Error('not implemented'));
 };
 
 Writable.prototype._writev = null;
 
-Writable.prototype.end = function(chunk, encoding, cb) {
+Writable.prototype.end = function (chunk, encoding, cb) {
   var state = this._writableState;
 
   if (typeof chunk === 'function') {
@@ -12670,8 +12511,7 @@ Writable.prototype.end = function(chunk, encoding, cb) {
     encoding = null;
   }
 
-  if (chunk !== null && chunk !== undefined)
-    this.write(chunk, encoding);
+  if (chunk !== null && chunk !== undefined) this.write(chunk, encoding);
 
   // .end() fully uncorks
   if (state.corked) {
@@ -12680,17 +12520,11 @@ Writable.prototype.end = function(chunk, encoding, cb) {
   }
 
   // ignore unnecessary end() calls.
-  if (!state.ending && !state.finished)
-    endWritable(this, state, cb);
+  if (!state.ending && !state.finished) endWritable(this, state, cb);
 };
 
-
 function needFinish(state) {
-  return (state.ending &&
-          state.length === 0 &&
-          state.bufferedRequest === null &&
-          !state.finished &&
-          !state.writing);
+  return state.ending && state.length === 0 && state.bufferedRequest === null && !state.finished && !state.writing;
 }
 
 function prefinish(stream, state) {
@@ -12718,18 +12552,41 @@ function endWritable(stream, state, cb) {
   state.ending = true;
   finishMaybe(stream, state);
   if (cb) {
-    if (state.finished)
-      processNextTick(cb);
-    else
-      stream.once('finish', cb);
+    if (state.finished) processNextTick(cb);else stream.once('finish', cb);
   }
   state.ended = true;
+  stream.writable = false;
 }
 
-},{"./_stream_duplex":85,"buffer":5,"core-util-is":68,"events":69,"inherits":72,"process-nextick-args":78,"util-deprecate":143}],90:[function(require,module,exports){
+// It seems a linked list but it is not
+// there will be only 2 of these for each stream
+function CorkedRequest(state) {
+  var _this = this;
+
+  this.next = null;
+  this.entry = null;
+
+  this.finish = function (err) {
+    var entry = _this.entry;
+    _this.entry = null;
+    while (entry) {
+      var cb = entry.callback;
+      state.pendingcb--;
+      cb(err);
+      entry = entry.next;
+    }
+    if (state.corkedRequestsFree) {
+      state.corkedRequestsFree.next = _this;
+    } else {
+      state.corkedRequestsFree = _this;
+    }
+  };
+}
+}).call(this,require('_process'))
+},{"./_stream_duplex":84,"_process":78,"buffer":5,"core-util-is":67,"events":68,"inherits":71,"process-nextick-args":77,"util-deprecate":142}],89:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":86}],91:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":85}],90:[function(require,module,exports){
 var Stream = (function (){
   try {
     return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
@@ -12743,13 +12600,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":85,"./lib/_stream_passthrough.js":86,"./lib/_stream_readable.js":87,"./lib/_stream_transform.js":88,"./lib/_stream_writable.js":89}],92:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":84,"./lib/_stream_passthrough.js":85,"./lib/_stream_readable.js":86,"./lib/_stream_transform.js":87,"./lib/_stream_writable.js":88}],91:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":88}],93:[function(require,module,exports){
+},{"./lib/_stream_transform.js":87}],92:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":89}],94:[function(require,module,exports){
+},{"./lib/_stream_writable.js":88}],93:[function(require,module,exports){
 "use strict";
 
 module.exports =
@@ -12761,7 +12618,7 @@ module.exports =
 	SHORTEST:      "shortest"
 };
 
-},{}],95:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 "use strict";
 
 var constants = require("./constants");
@@ -12937,7 +12794,7 @@ function showResource(urlObj, options)
 
 module.exports = formatUrl;
 
-},{"./constants":94}],96:[function(require,module,exports){
+},{"./constants":93}],95:[function(require,module,exports){
 "use strict";
 
 var constants  = require("./constants");
@@ -13033,7 +12890,7 @@ objUtils.shallowMerge(RelateUrl, constants);
 
 module.exports = RelateUrl;
 
-},{"./constants":94,"./format":95,"./options":97,"./parse":100,"./relate":107,"./util/object":109}],97:[function(require,module,exports){
+},{"./constants":93,"./format":94,"./options":96,"./parse":99,"./relate":106,"./util/object":108}],96:[function(require,module,exports){
 "use strict";
 
 var objUtils = require("./util/object");
@@ -13092,7 +12949,7 @@ function mergeOption(newValues, defaultValues)
 
 module.exports = getOptions;
 
-},{"./util/object":109}],98:[function(require,module,exports){
+},{"./util/object":108}],97:[function(require,module,exports){
 "use strict";
 
 function parseHost(urlObj, options)
@@ -13120,7 +12977,7 @@ function parseHost(urlObj, options)
 
 module.exports = parseHost;
 
-},{}],99:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 "use strict";
 
 function hrefInfo(urlObj)
@@ -13142,7 +12999,7 @@ function hrefInfo(urlObj)
 
 module.exports = hrefInfo;
 
-},{}],100:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 "use strict";
 
 var hrefInfo   = require("./hrefInfo");
@@ -13202,7 +13059,7 @@ module.exports =
 	to:   parseUrl
 };
 
-},{"../util/path":110,"./host":98,"./hrefInfo":99,"./path":101,"./port":102,"./query":103,"./urlstring":104}],101:[function(require,module,exports){
+},{"../util/path":109,"./host":97,"./hrefInfo":98,"./path":100,"./port":101,"./query":102,"./urlstring":103}],100:[function(require,module,exports){
 "use strict";
 
 function isDirectoryIndex(resource, options)
@@ -13304,7 +13161,7 @@ function splitPath(path)
 
 module.exports = parsePath;
 
-},{}],102:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 "use strict";
 
 function parsePort(urlObj, options)
@@ -13338,7 +13195,7 @@ function parsePort(urlObj, options)
 
 module.exports = parsePort;
 
-},{}],103:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 "use strict";
 
 function parseQuery(urlObj, options)
@@ -13390,7 +13247,7 @@ function stringify(queryObj, removeEmptyQueries)
 
 module.exports = parseQuery;
 
-},{}],104:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 "use strict";
 
 var _parseUrl = require("url").parse;
@@ -13538,7 +13395,7 @@ function parseUrlString(url, options)
 
 module.exports = parseUrlString;
 
-},{"url":141}],105:[function(require,module,exports){
+},{"url":140}],104:[function(require,module,exports){
 "use strict";
 
 var findRelation = require("./findRelation");
@@ -13629,7 +13486,7 @@ function copyResource(urlObj, siteUrlObj)
 
 module.exports = absolutize;
 
-},{"../util/object":109,"../util/path":110,"./findRelation":106}],106:[function(require,module,exports){
+},{"../util/object":108,"../util/path":109,"./findRelation":105}],105:[function(require,module,exports){
 "use strict";
 
 function findRelation_upToPath(urlObj, siteUrlObj, options)
@@ -13710,7 +13567,7 @@ module.exports =
 	upToPath: findRelation_upToPath
 };
 
-},{}],107:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 "use strict";
 
 var absolutize = require("./absolutize");
@@ -13730,7 +13587,7 @@ function relateUrl(siteUrlObj, urlObj, options)
 
 module.exports = relateUrl;
 
-},{"./absolutize":105,"./relativize":108}],108:[function(require,module,exports){
+},{"./absolutize":104,"./relativize":107}],107:[function(require,module,exports){
 "use strict";
 
 var pathUtils = require("../util/path");
@@ -13799,7 +13656,7 @@ function relativize(urlObj, siteUrlObj, options)
 
 module.exports = relativize;
 
-},{"../util/path":110}],109:[function(require,module,exports){
+},{"../util/path":109}],108:[function(require,module,exports){
 "use strict";
 
 /*
@@ -13865,7 +13722,7 @@ module.exports =
 	shallowMerge: shallowMerge
 };
 
-},{}],110:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 "use strict";
 
 function joinPath(pathArray)
@@ -13916,7 +13773,7 @@ module.exports =
 	resolveDotSegments: resolveDotSegments
 };
 
-},{}],111:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -13926,7 +13783,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":118,"./source-map/source-map-generator":119,"./source-map/source-node":120}],112:[function(require,module,exports){
+},{"./source-map/source-map-consumer":117,"./source-map/source-map-generator":118,"./source-map/source-node":119}],111:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -14035,7 +13892,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":121,"amdefine":1}],113:[function(require,module,exports){
+},{"./util":120,"amdefine":1}],112:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -14183,7 +14040,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":114,"amdefine":1}],114:[function(require,module,exports){
+},{"./base64":113,"amdefine":1}],113:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -14258,7 +14115,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":1}],115:[function(require,module,exports){
+},{"amdefine":1}],114:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -14377,7 +14234,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":1}],116:[function(require,module,exports){
+},{"amdefine":1}],115:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -14465,7 +14322,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":121,"amdefine":1}],117:[function(require,module,exports){
+},{"./util":120,"amdefine":1}],116:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -14587,7 +14444,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":1}],118:[function(require,module,exports){
+},{"amdefine":1}],117:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -15666,7 +15523,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":112,"./base64-vlq":113,"./binary-search":115,"./quick-sort":117,"./util":121,"amdefine":1}],119:[function(require,module,exports){
+},{"./array-set":111,"./base64-vlq":112,"./binary-search":114,"./quick-sort":116,"./util":120,"amdefine":1}],118:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -16067,7 +15924,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":112,"./base64-vlq":113,"./mapping-list":116,"./util":121,"amdefine":1}],120:[function(require,module,exports){
+},{"./array-set":111,"./base64-vlq":112,"./mapping-list":115,"./util":120,"amdefine":1}],119:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -16483,7 +16340,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":119,"./util":121,"amdefine":1}],121:[function(require,module,exports){
+},{"./source-map-generator":118,"./util":120,"amdefine":1}],120:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -16855,7 +16712,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":1}],122:[function(require,module,exports){
+},{"amdefine":1}],121:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -16984,7 +16841,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":69,"inherits":72,"readable-stream/duplex.js":84,"readable-stream/passthrough.js":90,"readable-stream/readable.js":91,"readable-stream/transform.js":92,"readable-stream/writable.js":93}],123:[function(require,module,exports){
+},{"events":68,"inherits":71,"readable-stream/duplex.js":83,"readable-stream/passthrough.js":89,"readable-stream/readable.js":90,"readable-stream/transform.js":91,"readable-stream/writable.js":92}],122:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var extend = require('xtend')
@@ -17066,7 +16923,7 @@ http.METHODS = [
 	'UNSUBSCRIBE'
 ]
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/request":125,"builtin-status-codes":7,"url":141,"xtend":147}],124:[function(require,module,exports){
+},{"./lib/request":124,"builtin-status-codes":6,"url":140,"xtend":146}],123:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableByteStream)
 
@@ -17110,7 +16967,7 @@ function isFunction (value) {
 xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],125:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 (function (process,global,Buffer){
 // var Base64 = require('Base64')
 var capability = require('./capability')
@@ -17392,7 +17249,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":124,"./response":126,"_process":79,"buffer":5,"inherits":72,"stream":122,"to-arraybuffer":128}],126:[function(require,module,exports){
+},{"./capability":123,"./response":125,"_process":78,"buffer":5,"inherits":71,"stream":121,"to-arraybuffer":127}],125:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -17574,7 +17431,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":124,"_process":79,"buffer":5,"inherits":72,"stream":122}],127:[function(require,module,exports){
+},{"./capability":123,"_process":78,"buffer":5,"inherits":71,"stream":121}],126:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -17797,7 +17654,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":5}],128:[function(require,module,exports){
+},{"buffer":5}],127:[function(require,module,exports){
 var Buffer = require('buffer').Buffer
 
 module.exports = function (buf) {
@@ -17826,7 +17683,7 @@ module.exports = function (buf) {
 	}
 }
 
-},{"buffer":5}],129:[function(require,module,exports){
+},{"buffer":5}],128:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -17932,7 +17789,7 @@ module.exports = function (buf) {
   exports.ArraySet = ArraySet;
 }
 
-},{"./util":138}],130:[function(require,module,exports){
+},{"./util":137}],129:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -18075,7 +17932,7 @@ module.exports = function (buf) {
   };
 }
 
-},{"./base64":131}],131:[function(require,module,exports){
+},{"./base64":130}],130:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -18145,7 +18002,7 @@ module.exports = function (buf) {
   };
 }
 
-},{}],132:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -18259,7 +18116,7 @@ module.exports = function (buf) {
   };
 }
 
-},{}],133:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -18341,7 +18198,7 @@ module.exports = function (buf) {
   exports.MappingList = MappingList;
 }
 
-},{"./util":138}],134:[function(require,module,exports){
+},{"./util":137}],133:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -18458,7 +18315,7 @@ module.exports = function (buf) {
   };
 }
 
-},{}],135:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -19542,7 +19399,7 @@ module.exports = function (buf) {
   exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 }
 
-},{"./array-set":129,"./base64-vlq":130,"./binary-search":132,"./quick-sort":134,"./util":138}],136:[function(require,module,exports){
+},{"./array-set":128,"./base64-vlq":129,"./binary-search":131,"./quick-sort":133,"./util":137}],135:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -19940,7 +19797,7 @@ module.exports = function (buf) {
   exports.SourceMapGenerator = SourceMapGenerator;
 }
 
-},{"./array-set":129,"./base64-vlq":130,"./mapping-list":133,"./util":138}],137:[function(require,module,exports){
+},{"./array-set":128,"./base64-vlq":129,"./mapping-list":132,"./util":137}],136:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -20350,7 +20207,7 @@ module.exports = function (buf) {
   exports.SourceNode = SourceNode;
 }
 
-},{"./source-map-generator":136,"./util":138}],138:[function(require,module,exports){
+},{"./source-map-generator":135,"./util":137}],137:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -20721,7 +20578,7 @@ module.exports = function (buf) {
   exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflated;
 }
 
-},{}],139:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -20731,7 +20588,7 @@ exports.SourceMapGenerator = require('./lib/source-map-generator').SourceMapGene
 exports.SourceMapConsumer = require('./lib/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./lib/source-node').SourceNode;
 
-},{"./lib/source-map-consumer":135,"./lib/source-map-generator":136,"./lib/source-node":137}],140:[function(require,module,exports){
+},{"./lib/source-map-consumer":134,"./lib/source-map-generator":135,"./lib/source-node":136}],139:[function(require,module,exports){
 var sys = require("util");
 var MOZ_SourceMap = require("source-map");
 var UglifyJS = exports;
@@ -22462,6 +22319,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
                 if (octal_len > 0) ch = String.fromCharCode(parseInt(ch, 8));
                 else ch = read_escaped_char(true);
             }
+            else if ("\r\n\u2028\u2029".indexOf(ch) >= 0) parse_error("Unterminated string constant");
             else if (ch == quote) break;
             ret += ch;
         }
@@ -22787,9 +22645,9 @@ function parse($TEXT, options) {
         );
     };
 
-    function semicolon() {
+    function semicolon(optional) {
         if (is("punc", ";")) next();
-        else if (!can_insert_semicolon()) unexpected();
+        else if (!optional && !can_insert_semicolon()) unexpected();
     };
 
     function parenthesised() {
@@ -22877,7 +22735,7 @@ function parse($TEXT, options) {
               case "do":
                 return new AST_Do({
                     body      : in_loop(statement),
-                    condition : (expect_token("keyword", "while"), tmp = parenthesised(), semicolon(), tmp)
+                    condition : (expect_token("keyword", "while"), tmp = parenthesised(), semicolon(true), tmp)
                 });
 
               case "while":
@@ -23239,6 +23097,13 @@ function parse($TEXT, options) {
                 ret = new AST_Null({ start: tok, end: tok });
                 break;
             }
+            break;
+          case "operator":
+            if (!is_identifier_string(tok.value)) {
+                throw new JS_Parse_Error("Invalid getter/setter name: " + tok.value,
+                    tok.file, tok.line, tok.col, tok.pos);
+            }
+            ret = _make_symbol(AST_SymbolRef);
             break;
         }
         next();
@@ -23629,7 +23494,7 @@ TreeTransformer.prototype = new TreeWalker;
                     x = this;
                     descend(x, tw);
                 } else {
-                    tw.stack[tw.stack.length - 1] = x = this.clone();
+                    tw.stack[tw.stack.length - 1] = x = this;
                     descend(x, tw);
                     y = tw.after(x, in_list);
                     if (y !== undefined) x = y;
@@ -23878,6 +23743,7 @@ AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
     var scope = self.parent_scope = null;
     var labels = new Dictionary();
     var defun = null;
+    var last_var_had_const_pragma = false;
     var nesting = 0;
     var tw = new TreeWalker(function(node, descend){
         if (options.screw_ie8 && node instanceof AST_Catch) {
@@ -23935,10 +23801,13 @@ AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
             // later.
             (node.scope = defun.parent_scope).def_function(node);
         }
+        else if (node instanceof AST_Var) {
+            last_var_had_const_pragma = node.has_const_pragma();
+        }
         else if (node instanceof AST_SymbolVar
                  || node instanceof AST_SymbolConst) {
             var def = defun.def_variable(node);
-            def.constant = node instanceof AST_SymbolConst;
+            def.constant = node instanceof AST_SymbolConst || last_var_had_const_pragma;
             def.init = tw.parent().value;
         }
         else if (node instanceof AST_SymbolCatch) {
@@ -23974,6 +23843,11 @@ AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
         }
         if (node instanceof AST_SymbolRef) {
             var name = node.name;
+            if (name == "eval" && tw.parent() instanceof AST_Call) {
+                for (var s = node.scope; s && !s.uses_eval; s = s.parent_scope) {
+                    s.uses_eval = true;
+                }
+            }
             var sym = node.scope.find_variable(name);
             if (!sym) {
                 var g;
@@ -23986,10 +23860,6 @@ AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
                     globals.set(name, g);
                 }
                 node.thedef = g;
-                if (name == "eval" && tw.parent() instanceof AST_Call) {
-                    for (var s = node.scope; s && !s.uses_eval; s = s.parent_scope)
-                        s.uses_eval = true;
-                }
                 if (func && name == "arguments") {
                     func.uses_arguments = true;
                 }
@@ -24021,6 +23891,10 @@ AST_Scope.DEFMETHOD("init_scope_vars", function(nesting){
 AST_Lambda.DEFMETHOD("init_scope_vars", function(){
     AST_Scope.prototype.init_scope_vars.apply(this, arguments);
     this.uses_arguments = false;
+
+    var symbol = new AST_VarDef({ name: "arguments", start: this.start, end: this.end });
+    var def = new SymbolDef(this, this.variables.size(), symbol);
+    this.variables.set(symbol.name, def);
 });
 
 AST_SymbolRef.DEFMETHOD("reference", function() {
@@ -24137,6 +24011,12 @@ AST_Symbol.DEFMETHOD("global", function(){
     return this.definition().global;
 });
 
+AST_Var.DEFMETHOD("has_const_pragma", function() {
+    var comments_before = this.start && this.start.comments_before;
+    var lastComment = comments_before && comments_before[comments_before.length - 1];
+    return lastComment && /@const\b/.test(lastComment.value);
+});
+
 AST_Toplevel.DEFMETHOD("_default_mangler_options", function(options){
     return defaults(options, {
         except      : [],
@@ -24150,6 +24030,10 @@ AST_Toplevel.DEFMETHOD("_default_mangler_options", function(options){
 
 AST_Toplevel.DEFMETHOD("mangle_names", function(options){
     options = this._default_mangler_options(options);
+
+    // Never mangle arguments
+    options.except.push('arguments');
+
     // We only need to mangle declaration nodes.  Special logic wired
     // into the code generator will display the mangled name if it's
     // present (and for AST_SymbolRef-s it'll use the mangled name of
@@ -24846,11 +24730,11 @@ function OutputStream(options) {
                 });
             } else if (c.test) {
                 comments = comments.filter(function(comment){
-                    return c.test(comment.value) || comment.type == "comment5";
+                    return comment.type == "comment5" || c.test(comment.value);
                 });
             } else if (typeof c == "function") {
                 comments = comments.filter(function(comment){
-                    return c(self, comment) || comment.type == "comment5";
+                    return comment.type == "comment5" || c(self, comment);
                 });
             }
 
@@ -25840,6 +25724,7 @@ function Compressor(options, false_by_default) {
         hoist_vars    : false,
         if_return     : !false_by_default,
         join_vars     : !false_by_default,
+        collapse_vars : false,
         cascade       : !false_by_default,
         side_effects  : !false_by_default,
         pure_getters  : false,
@@ -25949,6 +25834,23 @@ merge(Compressor.prototype, {
         }
     };
 
+    // we shouldn't compress (1,func)(something) to
+    // func(something) because that changes the meaning of
+    // the func (becomes lexical instead of global).
+    function maintain_this_binding(parent, orig, val) {
+        if (parent instanceof AST_Call && parent.expression === orig) {
+            if (val instanceof AST_PropAccess || val instanceof AST_SymbolRef && val.name === "eval") {
+                return make_node(AST_Seq, orig, {
+                    car: make_node(AST_Number, orig, {
+                        value: 0
+                    }),
+                    cdr: val
+                });
+            }
+        }
+        return val;
+    }
+
     function as_statement_array(thing) {
         if (thing === null) return [];
         if (thing instanceof AST_BlockStatement) return thing.body;
@@ -25992,6 +25894,9 @@ merge(Compressor.prototype, {
             if (compressor.option("join_vars")) {
                 statements = join_consecutive_vars(statements, compressor);
             }
+            if (compressor.option("collapse_vars")) {
+                statements = collapse_single_use_vars(statements, compressor);
+            }
         } while (CHANGED && max_iter-- > 0);
 
         if (compressor.option("negate_iife")) {
@@ -25999,6 +25904,163 @@ merge(Compressor.prototype, {
         }
 
         return statements;
+
+        function collapse_single_use_vars(statements, compressor) {
+            // Iterate statements backwards looking for a statement with a var/const
+            // declaration immediately preceding it. Grab the rightmost var definition
+            // and if it has exactly one reference then attempt to replace its reference
+            // in the statement with the var value and then erase the var definition.
+
+            var self = compressor.self();
+            var var_defs_removed = false;
+            for (var stat_index = statements.length; --stat_index >= 0;) {
+                var stat = statements[stat_index];
+                if (stat instanceof AST_Definitions) continue;
+
+                // Process child blocks of statement if present.
+                [stat, stat.body, stat.alternative, stat.bcatch, stat.bfinally].forEach(function(node) {
+                    node && node.body && collapse_single_use_vars(node.body, compressor);
+                });
+
+                // The variable definition must precede a statement.
+                if (stat_index <= 0) break;
+                var prev_stat_index = stat_index - 1;
+                var prev_stat = statements[prev_stat_index];
+                if (!(prev_stat instanceof AST_Definitions)) continue;
+                var var_defs = prev_stat.definitions;
+                if (var_defs == null) continue;
+
+                var var_names_seen = {};
+                var side_effects_encountered = false;
+                var lvalues_encountered = false;
+                var lvalues = {};
+
+                // Scan variable definitions from right to left.
+                for (var var_defs_index = var_defs.length; --var_defs_index >= 0;) {
+
+                    // Obtain var declaration and var name with basic sanity check.
+                    var var_decl = var_defs[var_defs_index];
+                    if (var_decl.value == null) break;
+                    var var_name = var_decl.name.name;
+                    if (!var_name || !var_name.length) break;
+
+                    // Bail if we've seen a var definition of same name before.
+                    if (var_name in var_names_seen) break;
+                    var_names_seen[var_name] = true;
+
+                    // Only interested in cases with just one reference to the variable.
+                    var def = self.find_variable && self.find_variable(var_name);
+                    if (!def || !def.references || def.references.length !== 1 || var_name == "arguments") {
+                        side_effects_encountered = true;
+                        continue;
+                    }
+                    var ref = def.references[0];
+
+                    // Don't replace ref if eval() or with statement in scope.
+                    if (ref.scope.uses_eval || ref.scope.uses_with) break;
+
+                    // Constant single use vars can be replaced in any scope.
+                    if (var_decl.value.is_constant(compressor)) {
+                        var ctt = new TreeTransformer(function(node) {
+                            if (node === ref)
+                                return replace_var(node, ctt.parent(), true);
+                        });
+                        stat.transform(ctt);
+                        continue;
+                    }
+
+                    // Restrict var replacement to constants if side effects encountered.
+                    if (side_effects_encountered |= lvalues_encountered) continue;
+
+                    // Non-constant single use vars can only be replaced in same scope.
+                    if (ref.scope !== self) {
+                        side_effects_encountered |= var_decl.value.has_side_effects(compressor);
+                        continue;
+                    }
+
+                    // Detect lvalues in var value.
+                    var tw = new TreeWalker(function(node){
+                        if (node instanceof AST_SymbolRef && is_lvalue(node, tw.parent())) {
+                            lvalues[node.name] = lvalues_encountered = true;
+                        }
+                    });
+                    var_decl.value.walk(tw);
+
+                    // Replace the non-constant single use var in statement if side effect free.
+                    var unwind = false;
+                    var tt = new TreeTransformer(
+                        function preorder(node) {
+                            if (unwind) return node;
+                            var parent = tt.parent();
+                            if (node instanceof AST_Lambda
+                                || node instanceof AST_Try
+                                || node instanceof AST_With
+                                || node instanceof AST_Case
+                                || node instanceof AST_IterationStatement
+                                || (parent instanceof AST_If          && node !== parent.condition)
+                                || (parent instanceof AST_Conditional && node !== parent.condition)
+                                || (parent instanceof AST_Binary
+                                    && (parent.operator == "&&" || parent.operator == "||")
+                                    && node === parent.right)
+                                || (parent instanceof AST_Switch && node !== parent.expression)) {
+                                return side_effects_encountered = unwind = true, node;
+                            }
+                        },
+                        function postorder(node) {
+                            if (unwind) return node;
+                            if (node === ref)
+                                return unwind = true, replace_var(node, tt.parent(), false);
+                            if (side_effects_encountered |= node.has_side_effects(compressor))
+                                return unwind = true, node;
+                            if (lvalues_encountered && node instanceof AST_SymbolRef && node.name in lvalues) {
+                                side_effects_encountered = true;
+                                return unwind = true, node;
+                            }
+                        }
+                    );
+                    stat.transform(tt);
+                }
+            }
+
+            // Remove extraneous empty statments in block after removing var definitions.
+            // Leave at least one statement in `statements`.
+            if (var_defs_removed) for (var i = statements.length; --i >= 0;) {
+                if (statements.length > 1 && statements[i] instanceof AST_EmptyStatement)
+                    statements.splice(i, 1);
+            }
+
+            return statements;
+
+            function is_lvalue(node, parent) {
+                return node instanceof AST_SymbolRef && (
+                    (parent instanceof AST_Assign && node === parent.left)
+                    || (parent instanceof AST_Unary && parent.expression === node
+                        && (parent.operator == "++" || parent.operator == "--")));
+            }
+            function replace_var(node, parent, is_constant) {
+                if (is_lvalue(node, parent)) return node;
+
+                // Remove var definition and return its value to the TreeTransformer to replace.
+                var value = maintain_this_binding(parent, node, var_decl.value);
+                var_decl.value = null;
+
+                var_defs.splice(var_defs_index, 1);
+                if (var_defs.length === 0) {
+                    statements[prev_stat_index] = make_node(AST_EmptyStatement, self);
+                    var_defs_removed = true;
+                }
+                // Further optimize statement after substitution.
+                stat.walk(new TreeWalker(function(node){
+                    delete node._squeezed;
+                    delete node._optimized;
+                }));
+
+                compressor.warn("Replacing " + (is_constant ? "constant" : "variable") +
+                    " " + var_name + " [{file}:{line},{col}]", node.start);
+                CHANGED = true;
+                return value;
+            }
+        }
 
         function process_for_angular(statements) {
             function has_inject(comment) {
@@ -26499,6 +26561,32 @@ merge(Compressor.prototype, {
                 if (ex !== def) throw ex;
                 return [ this ];
             }
+        });
+        AST_Node.DEFMETHOD("is_constant", function(compressor){
+            // Accomodate when compress option evaluate=false
+            // as well as the common constant expressions !0 and !1
+            return this instanceof AST_Constant
+                || (this instanceof AST_UnaryPrefix && this.operator == "!"
+                    && this.expression instanceof AST_Constant)
+                || this.evaluate(compressor).length > 1;
+        });
+        // Obtain the constant value of an expression already known to be constant.
+        // Result only valid iff this.is_constant(compressor) is true.
+        AST_Node.DEFMETHOD("constant_value", function(compressor){
+            // Accomodate when option evaluate=false.
+            if (this instanceof AST_Constant) return this.value;
+            // Accomodate the common constant expressions !0 and !1 when option evaluate=false.
+            if (this instanceof AST_UnaryPrefix
+                && this.operator == "!"
+                && this.expression instanceof AST_Constant) {
+                return !this.expression.value;
+            }
+            var result = this.evaluate(compressor)
+            if (result.length > 1) {
+                return result[1];
+            }
+            // should never be reached
+            return undefined;
         });
         def(AST_Statement, function(){
             throw new Error(string_template("Cannot evaluate a statement [{file}:{line},{col}]", this.start));
@@ -27024,7 +27112,10 @@ merge(Compressor.prototype, {
                             var seq = node.to_assignments();
                             var p = tt.parent();
                             if (p instanceof AST_ForIn && p.init === node) {
-                                if (seq == null) return node.definitions[0].name;
+                                if (seq == null) {
+                                    var def = node.definitions[0].name;
+                                    return make_node(AST_SymbolRef, def, def);
+                                }
                                 return seq;
                             }
                             if (p instanceof AST_For && p.init === node) {
@@ -27255,9 +27346,13 @@ merge(Compressor.prototype, {
         }
         if (is_empty(self.alternative)) self.alternative = null;
         var negated = self.condition.negate(compressor);
-        var negated_is_best = best_of(self.condition, negated) === negated;
+        var self_condition_length = self.condition.print_to_string().length;
+        var negated_length = negated.print_to_string().length;
+        var negated_is_best = negated_length < self_condition_length;
         if (self.alternative && negated_is_best) {
             negated_is_best = false; // because we already do the switch here.
+            // no need to swap values of self_condition_length and negated_length
+            // here because they are only used in an equality comparison later on.
             self.condition = negated;
             var tmp = self.body;
             self.body = self.alternative || make_node(AST_EmptyStatement);
@@ -27279,6 +27374,13 @@ merge(Compressor.prototype, {
             }).transform(compressor);
         }
         if (is_empty(self.alternative) && self.body instanceof AST_SimpleStatement) {
+            if (self_condition_length === negated_length && !negated_is_best
+                && self.condition instanceof AST_Binary && self.condition.operator == "||") {
+                // although the code length of self.condition and negated are the same,
+                // negated does not require additional surrounding parentheses.
+                // see https://github.com/mishoo/UglifyJS2/issues/979
+                negated_is_best = true;
+            }
             if (negated_is_best) return make_node(AST_SimpleStatement, self, {
                 body: make_node(AST_Binary, self, {
                     operator : "||",
@@ -27692,13 +27794,7 @@ merge(Compressor.prototype, {
         if (!compressor.option("side_effects"))
             return self;
         if (!self.car.has_side_effects(compressor)) {
-            // we shouldn't compress (1,func)(something) to
-            // func(something) because that changes the meaning of
-            // the func (becomes lexical instead of global).
-            var p = compressor.parent();
-            if (!(p instanceof AST_Call && p.expression === self)) {
-                return self.cdr;
-            }
+            return maintain_this_binding(compressor.parent(), self, self.cdr);
         }
         if (compressor.option("cascade")) {
             if (self.car instanceof AST_Assign
@@ -27888,11 +27984,10 @@ merge(Compressor.prototype, {
                 if (ll.length > 1) {
                     if (ll[1]) {
                         compressor.warn("Condition left of && always true [{file}:{line},{col}]", self.start);
-                        var rr = self.right.evaluate(compressor);
-                        return rr[0];
+                        return maintain_this_binding(compressor.parent(), self, self.right.evaluate(compressor)[0]);
                     } else {
                         compressor.warn("Condition left of && always false [{file}:{line},{col}]", self.start);
-                        return ll[0];
+                        return maintain_this_binding(compressor.parent(), self, ll[0]);
                     }
                 }
             }
@@ -27901,11 +27996,10 @@ merge(Compressor.prototype, {
                 if (ll.length > 1) {
                     if (ll[1]) {
                         compressor.warn("Condition left of || always true [{file}:{line},{col}]", self.start);
-                        return ll[0];
+                        return maintain_this_binding(compressor.parent(), self, ll[0]);
                     } else {
                         compressor.warn("Condition left of || always false [{file}:{line},{col}]", self.start);
-                        var rr = self.right.evaluate(compressor);
-                        return rr[0];
+                        return maintain_this_binding(compressor.parent(), self, self.right.evaluate(compressor)[0]);
                     }
                 }
             }
@@ -28130,10 +28224,10 @@ merge(Compressor.prototype, {
         if (cond.length > 1) {
             if (cond[1]) {
                 compressor.warn("Condition always true [{file}:{line},{col}]", self.start);
-                return self.consequent;
+                return maintain_this_binding(compressor.parent(), self, self.consequent);
             } else {
                 compressor.warn("Condition always false [{file}:{line},{col}]", self.start);
-                return self.alternative;
+                return maintain_this_binding(compressor.parent(), self, self.alternative);
             }
         }
         var negated = cond[0].negate(compressor);
@@ -28201,32 +28295,52 @@ merge(Compressor.prototype, {
                 alternative: alternative
             });
         }
-        // x=y?1:1 --> x=1
-        if (consequent instanceof AST_Constant
-            && alternative instanceof AST_Constant
+        // y?1:1 --> 1
+        if (consequent.is_constant(compressor)
+            && alternative.is_constant(compressor)
             && consequent.equivalent_to(alternative)) {
+            var consequent_value = consequent.constant_value();
             if (self.condition.has_side_effects(compressor)) {
-                return AST_Seq.from_array([self.condition, make_node_from_constant(compressor, consequent.value, self)]);
+                return AST_Seq.from_array([self.condition, make_node_from_constant(compressor, consequent_value, self)]);
             } else {
-                return make_node_from_constant(compressor, consequent.value, self);
-
+                return make_node_from_constant(compressor, consequent_value, self);
             }
         }
-        // x=y?true:false --> x=!!y
-        if (consequent instanceof AST_True
-            && alternative instanceof AST_False) {
+
+        // y?true:false --> !!y
+        if (is_true(consequent) && is_false(alternative)) {
+            if (self.condition.is_boolean()) {
+                // boolean_expression ? true : false --> boolean_expression
+                return self.condition;
+            }
             self.condition = self.condition.negate(compressor);
             return make_node(AST_UnaryPrefix, self.condition, {
                 operator: "!",
                 expression: self.condition
             });
         }
-        // x=y?false:true --> x=!y
-        if (consequent instanceof AST_False
-            && alternative instanceof AST_True) {
+        // y?false:true --> !y
+        if (is_false(consequent) && is_true(alternative)) {
             return self.condition.negate(compressor)
         }
         return self;
+
+        // AST_True or !0
+        function is_true(node) {
+            return node instanceof AST_True
+                || (node instanceof AST_UnaryPrefix
+                    && node.operator == "!"
+                    && node.expression instanceof AST_Constant
+                    && !node.expression.value);
+        }
+        // AST_False or !1
+        function is_false(node) {
+            return node instanceof AST_False
+                || (node instanceof AST_UnaryPrefix
+                    && node.operator == "!"
+                    && node.expression instanceof AST_Constant
+                    && !!node.expression.value);
+        }
     });
 
     OPT(AST_Boolean, function(self, compressor){
@@ -28362,16 +28476,11 @@ function SourceMap(options) {
         orig_line_diff : 0,
         dest_line_diff : 0,
     });
+    var generator = new MOZ_SourceMap.SourceMapGenerator({
+        file       : options.file,
+        sourceRoot : options.root
+    });
     var orig_map = options.orig && new MOZ_SourceMap.SourceMapConsumer(options.orig);
-    var generator;
-    if (orig_map) {
-      generator = MOZ_SourceMap.SourceMapGenerator.fromSourceMap(orig_map);
-    } else {
-        generator = new MOZ_SourceMap.SourceMapGenerator({
-            file       : options.file,
-            sourceRoot : options.root
-        });
-    }
     function add(source, gen_line, gen_col, orig_line, orig_col, name) {
         if (orig_map) {
             var info = orig_map.originalPositionFor({
@@ -28392,7 +28501,7 @@ function SourceMap(options) {
             source    : source,
             name      : name
         });
-    }
+    };
     return {
         add        : add,
         get        : function() { return generator },
@@ -29179,6 +29288,7 @@ exports["parse"] = parse;
 exports["push_uniq"] = push_uniq;
 exports["string_template"] = string_template;
 exports["is_identifier"] = is_identifier;
+exports["SymbolDef"] = SymbolDef;
 
 
 exports.sys = sys;
@@ -29343,15 +29453,18 @@ exports.AST_Node.warn_function = function (txt) { if (typeof console != "undefin
 
 exports.minify = function (files, options) {
     options = UglifyJS.defaults(options, {
-        spidermonkey : false,
-        outSourceMap : null,
-        sourceRoot   : null,
-        inSourceMap  : null,
-        fromString   : false,
-        warnings     : false,
-        mangle       : {},
-        output       : null,
-        compress     : {}
+        spidermonkey     : false,
+        outSourceMap     : null,
+        sourceRoot       : null,
+        inSourceMap      : null,
+        fromString       : false,
+        warnings         : false,
+        mangle           : {},
+        mangleProperties : false,
+        nameCache        : null,
+        output           : null,
+        compress         : {},
+        parse            : {}
     });
     UglifyJS.base54.reset();
 
@@ -29371,7 +29484,8 @@ exports.minify = function (files, options) {
             sourcesContent[file] = code;
             toplevel = UglifyJS.parse(code, {
                 filename: options.fromString ? i : file,
-                toplevel: toplevel
+                toplevel: toplevel,
+                bare_returns: options.parse ? options.parse.bare_returns : undefined
             });
         });
     }
@@ -29388,14 +29502,21 @@ exports.minify = function (files, options) {
         toplevel = toplevel.transform(sq);
     }
 
-    // 3. mangle
+    // 3. mangle properties
+    if (options.mangleProperties || options.nameCache) {
+        options.mangleProperties.cache = UglifyJS.readNameCache(options.nameCache, "props");
+        toplevel = UglifyJS.mangle_properties(toplevel, options.mangleProperties);
+        UglifyJS.writeNameCache(options.nameCache, "props", options.mangleProperties.cache);
+    }
+
+    // 4. mangle
     if (options.mangle) {
         toplevel.figure_out_scope(options.mangle);
         toplevel.compute_char_frequency(options.mangle);
         toplevel.mangle_names(options.mangle);
     }
 
-    // 4. output
+    // 5. output
     var inMap = options.inSourceMap;
     var output = {};
     if (typeof options.inSourceMap == "string") {
@@ -29471,7 +29592,7 @@ exports.describe_ast = function () {
     doitem(UglifyJS.AST_Node);
     return out + "";
 };
-},{"source-map":139,"util":145}],141:[function(require,module,exports){
+},{"source-map":138,"util":144}],140:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -30205,7 +30326,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":142,"punycode":80,"querystring":83}],142:[function(require,module,exports){
+},{"./util":141,"punycode":79,"querystring":82}],141:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -30223,7 +30344,7 @@ module.exports = {
   }
 };
 
-},{}],143:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 (function (global){
 
 /**
@@ -30294,14 +30415,14 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],144:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],145:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -30891,7 +31012,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":144,"_process":79,"inherits":72}],146:[function(require,module,exports){
+},{"./support/isBuffer":143,"_process":78,"inherits":71}],145:[function(require,module,exports){
 exports.baseChar = /[A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\u0131\u0134-\u013E\u0141-\u0148\u014A-\u017E\u0180-\u01C3\u01CD-\u01F0\u01F4\u01F5\u01FA-\u0217\u0250-\u02A8\u02BB-\u02C1\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03CE\u03D0-\u03D6\u03DA\u03DC\u03DE\u03E0\u03E2-\u03F3\u0401-\u040C\u040E-\u044F\u0451-\u045C\u045E-\u0481\u0490-\u04C4\u04C7\u04C8\u04CB\u04CC\u04D0-\u04EB\u04EE-\u04F5\u04F8\u04F9\u0531-\u0556\u0559\u0561-\u0586\u05D0-\u05EA\u05F0-\u05F2\u0621-\u063A\u0641-\u064A\u0671-\u06B7\u06BA-\u06BE\u06C0-\u06CE\u06D0-\u06D3\u06D5\u06E5\u06E6\u0905-\u0939\u093D\u0958-\u0961\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8B\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AE0\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B36-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB5\u0BB7-\u0BB9\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C33\u0C35-\u0C39\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CDE\u0CE0\u0CE1\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D28\u0D2A-\u0D39\u0D60\u0D61\u0E01-\u0E2E\u0E30\u0E32\u0E33\u0E40-\u0E45\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD\u0EAE\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0F40-\u0F47\u0F49-\u0F69\u10A0-\u10C5\u10D0-\u10F6\u1100\u1102\u1103\u1105-\u1107\u1109\u110B\u110C\u110E-\u1112\u113C\u113E\u1140\u114C\u114E\u1150\u1154\u1155\u1159\u115F-\u1161\u1163\u1165\u1167\u1169\u116D\u116E\u1172\u1173\u1175\u119E\u11A8\u11AB\u11AE\u11AF\u11B7\u11B8\u11BA\u11BC-\u11C2\u11EB\u11F0\u11F9\u1E00-\u1E9B\u1EA0-\u1EF9\u1F00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2126\u212A\u212B\u212E\u2180-\u2182\u3041-\u3094\u30A1-\u30FA\u3105-\u312C\uAC00-\uD7A3]/;
 
 exports.ideographic = /[\u3007\u3021-\u3029\u4E00-\u9FA5]/;
@@ -30903,7 +31024,7 @@ exports.combiningChar = /[\u0300-\u0345\u0360\u0361\u0483-\u0486\u0591-\u05A1\u0
 exports.digit = /[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F\u09E6-\u09EF\u0A66-\u0A6F\u0AE6-\u0AEF\u0B66-\u0B6F\u0BE7-\u0BEF\u0C66-\u0C6F\u0CE6-\u0CEF\u0D66-\u0D6F\u0E50-\u0E59\u0ED0-\u0ED9\u0F20-\u0F29]/;
 
 exports.extender = /[\xB7\u02D0\u02D1\u0387\u0640\u0E46\u0EC6\u3005\u3031-\u3035\u309D\u309E\u30FC-\u30FE]/;
-},{}],147:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -30924,7 +31045,7 @@ function extend() {
     return target
 }
 
-},{}],148:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 'use strict';
 
 function createMap(values, ignoreCase) {
@@ -31640,7 +31761,7 @@ exports.HTMLtoDOM = function( html, doc ) {
   return doc;
 };
 
-},{"./utils":148,"ncname":75}],"html-minifier":[function(require,module,exports){
+},{"./utils":147,"ncname":74}],"html-minifier":[function(require,module,exports){
 'use strict';
 
 var CleanCSS = require('clean-css');
@@ -32750,4 +32871,4 @@ exports.minify = function(value, options) {
   return minify(value, options);
 };
 
-},{"./htmlparser":"html-minifier/src/htmlparser","./utils":148,"clean-css":8,"relateurl":96,"uglify-js":140}]},{},["html-minifier"]);
+},{"./htmlparser":"html-minifier/src/htmlparser","./utils":147,"clean-css":7,"relateurl":95,"uglify-js":139}]},{},["html-minifier"]);
