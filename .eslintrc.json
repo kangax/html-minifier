@@ -5,6 +5,7 @@
   "extends": "eslint:recommended",
   "rules": {
     "block-scoped-var": "error",
+    "block-spacing": "error",
     "brace-style": [
       "error",
       "stroustrup",
