@@ -4,6 +4,10 @@
   },
   "extends": "eslint:recommended",
   "rules": {
+    "array-bracket-spacing": [
+      "error",
+      "always"
+    ],
     "block-scoped-var": "error",
     "block-spacing": "error",
     "brace-style": [

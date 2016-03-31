@@ -178,7 +178,7 @@ if (process.argv.length > 2) {
 }
 else {
   process.on('message', function(hash) {
-    var paths = ['src', 'benchmark.conf', 'sample-cli-config-file.conf'];
+    var paths = [ 'src', 'benchmark.conf', 'sample-cli-config-file.conf' ];
     git('reset', 'HEAD', '--', paths, function() {
       var conf = 'sample-cli-config-file.conf';
 
