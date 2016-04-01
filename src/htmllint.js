@@ -1,7 +1,7 @@
 /*!
  * HTMLLint (to be used in conjunction with HTMLMinifier)
  *
- * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
+ * Copyright (c) 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license.
  *
  */
@@ -138,7 +138,15 @@ Lint.prototype.test = function(tag, attrName, attrValue) {
   this.testAttribute(tag, attrName, attrValue);
 };
 
+Lint.prototype.testDoctype = function(doctype) {
+  this._doctype = doctype;
+};
+
 Lint.prototype.populate = function(writeToElement) {
+  if (!this._doctype) {
+    this.log.push('No DOCTYPE found.');
+  }
+
   if (this._isElementRepeated) {
     this._reportRepeatingElement();
   }

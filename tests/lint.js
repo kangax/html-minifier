@@ -27,11 +27,21 @@ test('lint API', function() {
   equal('function', typeof lint.testAttribute, '`testAttribute` method exists');
 });
 
-test('deprecated element (font)', function() {
+function process(input) {
   var lint = new HTMLLint();
-  minify('<font>foo</font>', { lint: lint });
-  var log = lint.log.join('');
+  minify(input, { lint: lint });
+  var element = {};
+  lint.populate(element);
+  return element.innerHTML;
+}
 
+test('deprecated element (font)', function() {
+  var log = process('<font>foo</font>');
   ok(log.indexOf('font') > -1);
   ok(log.indexOf('deprecated') > -1);
+});
+
+test('missing DOCTYPE', function() {
+  var log = process('<html><head><title>foo</title></head><body>bar</body></html>');
+  ok(log.indexOf('DOCTYPE') > -1);
 });
