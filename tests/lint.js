@@ -45,3 +45,8 @@ test('missing DOCTYPE', function() {
   var log = process('<html><head><title>foo</title></head><body>bar</body></html>');
   ok(log.indexOf('DOCTYPE') > -1);
 });
+
+test('repeating attribute', function() {
+  var log = process('<a data-foo="bar" href="/" data-foo="baz">click</a>');
+  ok(log.indexOf('repeating attribute') > -1);
+});

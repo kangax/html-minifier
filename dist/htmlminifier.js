@@ -31135,6 +31135,7 @@ function Lint() {
 }
 
 Lint.prototype.testElement = function(tag) {
+  this._attributes = Object.create(null);
   if (isDeprecatedElement(tag)) {
     this.log.push(
       'Found <span class="deprecated-element">deprecated</span> <strong><code>&lt;' +
@@ -31168,6 +31169,15 @@ Lint.prototype._reportRepeatingElement = function() {
 };
 
 Lint.prototype.testAttribute = function(tag, attrName, attrValue) {
+  if (this._attributes[attrName]) {
+    this.log.push(
+      'Found <span class="repeating-attribute">repeating attribute</span> (<strong>' +
+      attrName + '</strong>) on <strong><code>&lt;' + tag + '&gt;</code></strong> element.'
+    );
+  }
+  else {
+    this._attributes[attrName] = true;
+  }
   if (isEventAttribute(attrName)) {
     this.log.push(
       'Found <span class="event-attribute">event attribute</span> (<strong>' +
