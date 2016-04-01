@@ -1023,6 +1023,9 @@ function minify(value, options, partialMarkup) {
       buffer.push(text);
     },
     doctype: function(doctype) {
+      if (lint) {
+        lint.testDoctype(doctype);
+      }
       buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(doctype));
     },
     customAttrAssign: options.customAttrAssign,

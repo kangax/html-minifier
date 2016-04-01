@@ -1,7 +1,7 @@
 /*!
  * HTMLLint (to be used in conjunction with HTMLMinifier)
  *
- * Copyright (c) 2010-2013 Juriy "kangax" Zaytsev
+ * Copyright (c) 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license.
  *
  */
@@ -67,6 +67,7 @@ function Lint() {
 }
 
 Lint.prototype.testElement = function(tag) {
+  this._attributes = Object.create(null);
   if (isDeprecatedElement(tag)) {
     this.log.push(
       'Found <span class="deprecated-element">deprecated</span> <strong><code>&lt;' +
@@ -100,6 +101,15 @@ Lint.prototype._reportRepeatingElement = function() {
 };
 
 Lint.prototype.testAttribute = function(tag, attrName, attrValue) {
+  if (this._attributes[attrName]) {
+    this.log.push(
+      'Found <span class="repeating-attribute">repeating attribute</span> (<strong>' +
+      attrName + '</strong>) on <strong><code>&lt;' + tag + '&gt;</code></strong> element.'
+    );
+  }
+  else {
+    this._attributes[attrName] = true;
+  }
   if (isEventAttribute(attrName)) {
     this.log.push(
       'Found <span class="event-attribute">event attribute</span> (<strong>' +
@@ -138,7 +148,15 @@ Lint.prototype.test = function(tag, attrName, attrValue) {
   this.testAttribute(tag, attrName, attrValue);
 };
 
+Lint.prototype.testDoctype = function(doctype) {
+  this._doctype = doctype;
+};
+
 Lint.prototype.populate = function(writeToElement) {
+  if (!this._doctype) {
+    this.log.push('No DOCTYPE found.');
+  }
+
   if (this._isElementRepeated) {
     this._reportRepeatingElement();
   }
