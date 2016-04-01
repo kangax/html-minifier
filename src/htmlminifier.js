@@ -662,6 +662,31 @@ function uniqueId(value) {
   return id;
 }
 
+function createSortAttrFn(value) {
+  var counters = Object.create(null);
+  new HTMLParser(value, {
+    start: function(tag, attrs) {
+      var counter = counters[tag] || (counters[tag] = Object.create(null));
+      for (var i = 0; i < attrs.length; i++) {
+        var attr = attrs[i];
+        counter[attr.name] = (counter[attr.name] || 0) + 1;
+      }
+    }
+  });
+  return function(tag, attrs) {
+    if (attrs.length < 2) { return; }
+    var counter = counters[tag];
+    if (!counter) { return; }
+    attrs.sort(function(a, b) {
+      var m = a.name;
+      var n = b.name;
+      var i = counter[m] || 0;
+      var j = counter[n] || 0;
+      return i < j ? 1 : i > j ? -1 : m < n ? -1 : m > n ? 1 : 0;
+    });
+  };
+}
+
 function minify(value, options, partialMarkup) {
   options = options || {};
   var optionsStack = [];
@@ -678,6 +703,7 @@ function minify(value, options, partialMarkup) {
       stackNoCollapseWhitespace = [],
       optionalStartTag = '',
       optionalEndTag = '',
+      sortAttributes,
       lint = options.lint,
       t = Date.now(),
       ignoredMarkupChunks = [ ],
@@ -715,6 +741,10 @@ function minify(value, options, partialMarkup) {
       ignoredCustomMarkupChunks.push(match);
       return '\t' + token + '\t';
     });
+  }
+
+  if (options.sortAttributes) {
+    sortAttributes = createSortAttrFn(value);
   }
 
   function _canCollapseWhitespace(tag, attrs) {
@@ -830,6 +860,10 @@ function minify(value, options, partialMarkup) {
 
       if (lint) {
         lint.testElement(tag);
+      }
+
+      if (sortAttributes) {
+        sortAttributes(tag, attrs);
       }
 
       var parts = [ ];

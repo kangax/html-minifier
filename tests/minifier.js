@@ -2242,6 +2242,18 @@ test('auto-generated tags', function() {
   equal(minify('<p id=""class=""title="">x', options), '<p id="" class="" \ntitle="">x');
 });
 
+test('sort attributes', function() {
+  input = '<link href="foo">' +
+          '<link rel="bar" href="baz">' +
+          '<link type="text/css" href="app.css" rel="stylesheet" async>';
+  equal(minify(input), input);
+  equal(minify(input, { sortAttributes: false }), input);
+  output = '<link href="foo">' +
+           '<link href="baz" rel="bar">' +
+           '<link href="app.css" rel="stylesheet" async type="text/css">';
+  equal(minify(input, { sortAttributes: true }), output);
+});
+
 test('tests from PHPTAL', function() {
   [
     // trailing </p> removed by minifier, but not by PHPTAL

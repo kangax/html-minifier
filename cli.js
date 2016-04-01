@@ -86,7 +86,8 @@ var mainOptions = {
   removeRedundantAttributes: [ [ false, 'Remove attributes when value matches default.' ] ],
   removeScriptTypeAttributes: [ [ false, 'Remove type="text/javascript" from script tags. Other type attribute values are left intact.' ] ],
   removeStyleLinkTypeAttributes: [ [ false, 'Remove type="text/css" from style and link tags. Other type attribute values are left intact.' ] ],
-  removeTagWhitespace: [ [ false, 'Remove space between attributes whenever possible.' ] ],
+  removeTagWhitespace: [ [ false, 'Remove space between attributes whenever possible' ] ],
+  sortAttributes: [ [ false, 'Sort attributes by frequency' ] ],
   useShortDoctype: [ [ false, 'Replaces the doctype with the short (HTML5) doctype' ] ]
 };
 
