@@ -32,21 +32,28 @@ function process(input) {
   minify(input, { lint: lint });
   var element = {};
   lint.populate(element);
-  return element.innerHTML;
+  return element.innerHTML || '';
 }
 
-test('deprecated element (font)', function() {
+test('deprecated element', function() {
   var log = process('<font>foo</font>');
   ok(log.indexOf('font') > -1);
   ok(log.indexOf('deprecated') > -1);
+  log = process('<span>foo</span>');
+  ok(log.indexOf('span') === -1);
+  ok(log.indexOf('deprecated') === -1);
 });
 
 test('missing DOCTYPE', function() {
   var log = process('<html><head><title>foo</title></head><body>bar</body></html>');
   ok(log.indexOf('DOCTYPE') > -1);
+  log = process('<!DOCTYPE html><html><head><title>foo</title></head><body>bar</body></html>');
+  ok(log.indexOf('DOCTYPE') === -1);
 });
 
 test('repeating attribute', function() {
   var log = process('<a data-foo="bar" href="/" data-foo="baz">click</a>');
   ok(log.indexOf('repeating attribute') > -1);
+  log = process('<a data-foo="bar" href="/" ng-foo="baz">click</a>');
+  ok(log.indexOf('repeating attribute') === -1);
 });
