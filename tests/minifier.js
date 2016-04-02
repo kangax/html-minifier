@@ -2271,6 +2271,21 @@ test('sort attributes', function() {
     ],
     sortAttributes: true
   }), output);
+
+  input = '<link type="text/css" href="foo.css">' +
+          '<link rel="stylesheet" type="text/abc" href="bar.css">' +
+          '<link href="baz.css">';
+  output = '<link href="foo.css" type="text/css">' +
+           '<link href="bar.css" type="text/abc" rel="stylesheet">' +
+           '<link href="baz.css">';
+  equal(minify(input, { sortAttributes: true }), output);
+  output = '<link href="foo.css">' +
+           '<link href="bar.css" rel="stylesheet" type="text/abc">' +
+           '<link href="baz.css">';
+  equal(minify(input, {
+    removeStyleLinkTypeAttributes: true,
+    sortAttributes: true
+  }), output);
 });
 
 test('tests from PHPTAL', function() {

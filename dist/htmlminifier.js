@@ -32579,7 +32579,8 @@ function minify(value, options, partialMarkup) {
   }
 
   if (options.sortAttributes && typeof options.sortAttributes !== 'function') {
-    options.sortAttributes = createSortAttrFn(value, options);
+    options.sortAttributes = false;
+    options.sortAttributes = createSortAttrFn(minify(value, options), options);
   }
 
   function _canCollapseWhitespace(tag, attrs) {
