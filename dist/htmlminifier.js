@@ -32478,17 +32478,37 @@ function uniqueId(value) {
   return id;
 }
 
-function createSortAttrFn(value) {
+function createSortAttrFn(value, options) {
   var counters = Object.create(null);
-  new HTMLParser(value, {
-    start: function(tag, attrs) {
-      var counter = counters[tag] || (counters[tag] = Object.create(null));
-      for (var i = 0; i < attrs.length; i++) {
-        var attr = attrs[i];
-        counter[attr.name] = (counter[attr.name] || 0) + 1;
+
+  function scan(input) {
+    var currentTag, currentType;
+    new HTMLParser(input, {
+      start: function(tag, attrs) {
+        var counter = counters[tag] || (counters[tag] = Object.create(null));
+        for (var i = 0; i < attrs.length; i++) {
+          var attr = attrs[i];
+          counter[attr.name] = (counter[attr.name] || 0) + 1;
+          if (options.processScripts && attr.name.toLowerCase() === 'type') {
+            currentTag = tag;
+            currentType = attr.value;
+          }
+        }
+      },
+      end: function() {
+        currentTag = '';
+      },
+      chars: function(text) {
+        if (options.processScripts &&
+            (currentTag === 'script' || currentTag === 'style') &&
+            options.processScripts.indexOf(currentType) > -1) {
+          scan(text);
+        }
       }
-    }
-  });
+    });
+  }
+
+  scan(value);
   return function(tag, attrs) {
     if (attrs.length < 2) { return; }
     var counter = counters[tag];
@@ -32519,7 +32539,6 @@ function minify(value, options, partialMarkup) {
       stackNoCollapseWhitespace = [],
       optionalStartTag = '',
       optionalEndTag = '',
-      sortAttributes,
       lint = options.lint,
       t = Date.now(),
       ignoredMarkupChunks = [ ],
@@ -32559,8 +32578,8 @@ function minify(value, options, partialMarkup) {
     });
   }
 
-  if (options.sortAttributes) {
-    sortAttributes = createSortAttrFn(value);
+  if (options.sortAttributes && typeof options.sortAttributes !== 'function') {
+    options.sortAttributes = createSortAttrFn(value, options);
   }
 
   function _canCollapseWhitespace(tag, attrs) {
@@ -32678,8 +32697,8 @@ function minify(value, options, partialMarkup) {
         lint.testElement(tag);
       }
 
-      if (sortAttributes) {
-        sortAttributes(tag, attrs);
+      if (options.sortAttributes) {
+        options.sortAttributes(tag, attrs);
       }
 
       var parts = [ ];

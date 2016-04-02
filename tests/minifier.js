@@ -2252,6 +2252,25 @@ test('sort attributes', function() {
            '<link href="baz" rel="bar">' +
            '<link href="app.css" rel="stylesheet" async type="text/css">';
   equal(minify(input, { sortAttributes: true }), output);
+
+  input = '<link href="foo">' +
+          '<link rel="bar" href="baz">' +
+          '<script type="text/html"><link type="text/css" href="app.css" rel="stylesheet" async></script>';
+  equal(minify(input), input);
+  equal(minify(input, { sortAttributes: false }), input);
+  output = '<link href="foo">' +
+           '<link href="baz" rel="bar">' +
+           '<script type="text/html"><link type="text/css" href="app.css" rel="stylesheet" async></script>';
+  equal(minify(input, { sortAttributes: true }), output);
+  output = '<link href="foo">' +
+           '<link href="baz" rel="bar">' +
+           '<script type="text/html"><link href="app.css" rel="stylesheet" async type="text/css"></script>';
+  equal(minify(input, {
+    processScripts: [
+      'text/html'
+    ],
+    sortAttributes: true
+  }), output);
 });
 
 test('tests from PHPTAL', function() {
