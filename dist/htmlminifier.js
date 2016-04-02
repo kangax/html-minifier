@@ -2734,7 +2734,10 @@ function inlineRemoteResource(importedFile, mediaQuery, context) {
 
   context.visited.push(importedUrl);
 
-  var get = importedUrl.indexOf('http://') === 0 ?
+  var proxyProtocol = context.inliner.request.protocol || context.inliner.request.hostname;
+  var get =
+    ((proxyProtocol && proxyProtocol.indexOf('https://') !== 0 ) ||
+     importedUrl.indexOf('http://') === 0) ?
     http.get :
     https.get;
 
@@ -2753,8 +2756,13 @@ function inlineRemoteResource(importedFile, mediaQuery, context) {
   }
 
   var requestOptions = override(url.parse(importedUrl), context.inliner.request);
-  if (context.inliner.request.hostname !== undefined)
+  if (context.inliner.request.hostname !== undefined) {
+
+    //overwrite as we always expect a http proxy currently
+    requestOptions.protocol = context.inliner.request.protocol || 'http:';
     requestOptions.path = requestOptions.href;
+  }
+
 
   get(requestOptions, function (res) {
     if (res.statusCode < 200 || res.statusCode > 399) {
@@ -2943,7 +2951,7 @@ function background(property, compactable, validator) {
           // NOTE: we do this slicing as value may contain metadata too, like for source maps
           size.value = [[twoParts.pop()].concat(previousValue.slice(1)), value];
           values[i - 1] = [twoParts.pop()].concat(previousValue.slice(1));
-        } else if (i > 1 && values[i - 2] == '/') {
+        } else if (i > 1 && values[i - 2][0] == '/') {
           size.value = [previousValue, value];
           i -= 2;
         } else if (previousValue[0] == '/') {
@@ -4956,7 +4964,10 @@ module.exports = {
 
 },{}],28:[function(require,module,exports){
 var BACKSLASH_HACK = '\\';
-var IMPORTANT_TOKEN = '!important';
+var IMPORTANT_WORD = 'important';
+var IMPORTANT_TOKEN = '!'+IMPORTANT_WORD;
+var IMPORTANT_WORD_MATCH = new RegExp(IMPORTANT_WORD+'$', 'i');
+var IMPORTANT_TOKEN_MATCH = new RegExp(IMPORTANT_TOKEN+'$', 'i');
 var STAR_HACK = '*';
 var UNDERSCORE_HACK = '_';
 var BANG_HACK = '!';
@@ -4995,9 +5006,9 @@ function hackType(property) {
     type = 'underscore';
   } else if (name[0] == STAR_HACK) {
     type = 'star';
-  } else if (lastValue[0][0] == BANG_HACK && lastValue[0].indexOf('important') == -1) {
+  } else if (lastValue[0][0] == BANG_HACK && !lastValue[0].match(IMPORTANT_WORD_MATCH)) {
     type = 'bang';
-  } else if (lastValue[0].indexOf(BANG_HACK) > 0 && lastValue[0].indexOf('important') == -1) {
+  } else if (lastValue[0].indexOf(BANG_HACK) > 0 && !lastValue[0].match(IMPORTANT_WORD_MATCH)) {
     type = 'bang';
   } else if (lastValue[0].indexOf(BACKSLASH_HACK) > 0 && lastValue[0].indexOf(BACKSLASH_HACK) == lastValue[0].length - BACKSLASH_HACK.length - 1) {
     type = 'backslash';
@@ -5009,14 +5020,18 @@ function hackType(property) {
 }
 
 function isImportant(property) {
-  return property.length > 1 ?
-    property[property.length - 1][0].indexOf(IMPORTANT_TOKEN) > 0 :
-    false;
+  if (property.length > 1) {
+    var p = property[property.length - 1][0];
+    if (typeof(p) === 'string') {
+      return IMPORTANT_TOKEN_MATCH.test(p);
+    }
+  }
+  return false;
 }
 
 function stripImportant(property) {
   if (property.length > 0)
-    property[property.length - 1][0] = property[property.length - 1][0].replace(IMPORTANT_TOKEN, '');
+    property[property.length - 1][0] = property[property.length - 1][0].replace(IMPORTANT_TOKEN_MATCH, '');
 }
 
 function stripPrefixHack(property) {
@@ -7680,6 +7695,11 @@ var FORWARD_SLASH = '/';
 
 var AT_RULE = 'at-rule';
 
+var IMPORTANT_WORD = 'important';
+var IMPORTANT_TOKEN = '!'+IMPORTANT_WORD;
+var IMPORTANT_WORD_MATCH = new RegExp('^'+IMPORTANT_WORD+'$', 'i');
+var IMPORTANT_TOKEN_MATCH = new RegExp('^'+IMPORTANT_TOKEN+'$', 'i');
+
 function selectorName(value) {
   return value[0];
 }
@@ -7828,14 +7848,14 @@ function extractProperties(string, selectors, context) {
       }
 
       var pos = body.length - 1;
-      if (trimmed == 'important' && body[pos][0] == '!') {
+      if (IMPORTANT_WORD_MATCH.test(trimmed) && body[pos][0] == '!') {
         context.track(trimmed);
-        body[pos - 1][0] += '!important';
+        body[pos - 1][0] += IMPORTANT_TOKEN;
         body.pop();
         continue;
       }
 
-      if (trimmed == '!important' || (trimmed == 'important' && body[pos][0][body[pos][0].length - 1] == '!')) {
+      if (IMPORTANT_TOKEN_MATCH.test(trimmed) || (IMPORTANT_WORD_MATCH.test(trimmed) && body[pos][0][body[pos][0].length - 1] == '!')) {
         context.track(trimmed);
         body[pos][0] += trimmed;
         continue;
@@ -8924,18 +8944,19 @@ module.exports = {
 };
 
 },{}],63:[function(require,module,exports){
+var COMMENT_START_MARK = '/*';
+
 function QuoteScanner(data) {
   this.data = data;
 }
 
 var findQuoteEnd = function (data, matched, cursor, oldCursor) {
-  var commentStartMark = '/*';
   var commentEndMark = '*/';
   var escapeMark = '\\';
   var blockEndMark = '}';
   var dataPrefix = data.substring(oldCursor, cursor);
   var commentEndedAt = dataPrefix.lastIndexOf(commentEndMark, cursor);
-  var commentStartedAt = dataPrefix.lastIndexOf(commentStartMark, cursor);
+  var commentStartedAt = findLastCommentStartedAt(dataPrefix, cursor);
   var commentStarted = false;
 
   if (commentEndedAt >= cursor && commentStartedAt > -1)
@@ -8963,6 +8984,22 @@ var findQuoteEnd = function (data, matched, cursor, oldCursor) {
 
   return cursor;
 };
+
+function findLastCommentStartedAt(data, cursor) {
+  var position = cursor;
+
+  while (position > -1) {
+    position = data.lastIndexOf(COMMENT_START_MARK, position);
+
+    if (position > -1 && data[position - 1] != '*') {
+      break;
+    } else {
+      position--;
+    }
+  }
+
+  return position;
+}
 
 function findNext(data, mark, startAt) {
   var escapeMark = '\\';
