@@ -2286,6 +2286,20 @@ test('sort attributes', function() {
     removeStyleLinkTypeAttributes: true,
     sortAttributes: true
   }), output);
+
+  input = '<a foo moo></a>' +
+          '<a bar foo></a>' +
+          '<a baz bar foo></a>' +
+          '<a baz foo moo></a>' +
+          '<a moo baz></a>';
+  equal(minify(input), input);
+  equal(minify(input, { sortAttributes: false }), input);
+  output = '<a foo moo></a>' +
+           '<a foo bar></a>' +
+           '<a foo bar baz></a>' +
+           '<a foo baz moo></a>' +
+           '<a baz moo></a>';
+  equal(minify(input, { sortAttributes: true }), output);
 });
 
 test('sort style classes', function() {

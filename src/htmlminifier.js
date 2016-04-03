@@ -671,21 +671,26 @@ function uniqueId(value) {
 }
 
 function createSortFns(value, options) {
-  var counters = options.sortAttributes && Object.create(null);
-  var chain = options.sortClassName && new TokenChain();
+  var attrChains = options.sortAttributes && Object.create(null);
+  var classChain = options.sortClassName && new TokenChain();
+
+  function attrNames(attrs) {
+    return attrs.map(function(attr) {
+      return options.caseSensitive ? attr.name : attr.name.toLowerCase();
+    });
+  }
 
   function scan(input) {
     var currentTag, currentType;
     new HTMLParser(input, {
       start: function(tag, attrs) {
-        var counter = counters && (counters[tag] || (counters[tag] = Object.create(null)));
+        if (attrChains) {
+          (attrChains[tag] || (attrChains[tag] = new TokenChain())).add(attrNames(attrs));
+        }
         for (var i = 0; i < attrs.length; i++) {
           var attr = attrs[i];
-          if (counter) {
-            counter[attr.name] = (counter[attr.name] || 0) + 1;
-          }
-          if (chain && (options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
-            chain.add(trimWhitespace(attr.value).split(/\s+/));
+          if (classChain && (options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
+            classChain.add(trimWhitespace(attr.value).split(/\s+/));
           }
           else if (options.processScripts && attr.name.toLowerCase() === 'type') {
             currentTag = tag;
@@ -709,22 +714,27 @@ function createSortFns(value, options) {
   options.sortAttributes = false;
   options.sortClassName = false;
   scan(minify(value, options));
-  if (counters) {
+  if (attrChains) {
+    var attrSorters = Object.create(null);
+    for (var tag in attrChains) {
+      attrSorters[tag] = attrChains[tag].createSorter();
+    }
     options.sortAttributes = function(tag, attrs) {
-      if (attrs.length < 2) { return; }
-      var counter = counters[tag];
-      if (!counter) { return; }
-      attrs.sort(function(a, b) {
-        var m = a.name;
-        var n = b.name;
-        var i = counter[m] || 0;
-        var j = counter[n] || 0;
-        return i < j ? 1 : i > j ? -1 : m < n ? -1 : m > n ? 1 : 0;
-      });
+      var sorter = attrSorters[tag];
+      if (sorter) {
+        var attrMap = Object.create(null);
+        var names = attrNames(attrs);
+        names.forEach(function(name, index) {
+          (attrMap[name] || (attrMap[name] = [])).push(attrs[index]);
+        });
+        sorter.sort(names).forEach(function(name, index) {
+          attrs[index] = attrMap[name].shift();
+        });
+      }
     };
   }
-  if (chain) {
-    var sorter = chain.createSorter();
+  if (classChain) {
+    var sorter = classChain.createSorter();
     options.sortClassName = function(value) {
       return sorter.sort(value.split(/\s+/)).join(' ');
     };
