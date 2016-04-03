@@ -2242,6 +2242,52 @@ test('auto-generated tags', function() {
   equal(minify('<p id=""class=""title="">x', options), '<p id="" class="" \ntitle="">x');
 });
 
+test('sort attributes', function() {
+  input = '<link href="foo">' +
+          '<link rel="bar" href="baz">' +
+          '<link type="text/css" href="app.css" rel="stylesheet" async>';
+  equal(minify(input), input);
+  equal(minify(input, { sortAttributes: false }), input);
+  output = '<link href="foo">' +
+           '<link href="baz" rel="bar">' +
+           '<link href="app.css" rel="stylesheet" async type="text/css">';
+  equal(minify(input, { sortAttributes: true }), output);
+
+  input = '<link href="foo">' +
+          '<link rel="bar" href="baz">' +
+          '<script type="text/html"><link type="text/css" href="app.css" rel="stylesheet" async></script>';
+  equal(minify(input), input);
+  equal(minify(input, { sortAttributes: false }), input);
+  output = '<link href="foo">' +
+           '<link href="baz" rel="bar">' +
+           '<script type="text/html"><link type="text/css" href="app.css" rel="stylesheet" async></script>';
+  equal(minify(input, { sortAttributes: true }), output);
+  output = '<link href="foo">' +
+           '<link href="baz" rel="bar">' +
+           '<script type="text/html"><link href="app.css" rel="stylesheet" async type="text/css"></script>';
+  equal(minify(input, {
+    processScripts: [
+      'text/html'
+    ],
+    sortAttributes: true
+  }), output);
+
+  input = '<link type="text/css" href="foo.css">' +
+          '<link rel="stylesheet" type="text/abc" href="bar.css">' +
+          '<link href="baz.css">';
+  output = '<link href="foo.css" type="text/css">' +
+           '<link href="bar.css" type="text/abc" rel="stylesheet">' +
+           '<link href="baz.css">';
+  equal(minify(input, { sortAttributes: true }), output);
+  output = '<link href="foo.css">' +
+           '<link href="bar.css" rel="stylesheet" type="text/abc">' +
+           '<link href="baz.css">';
+  equal(minify(input, {
+    removeStyleLinkTypeAttributes: true,
+    sortAttributes: true
+  }), output);
+});
+
 test('tests from PHPTAL', function() {
   [
     // trailing </p> removed by minifier, but not by PHPTAL

@@ -662,6 +662,51 @@ function uniqueId(value) {
   return id;
 }
 
+function createSortAttrFn(value, options) {
+  var counters = Object.create(null);
+
+  function scan(input) {
+    var currentTag, currentType;
+    new HTMLParser(input, {
+      start: function(tag, attrs) {
+        var counter = counters[tag] || (counters[tag] = Object.create(null));
+        for (var i = 0; i < attrs.length; i++) {
+          var attr = attrs[i];
+          counter[attr.name] = (counter[attr.name] || 0) + 1;
+          if (options.processScripts && attr.name.toLowerCase() === 'type') {
+            currentTag = tag;
+            currentType = attr.value;
+          }
+        }
+      },
+      end: function() {
+        currentTag = '';
+      },
+      chars: function(text) {
+        if (options.processScripts &&
+            (currentTag === 'script' || currentTag === 'style') &&
+            options.processScripts.indexOf(currentType) > -1) {
+          scan(text);
+        }
+      }
+    });
+  }
+
+  scan(value);
+  return function(tag, attrs) {
+    if (attrs.length < 2) { return; }
+    var counter = counters[tag];
+    if (!counter) { return; }
+    attrs.sort(function(a, b) {
+      var m = a.name;
+      var n = b.name;
+      var i = counter[m] || 0;
+      var j = counter[n] || 0;
+      return i < j ? 1 : i > j ? -1 : m < n ? -1 : m > n ? 1 : 0;
+    });
+  };
+}
+
 function minify(value, options, partialMarkup) {
   options = options || {};
   var optionsStack = [];
@@ -715,6 +760,11 @@ function minify(value, options, partialMarkup) {
       ignoredCustomMarkupChunks.push(match);
       return '\t' + token + '\t';
     });
+  }
+
+  if (options.sortAttributes && typeof options.sortAttributes !== 'function') {
+    options.sortAttributes = false;
+    options.sortAttributes = createSortAttrFn(minify(value, options), options);
   }
 
   function _canCollapseWhitespace(tag, attrs) {
@@ -830,6 +880,10 @@ function minify(value, options, partialMarkup) {
 
       if (lint) {
         lint.testElement(tag);
+      }
+
+      if (options.sortAttributes) {
+        options.sortAttributes(tag, attrs);
       }
 
       var parts = [ ];
