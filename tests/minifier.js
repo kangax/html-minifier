@@ -2288,6 +2288,22 @@ test('sort attributes', function() {
   }), output);
 });
 
+test('sort style classes', function() {
+  input = '<a class="foo moo"></a>' +
+          '<b class="bar foo"></b>' +
+          '<i class="baz bar foo"></i>' +
+          '<s class="baz foo moo"></s>' +
+          '<u class="moo baz"></u>';
+  equal(minify(input), input);
+  equal(minify(input, { sortClassName: false }), input);
+  output = '<a class="foo moo"></a>' +
+           '<b class="foo bar"></b>' +
+           '<i class="foo bar baz"></i>' +
+           '<s class="foo baz moo"></s>' +
+           '<u class="baz moo"></u>';
+  equal(minify(input, { sortClassName: true }), output);
+});
+
 test('tests from PHPTAL', function() {
   [
     // trailing </p> removed by minifier, but not by PHPTAL

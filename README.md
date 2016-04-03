@@ -71,6 +71,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `removeStyleLinkTypeAttributes`| Remove `type="text/css"` from `style` and `link` tags. Other `type` attribute values are left intact | `false` |
 | `removeTagWhitespace`          | Remove space between attributes whenever possible. **Note that this will result in invalid HTML!** | `false` |
 | `sortAttributes`               | Sort attributes by frequency | `false` |
+| `sortClassName`                | Sort style classes by frequency | `false` |
 | `useShortDoctype`              | [Replaces the `doctype` with the short (HTML5) doctype](http://perfectionkills.com/experimenting-with-html-minifier/#use_short_doctype) | `false` |
 
 ## Special cases

@@ -1,5 +1,6 @@
 'use strict';
 
+var TokenChain = require('./tokenchain');
 var CleanCSS = require('clean-css');
 var HTMLParser = require('./htmlparser').HTMLParser;
 var RelateUrl = require('relateurl');
@@ -281,7 +282,14 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
     return attrValue;
   }
   else if (attrName === 'class') {
-    return collapseWhitespaceAll(trimWhitespace(attrValue));
+    attrValue = trimWhitespace(attrValue);
+    if (options.sortClassName) {
+      attrValue = options.sortClassName(attrValue);
+    }
+    else {
+      attrValue = collapseWhitespaceAll(attrValue);
+    }
+    return attrValue;
   }
   else if (isUriTypeAttribute(attrName, tag)) {
     attrValue = trimWhitespace(attrValue);
@@ -707,6 +715,44 @@ function createSortAttrFn(value, options) {
   };
 }
 
+function createSortClassFn(value, options) {
+  var chain = new TokenChain();
+
+  function scan(input) {
+    var currentTag, currentType;
+    new HTMLParser(input, {
+      start: function(tag, attrs) {
+        for (var i = 0; i < attrs.length; i++) {
+          var attr = attrs[i];
+          if ((options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
+            chain.add(trimWhitespace(attr.value).split(/\s+/));
+          }
+          else if (options.processScripts && attr.name.toLowerCase() === 'type') {
+            currentTag = tag;
+            currentType = attr.value;
+          }
+        }
+      },
+      end: function() {
+        currentTag = '';
+      },
+      chars: function(text) {
+        if (options.processScripts &&
+            (currentTag === 'script' || currentTag === 'style') &&
+            options.processScripts.indexOf(currentType) > -1) {
+          scan(text);
+        }
+      }
+    });
+  }
+
+  scan(value);
+  var sorter = chain.createSorter();
+  return function(value) {
+    return sorter.sort(value.split(/\s+/)).join(' ');
+  };
+}
+
 function minify(value, options, partialMarkup) {
   options = options || {};
   var optionsStack = [];
@@ -765,6 +811,11 @@ function minify(value, options, partialMarkup) {
   if (options.sortAttributes && typeof options.sortAttributes !== 'function') {
     options.sortAttributes = false;
     options.sortAttributes = createSortAttrFn(minify(value, options), options);
+  }
+
+  if (options.sortClassName && typeof options.sortClassName !== 'function') {
+    options.sortClassName = false;
+    options.sortClassName = createSortClassFn(minify(value, options), options);
   }
 
   function _canCollapseWhitespace(tag, attrs) {
