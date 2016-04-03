@@ -670,61 +670,21 @@ function uniqueId(value) {
   return id;
 }
 
-function createSortAttrFn(value, options) {
-  var counters = Object.create(null);
+function createSortFns(value, options) {
+  var counters = options.sortAttributes && Object.create(null);
+  var chain = options.sortClassName && new TokenChain();
 
   function scan(input) {
     var currentTag, currentType;
     new HTMLParser(input, {
       start: function(tag, attrs) {
-        var counter = counters[tag] || (counters[tag] = Object.create(null));
+        var counter = counters && (counters[tag] || (counters[tag] = Object.create(null)));
         for (var i = 0; i < attrs.length; i++) {
           var attr = attrs[i];
-          counter[attr.name] = (counter[attr.name] || 0) + 1;
-          if (options.processScripts && attr.name.toLowerCase() === 'type') {
-            currentTag = tag;
-            currentType = attr.value;
+          if (counter) {
+            counter[attr.name] = (counter[attr.name] || 0) + 1;
           }
-        }
-      },
-      end: function() {
-        currentTag = '';
-      },
-      chars: function(text) {
-        if (options.processScripts &&
-            (currentTag === 'script' || currentTag === 'style') &&
-            options.processScripts.indexOf(currentType) > -1) {
-          scan(text);
-        }
-      }
-    });
-  }
-
-  scan(value);
-  return function(tag, attrs) {
-    if (attrs.length < 2) { return; }
-    var counter = counters[tag];
-    if (!counter) { return; }
-    attrs.sort(function(a, b) {
-      var m = a.name;
-      var n = b.name;
-      var i = counter[m] || 0;
-      var j = counter[n] || 0;
-      return i < j ? 1 : i > j ? -1 : m < n ? -1 : m > n ? 1 : 0;
-    });
-  };
-}
-
-function createSortClassFn(value, options) {
-  var chain = new TokenChain();
-
-  function scan(input) {
-    var currentTag, currentType;
-    new HTMLParser(input, {
-      start: function(tag, attrs) {
-        for (var i = 0; i < attrs.length; i++) {
-          var attr = attrs[i];
-          if ((options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
+          if (chain && (options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
             chain.add(trimWhitespace(attr.value).split(/\s+/));
           }
           else if (options.processScripts && attr.name.toLowerCase() === 'type') {
@@ -746,11 +706,29 @@ function createSortClassFn(value, options) {
     });
   }
 
-  scan(value);
-  var sorter = chain.createSorter();
-  return function(value) {
-    return sorter.sort(value.split(/\s+/)).join(' ');
-  };
+  options.sortAttributes = false;
+  options.sortClassName = false;
+  scan(minify(value, options));
+  if (counters) {
+    options.sortAttributes = function(tag, attrs) {
+      if (attrs.length < 2) { return; }
+      var counter = counters[tag];
+      if (!counter) { return; }
+      attrs.sort(function(a, b) {
+        var m = a.name;
+        var n = b.name;
+        var i = counter[m] || 0;
+        var j = counter[n] || 0;
+        return i < j ? 1 : i > j ? -1 : m < n ? -1 : m > n ? 1 : 0;
+      });
+    };
+  }
+  if (chain) {
+    var sorter = chain.createSorter();
+    options.sortClassName = function(value) {
+      return sorter.sort(value.split(/\s+/)).join(' ');
+    };
+  }
 }
 
 function minify(value, options, partialMarkup) {
@@ -808,14 +786,9 @@ function minify(value, options, partialMarkup) {
     });
   }
 
-  if (options.sortAttributes && typeof options.sortAttributes !== 'function') {
-    options.sortAttributes = false;
-    options.sortAttributes = createSortAttrFn(minify(value, options), options);
-  }
-
-  if (options.sortClassName && typeof options.sortClassName !== 'function') {
-    options.sortClassName = false;
-    options.sortClassName = createSortClassFn(minify(value, options), options);
+  if (options.sortAttributes && typeof options.sortAttributes !== 'function' ||
+      options.sortClassName && typeof options.sortClassName !== 'function') {
+    createSortFns(value, options);
   }
 
   function _canCollapseWhitespace(tag, attrs) {
