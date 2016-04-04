@@ -32390,13 +32390,9 @@ function canTrimWhitespace(tag) {
   return !/^(?:pre|textarea)$/.test(tag);
 }
 
-function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isLast) {
-
+function normalizeAttr(attr, attrs, tag, options) {
   var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
-      attrValue = attr.value,
-      attrQuote = attr.quote,
-      attrFragment,
-      emittedAttrValue;
+      attrValue = attr.value;
 
   if (options.removeRedundantAttributes &&
     isAttributeRedundant(tag, attrName, attrValue, attrs)
@@ -32406,15 +32402,30 @@ function normalizeAttribute(attr, attrs, tag, hasUnarySlash, index, options, isL
     ||
     options.removeStyleLinkTypeAttributes &&
     isStyleLinkTypeAttribute(tag, attrName, attrValue)) {
-    return '';
+    return;
   }
 
   attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
   if (options.removeEmptyAttributes &&
       canDeleteEmptyAttribute(tag, attrName, attrValue)) {
-    return '';
+    return;
   }
+
+  return {
+    attr: attr,
+    name: attrName,
+    value: attrValue
+  };
+}
+
+function buildAttr(normalized, hasUnarySlash, options, isLast) {
+  var attrName = normalized.name,
+      attrValue = normalized.value,
+      attr = normalized.attr,
+      attrQuote = attr.quote,
+      attrFragment,
+      emittedAttrValue;
 
   if (attrValue !== undefined && !options.removeAttributeQuotes ||
       !canRemoveAttributeQuotes(attrValue)) {
@@ -32796,15 +32807,15 @@ function minify(value, options, partialMarkup) {
       }
 
       var parts = [];
-      var token, isLast = true;
-      for (var i = attrs.length; --i >= 0;) {
+      for (var i = attrs.length, isLast = true; --i >= 0;) {
+        var attr = attrs[i];
         if (lint) {
-          lint.testAttribute(tag, attrs[i].name.toLowerCase(), attrs[i].value);
+          lint.testAttribute(tag, attr.name.toLowerCase(), attr.value);
         }
-        token = normalizeAttribute(attrs[i], attrs, tag, hasUnarySlash, i, options, isLast);
-        if (token) {
+        var normalized = normalizeAttr(attr, attrs, tag, options);
+        if (normalized) {
+          parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast));
           isLast = false;
-          parts.unshift(token);
         }
       }
       if (parts.length > 0) {
