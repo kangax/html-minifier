@@ -19,8 +19,7 @@ module.exports = function(grunt) {
           banner: '<%= banner %>',
           require: [
             './src/htmllint.js:html-minifier/src/htmllint',
-            './src/htmlminifier.js:html-minifier',
-            './src/htmlparser.js:html-minifier/src/htmlparser'
+            './src/htmlminifier.js:html-minifier'
           ]
         },
         src: 'src/htmlminifier.js',
