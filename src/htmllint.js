@@ -61,7 +61,7 @@ function isInaccessibleAttribute(attrName, attrValue) {
 }
 
 function Lint() {
-  this.log = [ ];
+  this.log = [];
   this._lastElement = null;
   this._isElementRepeated = false;
 }

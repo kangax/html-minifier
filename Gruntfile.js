@@ -33,16 +33,16 @@ module.exports = function(grunt) {
         src: 'Gruntfile.js'
       },
       src: {
-        src: [ 'cli.js', 'src/**/*.js' ]
+        src: ['cli.js', 'src/**/*.js']
       },
       tests: {
-        src: [ 'tests/*.js', 'test.js' ]
+        src: ['tests/*.js', 'test.js']
       },
       web: {
         src: 'assets/master.js'
       },
       other: {
-        src: [ 'backtest.js', 'benchmark.js' ]
+        src: ['backtest.js', 'benchmark.js']
       }
     },
 
@@ -75,7 +75,7 @@ module.exports = function(grunt) {
   });
 
   require('load-grunt-tasks')(grunt, {
-    pattern: [ 'grunt-*', '!grunt-lib-*' ],
+    pattern: ['grunt-*', '!grunt-lib-*'],
     scope: 'devDependencies'
   });
   require('time-grunt')(grunt);
