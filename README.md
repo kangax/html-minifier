@@ -70,8 +70,13 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `removeScriptTypeAttributes`   | Remove `type="text/javascript"` from `script` tags. Other `type` attribute values are left intact | `false` |
 | `removeStyleLinkTypeAttributes`| Remove `type="text/css"` from `style` and `link` tags. Other `type` attribute values are left intact | `false` |
 | `removeTagWhitespace`          | Remove space between attributes whenever possible. **Note that this will result in invalid HTML!** | `false` |
-| `sortAttributes`               | Sort attributes by frequency | `false` |
+| `sortAttributes`               | [Sort attributes by frequency](#sorting-attributes--style-classes) | `false` |
+| `sortClassName`                | [Sort style classes by frequency](#sorting-attributes--style-classes) | `false` |
 | `useShortDoctype`              | [Replaces the `doctype` with the short (HTML5) doctype](http://perfectionkills.com/experimenting-with-html-minifier/#use_short_doctype) | `false` |
+
+### Sorting attributes / style classes
+
+Minifier options like `sortAttributes` and `sortClassName` won't impact the plain-text size of the output. However, they form long repetitive chains of characters that should improve compression ratio of gzip used in HTTP compression.
 
 ## Special cases
 

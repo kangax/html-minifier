@@ -31085,6 +31085,65 @@ function extend() {
 },{}],147:[function(require,module,exports){
 'use strict';
 
+function Sorter(tokens) {
+  this.tokens = tokens;
+}
+
+Sorter.prototype.sort = function(tokens, fromIndex) {
+  fromIndex = fromIndex || 0;
+  for (var i = 0; i < this.tokens.length; i++) {
+    var token = this.tokens[i];
+    var index = tokens.indexOf(token, fromIndex);
+    if (index !== -1) {
+      do {
+        if (index !== fromIndex) {
+          tokens.splice(index, 1);
+          tokens.splice(fromIndex, 0, token);
+        }
+        fromIndex++;
+      } while ((index = tokens.indexOf(token, fromIndex)) !== -1);
+      return this[token].sort(tokens, fromIndex);
+    }
+  }
+  return tokens;
+};
+
+function TokenChain() {
+}
+
+TokenChain.prototype = {
+  add: function(tokens) {
+    var self = this;
+    tokens.forEach(function(token) {
+      (self[token] || (self[token] = [])).push(tokens);
+    });
+  },
+  createSorter: function() {
+    var self = this;
+    var sorter = new Sorter(Object.keys(this).sort(function(j, k) {
+      var m = self[j].length;
+      var n = self[k].length;
+      return m < n ? 1 : m > n ? -1 : j < k ? -1 : j > k ? 1 : 0;
+    }));
+    sorter.tokens.forEach(function(token) {
+      var chain = new TokenChain();
+      self[token].forEach(function(tokens) {
+        var index;
+        while ((index = tokens.indexOf(token)) !== -1) {
+          tokens.splice(index, 1);
+        }
+        chain.add(tokens.slice(0));
+      });
+      sorter[token] = chain.createSorter();
+    });
+    return sorter;
+  }
+};
+module.exports = TokenChain;
+
+},{}],148:[function(require,module,exports){
+'use strict';
+
 function createMap(values, ignoreCase) {
   var map = {};
   values.forEach(function(value) {
@@ -31813,9 +31872,10 @@ exports.HTMLtoDOM = function(html, doc) {
   return doc;
 };
 
-},{"./utils":147,"ncname":74}],"html-minifier":[function(require,module,exports){
+},{"./utils":148,"ncname":74}],"html-minifier":[function(require,module,exports){
 'use strict';
 
+var TokenChain = require('./tokenchain');
 var CleanCSS = require('clean-css');
 var HTMLParser = require('./htmlparser').HTMLParser;
 var RelateUrl = require('relateurl');
@@ -32097,7 +32157,14 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
     return attrValue;
   }
   else if (attrName === 'class') {
-    return collapseWhitespaceAll(trimWhitespace(attrValue));
+    attrValue = trimWhitespace(attrValue);
+    if (options.sortClassName) {
+      attrValue = options.sortClassName(attrValue);
+    }
+    else {
+      attrValue = collapseWhitespaceAll(attrValue);
+    }
+    return attrValue;
   }
   else if (isUriTypeAttribute(attrName, tag)) {
     attrValue = trimWhitespace(attrValue);
@@ -32478,18 +32545,29 @@ function uniqueId(value) {
   return id;
 }
 
-function createSortAttrFn(value, options) {
-  var counters = Object.create(null);
+function createSortFns(value, options) {
+  var attrChains = options.sortAttributes && Object.create(null);
+  var classChain = options.sortClassName && new TokenChain();
+
+  function attrNames(attrs) {
+    return attrs.map(function(attr) {
+      return options.caseSensitive ? attr.name : attr.name.toLowerCase();
+    });
+  }
 
   function scan(input) {
     var currentTag, currentType;
     new HTMLParser(input, {
       start: function(tag, attrs) {
-        var counter = counters[tag] || (counters[tag] = Object.create(null));
+        if (attrChains) {
+          (attrChains[tag] || (attrChains[tag] = new TokenChain())).add(attrNames(attrs));
+        }
         for (var i = 0; i < attrs.length; i++) {
           var attr = attrs[i];
-          counter[attr.name] = (counter[attr.name] || 0) + 1;
-          if (options.processScripts && attr.name.toLowerCase() === 'type') {
+          if (classChain && (options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
+            classChain.add(trimWhitespace(attr.value).split(/\s+/));
+          }
+          else if (options.processScripts && attr.name.toLowerCase() === 'type') {
             currentTag = tag;
             currentType = attr.value;
           }
@@ -32508,19 +32586,34 @@ function createSortAttrFn(value, options) {
     });
   }
 
-  scan(value);
-  return function(tag, attrs) {
-    if (attrs.length < 2) { return; }
-    var counter = counters[tag];
-    if (!counter) { return; }
-    attrs.sort(function(a, b) {
-      var m = a.name;
-      var n = b.name;
-      var i = counter[m] || 0;
-      var j = counter[n] || 0;
-      return i < j ? 1 : i > j ? -1 : m < n ? -1 : m > n ? 1 : 0;
-    });
-  };
+  options.sortAttributes = false;
+  options.sortClassName = false;
+  scan(minify(value, options));
+  if (attrChains) {
+    var attrSorters = Object.create(null);
+    for (var tag in attrChains) {
+      attrSorters[tag] = attrChains[tag].createSorter();
+    }
+    options.sortAttributes = function(tag, attrs) {
+      var sorter = attrSorters[tag];
+      if (sorter) {
+        var attrMap = Object.create(null);
+        var names = attrNames(attrs);
+        names.forEach(function(name, index) {
+          (attrMap[name] || (attrMap[name] = [])).push(attrs[index]);
+        });
+        sorter.sort(names).forEach(function(name, index) {
+          attrs[index] = attrMap[name].shift();
+        });
+      }
+    };
+  }
+  if (classChain) {
+    var sorter = classChain.createSorter();
+    options.sortClassName = function(value) {
+      return sorter.sort(value.split(/\s+/)).join(' ');
+    };
+  }
 }
 
 function minify(value, options, partialMarkup) {
@@ -32578,9 +32671,9 @@ function minify(value, options, partialMarkup) {
     });
   }
 
-  if (options.sortAttributes && typeof options.sortAttributes !== 'function') {
-    options.sortAttributes = false;
-    options.sortAttributes = createSortAttrFn(minify(value, options), options);
+  if (options.sortAttributes && typeof options.sortAttributes !== 'function' ||
+      options.sortClassName && typeof options.sortClassName !== 'function') {
+    createSortFns(value, options);
   }
 
   function _canCollapseWhitespace(tag, attrs) {
@@ -32978,4 +33071,4 @@ exports.minify = function(value, options) {
   return minify(value, options);
 };
 
-},{"./htmlparser":"html-minifier/src/htmlparser","./utils":147,"clean-css":7,"relateurl":95,"uglify-js":139}]},{},["html-minifier"]);
+},{"./htmlparser":"html-minifier/src/htmlparser","./tokenchain":147,"./utils":148,"clean-css":7,"relateurl":95,"uglify-js":139}]},{},["html-minifier"]);
