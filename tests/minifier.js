@@ -2364,14 +2364,17 @@ test('tests from PHPTAL', function() {
     ['<div><ul><li><a>a </a></li><li>b </li><li>c</li></ul></div>', '<div> <ul> <li> <a> a </a> </li> <li> b </li> <li> c </li> </ul> </div>'],*/
     ['<table>x<tr>x<td>foo</td>x</tr>x</table>', '<table> x <tr> x <td> foo </td> x </tr> x </table>'],
     ['<select>x<option></option>x<optgroup>x<option></option>x</optgroup>x</select>', '<select> x <option> </option> x <optgroup> x <option> </option> x </optgroup> x </select> '],
-    /* minifier does not reorder attributes
-    ['<img src="foo" width="10" height="5" alt="x"/>', '<img width="10" height="5" src="foo" alt="x" />'],
-    ['<img alpha="1" beta="2" gamma="3"/>', '<img gamma="3" alpha="1" beta="2" />'],*/
+    // closing slash and optional attribute quotes removed by minifier, but not by PHPTAL
+    // attribute ordering differences between minifier and PHPTAL
+    ['<img alt=x height=5 src=foo width=10>', '<img width="10" height="5" src="foo" alt="x" />'],
+    ['<img alpha=1 beta=2 gamma=3>', '<img gamma="3" alpha="1" beta="2" />'],
     ['<pre>\n\n\ntest</pre>', '<pre>\n\n\ntest</pre>'],
     /* single line-break preceding <pre> is redundant, assuming <pre> is block element
     ['<pre>test</pre>', '<pre>\ntest</pre>'],*/
-    // optional attribute quotes removed by minifier, but not by PHPTAL
-    ['<meta http-equiv=Content-Type content="text/plain;charset=UTF-8">', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>'],
+    // closing slash and optional attribute quotes removed by minifier, but not by PHPTAL
+    // attribute ordering differences between minifier and PHPTAL
+    // redundant inter-attribute spacing removed by minifier, but not by PHPTAL
+    ['<meta content="text/plain;charset=UTF-8"http-equiv=Content-Type>', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>'],
     /* minifier does not optimise <meta/> in HTML5 mode
     ['<meta charset=utf-8>', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>'],*/
     /* minifier does not optimise <script/> in HTML5 mode
@@ -2404,6 +2407,7 @@ test('tests from PHPTAL', function() {
       removeScriptTypeAttributes: true,
       removeStyleLinkTypeAttributes: true,
       removeTagWhitespace: true,
+      sortAttributes: true,
       useShortDoctype: true
     }), tokens[0]);
   });
