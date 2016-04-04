@@ -14,7 +14,7 @@ var fileNames = Object.keys(urls);
 function git() {
   var args = [].concat.apply([], [].slice.call(arguments, 0, -1));
   var callback = arguments[arguments.length - 1];
-  var task = child_process.spawn('git', args, { stdio: [ 'ignore', 'pipe', 'ignore' ] });
+  var task = child_process.spawn('git', args, { stdio: ['ignore', 'pipe', 'ignore'] });
   var output = '';
   task.stdout.setEncoding('utf8');
   task.stdout.on('data', function(data) {
@@ -94,7 +94,7 @@ function print(table) {
   output.push(row.join(','));
   for (var hash in table) {
     var data = table[hash];
-    row = [ hash, '"' + data.date + '"' ];
+    row = [hash, '"' + data.date + '"'];
     fileNames.forEach(function(fileName) {
       row.push(data[fileName]);
     });
@@ -178,7 +178,7 @@ if (process.argv.length > 2) {
 }
 else {
   process.on('message', function(hash) {
-    var paths = [ 'src', 'benchmark.conf', 'sample-cli-config-file.conf' ];
+    var paths = ['src', 'benchmark.conf', 'sample-cli-config-file.conf'];
     git('reset', 'HEAD', '--', paths, function() {
       var conf = 'sample-cli-config-file.conf';
 

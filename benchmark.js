@@ -27,8 +27,8 @@ var progress = new Progress('[:bar] :etas :fileName', {
 });
 
 var table = new Table({
-  head: [ 'File', 'Before', 'After', 'Minimize', 'Will Peavy', 'htmlcompressor.com', 'Savings', 'Time' ],
-  colWidths: [ 20, 25, 25, 25, 25, 25, 20, 10 ]
+  head: ['File', 'Before', 'After', 'Minimize', 'Will Peavy', 'htmlcompressor.com', 'Savings', 'Time'],
+  colWidths: [20, 25, 25, 25, 25, 25, 20, 10]
 });
 
 function toKb(size) {
@@ -131,7 +131,7 @@ run(fileNames.map(function (fileName) {
       brFilePath: path.join('benchmarks/generated/', fileName + '.html.br')
     };
     var infos = {};
-    [ 'minifier', 'minimize', 'willpeavy', 'compressor' ].forEach(function (name) {
+    ['minifier', 'minimize', 'willpeavy', 'compressor'].forEach(function (name) {
       infos[name] = {
         filePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html'),
         gzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.gz'),
@@ -199,7 +199,7 @@ run(fileNames.map(function (fileName) {
     function testHTMLMinifier(done) {
       var info = infos.minifier;
       info.startTime = Date.now();
-      var args = [ filePath, '-c', 'sample-cli-config-file.conf', '--minify-urls', urls[fileName], '-o', info.filePath ];
+      var args = [filePath, '-c', 'sample-cli-config-file.conf', '--minify-urls', urls[fileName], '-o', info.filePath];
       fork('./cli', args).on('exit', function () {
         readSizes(info, done);
       });
@@ -303,12 +303,12 @@ run(fileNames.map(function (fileName) {
       testHTMLCompressor
     ], function () {
       var row = [
-        [ fileName, '+ gzip', '+ lzma', '+ brotli' ].join('\n'),
-        [ redSize(original.size), redSize(original.gzSize), redSize(original.lzSize), redSize(original.brSize) ].join('\n')
+        [fileName, '+ gzip', '+ lzma', '+ brotli'].join('\n'),
+        [redSize(original.size), redSize(original.gzSize), redSize(original.lzSize), redSize(original.brSize)].join('\n')
       ];
       for (var name in infos) {
         var info = infos[name];
-        row.push([ greenSize(info.size), greenSize(info.gzSize), greenSize(info.lzSize), greenSize(info.brSize) ].join('\n'));
+        row.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.lzSize), greenSize(info.brSize)].join('\n'));
       }
       row.push(
         [

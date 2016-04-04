@@ -39,7 +39,7 @@ function makeMap(values) {
 // Regular Expressions for parsing tags and attributes
 var singleAttrIdentifier = /([^\s"'<>\/=]+)/,
     singleAttrAssign = /=/,
-    singleAttrAssigns = [ singleAttrAssign ],
+    singleAttrAssigns = [singleAttrAssign],
     singleAttrValues = [
       // attr value double quotes
       /"([^"]*)"+/.source,

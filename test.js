@@ -7,7 +7,7 @@ testrunner.options.log.tests = false;
 testrunner.options.log.assertions = false;
 
 testrunner.run({
-  deps: [ './src/htmlparser.js', './src/htmllint.js' ],
+  deps: ['./src/htmlparser.js', './src/htmllint.js'],
   code: './src/htmlminifier.js',
   tests: [
     './tests/lint.js',

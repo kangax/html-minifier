@@ -851,7 +851,7 @@ test('preserving custom attribute-wrapping markup', function() {
 
   // With a single rule
   customAttrOptions = {
-    customAttrSurround: [ [ /\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/ ] ]
+    customAttrSurround: [[/\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/]]
   };
 
   input = '<input {{#if value}}checked="checked"{{/if}}>';
@@ -863,8 +863,8 @@ test('preserving custom attribute-wrapping markup', function() {
   // With multiple rules
   customAttrOptions = {
     customAttrSurround: [
-      [ /\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/ ],
-      [ /\{\{#unless\s+\w+\}\}/, /\{\{\/unless\}\}/ ]
+      [/\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/],
+      [/\{\{#unless\s+\w+\}\}/, /\{\{\/unless\}\}/]
     ]
   };
 
@@ -883,8 +883,8 @@ test('preserving custom attribute-wrapping markup', function() {
   // With multiple rules and richer options
   customAttrOptions = {
     customAttrSurround: [
-      [ /\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/ ],
-      [ /\{\{#unless\s+\w+\}\}/, /\{\{\/unless\}\}/ ]
+      [/\{\{#if\s+\w+\}\}/, /\{\{\/if\}\}/],
+      [/\{\{#unless\s+\w+\}\}/, /\{\{\/unless\}\}/]
     ],
     collapseBooleanAttributes: true,
     removeAttributeQuotes: true
@@ -903,7 +903,7 @@ test('preserving custom attribute-wrapping markup', function() {
 test('preserving custom attribute-joining markup', function() {
   var polymerConditionalAttributeJoin = /\?=/;
   var customAttrOptions = {
-    customAttrAssign: [ polymerConditionalAttributeJoin ]
+    customAttrAssign: [polymerConditionalAttributeJoin]
   };
 
   input = '<div flex?="{{mode != cover}}"></div>';
@@ -1373,7 +1373,7 @@ test('phrasing content with Web Components', function() {
 
 // https://github.com/kangax/html-minifier/issues/10
 test('Ignore custom fragments', function() {
-  var reFragments = [ /<\?[^\?]+\?>/, /<%[^%]+%>/, /\{\{[^\}]*\}\}/ ];
+  var reFragments = [/<\?[^\?]+\?>/, /<%[^%]+%>/, /\{\{[^\}]*\}\}/];
 
   input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n{{ ... }}\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
   output = 'This is the start. <% ... %> <%= ... %> <? ... ?> No comment, but middle. {{ ... }} <?php ... ?> <?xml ... ?> Hello, this is the end!';
@@ -1429,7 +1429,7 @@ test('Ignore custom fragments', function() {
   input = '<img src="{% static "images/logo.png" %}">';
   output = '<img src="{% static "images/logo.png" %}">';
 
-  equal(minify(input, { ignoreCustomFragments: [ /\{\%[^\%]*?\%\}/g ] }), output);
+  equal(minify(input, { ignoreCustomFragments: [/\{\%[^\%]*?\%\}/g] }), output);
 
   input = '<p{% if form.name.errors %}class=\'error\'{% endif %}>' +
             '{{ form.name.label_tag }}' +
@@ -1716,15 +1716,15 @@ test('event minification', function() {
   output = '<button type="button" onclick="return!1" ng-click="a(1 + 2)" data-click="a(1 + 2)"></button>';
 
   equal(minify(input, { minifyJS: true }), output);
-  equal(minify(input, { minifyJS: true, customEventAttributes: [ ] }), input);
+  equal(minify(input, { minifyJS: true, customEventAttributes: [] }), input);
 
   output = '<button type="button" onclick=";return false;" ng-click="a(3)" data-click="a(1 + 2)"></button>';
 
-  equal(minify(input, { minifyJS: true, customEventAttributes: [ /^ng-/ ] }), output);
+  equal(minify(input, { minifyJS: true, customEventAttributes: [/^ng-/] }), output);
 
   output = '<button type="button" onclick="return!1" ng-click="a(3)" data-click="a(1 + 2)"></button>';
 
-  equal(minify(input, { minifyJS: true, customEventAttributes: [ /^on/, /^ng-/ ] }), output);
+  equal(minify(input, { minifyJS: true, customEventAttributes: [/^on/, /^ng-/] }), output);
 });
 
 test('escaping closing script tag', function() {
@@ -1929,7 +1929,7 @@ test('processScripts', function() {
   equal(minify(input, {
     collapseWhitespace: true,
     removeComments: true,
-    processScripts: [ 'text/ng-template' ]
+    processScripts: ['text/ng-template']
   }), output);
 });
 
@@ -1967,7 +1967,7 @@ test('ignore', function() {
   input = '<!-- htmlmin:ignore --><body <?php body_class(); ?>><!-- htmlmin:ignore -->';
   output = '<body <?php body_class(); ?>>';
 
-  equal(minify(input, { ignoreCustomFragments: [ /<\?php[\s\S]*?\?>/ ] }), output);
+  equal(minify(input, { ignoreCustomFragments: [/<\?php[\s\S]*?\?>/] }), output);
 
   input = 'a\n<!-- htmlmin:ignore -->b<!-- htmlmin:ignore -->';
   output = 'a b';
@@ -2291,33 +2291,33 @@ test('sort attributes', function() {
 test('tests from PHPTAL', function() {
   [
     // trailing </p> removed by minifier, but not by PHPTAL
-    [ '<p>foo bar baz', '<p>foo     \t bar\n\n\n baz</p>' ],
-    [ '<p>foo bar<pre>  \tfoo\t   \nbar   </pre>', '<p>foo   \t\n bar</p><pre>  \tfoo\t   \nbar   </pre>' ],
-    [ '<p>foo <a href="">bar </a>baz', '<p>foo <a href=""> bar </a> baz  </p>' ],
-    [ '<p>foo <a href="">bar </a>baz', ' <p>foo <a href=""> bar </a>baz </p>' ],
-    [ '<p>foo<a href=""> bar </a>baz', ' <p> foo<a href=""> bar </a>baz </p>  ' ],
-    [ '<p>foo <a href="">bar</a> baz', ' <p> foo <a href="">bar</a> baz</p>' ],
-    [ '<p>foo<br>', '<p>foo <br/></p>' ],
+    ['<p>foo bar baz', '<p>foo     \t bar\n\n\n baz</p>'],
+    ['<p>foo bar<pre>  \tfoo\t   \nbar   </pre>', '<p>foo   \t\n bar</p><pre>  \tfoo\t   \nbar   </pre>'],
+    ['<p>foo <a href="">bar </a>baz', '<p>foo <a href=""> bar </a> baz  </p>'],
+    ['<p>foo <a href="">bar </a>baz', ' <p>foo <a href=""> bar </a>baz </p>'],
+    ['<p>foo<a href=""> bar </a>baz', ' <p> foo<a href=""> bar </a>baz </p>  '],
+    ['<p>foo <a href="">bar</a> baz', ' <p> foo <a href="">bar</a> baz</p>'],
+    ['<p>foo<br>', '<p>foo <br/></p>'],
     // PHPTAL remove whitespace after 'foo' - problematic if <span> is used as icon font
-    [ '<p>foo <span></span>', '<p>foo <span></span></p>' ],
-    [ '<p>foo <span></span>', '<p>foo <span></span> </p>' ],
+    ['<p>foo <span></span>', '<p>foo <span></span></p>'],
+    ['<p>foo <span></span>', '<p>foo <span></span> </p>'],
     // comments removed by minifier, but not by PHPTAL
-    [ '<p>foo', '<p>foo <!-- --> </p>' ],
-    [ '<div>a<div>b</div>c<div>d</div>e</div>', '<div>a <div>b</div> c <div> d </div> e </div>' ],
+    ['<p>foo', '<p>foo <!-- --> </p>'],
+    ['<div>a<div>b</div>c<div>d</div>e</div>', '<div>a <div>b</div> c <div> d </div> e </div>'],
     // unary slashes removed by minifier, but not by PHPTAL
-    [ '<div><img></div>', '<div> <img/> </div>' ],
-    [ '<div>x <img></div>', '<div> x <img/> </div>' ],
-    [ '<div>x <img> y</div>', '<div> x <img/> y </div>' ],
-    [ '<div><img> y</div>', '<div><img/> y </div>' ],
-    [ '<div><button>Z</button></div>', '<div> <button>Z</button> </div>' ],
-    [ '<div>x <button>Z</button></div>', '<div> x <button>Z</button> </div>' ],
-    [ '<div>x <button>Z</button> y</div>', '<div> x <button>Z</button> y </div>' ],
-    [ '<div><button>Z</button> y</div>', '<div><button>Z</button> y </div>' ],
-    [ '<div><button>Z</button></div>', '<div> <button> Z </button> </div>' ],
-    [ '<div>x <button>Z</button></div>', '<div> x <button> Z </button> </div>' ],
-    [ '<div>x <button>Z</button> y</div>', '<div> x <button> Z </button> y </div>' ],
-    [ '<div><button>Z</button> y</div>', '<div><button> Z </button> y </div>' ],
-    [ '<script>//foo\nbar()</script>', '<script>//foo\nbar()</script>' ],
+    ['<div><img></div>', '<div> <img/> </div>'],
+    ['<div>x <img></div>', '<div> x <img/> </div>'],
+    ['<div>x <img> y</div>', '<div> x <img/> y </div>'],
+    ['<div><img> y</div>', '<div><img/> y </div>'],
+    ['<div><button>Z</button></div>', '<div> <button>Z</button> </div>'],
+    ['<div>x <button>Z</button></div>', '<div> x <button>Z</button> </div>'],
+    ['<div>x <button>Z</button> y</div>', '<div> x <button>Z</button> y </div>'],
+    ['<div><button>Z</button> y</div>', '<div><button>Z</button> y </div>'],
+    ['<div><button>Z</button></div>', '<div> <button> Z </button> </div>'],
+    ['<div>x <button>Z</button></div>', '<div> x <button> Z </button> </div>'],
+    ['<div>x <button>Z</button> y</div>', '<div> x <button> Z </button> y </div>'],
+    ['<div><button>Z</button> y</div>', '<div><button> Z </button> y </div>'],
+    ['<script>//foo\nbar()</script>', '<script>//foo\nbar()</script>'],
     // optional tags removed by minifier, but not by PHPTAL
     // parser cannot handle <script/>
     [
@@ -2328,34 +2328,29 @@ test('tests from PHPTAL', function() {
       '  > </style >\n' +
       '   </head > </html>'
     ],
-    [ '<div><p>test 123<p>456<ul><li>x</ul></div>', '<div> <p> test 123 </p> <p> 456 </p> <ul> <li>x</li> </ul> </div>' ],
-    [ '<div><p>test 123<pre> 456 </pre><p>x</div>', '<div> <p> test 123 </p> <pre> 456 </pre> <p> x </p> </div>' ],
+    ['<div><p>test 123<p>456<ul><li>x</ul></div>', '<div> <p> test 123 </p> <p> 456 </p> <ul> <li>x</li> </ul> </div>'],
+    ['<div><p>test 123<pre> 456 </pre><p>x</div>', '<div> <p> test 123 </p> <pre> 456 </pre> <p> x </p> </div>'],
     /* minifier does not assume <li> as "display: inline"
-    ['<div><ul><li><a>a </a></li><li>b </li><li>c</li></ul></div>', '<div> <ul> <li> <a> a </a> </li> <li> b </li> <li> c </li> </ul> </div>'],
-      */
-    [ '<table>x<tr>x<td>foo</td>x</tr>x</table>', '<table> x <tr> x <td> foo </td> x </tr> x </table>' ],
-    [ '<select>x<option></option>x<optgroup>x<option></option>x</optgroup>x</select>', '<select> x <option> </option> x <optgroup> x <option> </option> x </optgroup> x </select> ' ],
+    ['<div><ul><li><a>a </a></li><li>b </li><li>c</li></ul></div>', '<div> <ul> <li> <a> a </a> </li> <li> b </li> <li> c </li> </ul> </div>'],*/
+    ['<table>x<tr>x<td>foo</td>x</tr>x</table>', '<table> x <tr> x <td> foo </td> x </tr> x </table>'],
+    ['<select>x<option></option>x<optgroup>x<option></option>x</optgroup>x</select>', '<select> x <option> </option> x <optgroup> x <option> </option> x </optgroup> x </select> '],
     /* minifier does not reorder attributes
     ['<img src="foo" width="10" height="5" alt="x"/>', '<img width="10" height="5" src="foo" alt="x" />'],
-    ['<img alpha="1" beta="2" gamma="3"/>', '<img gamma="3" alpha="1" beta="2" />'],
-      */
-    [ '<pre>\n\n\ntest</pre>', '<pre>\n\n\ntest</pre>' ],
+    ['<img alpha="1" beta="2" gamma="3"/>', '<img gamma="3" alpha="1" beta="2" />'],*/
+    ['<pre>\n\n\ntest</pre>', '<pre>\n\n\ntest</pre>'],
     /* single line-break preceding <pre> is redundant, assuming <pre> is block element
-    ['<pre>test</pre>', '<pre>\ntest</pre>'],
-      */
+    ['<pre>test</pre>', '<pre>\ntest</pre>'],*/
     // optional attribute quotes removed by minifier, but not by PHPTAL
-    [ '<meta http-equiv=Content-Type content="text/plain;charset=UTF-8">', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>' ],
+    ['<meta http-equiv=Content-Type content="text/plain;charset=UTF-8">', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>'],
     /* minifier does not optimise <meta/> in HTML5 mode
-    ['<meta charset=utf-8>', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>'],
-      */
+    ['<meta charset=utf-8>', '<meta http-equiv=\'Content-Type\' content=\'text/plain;charset=UTF-8\'/>'],*/
     /* minifier does not optimise <script/> in HTML5 mode
     [
       '<script></script><style></style>',
       '<script type=\'text/javascript ;charset=utf-8\'\n' +
       'language=\'javascript\'></script><style type=\'text/css\'></style>'
-    ],
-      */
-    [ '<script type="text/javascript;e4x=1"></script><script type=text/hack></script>', '<script type="text/javascript;e4x=1"></script><script type="text/hack"></script>' ]
+    ],*/
+    ['<script type="text/javascript;e4x=1"></script><script type=text/hack></script>', '<script type="text/javascript;e4x=1"></script><script type="text/hack"></script>']
     /* trim "title" attribute value in <a>
     [
       '<title>Foo</title><p><a title=\"x\"href=test>x </a>xu</p><br>foo',
@@ -2366,8 +2361,7 @@ test('tests from PHPTAL', function() {
       '</p>\n' +
       '<br/>\n' +
       'foo</body> </html>  <!-- bla -->'
-    ]
-      */
+    ]*/
   ].forEach(function(tokens) {
     equal(minify(tokens[1], {
       collapseBooleanAttributes: true,
