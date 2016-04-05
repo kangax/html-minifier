@@ -2119,10 +2119,15 @@ test('custom attribute collapse with newlines, whitespace, and carriage returns'
 
 test('do not escape attribute value', function() {
   input = '<div data=\'{\n' +
-  '\t"element": "<div class=\"test\"></div>\n"' +
-  '}\'></div>';
-
+          '\t"element": "<div class=\\"test\\"></div>\n"' +
+          '}\'></div>';
+  equal(minify(input), input);
   equal(minify(input, { preventAttributesEscaping: true }), input);
+
+  input = '<div foo bar=\'\' baz="" moo=1 loo=\'2\' haa="3"></div>';
+  equal(minify(input, { preventAttributesEscaping: true }), input);
+  output = '<div foo bar="" baz="" moo="1" loo="2" haa="3"></div>';
+  equal(minify(input), output);
 });
 
 test('quoteCharacter is single quote', function() {

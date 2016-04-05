@@ -31369,7 +31369,7 @@ function HTMLParser(html, handler) {
     var unary = empty(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash;
 
     var attrs = match.attrs.map(function(args) {
-      var name, value, fallbackValue, customOpen, customClose, customAssign, quote;
+      var name, value, customOpen, customClose, customAssign, quote;
       var ncp = 7; // number of captured parts, scalar
 
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
@@ -31379,15 +31379,29 @@ function HTMLParser(html, handler) {
         if (args[5] === '') { args[5] = undefined; }
       }
 
+      function populate(index) {
+        customAssign = args[index];
+        value = args[index + 1];
+        if (typeof value !== 'undefined') {
+          return '"';
+        }
+        value = args[index + 2];
+        if (typeof value !== 'undefined') {
+          return '\'';
+        }
+        value = args[index + 3];
+        if (typeof value === 'undefined' && fillAttrs(name)) {
+          value = name;
+        }
+        return '';
+      }
+
       var j = 1;
       if (handler.customAttrSurround) {
         for (var i = 0, l = handler.customAttrSurround.length; i < l; i++, j += ncp) {
           name = args[j + 1];
-          customAssign = args[j + 2];
           if (name) {
-            fallbackValue = args[j + 3];
-            value = fallbackValue || args[j + 4] || args[j + 5];
-            quote = fallbackValue ? '"' : value ? '\'' : '';
+            quote = populate(j + 2);
             customOpen = args[j];
             customClose = args[j + 6];
             break;
@@ -31396,14 +31410,7 @@ function HTMLParser(html, handler) {
       }
 
       if (!name && (name = args[j])) {
-        customAssign = args[j + 1];
-        fallbackValue = args[j + 2];
-        value = fallbackValue || args[j + 3] || args[j + 4];
-        quote = fallbackValue ? '"' : value ? '\'' : '';
-      }
-
-      if (value === undefined) {
-        value = fillAttrs(name) ? name : fallbackValue;
+        quote = populate(j + 1);
       }
 
       return {
