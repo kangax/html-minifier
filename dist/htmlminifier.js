@@ -31641,7 +31641,7 @@ Sorter.prototype.sort = function(tokens, fromIndex) {
       return this[token].sort(tokens, fromIndex);
     }
   }
-  return tokens;
+  return fromIndex < tokens.length ? this.sort(tokens, fromIndex + 1) : tokens;
 };
 
 function TokenChain() {
@@ -32563,7 +32563,7 @@ function uniqueId(value) {
   return id;
 }
 
-function createSortFns(value, options) {
+function createSortFns(value, options, uidIgnore, uidAttr) {
   var attrChains = options.sortAttributes && Object.create(null);
   var classChain = options.sortClassName && new TokenChain();
 
@@ -32573,17 +32573,28 @@ function createSortFns(value, options) {
     });
   }
 
+  function shouldSkipUID(token, uid) {
+    return !uid || token.indexOf(uid) === -1;
+  }
+
+  function shouldSkipUIDs(token) {
+    return shouldSkipUID(token, uidIgnore) && shouldSkipUID(token, uidAttr);
+  }
+
   function scan(input) {
     var currentTag, currentType;
     new HTMLParser(input, {
       start: function(tag, attrs) {
         if (attrChains) {
-          (attrChains[tag] || (attrChains[tag] = new TokenChain())).add(attrNames(attrs));
+          if (!attrChains[tag]) {
+            attrChains[tag] = new TokenChain();
+          }
+          attrChains[tag].add(attrNames(attrs).filter(shouldSkipUIDs));
         }
         for (var i = 0; i < attrs.length; i++) {
           var attr = attrs[i];
           if (classChain && (options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
-            classChain.add(trimWhitespace(attr.value).split(/\s+/));
+            classChain.add(trimWhitespace(attr.value).split(/\s+/).filter(shouldSkipUIDs));
           }
           else if (options.processScripts && attr.name.toLowerCase() === 'type') {
             currentTag = tag;
@@ -32691,7 +32702,7 @@ function minify(value, options, partialMarkup) {
 
   if (options.sortAttributes && typeof options.sortAttributes !== 'function' ||
       options.sortClassName && typeof options.sortClassName !== 'function') {
-    createSortFns(value, options);
+    createSortFns(value, options, uidIgnore, uidAttr);
   }
 
   function _canCollapseWhitespace(tag, attrs) {

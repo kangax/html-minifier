@@ -2305,6 +2305,20 @@ test('sort attributes', function() {
            '<a foo baz moo></a>' +
            '<a baz moo></a>';
   equal(minify(input, { sortAttributes: true }), output);
+
+  input = '<span nav_sv_fo_v_column <#=(j === 0) ? \'nav_sv_fo_v_first\' : \'\' #> foo_bar></span>';
+  equal(minify(input, {
+    ignoreCustomFragments: [/<#[\s\S]*?#>/]
+  }), input);
+  equal(minify(input, {
+    ignoreCustomFragments: [/<#[\s\S]*?#>/],
+    sortAttributes: false
+  }), input);
+  output = '<span foo_bar nav_sv_fo_v_column <#=(j === 0) ? \'nav_sv_fo_v_first\' : \'\' #> ></span>';
+  equal(minify(input, {
+    ignoreCustomFragments: [/<#[\s\S]*?#>/],
+    sortAttributes: true
+  }), output);
 });
 
 test('sort style classes', function() {
@@ -2321,6 +2335,27 @@ test('sort style classes', function() {
            '<s class="foo baz moo"></s>' +
            '<u class="baz moo"></u>';
   equal(minify(input, { sortClassName: true }), output);
+
+  input = '<a class="moo <!-- htmlmin:ignore -->bar<!-- htmlmin:ignore --> foo baz"></a>';
+  output = '<a class="moo bar foo baz"></a>';
+  equal(minify(input), output);
+  equal(minify(input, { sortClassName: false }), output);
+  output = '<a class="baz foo moo bar"></a>';
+  equal(minify(input, { sortClassName: true }), output);
+
+  input = '<div class="nav_sv_fo_v_column <#=(j === 0) ? \'nav_sv_fo_v_first\' : \'\' #> foo_bar"></div>';
+  equal(minify(input, {
+    ignoreCustomFragments: [/<#[\s\S]*?#>/]
+  }), input);
+  equal(minify(input, {
+    ignoreCustomFragments: [/<#[\s\S]*?#>/],
+    sortClassName: false
+  }), input);
+  output = '<div class="foo_bar nav_sv_fo_v_column <#=(j === 0) ? \'nav_sv_fo_v_first\' : \'\' #> "></div>';
+  equal(minify(input, {
+    ignoreCustomFragments: [/<#[\s\S]*?#>/],
+    sortClassName: true
+  }), output);
 });
 
 test('tests from PHPTAL', function() {
