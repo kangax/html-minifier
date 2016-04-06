@@ -73,10 +73,10 @@ module.exports = function(grunt) {
 
   });
 
-  require('load-grunt-tasks')(grunt, {
-    pattern: ['grunt-*', '!grunt-lib-*'],
-    scope: 'devDependencies'
-  });
+  grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-eslint');
+  grunt.loadNpmTasks('grunt-exec');
   require('time-grunt')(grunt);
   var phantomjs = require('grunt-lib-phantomjs').init(grunt);
   var webErrors;
