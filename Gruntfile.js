@@ -5,7 +5,6 @@ module.exports = function(grunt) {
   grunt.util.linefeed = '\n';
 
   grunt.initConfig({
-
     pkg: grunt.file.readJSON('package.json'),
     banner: '/*!\n' +
             ' * HTMLMinifier v<%= pkg.version %> (<%= pkg.homepage %>)\n' +
@@ -45,12 +44,6 @@ module.exports = function(grunt) {
       }
     },
 
-    exec: {
-      test: {
-        command: 'node ./test.js'
-      }
-    },
-
     uglify: {
       options: {
         banner: '<%= banner %>',
@@ -70,14 +63,13 @@ module.exports = function(grunt) {
       htmllint: 'tests/lint-tests.html',
       htmlminifier: 'tests/index.html'
     }
-
   });
 
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-eslint');
-  grunt.loadNpmTasks('grunt-exec');
   require('time-grunt')(grunt);
+
   var phantomjs = require('grunt-lib-phantomjs').init(grunt);
   var webErrors;
   phantomjs.on('fail.load', function() {
@@ -94,7 +86,6 @@ module.exports = function(grunt) {
     webErrors += details.failed;
     grunt.log[webErrors ? 'error' : 'ok'](details.passed + ' of ' + details.total + ' passed, ' + details.failed + ' failed');
   });
-
   grunt.registerMultiTask('web', function() {
     var done = this.async();
     webErrors = 0;
@@ -108,6 +99,14 @@ module.exports = function(grunt) {
     });
   });
 
+  var fork = require('child_process').fork;
+  grunt.registerTask('exec-test', function() {
+    var done = this.async();
+    fork('./test').on('exit', function(code) {
+      done(!code);
+    });
+  });
+
   grunt.registerTask('dist', [
     'browserify',
     'uglify'
@@ -116,10 +115,9 @@ module.exports = function(grunt) {
   grunt.registerTask('test', [
     'dist',
     'eslint',
-    'exec:test',
+    'exec-test',
     'web'
   ]);
 
   grunt.registerTask('default', 'test');
-
 };
