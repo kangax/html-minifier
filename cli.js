@@ -108,6 +108,7 @@ var mainOptions = {
   customAttrCollapse: ['Regex that specifies custom attribute to strip newlines from (e.g. /ng\-class/)', parseRegExp],
   customAttrSurround: ['Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', parseJSONRegExpArray],
   customEventAttributes: ['Arrays of regex\'es that allow to support custom event attributes for minifyJS (e.g. ng-click)', parseJSONRegExpArray],
+  decodeEntities: 'Use direct Unicode characters whenever possible',
   html5: 'Parse input according to HTML5 specifications',
   ignoreCustomComments: ['Array of regex\'es that allow to ignore certain comments, when matched', parseJSONRegExpArray],
   ignoreCustomFragments: ['Array of regex\'es that allow to ignore certain fragments, when matched (e.g. <?php ... ?>, {{ ... }})', parseJSONRegExpArray],
