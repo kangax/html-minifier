@@ -12,30 +12,43 @@
     return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  function forEachOption(fn) {
+    [].forEach.call(byId('options').getElementsByTagName('input'), fn);
+  }
+
   function getOptions() {
-    return {
-      removeComments:                 byId('remove-comments').checked,
-      collapseWhitespace:             byId('collapse-whitespace').checked,
-      conservativeCollapse:           byId('conservative-collapse').checked,
-      collapseBooleanAttributes:      byId('collapse-boolean-attributes').checked,
-      removeTagWhitespace:            byId('remove-tag-whitespace').checked,
-      removeAttributeQuotes:          byId('remove-attribute-quotes').checked,
-      removeRedundantAttributes:      byId('remove-redundant-attributes').checked,
-      useShortDoctype:                byId('use-short-doctype').checked,
-      removeEmptyAttributes:          byId('remove-empty-attributes').checked,
-      removeEmptyElements:            byId('remove-empty-elements').checked,
-      removeOptionalTags:             byId('remove-optional-tags').checked,
-      removeScriptTypeAttributes:     byId('remove-script-type-attributes').checked,
-      removeStyleLinkTypeAttributes:  byId('remove-style-link-type-attributes').checked,
-      caseSensitive:                  byId('case-sensitive').checked,
-      keepClosingSlash:               byId('keep-closing-slash').checked,
-      minifyJS:                       byId('minify-js').checked,
-      processScripts:                 byId('minify-js-templates').checked ? byId('minify-js-templates-type').value : false,
-      minifyCSS:                      byId('minify-css').checked,
-      minifyURLs:                     byId('minify-urls').checked ? { site: byId('minify-urls-siteurl').value } : false,
-      lint:                           byId('use-htmllint').checked ? new HTMLLint() : null,
-      maxLineLength:                  parseInt(byId('max-line-length').value, 10)
-    };
+    var options = {};
+    forEachOption(function(element) {
+      var key = element.id;
+      var value;
+      if (element.type === 'checkbox') {
+        value = element.checked;
+      }
+      else {
+        value = element.value.replace(/^\s+|\s+$/, '');
+        if (!value) {
+          return;
+        }
+      }
+      switch (key) {
+        case 'lint':
+          if (!value) {
+            return;
+          }
+          value = new HTMLLint();
+          break;
+        case 'maxLineLength':
+          value = parseInt(value);
+          break;
+        case 'minifyURLs':
+          value = { site: value };
+          break;
+        case 'processScripts':
+          value = value.split(/\s*,\s*/);
+      }
+      options[key] = value;
+    });
+    return options;
   }
 
   function commify(str) {
@@ -45,7 +58,7 @@
       .split('').reverse().join('');
   }
 
-  function minifyTextarea() {
+  byId('minify-btn').onclick = function() {
     try {
       var options = getOptions(),
           lint = options.lint,
@@ -71,38 +84,37 @@
       byId('output').value = '';
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
     }
-  }
-
-  byId('max-line-length').oninput = function() { minifyTextarea(); };
-  byId('minify-btn').onclick = function() { minifyTextarea(); };
-
-  function setCheckedAttrOnCheckboxes(attrValue) {
-    var checkboxes = byId('options').getElementsByTagName('input');
-    for (var i = checkboxes.length; i--;) {
-      checkboxes[i].checked = attrValue;
-    }
-  }
+  };
 
   byId('select-all').onclick = function() {
-    setCheckedAttrOnCheckboxes(true);
+    forEachOption(function(element) {
+      if (element.type === 'checkbox') {
+        element.checked = true;
+      }
+    });
     return false;
   };
 
   byId('select-none').onclick = function() {
-    setCheckedAttrOnCheckboxes(false);
+    forEachOption(function(element) {
+      if (element.type === 'checkbox') {
+        element.checked = false;
+      }
+      else {
+        element.value = '';
+      }
+    });
     return false;
   };
 
-  byId('select-safe').onclick = function() {
-    setCheckedAttrOnCheckboxes(true);
-    var inputEls = byId('options').getElementsByTagName('input');
-    inputEls[10].checked = false;
-    inputEls[11].checked = false;
-    inputEls[13].checked = false;
-    inputEls[18].checked = false;
+  var defaultOptions = getOptions();
+  byId('select-defaults').onclick = function() {
+    for (var key in defaultOptions) {
+      var element = byId(key);
+      element[element.type === 'checkbox' ? 'checked' : 'value'] = defaultOptions[key];
+    }
     return false;
   };
-
 })();
 /* eslint-disable */
 var _gaq = _gaq || [];
@@ -116,3 +128,14 @@ _gaq.push(['_trackPageview']);
   ga.src = (document.location.protocol === 'https:' ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
   document.getElementsByTagName('head')[0].appendChild(ga);
 })();
+
+(function(i){
+  var s = document.getElementById(i);
+  var f = document.createElement('iframe');
+  f.src = (document.location.protocol === 'https:' ? 'https' : 'http') + '://api.flattr.com/button/view/?uid=kangax&button=compact&url=' + encodeURIComponent(document.URL);
+  f.title = 'Flattr';
+  f.height = 20;
+  f.width = 110;
+  f.style.borderWidth = 0;
+  s.parentNode.insertBefore(f, s);
+})('wrapper');

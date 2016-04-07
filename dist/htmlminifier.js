@@ -32196,19 +32196,16 @@ Lint.prototype.populate = function(writeToElement) {
     this._reportRepeatingElement();
   }
 
-  if (this.log.length) {
-    if (writeToElement) {
-      writeToElement.innerHTML = '<ol><li>' + this.log.join('<li>') + '</ol>';
-    }
-    else {
-      var output = ' - ' +
-        this.log.join('\n - ')
-        .replace(/(<([^>]+)>)/ig, '')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>');
-
-      console.log(output);
-    }
+  var output;
+  if (writeToElement) {
+    output = this.log.map(function(line) {
+      return '<li>' + line + '</li>';
+    }).join('');
+    writeToElement.innerHTML = '<ol>' + output + '</ol>';
+  }
+  else if (this.log.length) {
+    output = this.log.join('\n - ').replace(/<[^>]+>/g, '');
+    console.log(' - ' + output.replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
   }
 };
 

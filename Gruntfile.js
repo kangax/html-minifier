@@ -107,7 +107,16 @@ module.exports = function(grunt) {
     });
   });
 
+  grunt.registerTask('update-html', function() {
+    var pattern = /(<h1>.*?<span>).*?(<\/span><\/h1>)/;
+    var path = './index.html';
+    var html = grunt.file.read(path);
+    html = html.replace(pattern, '$1(v' + grunt.config('pkg.version') + ')$2');
+    grunt.file.write(path, html);
+  });
+
   grunt.registerTask('dist', [
+    'update-html',
     'browserify',
     'uglify'
   ]);
