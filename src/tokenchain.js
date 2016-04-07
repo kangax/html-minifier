@@ -20,7 +20,7 @@ Sorter.prototype.sort = function(tokens, fromIndex) {
       return this[token].sort(tokens, fromIndex);
     }
   }
-  return fromIndex < tokens.length ? this.sort(tokens, fromIndex + 1) : tokens;
+  return tokens;
 };
 
 function TokenChain() {
