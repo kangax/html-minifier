@@ -32062,12 +32062,9 @@ var executableScriptsMimetypes = utils.createMap([
   'application/ecmascript'
 ]);
 
-function isScriptTypeAttribute(tag, attrName, attrValue) {
-  return (
-    tag === 'script' &&
-    attrName === 'type' &&
-    executableScriptsMimetypes(trimWhitespace(attrValue.toLowerCase()))
-  );
+function isScriptTypeAttribute(attrValue) {
+  attrValue = trimWhitespace(attrValue.split(/;/, 2)[0]).toLowerCase();
+  return attrValue === '' || executableScriptsMimetypes(attrValue);
 }
 
 function isExecutableScript(tag, attrs) {
@@ -32077,11 +32074,15 @@ function isExecutableScript(tag, attrs) {
   for (var i = 0, len = attrs.length; i < len; i++) {
     var attrName = attrs[i].name.toLowerCase();
     if (attrName === 'type') {
-      var attrValue = trimWhitespace(attrs[i].value.split(/;/, 2)[0]).toLowerCase();
-      return attrValue === '' || executableScriptsMimetypes(attrValue);
+      return isScriptTypeAttribute(attrs[i].value);
     }
   }
   return true;
+}
+
+function isStyleLinkTypeAttribute(attrValue) {
+  attrValue = trimWhitespace(attrValue).toLowerCase();
+  return attrValue === '' || attrValue === 'text/css';
 }
 
 function isStyleSheet(tag, attrs) {
@@ -32091,19 +32092,10 @@ function isStyleSheet(tag, attrs) {
   for (var i = 0, len = attrs.length; i < len; i++) {
     var attrName = attrs[i].name.toLowerCase();
     if (attrName === 'type') {
-      var attrValue = trimWhitespace(attrs[i].value).toLowerCase();
-      return attrValue === '' || attrValue === 'text/css';
+      return isStyleLinkTypeAttribute(attrs[i].value);
     }
   }
   return true;
-}
-
-function isStyleLinkTypeAttribute(tag, attrName, attrValue) {
-  return (
-    (tag === 'style' || tag === 'link') &&
-    attrName === 'type' &&
-    trimWhitespace(attrValue.toLowerCase()) === 'text/css'
-  );
 }
 
 var isSimpleBoolean = createMapFromString('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,default,defaultchecked,defaultmuted,defaultselected,defer,disabled,enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,required,reversed,scoped,seamless,selected,sortable,truespeed,typemustmatch,visible');
@@ -32404,11 +32396,11 @@ function normalizeAttr(attr, attrs, tag, options) {
   if (options.removeRedundantAttributes &&
     isAttributeRedundant(tag, attrName, attrValue, attrs)
     ||
-    options.removeScriptTypeAttributes &&
-    isScriptTypeAttribute(tag, attrName, attrValue)
+    options.removeScriptTypeAttributes && tag === 'script' &&
+    attrName === 'type' && isScriptTypeAttribute(attrValue)
     ||
-    options.removeStyleLinkTypeAttributes &&
-    isStyleLinkTypeAttribute(tag, attrName, attrValue)) {
+    options.removeStyleLinkTypeAttributes && (tag === 'style' || tag === 'link') &&
+    attrName === 'type' && isStyleLinkTypeAttribute(attrValue)) {
     return;
   }
 

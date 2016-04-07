@@ -773,53 +773,53 @@ test('removing redundant attributes (&lt;... = "javascript: ..." ...>)', functio
   equal(minify(input), input);
 });
 
-test('removing type="text/javascript" attributes', function() {
-  input = '<script type="text/javascript">alert(1)<\/script>';
-  output = '<script>alert(1)<\/script>';
-
-  equal(minify(input, { removeScriptTypeAttributes: true }), output);
+test('removing javascript type attributes', function() {
+  input = '<script type="">alert(1)<\/script>';
   equal(minify(input, { removeScriptTypeAttributes: false }), input);
+  output = '<script>alert(1)<\/script>';
+  equal(minify(input, { removeScriptTypeAttributes: true }), output);
+
+  input = '<script type="text/javascript">alert(1)<\/script>';
+  equal(minify(input, { removeScriptTypeAttributes: false }), input);
+  output = '<script>alert(1)<\/script>';
+  equal(minify(input, { removeScriptTypeAttributes: true }), output);
 
   input = '<SCRIPT TYPE="  text/javascript ">alert(1)<\/script>';
   output = '<script>alert(1)<\/script>';
-
   equal(minify(input, { removeScriptTypeAttributes: true }), output);
 
   input = '<script type="application/javascript;version=1.8">alert(1)<\/script>';
-  output = '<script type="application/javascript;version=1.8">alert(1)<\/script>';
-
+  output = '<script>alert(1)<\/script>';
   equal(minify(input, { removeScriptTypeAttributes: true }), output);
 
   input = '<script type="text/vbscript">MsgBox("foo bar")<\/script>';
   output = '<script type="text/vbscript">MsgBox("foo bar")<\/script>';
-
   equal(minify(input, { removeScriptTypeAttributes: true }), output);
 });
 
 test('removing type="text/css" attributes', function() {
-  input = '<style type="text/css">.foo { color: red }<\/style>';
-  output = '<style>.foo { color: red }<\/style>';
-
-  equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
+  input = '<style type="">.foo { color: red }<\/style>';
   equal(minify(input, { removeStyleLinkTypeAttributes: false }), input);
+  output = '<style>.foo { color: red }<\/style>';
+  equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
+
+  input = '<style type="text/css">.foo { color: red }<\/style>';
+  equal(minify(input, { removeStyleLinkTypeAttributes: false }), input);
+  output = '<style>.foo { color: red }<\/style>';
+  equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
 
   input = '<STYLE TYPE = "  text/CSS ">body { font-size: 1.75em }<\/style>';
   output = '<style>body { font-size: 1.75em }<\/style>';
-
   equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
 
   input = '<style type="text/plain">.foo { background: green }<\/style>';
-  output = '<style type="text/plain">.foo { background: green }<\/style>';
-
-  equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
+  equal(minify(input, { removeStyleLinkTypeAttributes: true }), input);
 
   input = '<link rel="stylesheet" type="text/css" href="http://example.com">';
   output = '<link rel="stylesheet" href="http://example.com">';
-
   equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
 
   input = '<link rel="alternate" type="application/atom+xml" href="data.xml">';
-
   equal(minify(input, { removeStyleLinkTypeAttributes: true }), input);
 });
 
@@ -2423,7 +2423,8 @@ test('tests from PHPTAL', function() {
       '<script type=\'text/javascript ;charset=utf-8\'\n' +
       'language=\'javascript\'></script><style type=\'text/css\'></style>'
     ],*/
-    ['<script type="text/javascript;e4x=1"></script><script type=text/hack></script>', '<script type="text/javascript;e4x=1"></script><script type="text/hack"></script>']
+    // minifier removes more javascript type attributes than PHPTAL
+    ['<script></script><script type=text/hack></script>', '<script type="text/javascript;e4x=1"></script><script type="text/hack"></script>']
     /* trim "title" attribute value in <a>
     [
       '<title>Foo</title><p><a title=\"x\"href=test>x </a>xu</p><br>foo',
