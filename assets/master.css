@@ -18,7 +18,6 @@ button { font-weight: bold; width: 100px; }
 #options input { margin-right: 0.5em; }
 #stats { margin-bottom: 2em; overflow: hidden; margin-top: 0; }
 #todo { font-family: monospace; margin-bottom: 2em; }
-#warning { background: #fee; padding: 0.25em; display: inline-block; margin-top: 0; font-size: 0.85em; }
 #lint-report { font-family: monospace; }
 #report { margin-bottom: 5em; }
 #report ul { margin: 0.5em; padding-left: 1em; list-style: none; }
@@ -33,7 +32,7 @@ button { font-weight: bold; width: 100px; }
 .controls a:focus, .controls a:hover { text-decoration: none; }
 
 .deprecated-element, .deprecated-attribute { color: red; }
-.presentational-element, .presentational-attribute, .inaccessible-attribute { color: #FF8C00; }
+.presentational-element, .presentational-attribute, .inaccessible-attribute, .repeating-attribute { color: #FF8C00; }
 
 .unsafe { color: #f33; }
 
