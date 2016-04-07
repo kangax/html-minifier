@@ -1,9 +1,10 @@
 'use strict';
 
-var TokenChain = require('./tokenchain');
 var CleanCSS = require('clean-css');
+var decode = require('he').decode;
 var HTMLParser = require('./htmlparser').HTMLParser;
 var RelateUrl = require('relateurl');
+var TokenChain = require('./tokenchain');
 var UglifyJS = require('uglify-js');
 var utils = require('./utils');
 
@@ -127,7 +128,7 @@ function isEventAttribute(attrName, options) {
 
 function canRemoveAttributeQuotes(value) {
   // http://mathiasbynens.be/notes/unquoted-attribute-values
-  return /^[^\x20\t\n\f\r"'`=<>]+$/.test(value);
+  return /^[^ \t\n\f\r"'`=<>]+$/.test(value);
 }
 
 function attributesInclude(attributes, attribute) {
@@ -295,8 +296,8 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (attrName === 'style') {
     attrValue = trimWhitespace(attrValue);
-    if (attrValue) {
-      attrValue = attrValue.replace(/\s*;\s*$/, '');
+    if (attrValue && /;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
+      attrValue = attrValue.replace(/\s*;$/, '');
     }
     if (options.minifyCSS) {
       return minifyCSS(attrValue, options.minifyCSS, true);
@@ -511,6 +512,10 @@ function normalizeAttr(attr, attrs, tag, options) {
   var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
       attrValue = attr.value;
 
+  if (options.decodeEntities && attrValue) {
+    attrValue = decode(attrValue, { isAttributeValue: true });
+  }
+
   if (options.removeRedundantAttributes &&
     isAttributeRedundant(tag, attrName, attrValue, attrs)
     ||
@@ -527,6 +532,10 @@ function normalizeAttr(attr, attrs, tag, options) {
   if (options.removeEmptyAttributes &&
       canDeleteEmptyAttribute(tag, attrName, attrValue)) {
     return;
+  }
+
+  if (options.decodeEntities && attrValue) {
+    attrValue = attrValue.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp;$1');
   }
 
   return {
@@ -673,6 +682,8 @@ function uniqueId(value) {
   return id;
 }
 
+var specialContentTags = createMapFromString('script,style');
+
 function createSortFns(value, options, uidIgnore, uidAttr) {
   var attrChains = options.sortAttributes && Object.create(null);
   var classChain = options.sortClassName && new TokenChain();
@@ -716,8 +727,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
         currentTag = '';
       },
       chars: function(text) {
-        if (options.processScripts &&
-            (currentTag === 'script' || currentTag === 'style') &&
+        if (options.processScripts && specialContentTags(currentTag) &&
             options.processScripts.indexOf(currentType) > -1) {
           scan(text);
         }
@@ -1028,6 +1038,9 @@ function minify(value, options, partialMarkup) {
     chars: function(text, prevTag, nextTag) {
       prevTag = prevTag === '' ? 'comment' : prevTag;
       nextTag = nextTag === '' ? 'comment' : nextTag;
+      if (options.decodeEntities && text && !specialContentTags(currentTag)) {
+        text = decode(text);
+      }
       if (options.collapseWhitespace) {
         if (!stackNoTrimWhitespace.length) {
           if (prevTag === 'comment') {
@@ -1064,12 +1077,12 @@ function minify(value, options, partialMarkup) {
           text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespaceAll(text);
         }
       }
-      if (options.processScripts && (currentTag === 'script' || currentTag === 'style')) {
+      if (options.processScripts && specialContentTags(currentTag)) {
         text = processScript(text, options, currentAttrs);
       }
       if (options.minifyJS && isExecutableScript(currentTag, currentAttrs)) {
         text = minifyJS(text, options.minifyJS);
-        if (text.charAt(text.length - 1) === ';') {
+        if (/;$/.test(text)) {
           text = text.slice(0, -1);
         }
       }
@@ -1091,6 +1104,11 @@ function minify(value, options, partialMarkup) {
         optionalEndTag = '';
       }
       charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
+      if (options.decodeEntities && text && !specialContentTags(currentTag)) {
+        // semi-colon can be omitted
+        // https://mathiasbynens.be/notes/ambiguous-ampersands
+        text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
+      }
       currentChars += text;
       if (text) {
         hasChars = true;

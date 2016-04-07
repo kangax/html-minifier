@@ -2358,6 +2358,37 @@ test('sort style classes', function() {
   }), output);
 });
 
+test('decode entity characters', function() {
+  input = '<!-- &ne; -->';
+  equal(minify(input), input);
+  equal(minify(input, { decodeEntities: false }), input);
+  equal(minify(input, { decodeEntities: true }), input);
+
+  input = '<script type="text/html">&colon;</script>';
+  equal(minify(input), input);
+  equal(minify(input, { decodeEntities: false }), input);
+  equal(minify(input, { decodeEntities: true }), input);
+  output = '<script type="text/html">:</script>';
+  equal(minify(input, { decodeEntities: true, processScripts: ['text/html'] }), output);
+
+  input = '<div style="font: &quot;monospace&#34;">foo&dollar;</div>';
+  equal(minify(input), input);
+  equal(minify(input, { decodeEntities: false }), input);
+  output = '<div style=\'font: "monospace"\'>foo$</div>';
+  equal(minify(input, { decodeEntities: true }), output);
+  output = '<div style="font:&quot">foo&dollar;</div>';
+  equal(minify(input, { minifyCSS: true }), output);
+  equal(minify(input, { decodeEntities: false, minifyCSS: true }), output);
+  output = '<div style="font:monospace">foo$</div>';
+  equal(minify(input, { decodeEntities: true, minifyCSS: true }), output);
+
+  input = '<a href="/?foo=1&amp;bar=&lt;2&gt;">baz&lt;moo&gt;&copy;</a>';
+  equal(minify(input), input);
+  equal(minify(input, { decodeEntities: false }), input);
+  output = '<a href="/?foo=1&bar=<2>">baz&lt;moo>\u00a9</a>';
+  equal(minify(input, { decodeEntities: true }), output);
+});
+
 test('tests from PHPTAL', function() {
   [
     // trailing </p> removed by minifier, but not by PHPTAL

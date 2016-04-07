@@ -41,6 +41,7 @@
     "clean-css": "3.4.x",
     "commander": "2.9.x",
     "concat-stream": "1.5.x",
+    "he": "1.0.x",
     "ncname": "1.0.x",
     "relateurl": "0.2.x",
     "uglify-js": "2.6.x"

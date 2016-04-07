@@ -23,15 +23,15 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 49                   | **37**       | 42       | 44         | 43                 |
 | [NBC](http://www.nbc.com/)                                                  | 91                   | **74**       | 84       | 85         | 85                 |
 | [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 118                  | **80**       | 93       | 93         | 94                 |
-| [New York Times](http://www.nytimes.com/)                                   | 131                  | **101**      | 122      | 125        | 120                |
+| [New York Times](http://www.nytimes.com/)                                   | 131                  | **100**      | 122      | 125        | 120                |
 | [Google](https://www.google.com/)                                           | 133                  | **128**      | 132      | 135        | 131                |
-| [MSN](http://www.msn.com/)                                                  | 157                  | **130**      | 138      | 145        | 138                |
-| [Stackoverflow](http://stackoverflow.com/)                                  | 200                  | **159**      | 165      | 173        | 166                |
+| [MSN](http://www.msn.com/)                                                  | 157                  | **127**      | 138      | 145        | 138                |
+| [Stackoverflow](http://stackoverflow.com/)                                  | 200                  | **156**      | 165      | 173        | 166                |
 | [Amazon](http://www.amazon.com/)                                            | 246                  | **203**      | 234      | 230        | 219                |
-| [Bootstrap CSS](http://getbootstrap.com/css/)                               | 277                  | **267**      | 274      | 232        | 277                |
-| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 401                  | **367**      | 388      | 400        | n/a                |
-| [Eloquent Javascript](http://eloquentjavascript.net/1st_edition/print.html) | 870                  | **827**      | 840      | 864        | n/a                |
-| [ES6 draft](https://tc39.github.io/ecma262/)                                | 3678                 | **2991**     | 3079     | 3183       | n/a                |
+| [Bootstrap CSS](http://getbootstrap.com/css/)                               | 277                  | **264**      | 274      | 232        | 277                |
+| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 401                  | **364**      | 388      | 400        | n/a                |
+| [Eloquent Javascript](http://eloquentjavascript.net/1st_edition/print.html) | 870                  | **815**      | 840      | 864        | n/a                |
+| [ES6 draft](https://tc39.github.io/ecma262/)                                | 3678                 | **2980**     | 3079     | 3183       | n/a                |
 
 ## Options Quick Reference
 
@@ -46,6 +46,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `customAttrCollapse`           | Regex that specifies custom attribute to strip newlines from (e.g. `/ng\-class/`) | |
 | `customAttrSurround`           | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) | `[ ]` |
 | `customEventAttributes`        | Arrays of regex'es that allow to support custom event attributes for `minifyJS` (e.g. `ng-click`) | `[ /^on[a-z]{3,}$/ ]` |
+| `decodeEntities`               | Use direct Unicode characters whenever possible | `false` |
 | `html5`                        | Parse input according to HTML5 specifications | `true` |
 | `ignoreCustomComments`         | Array of regex'es that allow to ignore certain comments, when matched | `[ ]` |
 | `ignoreCustomFragments`        | Array of regex'es that allow to ignore certain fragments, when matched (e.g. `<?php ... ?>`, `{{ ... }}`, etc.)  | `[ /<%[\s\S]*?%>/, /<\?[\s\S]*?\?>/ ]` |
