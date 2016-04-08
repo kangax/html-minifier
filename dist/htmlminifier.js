@@ -32767,10 +32767,10 @@ function buildAttr(normalized, hasUnarySlash, options, isLast) {
       attrFragment,
       emittedAttrValue;
 
-  if (attrValue !== undefined && !options.removeAttributeQuotes ||
+  if (typeof attrValue !== 'undefined' && !options.removeAttributeQuotes ||
       !canRemoveAttributeQuotes(attrValue)) {
     if (!options.preventAttributesEscaping) {
-      if (options.quoteCharacter !== undefined) {
+      if (typeof options.quoteCharacter !== 'undefined') {
         attrQuote = options.quoteCharacter === '\'' ? '\'' : '"';
       }
       else {
@@ -32798,7 +32798,7 @@ function buildAttr(normalized, hasUnarySlash, options, isLast) {
     emittedAttrValue = attrValue + ' ';
   }
 
-  if (attrValue === undefined || options.collapseBooleanAttributes &&
+  if (typeof attrValue === 'undefined' || options.collapseBooleanAttributes &&
       isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase())) {
     attrFragment = attrName;
     if (!isLast) {
@@ -33037,6 +33037,7 @@ function minify(value, options, partialMarkup) {
   if (options.sortAttributes && typeof options.sortAttributes !== 'function' ||
       options.sortClassName && typeof options.sortClassName !== 'function') {
     createSortFns(value, options, uidIgnore, uidAttr);
+    lint = null;
   }
 
   function _canCollapseWhitespace(tag, attrs) {
