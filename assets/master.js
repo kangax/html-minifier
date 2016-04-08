@@ -79,6 +79,9 @@
       if (lint) {
         lint.populate(byId('report'));
       }
+      else {
+        byId('report').innerHTML = '';
+      }
     }
     catch (err) {
       byId('output').value = '';
