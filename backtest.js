@@ -30,7 +30,7 @@ function readText(filePath, callback) {
 }
 
 function writeText(filePath, data) {
-  fs.writeFile(filePath, data, { encoding: 'utf8' }, function (err) {
+  fs.writeFile(filePath, data, { encoding: 'utf8' }, function(err) {
     if (err) {
       throw err;
     }

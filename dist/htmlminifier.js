@@ -31506,17 +31506,17 @@ var nonPhrasing = makeMap('address,article,aside,base,blockquote,body,caption,co
 var reCache = {};
 
 function attrForHandler(handler) {
-  var pattern = singleAttrIdentifier.source
-    + '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')'
-    + '\\s*(?:' + singleAttrValues.join('|') + '))?';
+  var pattern = singleAttrIdentifier.source +
+                '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')' +
+                '\\s*(?:' + singleAttrValues.join('|') + '))?';
   if (handler.customAttrSurround) {
     var attrClauses = [];
     for (var i = handler.customAttrSurround.length - 1; i >= 0; i--) {
-      attrClauses[i] = '(?:'
-        + '(' + handler.customAttrSurround[i][0].source + ')\\s*'
-        + pattern
-        + '\\s*(' + handler.customAttrSurround[i][1].source + ')'
-        + ')';
+      attrClauses[i] = '(?:' +
+                       '(' + handler.customAttrSurround[i][0].source + ')\\s*' +
+                       pattern +
+                       '\\s*(' + handler.customAttrSurround[i][1].source + ')' +
+                       ')';
     }
     attrClauses.push('(?:' + pattern + ')');
     pattern = '(?:' + attrClauses.join('|') + ')';
@@ -31527,7 +31527,7 @@ function attrForHandler(handler) {
 function joinSingleAttrAssigns(handler) {
   return singleAttrAssigns.concat(
     handler.customAttrAssign || []
-  ).map(function (assign) {
+  ).map(function(assign) {
     return '(?:' + assign.source + ')';
   }).join('|');
 }
@@ -31633,7 +31633,7 @@ function HTMLParser(html, handler) {
     }
     else {
       var stackedTag = lastTag.toLowerCase();
-      var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
+      var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'));
 
       html = html.replace(reStackedTag, function(all, text) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
@@ -31709,9 +31709,9 @@ function HTMLParser(html, handler) {
 
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
-        if (args[3] === '') { args[3] = undefined; }
-        if (args[4] === '') { args[4] = undefined; }
-        if (args[5] === '') { args[5] = undefined; }
+        if (args[3] === '') { delete args[3]; }
+        if (args[4] === '') { delete args[4]; }
+        if (args[5] === '') { delete args[5]; }
       }
 
       function populate(index) {
@@ -31772,18 +31772,18 @@ function HTMLParser(html, handler) {
   function parseEndTag(tag, tagName) {
     var pos;
 
-    // If no tag name is provided, clean shop
-    if (!tagName) {
-      pos = 0;
-    }
-    else {
-      // Find the closest opened tag of the same type
+    // Find the closest opened tag of the same type
+    if (tagName) {
       var needle = tagName.toLowerCase();
       for (pos = stack.length - 1; pos >= 0; pos--) {
         if (stack[pos].tag.toLowerCase() === needle) {
           break;
         }
       }
+    }
+    // If no tag name is provided, clean shop
+    else {
+      pos = 0;
     }
 
     if (pos >= 0) {
@@ -31860,22 +31860,17 @@ exports.HTMLtoDOM = function(html, doc) {
     base: 'head'
   };
 
-  if (!doc) {
-    if (typeof DOMDocument !== 'undefined') {
-      doc = new DOMDocument();
-    }
-    else if (typeof document !== 'undefined' && document.implementation && document.implementation.createDocument) {
-      doc = document.implementation.createDocument('', '', null);
-    }
-    else if (typeof ActiveX !== 'undefined') {
-      doc = new ActiveXObject('Msxml.DOMDocument');
-    }
-
+  if (doc) {
+    doc = doc.ownerDocument || doc.getOwnerDocument && doc.getOwnerDocument() || doc;
   }
-  else {
-    doc = doc.ownerDocument ||
-      doc.getOwnerDocument && doc.getOwnerDocument() ||
-      doc;
+  else if (typeof DOMDocument !== 'undefined') {
+    doc = new DOMDocument();
+  }
+  else if (typeof document !== 'undefined' && document.implementation && document.implementation.createDocument) {
+    doc = document.implementation.createDocument('', '', null);
+  }
+  else if (typeof ActiveX !== 'undefined') {
+    doc = new ActiveXObject('Msxml.DOMDocument');
   }
 
   var elems = [],
@@ -32234,20 +32229,17 @@ else {
   log = function() {};
 }
 
-var trimWhitespace = function(str) {
+var trimWhitespace = String.prototype.trim ? function(str) {
+  if (typeof str !== 'string') {
+    return str;
+  }
+  return str.trim();
+} : function(str) {
   if (typeof str !== 'string') {
     return str;
   }
   return str.replace(/^\s+/, '').replace(/\s+$/, '');
 };
-if (String.prototype.trim) {
-  trimWhitespace = function(str) {
-    if (typeof str !== 'string') {
-      return str;
-    }
-    return str.trim();
-  };
-}
 
 function compressWhitespace(spaces) {
   return spaces === '\t' ? spaces : ' ';
@@ -32336,9 +32328,7 @@ function isEventAttribute(attrName, options) {
     }
     return false;
   }
-  else {
-    return /^on[a-z]{3,}$/.test(attrName);
-  }
+  return /^on[a-z]{3,}$/.test(attrName);
 }
 
 function canRemoveAttributeQuotes(value) {
@@ -32558,9 +32548,7 @@ function unwrapCSS(text) {
   if (matches && matches[1]) {
     return matches[1];
   }
-  else {
-    return text;
-  }
+  return text;
 }
 
 function cleanConditionalComment(comment, options) {
@@ -32732,11 +32720,9 @@ function normalizeAttr(attr, attrs, tag, options) {
   }
 
   if (options.removeRedundantAttributes &&
-    isAttributeRedundant(tag, attrName, attrValue, attrs)
-    ||
+    isAttributeRedundant(tag, attrName, attrValue, attrs) ||
     options.removeScriptTypeAttributes && tag === 'script' &&
-    attrName === 'type' && isScriptTypeAttribute(attrValue)
-    ||
+    attrName === 'type' && isScriptTypeAttribute(attrValue) ||
     options.removeStyleLinkTypeAttributes && (tag === 'style' || tag === 'link') &&
     attrName === 'type' && isStyleLinkTypeAttribute(attrValue)) {
     return;
@@ -32771,13 +32757,13 @@ function buildAttr(normalized, hasUnarySlash, options, isLast) {
   if (typeof attrValue !== 'undefined' && !options.removeAttributeQuotes ||
       !canRemoveAttributeQuotes(attrValue)) {
     if (!options.preventAttributesEscaping) {
-      if (typeof options.quoteCharacter !== 'undefined') {
-        attrQuote = options.quoteCharacter === '\'' ? '\'' : '"';
-      }
-      else {
+      if (typeof options.quoteCharacter === 'undefined') {
         var apos = (attrValue.match(/'/g) || []).length;
         var quot = (attrValue.match(/"/g) || []).length;
         attrQuote = apos < quot ? '\'' : '"';
+      }
+      else {
+        attrQuote = options.quoteCharacter === '\'' ? '\'' : '"';
       }
       if (attrQuote === '"') {
         attrValue = attrValue.replace(/"/g, '&#34;');
@@ -32879,9 +32865,7 @@ function minifyCSS(text, options, inline) {
     if (inline) {
       return unwrapCSS(cleanCSS.minify(wrapCSS(style)).styles);
     }
-    else {
-      return cleanCSS.minify(style).styles;
-    }
+    return cleanCSS.minify(style).styles;
   }
   catch (err) {
     log(err);
@@ -33086,7 +33070,7 @@ function minify(value, options, partialMarkup) {
 
   new HTMLParser(value, {
     partialMarkup: partialMarkup,
-    html5: typeof options.html5 !== 'undefined' ? options.html5 : true,
+    html5: typeof options.html5 === 'undefined' ? true : options.html5,
 
     start: function(tag, attrs, unary, unarySlash, autoGenerated) {
       var lowerTag = tag.toLowerCase();
@@ -33397,9 +33381,7 @@ function minify(value, options, partialMarkup) {
           conservativeCollapse: true
         }, /^\s/.test(chunk), /\s$/.test(chunk));
       }
-      else {
-        return chunk;
-      }
+      return chunk;
     });
   }
   if (uidIgnore) {

@@ -54,7 +54,7 @@ function blueTime(time) {
 }
 
 function readBuffer(filePath, callback) {
-  fs.readFile(filePath, function (err, data) {
+  fs.readFile(filePath, function(err, data) {
     if (err) {
       throw new Error('There was an error reading ' + filePath);
     }
@@ -63,7 +63,7 @@ function readBuffer(filePath, callback) {
 }
 
 function readText(filePath, callback) {
-  fs.readFile(filePath, { encoding: 'utf8' }, function (err, data) {
+  fs.readFile(filePath, { encoding: 'utf8' }, function(err, data) {
     if (err) {
       throw new Error('There was an error reading ' + filePath);
     }
@@ -72,7 +72,7 @@ function readText(filePath, callback) {
 }
 
 function writeBuffer(filePath, data, callback) {
-  fs.writeFile(filePath, data, function (err) {
+  fs.writeFile(filePath, data, function(err) {
     if (err) {
       throw new Error('There was an error writing ' + filePath);
     }
@@ -81,7 +81,7 @@ function writeBuffer(filePath, data, callback) {
 }
 
 function writeText(filePath, data, callback) {
-  fs.writeFile(filePath, data, { encoding: 'utf8' }, function (err) {
+  fs.writeFile(filePath, data, { encoding: 'utf8' }, function(err) {
     if (err) {
       throw new Error('There was an error writing ' + filePath);
     }
@@ -90,7 +90,7 @@ function writeText(filePath, data, callback) {
 }
 
 function readSize(filePath, callback) {
-  fs.stat(filePath, function (err, stats) {
+  fs.stat(filePath, function(err, stats) {
     if (err) {
       throw new Error('There was an error reading ' + filePath);
     }
@@ -120,8 +120,8 @@ function run(tasks, done) {
 }
 
 var rows = {};
-run(fileNames.map(function (fileName) {
-  return function (done) {
+run(fileNames.map(function(fileName) {
+  return function(done) {
     progress.tick(0, { fileName: fileName });
     var filePath = path.join('benchmarks/', fileName + '.html');
     var original = {
@@ -131,7 +131,7 @@ run(fileNames.map(function (fileName) {
       brFilePath: path.join('benchmarks/generated/', fileName + '.html.br')
     };
     var infos = {};
-    ['minifier', 'minimize', 'willpeavy', 'compressor'].forEach(function (name) {
+    ['minifier', 'minimize', 'willpeavy', 'compressor'].forEach(function(name) {
       infos[name] = {
         filePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html'),
         gzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.gz'),
@@ -144,27 +144,27 @@ run(fileNames.map(function (fileName) {
       info.endTime = Date.now();
       run([
         // Apply Gzip on minified output
-        function (done) {
-          gzip(info.filePath, info.gzFilePath, function () {
+        function(done) {
+          gzip(info.filePath, info.gzFilePath, function() {
             info.gzTime = Date.now();
             // Open and read the size of the minified+gzip output
-            readSize(info.gzFilePath, function (size) {
+            readSize(info.gzFilePath, function(size) {
               info.gzSize = size;
               done();
             });
           });
         },
         // Apply LZMA on minified output
-        function (done) {
-          readBuffer(info.filePath, function (data) {
-            lzma.compress(data, 1, function (result, error) {
+        function(done) {
+          readBuffer(info.filePath, function(data) {
+            lzma.compress(data, 1, function(result, error) {
               if (error) {
                 throw error;
               }
-              writeBuffer(info.lzFilePath, new Buffer(result), function () {
+              writeBuffer(info.lzFilePath, new Buffer(result), function() {
                 info.lzTime = Date.now();
                 // Open and read the size of the minified+lzma output
-                readSize(info.lzFilePath, function (size) {
+                readSize(info.lzFilePath, function(size) {
                   info.lzSize = size;
                   done();
                 });
@@ -173,13 +173,13 @@ run(fileNames.map(function (fileName) {
           });
         },
         // Apply Brotli on minified output
-        function (done) {
-          readBuffer(info.filePath, function (data) {
+        function(done) {
+          readBuffer(info.filePath, function(data) {
             var output = new Buffer(brotli.compress(data, true).buffer);
-            writeBuffer(info.brFilePath, output, function () {
+            writeBuffer(info.brFilePath, output, function() {
               info.brTime = Date.now();
               // Open and read the size of the minified+brotli output
-              readSize(info.brFilePath, function (size) {
+              readSize(info.brFilePath, function(size) {
                 info.brSize = size;
                 done();
               });
@@ -187,8 +187,8 @@ run(fileNames.map(function (fileName) {
           });
         },
         // Open and read the size of the minified output
-        function (done) {
-          readSize(info.filePath, function (size) {
+        function(done) {
+          readSize(info.filePath, function(size) {
             info.size = size;
             done();
           });
@@ -200,16 +200,16 @@ run(fileNames.map(function (fileName) {
       var info = infos.minifier;
       info.startTime = Date.now();
       var args = [filePath, '-c', 'sample-cli-config-file.conf', '--minify-urls', urls[fileName], '-o', info.filePath];
-      fork('./cli', args).on('exit', function () {
+      fork('./cli', args).on('exit', function() {
         readSizes(info, done);
       });
     }
 
     function testMinimize(done) {
-      readBuffer(filePath, function (data) {
-        minimize.parse(data, function (error, data) {
+      readBuffer(filePath, function(data) {
+        minimize.parse(data, function(error, data) {
           var info = infos.minimize;
-          writeBuffer(info.filePath, data, function () {
+          writeBuffer(info.filePath, data, function() {
             readSizes(info, done);
           });
         });
@@ -217,24 +217,24 @@ run(fileNames.map(function (fileName) {
     }
 
     function testWillPeavy(done) {
-      readText(filePath, function (data) {
+      readText(filePath, function(data) {
         var options = url.parse('http://www.willpeavy.com/minifier/');
         options.method = 'POST';
         options.headers = {
           'Content-Type': 'application/x-www-form-urlencoded'
         };
-        http.request(options, function (res) {
+        http.request(options, function(res) {
           res.setEncoding('utf8');
           var response = '';
-          res.on('data', function (chunk) {
+          res.on('data', function(chunk) {
             response += chunk;
-          }).on('end', function () {
+          }).on('end', function() {
             // Extract result from <textarea/>
             var start = response.indexOf('>', response.indexOf('<textarea'));
             var end = response.lastIndexOf('</textarea>');
             var result = response.slice(start + 1, end).replace(/<\\\//g, '</');
             var info = infos.willpeavy;
-            writeText(info.filePath, result, function () {
+            writeText(info.filePath, result, function() {
               readSizes(info, done);
             });
           });
@@ -245,26 +245,26 @@ run(fileNames.map(function (fileName) {
     }
 
     function testHTMLCompressor(done) {
-      readText(filePath, function (data) {
+      readText(filePath, function(data) {
         var options = url.parse('http://htmlcompressor.com/compress_ajax_v2.php');
         options.method = 'POST';
         options.headers = {
           'Accept-Encoding': 'gzip',
           'Content-Type': 'application/x-www-form-urlencoded'
         };
-        http.request(options, function (res) {
+        http.request(options, function(res) {
           if (res.headers['content-encoding'] === 'gzip') {
             res = res.pipe(zlib.createGunzip());
           }
           res.setEncoding('utf8');
           var response = '';
-          res.on('data', function (chunk) {
+          res.on('data', function(chunk) {
             response += chunk;
-          }).on('end', function () {
+          }).on('end', function() {
             response = JSON.parse(response);
             var info = infos.compressor;
             if (response.success) {
-              writeText(info.filePath, response.result, function () {
+              writeText(info.filePath, response.result, function() {
                 readSizes(info, done);
               });
             }
@@ -294,14 +294,14 @@ run(fileNames.map(function (fileName) {
     }
 
     run([
-      function (done) {
+      function(done) {
         readSizes(original, done);
       },
       testHTMLMinifier,
       testMinimize,
       testWillPeavy,
       testHTMLCompressor
-    ], function () {
+    ], function() {
       var row = [
         [fileName, '+ gzip', '+ lzma', '+ brotli'].join('\n'),
         [redSize(original.size), redSize(original.gzSize), redSize(original.lzSize), redSize(original.brSize)].join('\n')
@@ -329,8 +329,8 @@ run(fileNames.map(function (fileName) {
       done();
     });
   };
-}), function () {
-  fileNames.forEach(function (fileName) {
+}), function() {
+  fileNames.forEach(function(fileName) {
     table.push(rows[fileName]);
   });
   console.log();

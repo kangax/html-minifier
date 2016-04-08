@@ -86,17 +86,17 @@ var nonPhrasing = makeMap('address,article,aside,base,blockquote,body,caption,co
 var reCache = {};
 
 function attrForHandler(handler) {
-  var pattern = singleAttrIdentifier.source
-    + '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')'
-    + '\\s*(?:' + singleAttrValues.join('|') + '))?';
+  var pattern = singleAttrIdentifier.source +
+                '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')' +
+                '\\s*(?:' + singleAttrValues.join('|') + '))?';
   if (handler.customAttrSurround) {
     var attrClauses = [];
     for (var i = handler.customAttrSurround.length - 1; i >= 0; i--) {
-      attrClauses[i] = '(?:'
-        + '(' + handler.customAttrSurround[i][0].source + ')\\s*'
-        + pattern
-        + '\\s*(' + handler.customAttrSurround[i][1].source + ')'
-        + ')';
+      attrClauses[i] = '(?:' +
+                       '(' + handler.customAttrSurround[i][0].source + ')\\s*' +
+                       pattern +
+                       '\\s*(' + handler.customAttrSurround[i][1].source + ')' +
+                       ')';
     }
     attrClauses.push('(?:' + pattern + ')');
     pattern = '(?:' + attrClauses.join('|') + ')';
@@ -107,7 +107,7 @@ function attrForHandler(handler) {
 function joinSingleAttrAssigns(handler) {
   return singleAttrAssigns.concat(
     handler.customAttrAssign || []
-  ).map(function (assign) {
+  ).map(function(assign) {
     return '(?:' + assign.source + ')';
   }).join('|');
 }
@@ -213,7 +213,7 @@ function HTMLParser(html, handler) {
     }
     else {
       var stackedTag = lastTag.toLowerCase();
-      var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)<\/' + stackedTag + '[^>]*>', 'i'));
+      var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'));
 
       html = html.replace(reStackedTag, function(all, text) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
@@ -289,9 +289,9 @@ function HTMLParser(html, handler) {
 
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
-        if (args[3] === '') { args[3] = undefined; }
-        if (args[4] === '') { args[4] = undefined; }
-        if (args[5] === '') { args[5] = undefined; }
+        if (args[3] === '') { delete args[3]; }
+        if (args[4] === '') { delete args[4]; }
+        if (args[5] === '') { delete args[5]; }
       }
 
       function populate(index) {
@@ -352,18 +352,18 @@ function HTMLParser(html, handler) {
   function parseEndTag(tag, tagName) {
     var pos;
 
-    // If no tag name is provided, clean shop
-    if (!tagName) {
-      pos = 0;
-    }
-    else {
-      // Find the closest opened tag of the same type
+    // Find the closest opened tag of the same type
+    if (tagName) {
       var needle = tagName.toLowerCase();
       for (pos = stack.length - 1; pos >= 0; pos--) {
         if (stack[pos].tag.toLowerCase() === needle) {
           break;
         }
       }
+    }
+    // If no tag name is provided, clean shop
+    else {
+      pos = 0;
     }
 
     if (pos >= 0) {
@@ -440,22 +440,17 @@ exports.HTMLtoDOM = function(html, doc) {
     base: 'head'
   };
 
-  if (!doc) {
-    if (typeof DOMDocument !== 'undefined') {
-      doc = new DOMDocument();
-    }
-    else if (typeof document !== 'undefined' && document.implementation && document.implementation.createDocument) {
-      doc = document.implementation.createDocument('', '', null);
-    }
-    else if (typeof ActiveX !== 'undefined') {
-      doc = new ActiveXObject('Msxml.DOMDocument');
-    }
-
+  if (doc) {
+    doc = doc.ownerDocument || doc.getOwnerDocument && doc.getOwnerDocument() || doc;
   }
-  else {
-    doc = doc.ownerDocument ||
-      doc.getOwnerDocument && doc.getOwnerDocument() ||
-      doc;
+  else if (typeof DOMDocument !== 'undefined') {
+    doc = new DOMDocument();
+  }
+  else if (typeof document !== 'undefined' && document.implementation && document.implementation.createDocument) {
+    doc = document.implementation.createDocument('', '', null);
+  }
+  else if (typeof ActiveX !== 'undefined') {
+    doc = new ActiveXObject('Msxml.DOMDocument');
   }
 
   var elems = [],
