@@ -105,7 +105,7 @@ var mainOptions = {
   collapseWhitespace: 'Collapse white space that contributes to text nodes in a document tree.',
   conservativeCollapse: 'Always collapse to 1 space (never remove it entirely)',
   customAttrAssign: ['Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', parseJSONRegExpArray],
-  customAttrCollapse: ['Regex that specifies custom attribute to strip newlines from (e.g. /ng\-class/)', parseRegExp],
+  customAttrCollapse: ['Regex that specifies custom attribute to strip newlines from (e.g. /ng-class/)', parseRegExp],
   customAttrSurround: ['Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', parseJSONRegExpArray],
   customEventAttributes: ['Arrays of regex\'es that allow to support custom event attributes for minifyJS (e.g. ng-click)', parseJSONRegExpArray],
   decodeEntities: 'Use direct Unicode characters whenever possible',
@@ -116,8 +116,8 @@ var mainOptions = {
   keepClosingSlash: 'Keep the trailing slash on singleton elements',
   lint: 'Toggle linting',
   maxLineLength: ['Max line length', parseInt],
-  minifyCSS: ['Minify CSS in style elements and style attributes (uses clean-css)', parseJSON, undefined],
-  minifyJS: ['Minify Javascript in script elements and on* attributes (uses uglify-js)', parseJSON, undefined],
+  minifyCSS: ['Minify CSS in style elements and style attributes (uses clean-css)', parseJSON],
+  minifyJS: ['Minify Javascript in script elements and on* attributes (uses uglify-js)', parseJSON],
   minifyURLs: ['Minify URLs in various attributes (uses relateurl)', parseSiteURL],
   preserveLineBreaks: 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.',
   preventAttributesEscaping: 'Prevents the escaping of the values of attributes.',
@@ -141,14 +141,12 @@ var mainOptionKeys = Object.keys(mainOptions);
 mainOptionKeys.forEach(function(key) {
   var option = mainOptions[key];
   key = '--' + changeCase.paramCase(key);
-  if (!Array.isArray(option)) {
-    program.option(key, option);
-  }
-  else if (option.length > 2) {
-    program.option(key + ' [value]', option[0], option[1], option[2]);
+  if (Array.isArray(option)) {
+    var optional = option[1] === parseJSON;
+    program.option(key + (optional ? ' [value]' : ' <value>'), option[0], option[1]);
   }
   else {
-    program.option(key + ' <value>', option[0], option[1]);
+    program.option(key, option);
   }
 });
 program.option('-o --output <file>', 'Specify output file (if not specified STDOUT will be used for output)', function(outputPath) {
@@ -201,7 +199,7 @@ function createOptions() {
   var options = {};
   mainOptionKeys.forEach(function(key) {
     var param = program[changeCase.camelCase(key)];
-    if (param !== undefined) {
+    if (typeof param !== 'undefined') {
       options[key] = param;
     }
     else if (key in config) {

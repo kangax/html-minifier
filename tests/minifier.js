@@ -28,9 +28,9 @@ test('parsing non-trivial markup', function() {
 
   equal(minify(input), input);
 
-  equal(minify('<script>alert(\'<!--\')<\/script>'), '<script>alert(\'<!--\')<\/script>');
-  equal(minify('<script>alert(\'<!-- foo -->\')<\/script>'), '<script>alert(\'<!-- foo -->\')<\/script>');
-  equal(minify('<script>alert(\'-->\')<\/script>'), '<script>alert(\'-->\')<\/script>');
+  equal(minify('<script>alert(\'<!--\')</script>'), '<script>alert(\'<!--\')</script>');
+  equal(minify('<script>alert(\'<!-- foo -->\')</script>'), '<script>alert(\'<!-- foo -->\')</script>');
+  equal(minify('<script>alert(\'-->\')</script>'), '<script>alert(\'-->\')</script>');
 
   equal(minify('<a title="x"href=" ">foo</a>'), '<a title="x" href="">foo</a>');
   equal(minify('<p id=""class=""title="">x'), '<p id="" class="" title="">x</p>');
@@ -96,24 +96,24 @@ test('parsing non-trivial markup', function() {
   }, 'invalid attribute name');
 
   // https://github.com/kangax/html-minifier/issues/512
-  input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"'
-    + ' placeholder="YYYY-MM-DD"'
-    + ' date-range-picker'
-    + ' data-ng-model="vm.value"'
-    + ' data-ng-model-options="{ debounce: 1000 }"'
-    + ' data-ng-pattern="vm.options.format"'
-    + ' data-options="vm.datepickerOptions">';
+  input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
+          ' placeholder="YYYY-MM-DD"' +
+          ' date-range-picker' +
+          ' data-ng-model="vm.value"' +
+          ' data-ng-model-options="{ debounce: 1000 }"' +
+          ' data-ng-pattern="vm.options.format"' +
+          ' data-options="vm.datepickerOptions">';
   equal(minify(input), input);
   throws(function() {
     minify(
-      '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"'
-      + ' <!--FIXME hardcoded placeholder - dates may not be used for service required fields yet. -->'
-      + ' placeholder="YYYY-MM-DD"'
-      + ' date-range-picker'
-      + ' data-ng-model="vm.value"'
-      + ' data-ng-model-options="{ debounce: 1000 }"'
-      + ' data-ng-pattern="vm.options.format"'
-      + ' data-options="vm.datepickerOptions">'
+      '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
+      ' <!--FIXME hardcoded placeholder - dates may not be used for service required fields yet. -->' +
+      ' placeholder="YYYY-MM-DD"' +
+      ' date-range-picker' +
+      ' data-ng-model="vm.value"' +
+      ' data-ng-model-options="{ debounce: 1000 }"' +
+      ' data-ng-pattern="vm.options.format"' +
+      ' data-options="vm.datepickerOptions">'
     );
   }, 'HTML comment inside tag');
 });
@@ -242,11 +242,11 @@ test('removing comments', function() {
   input = '<p title="<!-- comment in attribute -->">foo</p>';
   equal(minify(input, { removeComments: true }), input);
 
-  input = '<script><!-- alert(1) --><\/script>';
+  input = '<script><!-- alert(1) --></script>';
   equal(minify(input, { removeComments: true }), input);
 
-  input = '<STYLE><!-- alert(1) --><\/STYLE>';
-  equal(minify(input, { removeComments: true }), '<style><!-- alert(1) --><\/style>');
+  input = '<STYLE><!-- alert(1) --></STYLE>';
+  equal(minify(input, { removeComments: true }), '<style><!-- alert(1) --></style>');
 });
 
 test('ignoring comments', function() {
@@ -401,49 +401,49 @@ test('collapsing space in conditional comments', function() {
 });
 
 test('remove comments from scripts', function() {
-  input = '<script><!--\nalert(1);\n--><\/script>';
+  input = '<script><!--\nalert(1);\n--></script>';
   equal(minify(input), input);
-  output = '<script>alert(1)<\/script>';
+  output = '<script>alert(1)</script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script><!--alert(2);--><\/script>';
+  input = '<script><!--alert(2);--></script>';
   equal(minify(input), input);
-  output = '<script><\/script>';
+  output = '<script></script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script><!--alert(3);\n--><\/script>';
+  input = '<script><!--alert(3);\n--></script>';
   equal(minify(input), input);
-  output = '<script><\/script>';
+  output = '<script></script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script><!--\nalert(4);--><\/script>';
+  input = '<script><!--\nalert(4);--></script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script><!--alert(5);\nalert(6);\nalert(7);--><\/script>';
+  input = '<script><!--alert(5);\nalert(6);\nalert(7);--></script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script><!--alert(8)<\/script>';
+  input = '<script><!--alert(8)</script>';
   equal(minify(input), input);
-  output = '<script><\/script>';
+  output = '<script></script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script type="text/javascript"> \n <!--\nalert("-->"); -->\n\n   <\/script>';
+  input = '<script type="text/javascript"> \n <!--\nalert("-->"); -->\n\n   </script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script type="text/javascript"> \n <!--\nalert("-->");\n -->\n\n   <\/script>';
+  input = '<script type="text/javascript"> \n <!--\nalert("-->");\n -->\n\n   </script>';
   equal(minify(input), input);
-  output = '<script type="text/javascript">alert("--\\x3e")<\/script>';
+  output = '<script type="text/javascript">alert("--\\x3e")</script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script> //   <!--   \n  alert(1)   //  --> <\/script>';
+  input = '<script> //   <!--   \n  alert(1)   //  --> </script>';
   equal(minify(input), input);
-  output = '<script>alert(1)<\/script>';
+  output = '<script>alert(1)</script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script type="text/html">\n<div>\n</div>\n<!-- aa -->\n<\/script>';
+  input = '<script type="text/html">\n<div>\n</div>\n<!-- aa -->\n</script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 });
@@ -479,98 +479,98 @@ test('remove comments from styles', function() {
   output = '<style>p.h{background:red}<!-- p.i{background:red}-->p.j{background:red}</style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style type="text/css"><!-- p { color: red } --><\/style>';
+  input = '<style type="text/css"><!-- p { color: red } --></style>';
   equal(minify(input), input);
-  output = '<style type="text/css">p{color:red}<\/style>';
+  output = '<style type="text/css">p{color:red}</style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style type="text/css">p::before { content: "<!--" }<\/style>';
+  input = '<style type="text/css">p::before { content: "<!--" }</style>';
   equal(minify(input), input);
-  output = '<style type="text/css">p::before{content:"<!--"}<\/style>';
+  output = '<style type="text/css">p::before{content:"<!--"}</style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style type="text/html">\n<div>\n</div>\n<!-- aa -->\n<\/style>';
+  input = '<style type="text/html">\n<div>\n</div>\n<!-- aa -->\n</style>';
   equal(minify(input), input);
   equal(minify(input, { minifyCSS: true }), input);
 });
 
 test('remove CDATA sections from scripts/styles', function() {
-  input = '<script><![CDATA[\nalert(1)\n]]><\/script>';
+  input = '<script><![CDATA[\nalert(1)\n]]></script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script><![CDATA[alert(2)]]><\/script>';
+  input = '<script><![CDATA[alert(2)]]></script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script><![CDATA[alert(3)\n]]><\/script>';
+  input = '<script><![CDATA[alert(3)\n]]></script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script><![CDATA[\nalert(4)]]><\/script>';
+  input = '<script><![CDATA[\nalert(4)]]></script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script><![CDATA[alert(5)\nalert(6)\nalert(7)]]><\/script>';
+  input = '<script><![CDATA[alert(5)\nalert(6)\nalert(7)]]></script>';
   equal(minify(input), input);
   equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script>/*<![CDATA[*/alert(8)/*]]>*/<\/script>';
+  input = '<script>/*<![CDATA[*/alert(8)/*]]>*/</script>';
   equal(minify(input), input);
-  output = '<script>alert(8)<\/script>';
+  output = '<script>alert(8)</script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script>//<![CDATA[\nalert(9)\n//]]><\/script>';
+  input = '<script>//<![CDATA[\nalert(9)\n//]]></script>';
   equal(minify(input), input);
-  output = '<script>alert(9)<\/script>';
+  output = '<script>alert(9)</script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script type="text/javascript"> /* \n\t  <![CDATA[  */ alert(10) /*  ]]>  */ \n <\/script>';
+  input = '<script type="text/javascript"> /* \n\t  <![CDATA[  */ alert(10) /*  ]]>  */ \n </script>';
   equal(minify(input), input);
-  output = '<script type="text/javascript">alert(10)<\/script>';
+  output = '<script type="text/javascript">alert(10)</script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script>\n\n//<![CDATA[\nalert(11)//]]><\/script>';
+  input = '<script>\n\n//<![CDATA[\nalert(11)//]]></script>';
   equal(minify(input), input);
-  output = '<script>alert(11)<\/script>';
+  output = '<script>alert(11)</script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<style><![CDATA[\np.a{backgourd:red}\n]]><\/style>';
+  input = '<style><![CDATA[\np.a{backgourd:red}\n]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[ p.a{backgourd:red}\n]]><\/style>';
+  output = '<style><![CDATA[ p.a{backgourd:red}\n]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style><![CDATA[p.b{backgourd:red}]]><\/style>';
+  input = '<style><![CDATA[p.b{backgourd:red}]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[p.b{backgourd:red}]]><\/style>';
+  output = '<style><![CDATA[p.b{backgourd:red}]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style><![CDATA[p.c{backgourd:red}\n]]><\/style>';
+  input = '<style><![CDATA[p.c{backgourd:red}\n]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[p.c{backgourd:red}\n]]><\/style>';
+  output = '<style><![CDATA[p.c{backgourd:red}\n]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style><![CDATA[\np.d{backgourd:red}]]><\/style>';
+  input = '<style><![CDATA[\np.d{backgourd:red}]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[ p.d{backgourd:red}]]><\/style>';
+  output = '<style><![CDATA[ p.d{backgourd:red}]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style><![CDATA[p.e{backgourd:red}\np.f{backgourd:red}\np.g{backgourd:red}]]><\/style>';
+  input = '<style><![CDATA[p.e{backgourd:red}\np.f{backgourd:red}\np.g{backgourd:red}]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[p.e{backgourd:red}p.f{backgourd:red}p.g{backgourd:red}]]><\/style>';
+  output = '<style><![CDATA[p.e{backgourd:red}p.f{backgourd:red}p.g{backgourd:red}]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style>p.h{backgourd:red}<![CDATA[\np.i{backgourd:red}\n]]>p.j{backgourd:red}<\/style>';
+  input = '<style>p.h{backgourd:red}<![CDATA[\np.i{backgourd:red}\n]]>p.j{backgourd:red}</style>';
   equal(minify(input), input);
-  output = '<style>p.h{backgourd:red}<![CDATA[ p.i{backgourd:red}]]>p.j{backgourd:red}<\/style>';
+  output = '<style>p.h{backgourd:red}<![CDATA[ p.i{backgourd:red}]]>p.j{backgourd:red}</style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style>/* <![CDATA[ */p { color: red } // ]]><\/style>';
+  input = '<style>/* <![CDATA[ */p { color: red } // ]]></style>';
   equal(minify(input), input);
-  output = '<style>p{color:red} // ]]><\/style>';
+  output = '<style>p{color:red} // ]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style type="text/html">\n<div>\n</div>\n<![CDATA[ aa ]]>\n<\/style>';
+  input = '<style type="text/html">\n<div>\n</div>\n<![CDATA[ aa ]]>\n</style>';
   equal(minify(input), input);
   equal(minify(input, { minifyCSS: true }), input);
 });
@@ -733,24 +733,24 @@ test('removing redundant attributes (&lt;a name="..." id="..." ...>)', function(
 });
 
 test('removing redundant attributes (&lt;script src="..." charset="...">)', function() {
-  input = '<script type="text/javascript" charset="UTF-8">alert(222);<\/script>';
-  output = '<script type="text/javascript">alert(222);<\/script>';
+  input = '<script type="text/javascript" charset="UTF-8">alert(222);</script>';
+  output = '<script type="text/javascript">alert(222);</script>';
   equal(minify(input, { removeRedundantAttributes: true }), output);
 
-  input = '<script type="text/javascript" src="http://example.com" charset="UTF-8">alert(222);<\/script>';
+  input = '<script type="text/javascript" src="http://example.com" charset="UTF-8">alert(222);</script>';
   equal(minify(input, { removeRedundantAttributes: true }), input);
 
-  input = '<script CHARSET=" ... ">alert(222);<\/script>';
-  output = '<script>alert(222);<\/script>';
+  input = '<script CHARSET=" ... ">alert(222);</script>';
+  output = '<script>alert(222);</script>';
   equal(minify(input, { removeRedundantAttributes: true }), output);
 });
 
 test('removing redundant attributes (&lt;... language="javascript" ...>)', function() {
-  input = '<script language="Javascript">x=2,y=4<\/script>';
-  equal(minify(input, { removeRedundantAttributes: true }), '<script>x=2,y=4<\/script>');
+  input = '<script language="Javascript">x=2,y=4</script>';
+  equal(minify(input, { removeRedundantAttributes: true }), '<script>x=2,y=4</script>');
 
-  input = '<script LANGUAGE = "  javaScript  ">x=2,y=4<\/script>';
-  equal(minify(input, { removeRedundantAttributes: true }), '<script>x=2,y=4<\/script>');
+  input = '<script LANGUAGE = "  javaScript  ">x=2,y=4</script>';
+  equal(minify(input, { removeRedundantAttributes: true }), '<script>x=2,y=4</script>');
 });
 
 test('removing redundant attributes (&lt;area shape="rect" ...>)', function() {
@@ -774,45 +774,45 @@ test('removing redundant attributes (&lt;... = "javascript: ..." ...>)', functio
 });
 
 test('removing javascript type attributes', function() {
-  input = '<script type="">alert(1)<\/script>';
+  input = '<script type="">alert(1)</script>';
   equal(minify(input, { removeScriptTypeAttributes: false }), input);
-  output = '<script>alert(1)<\/script>';
+  output = '<script>alert(1)</script>';
   equal(minify(input, { removeScriptTypeAttributes: true }), output);
 
-  input = '<script type="text/javascript">alert(1)<\/script>';
+  input = '<script type="text/javascript">alert(1)</script>';
   equal(minify(input, { removeScriptTypeAttributes: false }), input);
-  output = '<script>alert(1)<\/script>';
+  output = '<script>alert(1)</script>';
   equal(minify(input, { removeScriptTypeAttributes: true }), output);
 
-  input = '<SCRIPT TYPE="  text/javascript ">alert(1)<\/script>';
-  output = '<script>alert(1)<\/script>';
+  input = '<SCRIPT TYPE="  text/javascript ">alert(1)</script>';
+  output = '<script>alert(1)</script>';
   equal(minify(input, { removeScriptTypeAttributes: true }), output);
 
-  input = '<script type="application/javascript;version=1.8">alert(1)<\/script>';
-  output = '<script>alert(1)<\/script>';
+  input = '<script type="application/javascript;version=1.8">alert(1)</script>';
+  output = '<script>alert(1)</script>';
   equal(minify(input, { removeScriptTypeAttributes: true }), output);
 
-  input = '<script type="text/vbscript">MsgBox("foo bar")<\/script>';
-  output = '<script type="text/vbscript">MsgBox("foo bar")<\/script>';
+  input = '<script type="text/vbscript">MsgBox("foo bar")</script>';
+  output = '<script type="text/vbscript">MsgBox("foo bar")</script>';
   equal(minify(input, { removeScriptTypeAttributes: true }), output);
 });
 
 test('removing type="text/css" attributes', function() {
-  input = '<style type="">.foo { color: red }<\/style>';
+  input = '<style type="">.foo { color: red }</style>';
   equal(minify(input, { removeStyleLinkTypeAttributes: false }), input);
-  output = '<style>.foo { color: red }<\/style>';
+  output = '<style>.foo { color: red }</style>';
   equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
 
-  input = '<style type="text/css">.foo { color: red }<\/style>';
+  input = '<style type="text/css">.foo { color: red }</style>';
   equal(minify(input, { removeStyleLinkTypeAttributes: false }), input);
-  output = '<style>.foo { color: red }<\/style>';
+  output = '<style>.foo { color: red }</style>';
   equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
 
-  input = '<STYLE TYPE = "  text/CSS ">body { font-size: 1.75em }<\/style>';
-  output = '<style>body { font-size: 1.75em }<\/style>';
+  input = '<STYLE TYPE = "  text/CSS ">body { font-size: 1.75em }</style>';
+  output = '<style>body { font-size: 1.75em }</style>';
   equal(minify(input, { removeStyleLinkTypeAttributes: true }), output);
 
-  input = '<style type="text/plain">.foo { background: green }<\/style>';
+  input = '<style type="text/plain">.foo { background: green }</style>';
   equal(minify(input, { removeStyleLinkTypeAttributes: true }), input);
 
   input = '<link rel="stylesheet" type="text/css" href="http://example.com">';
@@ -916,8 +916,8 @@ test('preserving custom attribute-joining markup', function() {
 });
 
 test('collapsing whitespace', function() {
-  input = '<script type="text/javascript">  \n\t   alert(1) \n\n\n  \t <\/script>';
-  output = '<script type="text/javascript">alert(1)<\/script>';
+  input = '<script type="text/javascript">  \n\t   alert(1) \n\n\n  \t </script>';
+  output = '<script type="text/javascript">alert(1)</script>';
   equal(minify(input, { collapseWhitespace: true }), output);
 
   input = '<p>foo</p>    <p> bar</p>\n\n   \n\t\t  <div title="quz">baz  </div>';
@@ -950,14 +950,14 @@ test('collapsing whitespace', function() {
   output = '<div><pRe>$foo = "baz";</pRe></div>';
   equal(minify(input, { collapseWhitespace: true, caseSensitive: true }), output);
 
-  input = '<script type=\"text\/javascript\">var = \"hello\";<\/script>\r\n\r\n\r\n' +
-          '<style type=\"text\/css\">#foo { color: red;        }          <\/style>\r\n\r\n\r\n' +
+  input = '<script type="text/javascript">var = "hello";</script>\r\n\r\n\r\n' +
+          '<style type="text/css">#foo { color: red;        }          </style>\r\n\r\n\r\n' +
           '<div>\r\n  <div>\r\n    <div><!-- hello -->\r\n      <div>' +
-          '<!--! hello -->\r\n        <div>\r\n          <div class=\"\">\r\n\r\n            ' +
-          '<textarea disabled=\"disabled\">     this is a textarea <\/textarea>\r\n          ' +
-          '<\/div>\r\n        <\/div>\r\n      <\/div>\r\n    <\/div>\r\n  <\/div>\r\n<\/div>' +
-          '<pre>       \r\nxxxx<\/pre><span>x<\/span> <span>Hello<\/span> <b>billy<\/b>     \r\n' +
-          '<input type=\"text\">\r\n<textarea><\/textarea>\r\n<pre><\/pre>';
+          '<!--! hello -->\r\n        <div>\r\n          <div class="">\r\n\r\n            ' +
+          '<textarea disabled="disabled">     this is a textarea </textarea>\r\n          ' +
+          '</div>\r\n        </div>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>' +
+          '<pre>       \r\nxxxx</pre><span>x</span> <span>Hello</span> <b>billy</b>     \r\n' +
+          '<input type="text">\r\n<textarea></textarea>\r\n<pre></pre>';
   output = '<script type="text/javascript">var = "hello";</script>' +
            '<style type="text/css">#foo { color: red;        }</style>' +
            '<div><div><div>' +
@@ -976,12 +976,12 @@ test('collapsing whitespace', function() {
   output = '<pre title="some title..."><code>   hello     world </code></pre>';
   equal(minify(input, { collapseWhitespace: true }), output);
 
-  input = '<script>alert("foo     bar")    <\/script>';
-  output = '<script>alert("foo     bar")<\/script>';
+  input = '<script>alert("foo     bar")    </script>';
+  output = '<script>alert("foo     bar")</script>';
   equal(minify(input, { collapseWhitespace: true }), output);
 
-  input = '<style>alert("foo     bar")    <\/style>';
-  output = '<style>alert("foo     bar")<\/style>';
+  input = '<style>alert("foo     bar")    </style>';
+  output = '<style>alert("foo     bar")</style>';
   equal(minify(input, { collapseWhitespace: true }), output);
 });
 
@@ -1429,7 +1429,7 @@ test('Ignore custom fragments', function() {
   input = '<img src="{% static "images/logo.png" %}">';
   output = '<img src="{% static "images/logo.png" %}">';
 
-  equal(minify(input, { ignoreCustomFragments: [/\{\%[^\%]*?\%\}/g] }), output);
+  equal(minify(input, { ignoreCustomFragments: [/\{%[^%]*?%\}/g] }), output);
 
   input = '<p{% if form.name.errors %}class=\'error\'{% endif %}>' +
             '{{ form.name.label_tag }}' +
@@ -1443,7 +1443,7 @@ test('Ignore custom fragments', function() {
           '</p>';
   equal(minify(input, {
     ignoreCustomFragments: [
-      /\{\%[\s\S]*?\%\}/g,
+      /\{%[\s\S]*?%\}/g,
       /\{\{[\s\S]*?\}\}/g
     ],
     quoteCharacter: '\''
@@ -1460,7 +1460,7 @@ test('Ignore custom fragments', function() {
            '</p>';
   equal(minify(input, {
     ignoreCustomFragments: [
-      /\{\%[\s\S]*?\%\}/g,
+      /\{%[\s\S]*?%\}/g,
       /\{\{[\s\S]*?\}\}/g
     ],
     quoteCharacter: '\'',
@@ -1477,7 +1477,7 @@ test('Ignore custom fragments', function() {
   input = '<input type="checkbox"<%= (model.isChecked ? \'checked="checked"\' : \'\') %>>';
   equal(minify(input, {
     ignoreCustomFragments: [
-      /<\%=[\s\S]*?%>/g
+      /<%=[\s\S]*?%>/g
     ]
   }), input);
 
@@ -1495,7 +1495,7 @@ test('Ignore custom fragments', function() {
   input = '<img class="{% foo %} {% bar %}">';
   equal(minify(input, {
     ignoreCustomFragments: [
-      /\{\%[^\%]*?\%\}/g
+      /\{%[^%]*?%\}/g
     ]
   }), input);
 
@@ -2034,9 +2034,9 @@ test('max line length', function() {
 
   equal(minify(input), input);
 
-  equal(minify('<script>alert(\'<!--\')<\/script>', options), '<script>alert(\'<!--\')\n<\/script>');
-  equal(minify('<script>alert(\'<!-- foo -->\')<\/script>', options), '<script>\nalert(\'<!-- foo -->\')\n<\/script>');
-  equal(minify('<script>alert(\'-->\')<\/script>', options), '<script>alert(\'-->\')\n<\/script>');
+  equal(minify('<script>alert(\'<!--\')</script>', options), '<script>alert(\'<!--\')\n</script>');
+  equal(minify('<script>alert(\'<!-- foo -->\')</script>', options), '<script>\nalert(\'<!-- foo -->\')\n</script>');
+  equal(minify('<script>alert(\'-->\')</script>', options), '<script>alert(\'-->\')\n</script>');
 
   equal(minify('<a title="x"href=" ">foo</a>', options), '<a title="x" href="">foo\n</a>');
   equal(minify('<p id=""class=""title="">x', options), '<p id="" class="" \ntitle="">x</p>');
@@ -2458,7 +2458,7 @@ test('tests from PHPTAL', function() {
     ['<script></script><script type=text/hack></script>', '<script type="text/javascript;e4x=1"></script><script type="text/hack"></script>']
     /* trim "title" attribute value in <a>
     [
-      '<title>Foo</title><p><a title=\"x\"href=test>x </a>xu</p><br>foo',
+      '<title>Foo</title><p><a title="x"href=test>x </a>xu</p><br>foo',
       '<html> <head> <title> Foo </title> </head>\n' +
       '<body>\n' +
       '<p>\n' +
