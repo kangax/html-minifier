@@ -402,7 +402,7 @@ exports.HTMLtoXML = function(html) {
     start: function(tag, attrs, unary) {
       results += '<' + tag;
 
-      for (var i = 0; i < attrs.length; i++) {
+      for (var i = 0, len = attrs.length; i < len; i++) {
         results += ' ' + attrs[i].name + '="' + (attrs[i].value || '').replace(/"/g, '&#34;') + '"';
       }
 

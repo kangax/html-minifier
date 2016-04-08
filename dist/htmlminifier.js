@@ -31822,7 +31822,7 @@ exports.HTMLtoXML = function(html) {
     start: function(tag, attrs, unary) {
       results += '<' + tag;
 
-      for (var i = 0; i < attrs.length; i++) {
+      for (var i = 0, len = attrs.length; i < len; i++) {
         results += ' ' + attrs[i].name + '="' + (attrs[i].value || '').replace(/"/g, '&#34;') + '"';
       }
 
@@ -31962,7 +31962,7 @@ function Sorter(tokens) {
 
 Sorter.prototype.sort = function(tokens, fromIndex) {
   fromIndex = fromIndex || 0;
-  for (var i = 0; i < this.tokens.length; i++) {
+  for (var i = 0, len = this.tokens.length; i < len; i++) {
     var token = this.tokens[i];
     var index = tokens.indexOf(token, fromIndex);
     if (index !== -1) {
@@ -32010,6 +32010,7 @@ TokenChain.prototype = {
     return sorter;
   }
 };
+
 module.exports = TokenChain;
 
 },{}],150:[function(require,module,exports){
@@ -32926,7 +32927,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
           }
           attrChains[tag].add(attrNames(attrs).filter(shouldSkipUIDs));
         }
-        for (var i = 0; i < attrs.length; i++) {
+        for (var i = 0, len = attrs.length; i < len; i++) {
           var attr = attrs[i];
           if (classChain && (options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
             classChain.add(trimWhitespace(attr.value).split(/\s+/).filter(shouldSkipUIDs));

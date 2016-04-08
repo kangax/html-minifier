@@ -6,7 +6,7 @@ function Sorter(tokens) {
 
 Sorter.prototype.sort = function(tokens, fromIndex) {
   fromIndex = fromIndex || 0;
-  for (var i = 0; i < this.tokens.length; i++) {
+  for (var i = 0, len = this.tokens.length; i < len; i++) {
     var token = this.tokens[i];
     var index = tokens.indexOf(token, fromIndex);
     if (index !== -1) {
@@ -54,4 +54,5 @@ TokenChain.prototype = {
     return sorter;
   }
 };
+
 module.exports = TokenChain;
