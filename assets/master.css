@@ -15,7 +15,8 @@ button { font-weight: bold; width: 100px; }
 #options ul li div { margin-left: 1.75em; }
 #options label, #options input { float: left; }
 #options label.sub-option{ margin-left: 22px; margin-right: 5px }
-#options input { margin-right: 0.5em; }
+#options label { margin-left: 0.25em; }
+#options label + input { margin-left: 0.5em; }
 #stats { margin-bottom: 2em; overflow: hidden; margin-top: 0; }
 #todo { font-family: monospace; margin-bottom: 2em; }
 #lint-report { font-family: monospace; }
@@ -25,7 +26,7 @@ button { font-weight: bold; width: 100px; }
 .success { color: green; }
 .failure { color: red; }
 .quiet { font-size: 0.85em; color: #888; }
-.short { display: inline-block; width: 20em; margin-top: 0.25em; }
+.short { display: inline-block; width: 20em; margin-top: 0.25em; margin-left: 0.25em; }
 
 .controls span { margin-right: 0.5em; margin-left: 1em; }
 .controls a { margin-left: 0.1em; }
