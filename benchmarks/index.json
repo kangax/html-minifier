@@ -1,14 +1,15 @@
 {
-  "html-minifier": "https://github.com/kangax/html-minifier",
-  "nbc": "http://www.nbc.com/",
-  "es6-table": "http://kangax.github.io/es5-compat-table/es6/",
-  "newyorktimes": "http://www.nytimes.com/",
-  "google": "http://www.google.com/",
-  "msn": "http://www.msn.com/",
-  "stackoverflow": "http://stackoverflow.com/",
-  "amazon": "http://www.amazon.com/",
-  "bootstrap": "http://getbootstrap.com/css/",
-  "wikipedia": "http://en.wikipedia.org/wiki/President_of_the_United_States",
-  "eloquentjavascript": "http://eloquentjavascript.net/print.html",
-  "es6": "https://people.mozilla.org/~jorendorff/es6-draft.html"
+  "Amazon": "http://www.amazon.com/",
+  "BBC": "http://www.bbc.co.uk/",
+  "CNN": "http://www.cnn.com/",
+  "Bootstrap CSS": "http://getbootstrap.com/css/",
+  "Eloquent Javascript": "http://eloquentjavascript.net/1st_edition/print.html",
+  "ES6 draft": "https://tc39.github.io/ecma262/",
+  "ES6 table": "http://kangax.github.io/compat-table/es6/",
+  "Google": "https://www.google.com/",
+  "HTMLMinifier": "https://github.com/kangax/html-minifier",
+  "NBC": "http://www.nbc.com/",
+  "New York Times": "http://www.nytimes.com/",
+  "Stack Overflow": "http://stackoverflow.com/",
+  "Wikipedia": "https://en.wikipedia.org/wiki/President_of_the_United_States"
 }

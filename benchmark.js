@@ -7,6 +7,7 @@ var brotli = require('brotli'),
     fork = require('child_process').fork,
     fs = require('fs'),
     http = require('http'),
+    https = require('https'),
     lzma = require('lzma'),
     Minimize = require('minimize'),
     path = require('path'),
@@ -28,7 +29,9 @@ var progress = new Progress('[:bar] :etas :fileName', {
 
 var table = new Table({
   head: ['File', 'Before', 'After', 'Minimize', 'Will Peavy', 'htmlcompressor.com', 'Savings', 'Time'],
-  colWidths: [20, 25, 25, 25, 25, 25, 20, 10]
+  colWidths: [fileNames.reduce(function(length, fileName) {
+    return Math.max(length, fileName.length);
+  }, 0) + 2, 25, 25, 25, 25, 25, 20, 10]
 });
 
 function toKb(size) {
@@ -121,9 +124,9 @@ function run(tasks, done) {
 
 var rows = {};
 run(fileNames.map(function(fileName) {
-  return function(done) {
-    progress.tick(0, { fileName: fileName });
-    var filePath = path.join('benchmarks/', fileName + '.html');
+  var filePath = path.join('benchmarks/', fileName + '.html');
+
+  function processFile(site, done) {
     var original = {
       filePath: filePath,
       gzFilePath: path.join('benchmarks/generated/', fileName + '.html.gz'),
@@ -199,7 +202,7 @@ run(fileNames.map(function(fileName) {
     function testHTMLMinifier(done) {
       var info = infos.minifier;
       info.startTime = Date.now();
-      var args = [filePath, '-c', 'sample-cli-config-file.conf', '--minify-urls', urls[fileName], '-o', info.filePath];
+      var args = [filePath, '-c', 'sample-cli-config-file.conf', '--minify-urls', site, '-o', info.filePath];
       fork('./cli', args).on('exit', function() {
         readSizes(info, done);
       });
@@ -327,6 +330,35 @@ run(fileNames.map(function(fileName) {
       rows[fileName] = row;
       progress.tick({ fileName: '' });
       done();
+    });
+  }
+
+  function get(site, callback) {
+    var options = url.parse(site);
+    var protocol = options.protocol === 'https:' ? https : http;
+    protocol.get(options, function(res) {
+      var status = res.statusCode;
+      if (200 <= status && status < 300) {
+        if (res.headers['content-encoding'] === 'gzip') {
+          res = res.pipe(zlib.createGunzip());
+        }
+        res.pipe(fs.createWriteStream(filePath)).on('finish', function() {
+          callback(site);
+        });
+      }
+      else if (300 <= status && status < 400 && res.headers.location) {
+        get(url.resolve(site, res.headers.location), callback);
+      }
+      else {
+        throw new Error('HTTP error ' + status + '\n' + site);
+      }
+    });
+  }
+
+  return function(done) {
+    progress.tick(0, { fileName: fileName });
+    get(urls[fileName], function(site) {
+      processFile(site, done);
     });
   };
 }), function() {
