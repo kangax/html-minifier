@@ -18,7 +18,7 @@ var brotli = require('brotli'),
     zlib = require('zlib');
 
 var urls = require('./benchmarks');
-var fileNames = Object.keys(urls).sort();
+var fileNames = Object.keys(urls);
 
 var minimize = new Minimize();
 
@@ -34,22 +34,22 @@ var table = new Table({
   }, 0) + 2, 25, 25, 25, 25, 25, 20, 10]
 });
 
-function toKb(size) {
-  return (size / 1024).toFixed(2);
+function toKb(size, precision) {
+  return (size / 1024).toFixed(precision || 0);
 }
 
 function redSize(size) {
-  return chalk.red.bold(size) + chalk.white(' (' + toKb(size) + ' KB)');
+  return chalk.red.bold(size) + chalk.white(' (' + toKb(size, 2) + ' KB)');
 }
 
 function greenSize(size) {
-  return chalk.green.bold(size) + chalk.white(' (' + toKb(size) + ' KB)');
+  return chalk.green.bold(size) + chalk.white(' (' + toKb(size, 2) + ' KB)');
 }
 
 function blueSavings(oldSize, newSize) {
   var savingsPercent = (1 - newSize / oldSize) * 100;
-  var savings = (oldSize - newSize) / 1024;
-  return chalk.cyan.bold(savingsPercent.toFixed(2)) + chalk.white('% (' + savings.toFixed(2) + ' KB)');
+  var savings = oldSize - newSize;
+  return chalk.cyan.bold(savingsPercent.toFixed(2)) + chalk.white('% (' + toKb(savings, 2) + ' KB)');
 }
 
 function blueTime(time) {
@@ -88,7 +88,9 @@ function writeText(filePath, data, callback) {
     if (err) {
       throw new Error('There was an error writing ' + filePath);
     }
-    callback();
+    if (callback) {
+      callback();
+    }
   });
 }
 
@@ -123,6 +125,63 @@ function run(tasks, done) {
 }
 
 var rows = {};
+
+function generateMarkdownTable() {
+  var headers = [
+    'Site',
+    'Original size *(KB)*',
+    'HTMLMinifier',
+    'minimize',
+    'Will Peavy',
+    'htmlcompressor.com'
+  ];
+  fileNames.forEach(function(fileName) {
+    var row = rows[fileName].report;
+    row[2] = '**' + row[2] + '**';
+  });
+  var widths = headers.map(function(header, index) {
+    var width = header.length;
+    fileNames.forEach(function(fileName) {
+      width = Math.max(width, rows[fileName].report[index].length);
+    });
+    return width;
+  });
+  var content = '';
+
+  function output(row) {
+    widths.forEach(function(width, index) {
+      var text = row[index];
+      content += '| ' + text + new Array(width - text.length + 2).join(' ');
+    });
+    content += '|\n';
+  }
+
+  output(headers);
+  widths.forEach(function(width, index) {
+    content += '|';
+    content += index === 1 ? ':' : ' ';
+    content += new Array(width + 1).join('-');
+    content += index === 0 ? ' ' : ':';
+  });
+  content += '|\n';
+  fileNames.sort(function(a, b) {
+    var r = +rows[a].report[1];
+    var s = +rows[b].report[1];
+    return r < s ? -1 : r > s ? 1 : a < b ? -1 : a > b ? 1 : 0;
+  }).forEach(function(fileName) {
+    output(rows[fileName].report);
+  });
+  return content;
+}
+
+function displayTable() {
+  fileNames.forEach(function(fileName) {
+    table.push(rows[fileName].display);
+  });
+  console.log();
+  console.log(table.toString());
+}
+
 run(fileNames.map(function(fileName) {
   var filePath = path.join('benchmarks/', fileName + '.html');
 
@@ -311,15 +370,20 @@ run(fileNames.map(function(fileName) {
       testWillPeavy,
       testHTMLCompressor
     ], function() {
-      var row = [
+      var display = [
         [fileName, '+ gzip', '+ lzma', '+ brotli'].join('\n'),
         [redSize(original.size), redSize(original.gzSize), redSize(original.lzSize), redSize(original.brSize)].join('\n')
       ];
+      var report = [
+        '[' + fileName + '](' + urls[fileName] + ')',
+        toKb(original.size)
+      ];
       for (var name in infos) {
         var info = infos[name];
-        row.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.lzSize), greenSize(info.brSize)].join('\n'));
+        display.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.lzSize), greenSize(info.brSize)].join('\n'));
+        report.push(info.size ? toKb(info.size) : 'n/a');
       }
-      row.push(
+      display.push(
         [
           blueSavings(original.size, infos.minifier.size),
           blueSavings(original.gzSize, infos.minifier.gzSize),
@@ -333,7 +397,10 @@ run(fileNames.map(function(fileName) {
           blueTime(original.brTime - original.lzTime)
         ].join('\n')
       );
-      rows[fileName] = row;
+      rows[fileName] = {
+        display: display,
+        report: report
+      };
       progress.tick({ fileName: '' });
       done();
     });
@@ -368,9 +435,15 @@ run(fileNames.map(function(fileName) {
     });
   };
 }), function() {
-  fileNames.forEach(function(fileName) {
-    table.push(rows[fileName]);
+  displayTable();
+  var content = generateMarkdownTable();
+  var readme = './README.md';
+  readText(readme, function(data) {
+    var start = data.indexOf('## Minification comparison');
+    start = data.indexOf('|', start);
+    var end = data.indexOf('##', start);
+    end = data.lastIndexOf('|\n', end) + '|\n'.length;
+    data = data.slice(0, start) + content + data.slice(end);
+    writeText(readme, data);
   });
-  console.log();
-  console.log(table.toString());
 });
