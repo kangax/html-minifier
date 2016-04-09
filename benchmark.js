@@ -264,7 +264,12 @@ run(fileNames.map(function(fileName) {
           res.on('data', function(chunk) {
             response += chunk;
           }).on('end', function() {
-            response = JSON.parse(response);
+            try {
+              response = JSON.parse(response);
+            }
+            catch (e) {
+              response = {};
+            }
             var info = infos.compressor;
             if (response.success) {
               writeText(info.filePath, response.result, function() {
@@ -282,13 +287,14 @@ run(fileNames.map(function(fileName) {
           });
         }).end(querystring.stringify({
           code_type: 'html',
-          verbose: 1,
-          html_level: 1,
+          html_level: 3,
+          html_strip_quotes: 1,
           minimize_style: 1,
           minimize_events: 1,
           minimize_js_href: 1,
           minimize_css: 1,
           minimize_js: 1,
+          html_optional_cdata: 1,
           js_engine: 'yui',
           js_fallback: 1,
           code: data
@@ -338,7 +344,7 @@ run(fileNames.map(function(fileName) {
     var protocol = options.protocol === 'https:' ? https : http;
     protocol.get(options, function(res) {
       var status = res.statusCode;
-      if (200 <= status && status < 300) {
+      if (status === 200) {
         if (res.headers['content-encoding'] === 'gzip') {
           res = res.pipe(zlib.createGunzip());
         }
@@ -346,7 +352,7 @@ run(fileNames.map(function(fileName) {
           callback(site);
         });
       }
-      else if (300 <= status && status < 400 && res.headers.location) {
+      else if (status >= 300 && status < 400 && res.headers.location) {
         get(url.resolve(site, res.headers.location), callback);
       }
       else {
