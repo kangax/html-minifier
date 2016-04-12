@@ -58,7 +58,7 @@
     "lzma": "2.3.x",
     "minimize": "1.8.x",
     "progress": "1.1.x",
-    "qunit": "0.9.x"
+    "qunitjs": "1.23.x"
   },
   "files": [
     "src",
