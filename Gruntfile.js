@@ -68,7 +68,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-eslint');
-  require('time-grunt')(grunt);
 
   var phantomjs = require('grunt-lib-phantomjs').init(grunt);
   var webErrors;
