@@ -49,6 +49,21 @@ module.exports = function(grunt) {
       htmlminifier: ['./tests/minifier', 'tests/index.html']
     },
 
+    replace: {
+      './index.html': [
+        /(<h1>.*?<span>).*?(<\/span><\/h1>)/,
+        '$1(v<%= pkg.version %>)$2'
+      ],
+      './tests/index.html': [
+        /("[^"]+\/qunit-)[0-9\.]+?(\.(?:css|js)")/g,
+        '$1<%= pkg.devDependencies.qunitjs %>$2'
+      ],
+      './tests/lint-tests.html': [
+        /("[^"]+\/qunit-)[0-9\.]+?(\.(?:css|js)")/g,
+        '$1<%= pkg.devDependencies.qunitjs %>$2'
+      ]
+    },
+
     uglify: {
       options: {
         banner: '<%= banner %>',
@@ -114,16 +129,16 @@ module.exports = function(grunt) {
     });
   });
 
-  grunt.registerTask('update-html', function() {
-    var pattern = /(<h1>.*?<span>).*?(<\/span><\/h1>)/;
-    var path = './index.html';
+  grunt.registerMultiTask('replace', function() {
+    var pattern = this.data[0];
+    var path = this.target;
     var html = grunt.file.read(path);
-    html = html.replace(pattern, '$1(v' + grunt.config('pkg.version') + ')$2');
+    html = html.replace(pattern, this.data[1]);
     grunt.file.write(path, html);
   });
 
   grunt.registerTask('dist', [
-    'update-html',
+    'replace',
     'browserify',
     'uglify'
   ]);
