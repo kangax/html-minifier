@@ -295,7 +295,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
       attrValue = attrValue.replace(/\s*;$/, '');
     }
     if (options.minifyCSS) {
-      return minifyCSS(attrValue, options.minifyCSS, true);
+      return minifyStyles(attrValue, options, true);
     }
     return attrValue;
   }
@@ -661,6 +661,15 @@ function minifyCSS(text, options, inline) {
     log(err);
     return text;
   }
+}
+
+function minifyStyles(text, options, inline) {
+  if (options.minifyURLs) {
+    text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, function(match, prefix, quote, url, suffix) {
+      return prefix + quote + minifyURLs(url, options.minifyURLs) + quote + suffix;
+    });
+  }
+  return minifyCSS(text, options.minifyCSS, inline);
 }
 
 function uniqueId(value) {
@@ -1077,7 +1086,7 @@ function minify(value, options, partialMarkup) {
         }
       }
       if (options.minifyCSS && isStyleSheet(currentTag, currentAttrs)) {
-        text = minifyCSS(text, options.minifyCSS);
+        text = minifyStyles(text, options);
       }
       if (options.removeOptionalTags && text) {
         // <html> may be omitted if first thing inside is not comment

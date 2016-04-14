@@ -535,34 +535,34 @@ test('remove CDATA sections from scripts/styles', function() {
   output = '<script>alert(11)</script>';
   equal(minify(input, { minifyJS: true }), output);
 
-  input = '<style><![CDATA[\np.a{backgourd:red}\n]]></style>';
+  input = '<style><![CDATA[\np.a{background:red}\n]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[ p.a{backgourd:red}\n]]></style>';
+  output = '<style><![CDATA[ p.a{background:red}\n]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style><![CDATA[p.b{backgourd:red}]]></style>';
+  input = '<style><![CDATA[p.b{background:red}]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[p.b{backgourd:red}]]></style>';
+  output = '<style><![CDATA[p.b{background:red}]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style><![CDATA[p.c{backgourd:red}\n]]></style>';
+  input = '<style><![CDATA[p.c{background:red}\n]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[p.c{backgourd:red}\n]]></style>';
+  output = '<style><![CDATA[p.c{background:red}\n]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style><![CDATA[\np.d{backgourd:red}]]></style>';
+  input = '<style><![CDATA[\np.d{background:red}]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[ p.d{backgourd:red}]]></style>';
+  output = '<style><![CDATA[ p.d{background:red}]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style><![CDATA[p.e{backgourd:red}\np.f{backgourd:red}\np.g{backgourd:red}]]></style>';
+  input = '<style><![CDATA[p.e{background:red}\np.f{background:red}\np.g{background:red}]]></style>';
   equal(minify(input), input);
-  output = '<style><![CDATA[p.e{backgourd:red}p.f{backgourd:red}p.g{backgourd:red}]]></style>';
+  output = '<style><![CDATA[p.e{background:red}p.f{background:red}p.g{background:red}]]></style>';
   equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<style>p.h{backgourd:red}<![CDATA[\np.i{backgourd:red}\n]]>p.j{backgourd:red}</style>';
+  input = '<style>p.h{background:red}<![CDATA[\np.i{background:red}\n]]>p.j{background:red}</style>';
   equal(minify(input), input);
-  output = '<style>p.h{backgourd:red}<![CDATA[ p.i{backgourd:red}]]>p.j{backgourd:red}</style>';
+  output = '<style>p.h{background:red}<![CDATA[ p.i{background:red}]]>p.j{background:red}</style>';
   equal(minify(input, { minifyCSS: true }), output);
 
   input = '<style>/* <![CDATA[ */p { color: red } // ]]></style>';
@@ -1761,12 +1761,30 @@ test('style attribute minification', function() {
 test('url attribute minification', function() {
   input = '<link rel="stylesheet" href="http://website.com/style.css"><form action="http://website.com/folder/folder2/index.html"><a href="http://website.com/folder/file.html">link</a></form>';
   output = '<link rel="stylesheet" href="/style.css"><form action="folder2/"><a href="file.html">link</a></form>';
-
   equal(minify(input, { minifyURLs: { site: 'http://website.com/folder/' } }), output);
 
   input = '<link rel="canonical" href="http://website.com/">';
-
   equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
+
+  input = '<style>body { background: url(\'http://website.com/bg.png\') }</style>';
+  equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
+  output = '<style>body{background:url(http://website.com/bg.png)}</style>';
+  equal(minify(input, { minifyCSS: true }), output);
+  output = '<style>body{background:url(bg.png)}</style>';
+  equal(minify(input, {
+    minifyCSS: true,
+    minifyURLs: { site: 'http://website.com/' }
+  }), output);
+
+  input = '<style>body { background: url("http://website.com/foo bar/bg.png") }</style>';
+  equal(minify(input, { minifyURLs: { site: 'http://website.com/foo bar/' } }), input);
+  output = '<style>body{background:url("http://website.com/foo bar/bg.png")}</style>';
+  equal(minify(input, { minifyCSS: true }), output);
+  output = '<style>body{background:url(bg.png)}</style>';
+  equal(minify(input, {
+    minifyCSS: true,
+    minifyURLs: { site: 'http://website.com/foo bar/' }
+  }), output);
 });
 
 test('valueless attributes', function() {
@@ -1938,7 +1956,7 @@ test('ignore', function() {
           '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
 
   output = '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>' +
-          '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
+           '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
 
   equal(minify(input, { collapseWhitespace: true }), output);
 
