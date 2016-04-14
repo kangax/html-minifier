@@ -47,18 +47,20 @@
     "uglify-js": "2.6.x"
   },
   "devDependencies": {
-    "brotli": "1.2.x",
-    "chalk": "1.1.x",
-    "cli-table": "0.3.x",
     "grunt": "1.0.x",
     "grunt-browserify": "5.0.x",
     "grunt-contrib-uglify": "1.0.x",
     "grunt-eslint": "18.0.x",
     "grunt-lib-phantomjs": "1.0.x",
+    "qunitjs": "1.23.0"
+  },
+  "optionalDependencies": {
+    "brotli": "1.2.x",
+    "chalk": "1.1.x",
+    "cli-table": "0.3.x",
     "lzma": "2.3.x",
     "minimize": "1.8.x",
-    "progress": "1.1.x",
-    "qunitjs": "1.23.0"
+    "progress": "1.1.x"
   },
   "files": [
     "src",
