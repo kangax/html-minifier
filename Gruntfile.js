@@ -86,40 +86,45 @@ module.exports = function(grunt) {
 
   function report(type, details) {
     grunt.log.writeln(type + ' completed in ' + details.runtime + 'ms');
+    details.failures.forEach(function(details) {
+      grunt.log.error();
+      grunt.log.error(details.name);
+      grunt.log.error(details.source);
+      grunt.log.error('Actual:');
+      grunt.log.error(details.actual);
+      grunt.log.error('Expected:');
+      grunt.log.error(details.expected);
+    });
     grunt.log[details.failed ? 'error' : 'ok'](details.passed + ' of ' + details.total + ' passed, ' + details.failed + ' failed');
     return details.failed;
   }
 
   var phantomjs = require('phantomjs-prebuilt').path;
-  var fork = require('child_process').fork;
   grunt.registerMultiTask('qunit', function() {
     var done = this.async();
-    var remaining = 2;
-    var nodeErrors, webErrors;
+    var errors = [];
 
-    function completed() {
-      if (!--remaining) {
-        done(!nodeErrors && !webErrors);
-      }
+    function run(testType, binPath, testPath) {
+      grunt.util.spawn({
+        cmd: binPath,
+        args: ['test.js', testPath]
+      }, function(error, result) {
+        if (error) {
+          grunt.log.error(result.stderr);
+          grunt.log.error(testType + ' test failed to load');
+          errors.push(-1);
+        }
+        else {
+          errors.push(report(testType, JSON.parse(result.stdout)));
+        }
+        if (errors.length === 2) {
+          done(!errors[0] && !errors[1]);
+        }
+      });
     }
 
-    grunt.util.spawn({
-      cmd: phantomjs,
-      args: ['tests/phantom.js', this.data[1]]
-    }, function(error, result) {
-      if (error) {
-        grunt.log.error('web page failed to load');
-        webErrors = -1;
-      }
-      else {
-        webErrors = report('web', JSON.parse(result.stdout));
-      }
-      completed();
-    });
-    fork('./test', [this.data[0]]).on('message', function(details) {
-      nodeErrors += report('node', details);
-      completed();
-    });
+    run('node', process.argv[0], this.data[0]);
+    run('web', phantomjs, this.data[1]);
   });
 
   grunt.registerMultiTask('replace', function() {
