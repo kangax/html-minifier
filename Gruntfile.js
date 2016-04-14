@@ -90,25 +90,12 @@ module.exports = function(grunt) {
     return details.failed;
   }
 
-  var phantomjs = require('grunt-lib-phantomjs').init(grunt);
-  var webErrors;
-  phantomjs.on('fail.load', function() {
-    phantomjs.halt();
-    webErrors++;
-    grunt.log.error('page failed to load');
-  }).on('fail.timeout', function() {
-    phantomjs.halt();
-    webErrors++;
-    grunt.log.error('timed out');
-  }).on('qunit.done', function(details) {
-    phantomjs.halt();
-    webErrors += report('web', details);
-  });
+  var phantomjs = require('phantomjs-prebuilt').path;
   var fork = require('child_process').fork;
   grunt.registerMultiTask('qunit', function() {
     var done = this.async();
     var remaining = 2;
-    var nodeErrors;
+    var nodeErrors, webErrors;
 
     function completed() {
       if (!--remaining) {
@@ -116,12 +103,18 @@ module.exports = function(grunt) {
       }
     }
 
-    webErrors = 0;
-    phantomjs.spawn(this.data[1], {
-      done: completed,
-      options: {
-        inject: 'tests/inject.js'
+    grunt.util.spawn({
+      cmd: phantomjs,
+      args: ['tests/phantom.js', this.data[1]]
+    }, function(error, result) {
+      if (error) {
+        grunt.log.error('web page failed to load');
+        webErrors = -1;
       }
+      else {
+        webErrors = report('web', JSON.parse(result.stdout));
+      }
+      completed();
     });
     fork('./test', [this.data[0]]).on('message', function(details) {
       nodeErrors += report('node', details);
