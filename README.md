@@ -4,6 +4,7 @@
 [![Build Status](https://img.shields.io/travis/kangax/html-minifier.svg)](https://travis-ci.org/kangax/html-minifier)
 [![Dependency Status](https://img.shields.io/david/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier)
 [![devDependency Status](https://img.shields.io/david/dev/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
+[![optionalDependency Status](https://img.shields.io/david/optional/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier#info=optionalDependencies)
 [![Gitter](https://img.shields.io/gitter/room/kangax/html-minifier.svg)](https://gitter.im/kangax/html-minifier)
 
 [HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, JavaScript-based HTML minifier, with lint-like capabilities.
