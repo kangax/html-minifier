@@ -31,7 +31,6 @@ module.exports = function(grunt) {
         options: {
           banner: '<%= banner %>',
           require: [
-            './src/htmllint.js:html-minifier/src/htmllint',
             './src/htmlminifier.js:html-minifier'
           ]
         },
@@ -59,7 +58,6 @@ module.exports = function(grunt) {
     },
 
     qunit: {
-      htmllint: ['./tests/lint', 'tests/lint-tests.html'],
       htmlminifier: ['./tests/minifier', 'tests/index.html']
     },
 
@@ -69,10 +67,6 @@ module.exports = function(grunt) {
         '$1(v<%= pkg.version %>)$2'
       ],
       './tests/index.html': [
-        /("[^"]+\/qunit-)[0-9\.]+?(\.(?:css|js)")/g,
-        '$1<%= qunit_ver %>$2'
-      ],
-      './tests/lint-tests.html': [
         /("[^"]+\/qunit-)[0-9\.]+?(\.(?:css|js)")/g,
         '$1<%= qunit_ver %>$2'
       ]

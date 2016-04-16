@@ -1,11 +1,13 @@
 {
   "name": "html-minifier",
-  "description": "HTML minifier with lint-like capabilities.",
+  "description": "Highly configurable, well-tested, JavaScript-based HTML minifier.",
   "version": "1.5.0",
   "keywords": [
+    "compress",
     "html",
     "minifier",
-    "lint"
+    "minify",
+    "optimize"
   ],
   "homepage": "http://kangax.github.io/html-minifier/",
   "author": "Juriy \"kangax\" Zaytsev",

@@ -2,7 +2,6 @@
   'use strict';
 
   var minify = require('html-minifier').minify;
-  var HTMLLint = require('html-minifier/src/htmllint').HTMLLint;
 
   function byId(id) {
     return document.getElementById(id);
@@ -31,12 +30,6 @@
         }
       }
       switch (key) {
-        case 'lint':
-          if (!value) {
-            return;
-          }
-          value = new HTMLLint();
-          break;
         case 'maxLineLength':
           value = parseInt(value);
           break;
@@ -61,7 +54,6 @@
   byId('minify-btn').onclick = function() {
     try {
       var options = getOptions(),
-          lint = options.lint,
           originalValue = byId('input').value,
           minifiedValue = minify(originalValue, options),
           diff = originalValue.length - minifiedValue.length,
@@ -75,13 +67,6 @@
           '. Minified size: <strong>' + commify(minifiedValue.length) + '</strong>' +
           '. Savings: <strong>' + commify(diff) + ' (' + savings + '%)</strong>.' +
         '</span>';
-
-      if (lint) {
-        lint.populate(byId('report'));
-      }
-      else {
-        byId('report').innerHTML = '';
-      }
     }
     catch (err) {
       byId('output').value = '';
