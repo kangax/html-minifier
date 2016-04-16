@@ -102,7 +102,7 @@ module.exports = function(grunt) {
     grunt.log.writeln(type + ' completed in ' + details.runtime + 'ms');
     details.failures.forEach(function(details) {
       grunt.log.error();
-      grunt.log.error(details.name);
+      grunt.log.error(details.name + (details.message ? ' [' + details.message + ']' : ''));
       grunt.log.error(details.source);
       grunt.log.error('Actual:');
       grunt.log.error(details.actual);

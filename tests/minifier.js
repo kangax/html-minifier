@@ -213,8 +213,10 @@ test('space normalization around text', function() {
     ['a <nobr> b</nobr> c', 'a <nobr>b</nobr> c'],
     ['a <nobr> b </nobr> c', 'a <nobr>b</nobr> c']
   ].forEach(function(inputs) {
-    equal(minify(inputs[0], { collapseWhitespace: true }), inputs[1]);
-    equal(minify('<div>' + inputs[0] + '</div>', { collapseWhitespace: true }), '<div>' + inputs[1] + '</div>');
+    equal(minify(inputs[0], { collapseWhitespace: true }), inputs[1], inputs[0]);
+    var input = '<div>' + inputs[0] + '</div>';
+    var output = '<div>' + inputs[1] + '</div>';
+    equal(minify(input, { collapseWhitespace: true }), output, input);
   });
   equal(minify('<p>foo <img> bar</p>', { collapseWhitespace: true }), '<p>foo <img> bar</p>');
   equal(minify('<p>foo<img>bar</p>', { collapseWhitespace: true }), '<p>foo<img>bar</p>');
