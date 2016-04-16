@@ -70,9 +70,9 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
 
 var createMapFromString = utils.createMapFromString;
 // non-empty tags that will maintain whitespace around them
-var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
+var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,nobr,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
 // non-empty tags that will maintain whitespace within them
-var inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
+var inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,nobr,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
 // self-closing tags that will maintain whitespace around them
 var selfClosingInlineTags = createMapFromString('comment,img,input');
 
@@ -860,10 +860,17 @@ function minify(value, options, partialMarkup) {
     else if (buffer.length > 0 && /\s$/.test(buffer[buffer.length - 1])) {
       charsIndex = buffer.length - 1;
     }
-    if (charsIndex > 0) {
+    if (charsIndex >= 0) {
       buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(text) {
         return collapseWhitespaceSmart(text, 'comment', nextTag, options);
       });
+    }
+  }
+
+  function trimPrevCharsTrailingWhitespace() {
+    var charsIndex = buffer.length - 2;
+    if (charsIndex >= 0) {
+      buffer[charsIndex] = collapseWhitespace(buffer[charsIndex], options, false, true);
     }
   }
 
@@ -1055,12 +1062,19 @@ function minify(value, options, partialMarkup) {
               });
             }
           }
-          if (prevTag && inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
-            text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
+          if (prevTag) {
+            if (prevTag === '/nobr') {
+              if (/^\s/.test(text)) {
+                trimPrevCharsTrailingWhitespace();
+              }
+            }
+            else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
+              text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
+            }
           }
           text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
           if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
-            for (var index = buffer.length - 2, endTag = prevTag.slice(1); index >= 0 && _canTrimWhitespace(endTag); index--) {
+            for (var index = buffer.length - 1, endTag = prevTag.slice(1); index >= 0 && _canTrimWhitespace(endTag); index--) {
               var str = buffer[index];
               var match = str.match(/^<\/([\w:-]+)>$/);
               if (match) {
