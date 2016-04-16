@@ -152,6 +152,14 @@ test('space normalization around text', function() {
     'mark', 's', 'samp', 'small', 'span', 'strike', 'strong', 'sub', 'sup',
     'time', 'tt', 'u', 'var'
   ].forEach(function(el) {
+    equal(minify('foo <' + el + '>baz</' + el + '> bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '> bar');
+    equal(minify('foo<' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '>bar');
+    equal(minify('foo <' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '>bar');
+    equal(minify('foo<' + el + '>baz</' + el + '> bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '> bar');
+    equal(minify('foo <' + el + '> baz </' + el + '> bar', { collapseWhitespace: true }), 'foo <' + el + '>baz </' + el + '>bar');
+    equal(minify('foo<' + el + '> baz </' + el + '>bar', { collapseWhitespace: true }), 'foo<' + el + '> baz </' + el + '>bar');
+    equal(minify('foo <' + el + '> baz </' + el + '>bar', { collapseWhitespace: true }), 'foo <' + el + '>baz </' + el + '>bar');
+    equal(minify('foo<' + el + '> baz </' + el + '> bar', { collapseWhitespace: true }), 'foo<' + el + '> baz </' + el + '>bar');
     equal(minify('<div>foo <' + el + '>baz</' + el + '> bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz</' + el + '> bar</div>');
     equal(minify('<div>foo<' + el + '>baz</' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '>baz</' + el + '>bar</div>');
     equal(minify('<div>foo <' + el + '>baz</' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz</' + el + '>bar</div>');
@@ -164,6 +172,14 @@ test('space normalization around text', function() {
   [
     'bdi', 'bdo', 'button', 'cite', 'code', 'dfn', 'math', 'q', 'rt', 'rp', 'svg'
   ].forEach(function(el) {
+    equal(minify('foo <' + el + '>baz</' + el + '> bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '> bar');
+    equal(minify('foo<' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '>bar');
+    equal(minify('foo <' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '>bar');
+    equal(minify('foo<' + el + '>baz</' + el + '> bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '> bar');
+    equal(minify('foo <' + el + '> baz </' + el + '> bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '> bar');
+    equal(minify('foo<' + el + '> baz </' + el + '>bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '>bar');
+    equal(minify('foo <' + el + '> baz </' + el + '>bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '>bar');
+    equal(minify('foo<' + el + '> baz </' + el + '> bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '> bar');
     equal(minify('<div>foo <' + el + '>baz</' + el + '> bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz</' + el + '> bar</div>');
     equal(minify('<div>foo<' + el + '>baz</' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '>baz</' + el + '>bar</div>');
     equal(minify('<div>foo <' + el + '>baz</' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz</' + el + '>bar</div>');
@@ -173,26 +189,33 @@ test('space normalization around text', function() {
     equal(minify('<div>foo <' + el + '> baz </' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz</' + el + '>bar</div>');
     equal(minify('<div>foo<' + el + '> baz </' + el + '> bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '>baz</' + el + '> bar</div>');
   });
-  equal(minify('<nobr>a</nobr>', { collapseWhitespace: true }), '<nobr>a</nobr>');
-  equal(minify('<nobr>a </nobr>', { collapseWhitespace: true }), '<nobr>a </nobr>');
-  equal(minify('<nobr> a</nobr>', { collapseWhitespace: true }), '<nobr>a</nobr>');
-  equal(minify('<nobr> a </nobr>', { collapseWhitespace: true }), '<nobr>a </nobr>');
-  equal(minify('a<nobr>b</nobr>c', { collapseWhitespace: true }), 'a<nobr>b</nobr>c');
-  equal(minify('a<nobr>b </nobr>c', { collapseWhitespace: true }), 'a<nobr>b </nobr>c');
-  equal(minify('a<nobr> b</nobr>c', { collapseWhitespace: true }), 'a<nobr> b</nobr>c');
-  equal(minify('a<nobr> b </nobr>c', { collapseWhitespace: true }), 'a<nobr> b </nobr>c');
-  equal(minify('a<nobr>b</nobr> c', { collapseWhitespace: true }), 'a<nobr>b</nobr> c');
-  equal(minify('a<nobr>b </nobr> c', { collapseWhitespace: true }), 'a<nobr>b</nobr> c');
-  equal(minify('a<nobr> b</nobr> c', { collapseWhitespace: true }), 'a<nobr> b</nobr> c');
-  equal(minify('a<nobr> b </nobr> c', { collapseWhitespace: true }), 'a<nobr> b</nobr> c');
-  equal(minify('a <nobr>b</nobr>c', { collapseWhitespace: true }), 'a <nobr>b</nobr>c');
-  equal(minify('a <nobr>b </nobr>c', { collapseWhitespace: true }), 'a <nobr>b </nobr>c');
-  equal(minify('a <nobr> b</nobr>c', { collapseWhitespace: true }), 'a <nobr>b</nobr>c');
-  equal(minify('a <nobr> b </nobr>c', { collapseWhitespace: true }), 'a <nobr>b </nobr>c');
-  equal(minify('a <nobr>b</nobr> c', { collapseWhitespace: true }), 'a <nobr>b</nobr> c');
-  equal(minify('a <nobr>b </nobr> c', { collapseWhitespace: true }), 'a <nobr>b</nobr> c');
-  equal(minify('a <nobr> b</nobr> c', { collapseWhitespace: true }), 'a <nobr>b</nobr> c');
-  equal(minify('a <nobr> b </nobr> c', { collapseWhitespace: true }), 'a <nobr>b</nobr> c');
+  [
+    ['<span> foo </span>', '<span>foo</span>'],
+    [' <span> foo </span> ', '<span>foo</span>'],
+    ['<nobr>a</nobr>', '<nobr>a</nobr>'],
+    ['<nobr>a </nobr>', '<nobr>a</nobr>'],
+    ['<nobr> a</nobr>', '<nobr>a</nobr>'],
+    ['<nobr> a </nobr>', '<nobr>a</nobr>'],
+    ['a<nobr>b</nobr>c', 'a<nobr>b</nobr>c'],
+    ['a<nobr>b </nobr>c', 'a<nobr>b </nobr>c'],
+    ['a<nobr> b</nobr>c', 'a<nobr> b</nobr>c'],
+    ['a<nobr> b </nobr>c', 'a<nobr> b </nobr>c'],
+    ['a<nobr>b</nobr> c', 'a<nobr>b</nobr> c'],
+    ['a<nobr>b </nobr> c', 'a<nobr>b</nobr> c'],
+    ['a<nobr> b</nobr> c', 'a<nobr> b</nobr> c'],
+    ['a<nobr> b </nobr> c', 'a<nobr> b</nobr> c'],
+    ['a <nobr>b</nobr>c', 'a <nobr>b</nobr>c'],
+    ['a <nobr>b </nobr>c', 'a <nobr>b </nobr>c'],
+    ['a <nobr> b</nobr>c', 'a <nobr>b</nobr>c'],
+    ['a <nobr> b </nobr>c', 'a <nobr>b </nobr>c'],
+    ['a <nobr>b</nobr> c', 'a <nobr>b</nobr> c'],
+    ['a <nobr>b </nobr> c', 'a <nobr>b</nobr> c'],
+    ['a <nobr> b</nobr> c', 'a <nobr>b</nobr> c'],
+    ['a <nobr> b </nobr> c', 'a <nobr>b</nobr> c']
+  ].forEach(function(inputs) {
+    equal(minify(inputs[0], { collapseWhitespace: true }), inputs[1]);
+    equal(minify('<div>' + inputs[0] + '</div>', { collapseWhitespace: true }), '<div>' + inputs[1] + '</div>');
+  });
   equal(minify('<p>foo <img> bar</p>', { collapseWhitespace: true }), '<p>foo <img> bar</p>');
   equal(minify('<p>foo<img>bar</p>', { collapseWhitespace: true }), '<p>foo<img>bar</p>');
   equal(minify('<p>foo <img>bar</p>', { collapseWhitespace: true }), '<p>foo <img>bar</p>');
