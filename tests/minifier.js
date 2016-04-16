@@ -147,7 +147,6 @@ test('space normalization around text', function() {
   equal(minify(input), input);
   output = '<p>blah</p>';
   equal(minify(input, { collapseWhitespace: true }), output);
-  // tags from collapseWhitespaceSmart()
   [
     'a', 'abbr', 'acronym', 'b', 'big', 'del', 'em', 'font', 'i', 'ins', 'kbd',
     'mark', 's', 'samp', 'small', 'span', 'strike', 'strong', 'sub', 'sup',
@@ -174,6 +173,26 @@ test('space normalization around text', function() {
     equal(minify('<div>foo <' + el + '> baz </' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz</' + el + '>bar</div>');
     equal(minify('<div>foo<' + el + '> baz </' + el + '> bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '>baz</' + el + '> bar</div>');
   });
+  equal(minify('<nobr>a</nobr>', { collapseWhitespace: true }), '<nobr>a</nobr>');
+  equal(minify('<nobr>a </nobr>', { collapseWhitespace: true }), '<nobr>a </nobr>');
+  equal(minify('<nobr> a</nobr>', { collapseWhitespace: true }), '<nobr>a</nobr>');
+  equal(minify('<nobr> a </nobr>', { collapseWhitespace: true }), '<nobr>a </nobr>');
+  equal(minify('a<nobr>b</nobr>c', { collapseWhitespace: true }), 'a<nobr>b</nobr>c');
+  equal(minify('a<nobr>b </nobr>c', { collapseWhitespace: true }), 'a<nobr>b </nobr>c');
+  equal(minify('a<nobr> b</nobr>c', { collapseWhitespace: true }), 'a<nobr> b</nobr>c');
+  equal(minify('a<nobr> b </nobr>c', { collapseWhitespace: true }), 'a<nobr> b </nobr>c');
+  equal(minify('a<nobr>b</nobr> c', { collapseWhitespace: true }), 'a<nobr>b</nobr> c');
+  equal(minify('a<nobr>b </nobr> c', { collapseWhitespace: true }), 'a<nobr>b</nobr> c');
+  equal(minify('a<nobr> b</nobr> c', { collapseWhitespace: true }), 'a<nobr> b</nobr> c');
+  equal(minify('a<nobr> b </nobr> c', { collapseWhitespace: true }), 'a<nobr> b</nobr> c');
+  equal(minify('a <nobr>b</nobr>c', { collapseWhitespace: true }), 'a <nobr>b</nobr>c');
+  equal(minify('a <nobr>b </nobr>c', { collapseWhitespace: true }), 'a <nobr>b </nobr>c');
+  equal(minify('a <nobr> b</nobr>c', { collapseWhitespace: true }), 'a <nobr>b</nobr>c');
+  equal(minify('a <nobr> b </nobr>c', { collapseWhitespace: true }), 'a <nobr>b </nobr>c');
+  equal(minify('a <nobr>b</nobr> c', { collapseWhitespace: true }), 'a <nobr>b</nobr> c');
+  equal(minify('a <nobr>b </nobr> c', { collapseWhitespace: true }), 'a <nobr>b</nobr> c');
+  equal(minify('a <nobr> b</nobr> c', { collapseWhitespace: true }), 'a <nobr>b</nobr> c');
+  equal(minify('a <nobr> b </nobr> c', { collapseWhitespace: true }), 'a <nobr>b</nobr> c');
   equal(minify('<p>foo <img> bar</p>', { collapseWhitespace: true }), '<p>foo <img> bar</p>');
   equal(minify('<p>foo<img>bar</p>', { collapseWhitespace: true }), '<p>foo<img>bar</p>');
   equal(minify('<p>foo <img>bar</p>', { collapseWhitespace: true }), '<p>foo <img>bar</p>');
