@@ -850,30 +850,32 @@ function minify(value, options, partialMarkup) {
     buffer.length = Math.max(0, index);
   }
 
+  // look for trailing whitespaces, bypass any inline tags
+  function trimTrailingWhitespace(index, nextTag) {
+    for (var endTag = null; index >= 0 && _canTrimWhitespace(endTag); index--) {
+      var str = buffer[index];
+      var match = str.match(/^<\/([\w:-]+)>$/);
+      if (match) {
+        endTag = match[1];
+      }
+      else if (/>$/.test(str) || (buffer[index] = collapseWhitespaceSmart(str, null, nextTag, options))) {
+        break;
+      }
+    }
+  }
+
   // look for trailing whitespaces from previously processed text
   // which may not be trimmed due to a following comment or an empty
   // element which has now been removed
   function squashTrailingWhitespace(nextTag) {
-    var charsIndex;
-    if (buffer.length > 1 && /^(?:<!|$)/.test(buffer[buffer.length - 1]) &&
-        /\s$/.test(buffer[buffer.length - 2])) {
-      charsIndex = buffer.length - 2;
+    var charsIndex = buffer.length - 1;
+    if (buffer.length > 1) {
+      var item = buffer[buffer.length - 1];
+      if (/^(?:<!|$)/.test(item) && item.indexOf(uidIgnore) === -1) {
+        charsIndex--;
+      }
     }
-    else if (buffer.length > 0 && /\s$/.test(buffer[buffer.length - 1])) {
-      charsIndex = buffer.length - 1;
-    }
-    if (charsIndex >= 0) {
-      buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(text) {
-        return collapseWhitespaceSmart(text, 'comment', nextTag, options);
-      });
-    }
-  }
-
-  function trimPrevCharsTrailingWhitespace() {
-    var charsIndex = buffer.length - 2;
-    if (charsIndex >= 0) {
-      buffer[charsIndex] = collapseWhitespace(buffer[charsIndex], options, false, true);
-    }
+    trimTrailingWhitespace(charsIndex, nextTag);
   }
 
   new HTMLParser(value, {
@@ -1071,7 +1073,7 @@ function minify(value, options, partialMarkup) {
           if (prevTag) {
             if (prevTag === '/nobr') {
               if (/^\s/.test(text)) {
-                trimPrevCharsTrailingWhitespace();
+                trimTrailingWhitespace(buffer.length - 1, 'br');
               }
             }
             else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
@@ -1080,16 +1082,7 @@ function minify(value, options, partialMarkup) {
           }
           text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
           if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
-            for (var index = buffer.length - 1, endTag = prevTag.slice(1); index >= 0 && _canTrimWhitespace(endTag); index--) {
-              var str = buffer[index];
-              var match = str.match(/^<\/([\w:-]+)>$/);
-              if (match) {
-                endTag = match[1];
-              }
-              else if (/>$/.test(str) || (buffer[index] = collapseWhitespaceSmart(str, null, nextTag, options))) {
-                break;
-              }
-            }
+            trimTrailingWhitespace(buffer.length - 1, nextTag);
           }
         }
         if (!stackNoCollapseWhitespace.length) {
@@ -1181,6 +1174,9 @@ function minify(value, options, partialMarkup) {
     if (optionalEndTag && !trailingTags(optionalEndTag)) {
       removeEndTag();
     }
+  }
+  if (options.collapseWhitespace) {
+    squashTrailingWhitespace('br');
   }
 
   var str = joinResultSegments(buffer, options);
