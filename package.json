@@ -52,7 +52,7 @@
     "grunt-contrib-uglify": "1.0.x",
     "grunt-eslint": "18.1.x",
     "phantomjs-prebuilt": "2.1.x",
-    "qunitjs": "1.23.1"
+    "qunitjs": "1.x"
   },
   "optionalDependencies": {
     "brotli": "1.2.x",

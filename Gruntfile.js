@@ -1,11 +1,25 @@
 'use strict';
 
+function qunitVersion() {
+  var prepareStackTrace = Error.prepareStackTrace;
+  Error.prepareStackTrace = function() {
+    return '';
+  };
+  try {
+    return require('qunitjs').version;
+  }
+  finally {
+    Error.prepareStackTrace = prepareStackTrace;
+  }
+}
+
 module.exports = function(grunt) {
   // Force use of Unix newlines
   grunt.util.linefeed = '\n';
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    qunit_ver: qunitVersion(),
     banner: '/*!\n' +
             ' * HTMLMinifier v<%= pkg.version %> (<%= pkg.homepage %>)\n' +
             ' * Copyright 2010-<%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
@@ -56,11 +70,11 @@ module.exports = function(grunt) {
       ],
       './tests/index.html': [
         /("[^"]+\/qunit-)[0-9\.]+?(\.(?:css|js)")/g,
-        '$1<%= pkg.devDependencies.qunitjs %>$2'
+        '$1<%= qunit_ver %>$2'
       ],
       './tests/lint-tests.html': [
         /("[^"]+\/qunit-)[0-9\.]+?(\.(?:css|js)")/g,
-        '$1<%= pkg.devDependencies.qunitjs %>$2'
+        '$1<%= qunit_ver %>$2'
       ]
     },
 
