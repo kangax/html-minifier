@@ -33,12 +33,17 @@ if (typeof phantom === 'undefined') {
   QUnit.load();
 }
 else {
+  var system = require('system');
+  setTimeout(function() {
+    system.stderr.write('timed out');
+    phantom.exit(1);
+  }, 15000);
   var page = require('webpage').create();
   page.onAlert = function(details) {
     console.log(details);
     phantom.exit();
   };
-  page.open(require('system').args[1], function(status) {
+  page.open(system.args[1], function(status) {
     if (status !== 'success') {
       phantom.exit(1);
     }
