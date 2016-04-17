@@ -79,9 +79,8 @@
     "progress": "1.1.x"
   },
   "files": [
-    "src",
+    "src/*.js",
     "cli.js",
-    "sample-cli-config-file.conf",
-    "LICENSE"
+    "sample-cli-config-file.conf"
   ]
 }
