@@ -781,7 +781,6 @@ function minify(value, options, partialMarkup) {
       stackNoCollapseWhitespace = [],
       optionalStartTag = '',
       optionalEndTag = '',
-      lint = options.lint,
       t = Date.now(),
       ignoredMarkupChunks = [],
       ignoredCustomMarkupChunks = [],
@@ -823,7 +822,6 @@ function minify(value, options, partialMarkup) {
   if (options.sortAttributes && typeof options.sortAttributes !== 'function' ||
       options.sortClassName && typeof options.sortClassName !== 'function') {
     createSortFns(value, options, uidIgnore, uidAttr);
-    lint = null;
   }
 
   function _canCollapseWhitespace(tag, attrs) {
@@ -946,21 +944,13 @@ function minify(value, options, partialMarkup) {
 
       buffer.push(openTag);
 
-      if (lint) {
-        lint.testElement(tag);
-      }
-
       if (options.sortAttributes) {
         options.sortAttributes(tag, attrs);
       }
 
       var parts = [];
       for (var i = attrs.length, isLast = true; --i >= 0;) {
-        var attr = attrs[i];
-        if (lint) {
-          lint.testAttribute(tag, attr.name.toLowerCase(), attr.value);
-        }
-        var normalized = normalizeAttr(attr, attrs, tag, options);
+        var normalized = normalizeAttr(attrs[i], attrs, tag, options);
         if (normalized) {
           parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast));
           isLast = false;
@@ -1125,9 +1115,6 @@ function minify(value, options, partialMarkup) {
       if (text) {
         hasChars = true;
       }
-      if (lint) {
-        lint.testChars(text);
-      }
       buffer.push(text);
     },
     comment: function(text, nonStandard) {
@@ -1155,9 +1142,6 @@ function minify(value, options, partialMarkup) {
       buffer.push(text);
     },
     doctype: function(doctype) {
-      if (lint) {
-        lint.testDoctype(doctype);
-      }
       buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(doctype));
     },
     customAttrAssign: options.customAttrAssign,

@@ -19,9 +19,6 @@ button { font-weight: bold; width: 100px; }
 #options label + input { margin-left: 0.5em; }
 #stats { margin-bottom: 2em; overflow: hidden; margin-top: 0; }
 #todo { font-family: monospace; margin-bottom: 2em; }
-#lint-report { font-family: monospace; }
-#report { margin-bottom: 5em; }
-#report ul { margin: 0.5em; padding-left: 1em; list-style: none; }
 
 .success { color: green; }
 .failure { color: red; }
