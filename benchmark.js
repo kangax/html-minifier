@@ -2,6 +2,24 @@
 
 'use strict';
 
+var packages = require('./package.json').benchmarkDependencies;
+packages = Object.keys(packages).map(function(name) {
+  return name + '@' + packages[name];
+});
+packages.unshift('install');
+var installed = require('child_process').spawnSync('npm', packages, {
+  encoding: 'utf-8',
+  shell: true
+});
+if (installed.error) {
+  throw installed.error;
+}
+else if (installed.status) {
+  console.log(installed.stdout);
+  console.error(installed.stderr);
+  process.exit(installed.status);
+}
+
 var brotli = require('brotli'),
     chalk = require('chalk'),
     fork = require('child_process').fork,

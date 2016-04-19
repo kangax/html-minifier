@@ -70,7 +70,7 @@
     "phantomjs-prebuilt": "2.1.x",
     "qunitjs": "1.x"
   },
-  "optionalDependencies": {
+  "benchmarkDependencies": {
     "brotli": "1.2.x",
     "chalk": "1.1.x",
     "cli-table": "0.3.x",
