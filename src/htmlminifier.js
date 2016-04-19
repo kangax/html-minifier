@@ -257,6 +257,12 @@ function isCanonicalURL(tag, attrs) {
   }
 }
 
+var srcsetTags = createMapFromString('img,source');
+
+function isSrcset(attrName, tag) {
+  return attrName === 'srcset' && srcsetTags(tag);
+}
+
 var fnPrefix = '!function(){';
 var fnSuffix = '}();';
 
@@ -298,6 +304,26 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
       return minifyStyles(attrValue, options, true);
     }
     return attrValue;
+  }
+  else if (isSrcset(attrName, tag)) {
+    // https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
+    attrValue = trimWhitespace(attrValue).split(/\s+,\s*|\s*,\s+/).map(function(candidate) {
+      var url = candidate;
+      var descriptor = '';
+      var match = candidate.match(/\s+([1-9][0-9]*w|[0-9]+(?:\.[0-9]+)?x)$/);
+      if (match) {
+        url = url.slice(0, -match[0].length);
+        var num = +match[1].slice(0, -1);
+        var suffix = match[1].slice(-1);
+        if (num !== 1 || suffix !== 'x') {
+          descriptor = ' ' + num + suffix;
+        }
+      }
+      if (options.minifyURLs) {
+        url = minifyURLs(url, options.minifyURLs);
+      }
+      return url + descriptor;
+    }).join(', ');
   }
   else if (isMetaViewport(tag, attrs) && attrName === 'content') {
     attrValue = attrValue.replace(/\s+/g, '').replace(/[0-9]+\.[0-9]+/g, function(numString) {

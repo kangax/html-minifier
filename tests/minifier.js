@@ -1836,6 +1836,19 @@ test('url attribute minification', function() {
     minifyCSS: true,
     minifyURLs: { site: 'http://website.com/foo bar/' }
   }), output);
+
+  input = '<img src="http://cdn.site.com/foo.png">';
+  output = '<img src="//cdn.site.com/foo.png">';
+  equal(minify(input, { minifyURLs: { site: 'http://site.com/' } }), output);
+});
+
+test('srcset attribute minification', function() {
+  input = '<source srcset="http://site.com/foo.gif ,http://site.com/bar.jpg 1x, baz moo 42w,' +
+          '\n\n\n\n\n\t    http://site.com/zo om.png 1.00x">';
+  output = '<source srcset="http://site.com/foo.gif, http://site.com/bar.jpg, baz moo 42w, http://site.com/zo om.png">';
+  equal(minify(input), output);
+  output = '<source srcset="foo.gif, bar.jpg, baz%20moo 42w, zo%20om.png">';
+  equal(minify(input, { minifyURLs: { site: 'http://site.com/' } }), output);
 });
 
 test('valueless attributes', function() {
