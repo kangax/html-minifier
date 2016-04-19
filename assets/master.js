@@ -15,8 +15,12 @@
     [].forEach.call(byId('options').getElementsByTagName('input'), fn);
   }
 
+  function log(message) {
+    console.log(message);
+  }
+
   function getOptions() {
-    var options = {};
+    var options = { log: log };
     forEachOption(function(element) {
       var key = element.id;
       var value;

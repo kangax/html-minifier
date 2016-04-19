@@ -29,9 +29,6 @@ button { font-weight: bold; width: 100px; }
 .controls a { margin-left: 0.1em; }
 .controls a:focus, .controls a:hover { text-decoration: none; }
 
-.deprecated-element, .deprecated-attribute { color: red; }
-.presentational-element, .presentational-attribute, .inaccessible-attribute, .repeating-attribute { color: #FF8C00; }
-
 .unsafe { color: #f33; }
 
 iframe { position: absolute; top: 10px; right: 10px; }
