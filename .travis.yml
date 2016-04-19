@@ -13,5 +13,3 @@ branches:
 
 matrix:
   fast_finish: true
-
-install: npm install --no-optional
