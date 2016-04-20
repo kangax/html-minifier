@@ -82,18 +82,11 @@ function isConditionalComment(text) {
 }
 
 function isIgnoredComment(text, options) {
-  if (/^!/.test(text)) {
-    return true;
-  }
-
-  if (options.ignoreCustomComments) {
-    for (var i = 0, len = options.ignoreCustomComments.length; i < len; i++) {
-      if (options.ignoreCustomComments[i].test(text)) {
-        return true;
-      }
+  for (var i = 0, len = options.ignoreCustomComments.length; i < len; i++) {
+    if (options.ignoreCustomComments[i].test(text)) {
+      return true;
     }
   }
-
   return false;
 }
 
@@ -624,6 +617,17 @@ function processOptions(options) {
     }
   }
 
+  if (!('ignoreCustomComments' in options)) {
+    options.ignoreCustomComments = [/^!/];
+  }
+
+  if (!('ignoreCustomFragments' in options)) {
+    options.ignoreCustomFragments = [
+      /<%[\s\S]*?%>/,
+      /<\?[\s\S]*?\?>/
+    ];
+  }
+
   if (options.minifyURLs && typeof options.minifyURLs !== 'object') {
     options.minifyURLs = {};
   }
@@ -822,10 +826,7 @@ function minify(value, options, partialMarkup) {
     return token;
   });
 
-  var customFragments = (options.ignoreCustomFragments || [
-    /<%[\s\S]*?%>/,
-    /<\?[\s\S]*?\?>/
-  ]).map(function(re) {
+  var customFragments = options.ignoreCustomFragments.map(function(re) {
     return re.source;
   });
   if (customFragments.length) {
@@ -1070,16 +1071,18 @@ function minify(value, options, partialMarkup) {
       if (options.collapseWhitespace) {
         if (!stackNoTrimWhitespace.length) {
           if (prevTag === 'comment') {
-            var removed = buffer[buffer.length - 1] === '';
-            if (removed) {
-              prevTag = charsPrevTag;
-            }
-            if (buffer.length > 1 && (removed || / $/.test(currentChars))) {
-              var charsIndex = buffer.length - 2;
-              buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
-                text = trailingSpaces + text;
-                return '';
-              });
+            var prevComment = buffer[buffer.length - 1];
+            if (prevComment.indexOf(uidIgnore) === -1) {
+              if (!prevComment) {
+                prevTag = charsPrevTag;
+              }
+              if (buffer.length > 1 && (!prevComment || / $/.test(currentChars))) {
+                var charsIndex = buffer.length - 2;
+                buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
+                  text = trailingSpaces + text;
+                  return '';
+                });
+              }
             }
           }
           if (prevTag) {
