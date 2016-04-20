@@ -619,8 +619,17 @@ function processOptions(options) {
     ];
   }
 
-  if (typeof options.minifyURLs === 'object') {
+  if (!options.minifyURLs) {
+    options.minifyURLs = identity;
+  }
+  if (typeof options.minifyURLs !== 'function') {
     var minifyURLs = options.minifyURLs;
+    if (typeof minifyURLs === 'string') {
+      minifyURLs = { site: minifyURLs };
+    }
+    else if (typeof minifyURLs !== 'object') {
+      minifyURLs = {};
+    }
     options.minifyURLs = function(text) {
       try {
         return RelateUrl.relate(text, minifyURLs);
@@ -630,9 +639,6 @@ function processOptions(options) {
         return text;
       }
     };
-  }
-  else if (typeof options.minifyURLs !== 'function') {
-    options.minifyURLs = identity;
   }
 
   if (!options.minifyJS) {

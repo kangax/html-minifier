@@ -1862,16 +1862,23 @@ test('style attribute minification', function() {
 test('url attribute minification', function() {
   input = '<link rel="stylesheet" href="http://website.com/style.css"><form action="http://website.com/folder/folder2/index.html"><a href="http://website.com/folder/file.html">link</a></form>';
   output = '<link rel="stylesheet" href="/style.css"><form action="folder2/"><a href="file.html">link</a></form>';
+  equal(minify(input, { minifyURLs: 'http://website.com/folder/' }), output);
   equal(minify(input, { minifyURLs: { site: 'http://website.com/folder/' } }), output);
 
   input = '<link rel="canonical" href="http://website.com/">';
+  equal(minify(input, { minifyURLs: 'http://website.com/' }), input);
   equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
 
   input = '<style>body { background: url(\'http://website.com/bg.png\') }</style>';
+  equal(minify(input, { minifyURLs: 'http://website.com/' }), input);
   equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
   output = '<style>body{background:url(http://website.com/bg.png)}</style>';
   equal(minify(input, { minifyCSS: true }), output);
   output = '<style>body{background:url(bg.png)}</style>';
+  equal(minify(input, {
+    minifyCSS: true,
+    minifyURLs: 'http://website.com/'
+  }), output);
   equal(minify(input, {
     minifyCSS: true,
     minifyURLs: { site: 'http://website.com/' }
