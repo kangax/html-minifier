@@ -1071,16 +1071,18 @@ function minify(value, options, partialMarkup) {
       if (options.collapseWhitespace) {
         if (!stackNoTrimWhitespace.length) {
           if (prevTag === 'comment') {
-            var removed = buffer[buffer.length - 1] === '';
-            if (removed) {
-              prevTag = charsPrevTag;
-            }
-            if (buffer.length > 1 && (removed || / $/.test(currentChars))) {
-              var charsIndex = buffer.length - 2;
-              buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
-                text = trailingSpaces + text;
-                return '';
-              });
+            var prevComment = buffer[buffer.length - 1];
+            if (prevComment.indexOf(uidIgnore) === -1) {
+              if (!prevComment) {
+                prevTag = charsPrevTag;
+              }
+              if (buffer.length > 1 && (!prevComment || / $/.test(currentChars))) {
+                var charsIndex = buffer.length - 2;
+                buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
+                  text = trailingSpaces + text;
+                  return '';
+                });
+              }
             }
           }
           if (prevTag) {

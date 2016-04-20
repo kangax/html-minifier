@@ -1428,7 +1428,6 @@ test('Ignore custom fragments', function() {
 
   input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n{{ ... }}\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
   output = 'This is the start. <% ... %> <%= ... %> <? ... ?> No comment, but middle. {{ ... }} <?php ... ?> <?xml ... ?> Hello, this is the end!';
-
   equal(minify(input, {}), input);
   equal(minify(input, { removeComments: true, collapseWhitespace: true }), output);
   equal(minify(input, {
@@ -1438,7 +1437,6 @@ test('Ignore custom fragments', function() {
   }), output);
 
   output = 'This is the start. <% ... %>\n<%= ... %>\n<? ... ?>\nNo comment, but middle. {{ ... }}\n<?php ... ?>\n<?xml ... ?>\nHello, this is the end!';
-
   equal(minify(input, {
     removeComments: true,
     collapseWhitespace: true,
@@ -1446,7 +1444,6 @@ test('Ignore custom fragments', function() {
   }), output);
 
   output = 'This is the start. <% ... %>\n<%= ... %>\n<? ... ?>\nNo comment, but middle.\n{{ ... }}\n<?php ... ?>\n<?xml ... ?>\nHello, this is the end!';
-
   equal(minify(input, {
     removeComments: true,
     collapseWhitespace: true,
@@ -1456,17 +1453,14 @@ test('Ignore custom fragments', function() {
 
   input = '{{ if foo? }}\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n{{ end \n}}';
   output = '{{ if foo? }}<div class="bar">...</div>{{ end }}';
-
   equal(minify(input, {}), input);
   equal(minify(input, { collapseWhitespace: true }), output);
   equal(minify(input, { collapseWhitespace: true, ignoreCustomFragments: [] }), output);
 
   output = '{{ if foo? }} <div class="bar">...</div> {{ end \n}}';
-
   equal(minify(input, { collapseWhitespace: true, ignoreCustomFragments: reFragments }), output);
 
   output = '{{ if foo? }}\n<div class="bar">\n...\n</div>\n{{ end \n}}';
-
   equal(minify(input, {
     collapseWhitespace: true,
     preserveLineBreaks: true,
@@ -1479,7 +1473,6 @@ test('Ignore custom fragments', function() {
 
   input = '<img src="{% static "images/logo.png" %}">';
   output = '<img src="{% static "images/logo.png" %}">';
-
   equal(minify(input, { ignoreCustomFragments: [/\{%[^%]*?%\}/g] }), output);
 
   input = '<p{% if form.name.errors %}class=\'error\'{% endif %}>' +
@@ -1881,29 +1874,29 @@ test('conservative collapse', function() {
 
 test('collapse preseving a line break', function() {
   input = '\n\n\n<!DOCTYPE html>   \n<html lang="en" class="no-js">\n' +
-    '  <head>\n    <meta charset="utf-8">\n    <meta http-equiv="X-UA-Compatible" content="IE=edge">\n\n\n\n' +
-    '\t<!-- Copyright Notice -->\n' +
-    '    <title>Carbon</title>\n\n\t<meta name="title" content="Carbon">\n\t\n\n' +
-    '\t<meta name="description" content="A front-end framework.">\n' +
-    '    <meta name="apple-mobile-web-app-capable" content="yes">\n' +
-    '    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n' +
-    '    <meta name="viewport" content="width=device-width, initial-scale=1">\n\n' +
-    '<link href="stylesheets/application.css" rel="stylesheet">\n' +
-    '    <script src="scripts/application.js"></script>\n' +
-    '    <link href="images/icn-32x32.png" rel="shortcut icon">\n' +
-    '    <link href="images/icn-152x152.png" rel="apple-touch-icon">\n  </head>\n  <body><p>\n   test test\n\ttest\n\n</p></body>\n</html>';
+          '  <head>\n    <meta charset="utf-8">\n    <meta http-equiv="X-UA-Compatible" content="IE=edge">\n\n\n\n' +
+          '\t<!-- Copyright Notice -->\n' +
+          '    <title>Carbon</title>\n\n\t<meta name="title" content="Carbon">\n\t\n\n' +
+          '\t<meta name="description" content="A front-end framework.">\n' +
+          '    <meta name="apple-mobile-web-app-capable" content="yes">\n' +
+          '    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n' +
+          '    <meta name="viewport" content="width=device-width, initial-scale=1">\n\n' +
+          '<link href="stylesheets/application.css" rel="stylesheet">\n' +
+          '    <script src="scripts/application.js"></script>\n' +
+          '    <link href="images/icn-32x32.png" rel="shortcut icon">\n' +
+          '    <link href="images/icn-152x152.png" rel="apple-touch-icon">\n  </head>\n  <body><p>\n   test test\n\ttest\n\n</p></body>\n</html>';
   output = '<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
-    '<head>\n<meta charset="utf-8">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
-    '<!-- Copyright Notice -->\n' +
-    '<title>Carbon</title>\n<meta name="title" content="Carbon">\n' +
-    '<meta name="description" content="A front-end framework.">\n' +
-    '<meta name="apple-mobile-web-app-capable" content="yes">\n' +
-    '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n' +
-    '<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
-    '<link href="stylesheets/application.css" rel="stylesheet">\n' +
-    '<script src="scripts/application.js"></script>\n' +
-    '<link href="images/icn-32x32.png" rel="shortcut icon">\n' +
-    '<link href="images/icn-152x152.png" rel="apple-touch-icon">\n</head>\n<body><p>\ntest test test\n</p></body>\n</html>';
+           '<head>\n<meta charset="utf-8">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
+           '<!-- Copyright Notice -->\n' +
+           '<title>Carbon</title>\n<meta name="title" content="Carbon">\n' +
+           '<meta name="description" content="A front-end framework.">\n' +
+           '<meta name="apple-mobile-web-app-capable" content="yes">\n' +
+           '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n' +
+           '<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
+           '<link href="stylesheets/application.css" rel="stylesheet">\n' +
+           '<script src="scripts/application.js"></script>\n' +
+           '<link href="images/icn-32x32.png" rel="shortcut icon">\n' +
+           '<link href="images/icn-152x152.png" rel="apple-touch-icon">\n</head>\n<body><p>\ntest test test\n</p></body>\n</html>';
   equal(minify(input, {
     collapseWhitespace: true,
     preserveLineBreaks: true
@@ -1912,6 +1905,23 @@ test('collapse preseving a line break', function() {
     collapseWhitespace: true,
     conservativeCollapse: true,
     preserveLineBreaks: true
+  }), output);
+  output = '<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
+           '<head>\n<meta charset="utf-8">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
+           '<title>Carbon</title>\n<meta name="title" content="Carbon">\n' +
+           '<meta name="description" content="A front-end framework.">\n' +
+           '<meta name="apple-mobile-web-app-capable" content="yes">\n' +
+           '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n' +
+           '<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
+           '<link href="stylesheets/application.css" rel="stylesheet">\n' +
+           '<script src="scripts/application.js"></script>\n' +
+           '<link href="images/icn-32x32.png" rel="shortcut icon">\n' +
+           '<link href="images/icn-152x152.png" rel="apple-touch-icon">\n</head>\n<body><p>\ntest test test\n</p></body>\n</html>';
+  equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true,
+    preserveLineBreaks: true,
+    removeComments: true
   }), output);
 
   input = '<div> text <span>\n text</span> \n</div>';
@@ -2018,10 +2028,8 @@ test('processScripts', function() {
 test('ignore', function() {
   input = '<!-- htmlmin:ignore --><div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div><!-- htmlmin:ignore -->' +
           '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>';
-
   output = '<div class="blah" style="color: red">\n   test   <span> <input disabled/>  foo </span>\n\n   </div>' +
            '<div class="blah" style="color: red">test <span><input disabled="disabled"> foo</span></div>';
-
   equal(minify(input, { collapseWhitespace: true }), output);
 
   input = '<!-- htmlmin:ignore --><!-- htmlmin:ignore -->';
@@ -2032,28 +2040,27 @@ test('ignore', function() {
               '<h1>{{ $criterions[$i]->value }}</h1>' +
           '@endfor' +
           '<!-- htmlmin:ignore --><p>....</p>';
-
   output = '<p>.....</p>' +
            '@for( $i = 0 ; $i < $criterions->count() ; $i++ )' +
                '<h1>{{ $criterions[$i]->value }}</h1>' +
            '@endfor' +
            '<p>....</p>';
-
   equal(minify(input, { removeComments: true }), output);
 
   input = '<!-- htmlmin:ignore --> <p class="logged"|cond="$is_logged === true" id="foo"> bar</p> <!-- htmlmin:ignore -->';
   output = ' <p class="logged"|cond="$is_logged === true" id="foo"> bar</p> ';
-
   equal(minify(input), output);
 
   input = '<!-- htmlmin:ignore --><body <?php body_class(); ?>><!-- htmlmin:ignore -->';
   output = '<body <?php body_class(); ?>>';
-
   equal(minify(input, { ignoreCustomFragments: [/<\?php[\s\S]*?\?>/] }), output);
 
   input = 'a\n<!-- htmlmin:ignore -->b<!-- htmlmin:ignore -->';
   output = 'a b';
+  equal(minify(input, { collapseWhitespace: true }), output);
 
+  input = '<p>foo <!-- htmlmin:ignore --><span>\n\tbar\n</span><!-- htmlmin:ignore -->.</p>';
+  output = '<p>foo <span>\n\tbar\n</span>.</p>';
   equal(minify(input, { collapseWhitespace: true }), output);
 });
 
