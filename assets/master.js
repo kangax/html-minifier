@@ -37,9 +37,6 @@
         case 'maxLineLength':
           value = parseInt(value);
           break;
-        case 'minifyURLs':
-          value = { site: value };
-          break;
         case 'processScripts':
           value = value.split(/\s*,\s*/);
       }

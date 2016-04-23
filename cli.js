@@ -72,7 +72,10 @@ function parseJSON(value) {
       return JSON.parse(value);
     }
     catch (e) {
-      fatal('Could not parse JSON value \'' + value + '\'');
+      if (/^{/.test(value)) {
+        fatal('Could not parse JSON value \'' + value + '\'');
+      }
+      return value;
     }
   }
 }
@@ -87,10 +90,6 @@ function parseJSONArray(value) {
 function parseJSONRegExpArray(value) {
   value = parseJSONArray(value);
   return value && value.map(parseRegExp);
-}
-
-function parseSiteURL(value) {
-  return value && { site: value };
 }
 
 function parseString(value) {
@@ -116,7 +115,7 @@ var mainOptions = {
   maxLineLength: ['Max line length', parseInt],
   minifyCSS: ['Minify CSS in style elements and style attributes (uses clean-css)', parseJSON],
   minifyJS: ['Minify Javascript in script elements and on* attributes (uses uglify-js)', parseJSON],
-  minifyURLs: ['Minify URLs in various attributes (uses relateurl)', parseSiteURL],
+  minifyURLs: ['Minify URLs in various attributes (uses relateurl)', parseJSON],
   preserveLineBreaks: 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.',
   preventAttributesEscaping: 'Prevents the escaping of the values of attributes.',
   processConditionalComments: 'Process contents of conditional comments through minifier',
