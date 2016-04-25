@@ -247,8 +247,7 @@ function processDirectory(inputDir, outputDir) {
 function writeMinify() {
   var minified;
   try {
-    var options = createOptions();
-    minified = minify(content, options);
+    minified = minify(content, createOptions());
   }
   catch (e) {
     fatal('Minification error:\n' + e.message);
@@ -269,7 +268,7 @@ if (inputDir || outputDir) {
 }
 // Minifying one or more files specified on the CMD line
 else if (typeof content === 'string') {
-  writeMinify(content);
+  writeMinify();
 }
 // Minifying input coming from STDIN
 else {
