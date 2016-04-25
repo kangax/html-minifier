@@ -28,7 +28,6 @@
 'use strict';
 
 var changeCase = require('change-case');
-var concat = require('concat-stream');
 var fs = require('fs');
 var info = require('./package.json');
 var minify = require('.').minify;
@@ -245,7 +244,7 @@ function processDirectory(inputDir, outputDir) {
   });
 }
 
-function writeMinify(content) {
+function writeMinify() {
   var minified;
   try {
     var options = createOptions();
@@ -274,5 +273,9 @@ else if (typeof content === 'string') {
 }
 // Minifying input coming from STDIN
 else {
-  process.stdin.pipe(concat({ encoding: 'string' }, writeMinify));
+  content = '';
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', function(data) {
+    content += data;
+  }).on('end', writeMinify);
 }
