@@ -34,7 +34,8 @@ var minify = require('.').minify;
 var path = require('path');
 var program = require('commander');
 
-program.version(info.version).description(info.name + ' command-line tool');
+program._name = info.name;
+program.version(info.version);
 
 function fatal(message) {
   console.error(message);
