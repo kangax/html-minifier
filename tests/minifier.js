@@ -147,6 +147,22 @@ test('space normalization around text', function() {
   equal(minify(input), input);
   output = '<p>blah</p>';
   equal(minify(input, { collapseWhitespace: true }), output);
+  output = ' <p>blah</p> ';
+  equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+  output = '<p>blah</p>\n';
+  equal(minify(input, {
+    collapseWhitespace: true,
+    preserveLineBreaks: true
+  }), output);
+  output = ' <p>blah</p>\n';
+  equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true,
+    preserveLineBreaks: true
+  }), output);
   [
     'a', 'abbr', 'acronym', 'b', 'big', 'del', 'em', 'font', 'i', 'ins', 'kbd',
     'mark', 's', 'samp', 'small', 'span', 'strike', 'strong', 'sub', 'sup',
@@ -213,8 +229,16 @@ test('space normalization around text', function() {
     ['a <nobr> b</nobr> c', 'a <nobr>b</nobr> c'],
     ['a <nobr> b </nobr> c', 'a <nobr>b</nobr> c']
   ].forEach(function(inputs) {
+    equal(minify(inputs[0], {
+      collapseWhitespace: true,
+      conservativeCollapse: true
+    }), inputs[0], inputs[0]);
     equal(minify(inputs[0], { collapseWhitespace: true }), inputs[1], inputs[0]);
     var input = '<div>' + inputs[0] + '</div>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true
+    }), input, input);
     var output = '<div>' + inputs[1] + '</div>';
     equal(minify(input, { collapseWhitespace: true }), output, input);
   });
@@ -226,21 +250,48 @@ test('space normalization around text', function() {
   equal(minify('<p><a href="#"><code>foo  </code></a> bar</p>', { collapseWhitespace: true }), '<p><a href="#"><code>foo</code></a> bar</p>');
   equal(minify('<p>  <a href="#">  <code>   foo</code></a> bar   </p>', { collapseWhitespace: true }), '<p><a href="#"><code>foo</code></a> bar</p>');
   equal(minify('<div> Empty <!-- or --> not </div>', { collapseWhitespace: true }), '<div>Empty<!-- or --> not</div>');
-  equal(minify('<div> a <input><!-- b --> c </div>', { removeComments: true, collapseWhitespace: true }), '<div>a <input> c</div>');
+  equal(minify('<div> a <input><!-- b --> c </div>', {
+    collapseWhitespace: true,
+    removeComments: true
+  }), '<div>a <input> c</div>');
   [
-    '  a  <? b ?>  c  ',
-    '<!-- d -->  a  <? b ?>  c  ',
-    '  <!-- d -->a  <? b ?>  c  ',
-    '  a<!-- d -->  <? b ?>  c  ',
-    '  a  <!-- d --><? b ?>  c  ',
-    '  a  <? b ?><!-- d -->  c  ',
-    '  a  <? b ?>  <!-- d -->c  ',
-    '  a  <? b ?>  c<!-- d -->  ',
-    '  a  <? b ?>  c  <!-- d -->'
-  ].forEach(function(input, index) {
-    input = input.replace(/b/, 'b' + index);
-    equal(minify(input, { removeComments: true, collapseWhitespace: true }), 'a <? b' + index + ' ?> c');
-    equal(minify('<p>' + input + '</p>', { removeComments: true, collapseWhitespace: true }), '<p>a <? b' + index + ' ?> c</p>');
+    ' a <? b ?> c ',
+    '<!-- d --> a <? b ?> c ',
+    ' <!-- d -->a <? b ?> c ',
+    ' a<!-- d --> <? b ?> c ',
+    ' a <!-- d --><? b ?> c ',
+    ' a <? b ?><!-- d --> c ',
+    ' a <? b ?> <!-- d -->c ',
+    ' a <? b ?> c<!-- d --> ',
+    ' a <? b ?> c <!-- d -->'
+  ].forEach(function(input) {
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true
+    }), input, input);
+    equal(minify(input, {
+      collapseWhitespace: true,
+      removeComments: true
+    }), 'a <? b ?> c', input);
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true,
+      removeComments: true
+    }), ' a <? b ?> c ', input);
+    input = '<p>' + input + '</p>';
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true
+    }), input, input);
+    equal(minify(input, {
+      collapseWhitespace: true,
+      removeComments: true
+    }), '<p>a <? b ?> c</p>', input);
+    equal(minify(input, {
+      collapseWhitespace: true,
+      conservativeCollapse: true,
+      removeComments: true
+    }), '<p> a <? b ?> c </p>', input);
   });
   input = '<li><i></i> <b></b> foo</li>';
   output = '<li><i></i> <b></b> foo</li>';
@@ -1949,7 +2000,7 @@ test('collapse preseving a line break', function() {
           '    <script src="scripts/application.js"></script>\n' +
           '    <link href="images/icn-32x32.png" rel="shortcut icon">\n' +
           '    <link href="images/icn-152x152.png" rel="apple-touch-icon">\n  </head>\n  <body><p>\n   test test\n\ttest\n\n</p></body>\n</html>';
-  output = '<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
+  output = '\n<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
            '<head>\n<meta charset="utf-8">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
            '<!-- Copyright Notice -->\n' +
            '<title>Carbon</title>\n<meta name="title" content="Carbon">\n' +
@@ -1970,7 +2021,7 @@ test('collapse preseving a line break', function() {
     conservativeCollapse: true,
     preserveLineBreaks: true
   }), output);
-  output = '<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
+  output = '\n<!DOCTYPE html>\n<html lang="en" class="no-js">\n' +
            '<head>\n<meta charset="utf-8">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n' +
            '<title>Carbon</title>\n<meta name="title" content="Carbon">\n' +
            '<meta name="description" content="A front-end framework.">\n' +
