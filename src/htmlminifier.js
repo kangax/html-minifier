@@ -35,7 +35,7 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
     str = str.replace(/^[\t ]*[\n\r][\t\n\r ]*/, function() {
       lineBreakBefore = '\n';
       return '';
-    }).replace(/[\t\n\r ]*[\n\r][\t ]*$/, function() {
+    }).replace(/[\t ]*[\n\r][\t\n\r ]*$/, function() {
       lineBreakAfter = '\n';
       return '';
     });
@@ -804,7 +804,9 @@ function minify(value, options, partialMarkup) {
   options = options || {};
   var optionsStack = [];
   processOptions(options);
-  value = options.collapseWhitespace ? trimWhitespace(value) : value;
+  if (options.collapseWhitespace) {
+    value = collapseWhitespace(value, options, true, true);
+  }
 
   var buffer = [],
       charsPrevTag,
@@ -1085,7 +1087,7 @@ function minify(value, options, partialMarkup) {
               if (!prevComment) {
                 prevTag = charsPrevTag;
               }
-              if (buffer.length > 1 && (!prevComment || / $/.test(currentChars))) {
+              if (buffer.length > 1 && (!prevComment || !options.conservativeCollapse && / $/.test(currentChars))) {
                 var charsIndex = buffer.length - 2;
                 buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
                   text = trailingSpaces + text;
@@ -1104,13 +1106,18 @@ function minify(value, options, partialMarkup) {
               text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
             }
           }
-          text = prevTag || nextTag ? collapseWhitespaceSmart(text, prevTag, nextTag, options) : trimWhitespace(text);
+          if (prevTag || nextTag) {
+            text = collapseWhitespaceSmart(text, prevTag, nextTag, options);
+          }
+          else {
+            text = collapseWhitespace(text, options, true, true);
+          }
           if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
             trimTrailingWhitespace(buffer.length - 1, nextTag);
           }
         }
-        if (!stackNoCollapseWhitespace.length) {
-          text = prevTag && nextTag || nextTag === 'html' ? text : collapseWhitespaceAll(text);
+        if (!stackNoCollapseWhitespace.length && nextTag !== 'html' && !(prevTag && nextTag)) {
+          text = collapseWhitespace(text, options, false, false, true);
         }
       }
       if (options.processScripts && specialContentTags(currentTag)) {
@@ -1248,8 +1255,7 @@ function joinResultSegments(results, options) {
   else {
     str = results.join('');
   }
-
-  return options.collapseWhitespace ? trimWhitespace(str) : str;
+  return options.collapseWhitespace ? collapseWhitespace(str, options, true, true) : str;
 }
 
 exports.minify = function(value, options) {
