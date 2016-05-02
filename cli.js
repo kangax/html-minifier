@@ -30,7 +30,7 @@
 var changeCase = require('change-case');
 var fs = require('fs');
 var info = require('./package.json');
-var minify = require('.').minify;
+var minify = require('./' + info.main).minify;
 var path = require('path');
 var program = require('commander');
 
