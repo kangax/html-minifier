@@ -35,7 +35,7 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
     str = str.replace(/^[\t ]*[\n\r][\t\n\r ]*/, function() {
       lineBreakBefore = '\n';
       return '';
-    }).replace(/[\t\n\r ]*[\n\r][\t ]*$/, function() {
+    }).replace(/[\t ]*[\n\r][\t\n\r ]*$/, function() {
       lineBreakAfter = '\n';
       return '';
     });
