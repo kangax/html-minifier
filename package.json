@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "Highly configurable, well-tested, JavaScript-based HTML minifier.",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "keywords": [
     "cli",
     "compress",
