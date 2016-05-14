@@ -23,18 +23,18 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | Site                                                                        | Original size *(KB)* | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
 | --------------------------------------------------------------------------- |:--------------------:| ------------:| --------:| ----------:| ------------------:|
 | [Google](https://www.google.com/)                                           | 57                   | **54**       | 57       | 59         | 57                 |
-| [CNN](http://www.cnn.com/)                                                  | 108                  | **98**       | 105      | 106        | 103                |
-| [HTMLMinifier](https://github.com/kangax/html-minifier)                     | 117                  | **76**       | 100      | 104        | 100                |
-| [BBC](http://www.bbc.co.uk/)                                                | 151                  | **121**      | 145      | 150        | 144                |
-| [New York Times](http://www.nytimes.com/)                                   | 171                  | **107**      | 122      | 126        | 122                |
-| [Stack Overflow](http://stackoverflow.com/)                                 | 239                  | **184**      | 193      | 202        | 192                |
+| [CNN](http://www.cnn.com/)                                                  | 109                  | **99**       | 105      | 107        | 103                |
+| [HTMLMinifier](https://github.com/kangax/html-minifier)                     | 117                  | **75**       | 99       | 104        | 100                |
+| [BBC](http://www.bbc.co.uk/)                                                | 154                  | **123**      | 148      | 152        | 145                |
+| [New York Times](http://www.nytimes.com/)                                   | 170                  | **106**      | 121      | 125        | 121                |
+| [Stack Overflow](http://stackoverflow.com/)                                 | 240                  | **185**      | 195      | 204        | 194                |
 | [Bootstrap CSS](http://getbootstrap.com/css/)                               | 277                  | **264**      | 274      | 232        | 274                |
-| [Amazon](http://www.amazon.co.uk/)                                          | 456                  | **400**      | 437      | 450        | n/a                |
-| [NBC](http://www.nbc.com/)                                                  | 465                  | **446**      | 464      | 465        | n/a                |
-| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 475                  | **422**      | 459      | 474        | n/a                |
+| [Amazon](http://www.amazon.co.uk/)                                          | 444                  | **388**      | 424      | 437        | n/a                |
+| [NBC](http://www.nbc.com/)                                                  | 465                  | **446**      | 464      | 466        | n/a                |
+| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 476                  | **422**      | 459      | 474        | n/a                |
 | [Eloquent Javascript](http://eloquentjavascript.net/1st_edition/print.html) | 870                  | **815**      | 840      | 864        | n/a                |
-| [ES6 table](http://kangax.github.io/compat-table/es6/)                      | 3780                 | **3177**     | 3559     | 3736       | n/a                |
-| [ES6 draft](https://tc39.github.io/ecma262/)                                | 4774                 | **4222**     | 4352     | 4474       | n/a                |
+| [ES6 table](http://kangax.github.io/compat-table/es6/)                      | 3801                 | **3194**     | 3579     | 3756       | n/a                |
+| [ES6 draft](https://tc39.github.io/ecma262/)                                | 4777                 | **4225**     | 4355     | 4477       | n/a                |
 
 ## Options Quick Reference
 
