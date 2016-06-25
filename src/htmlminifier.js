@@ -59,11 +59,11 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
 
 var createMapFromString = utils.createMapFromString;
 // non-empty tags that will maintain whitespace around them
-var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,nobr,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var,wbr');
+var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,nobr,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
 // non-empty tags that will maintain whitespace within them
 var inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,nobr,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
 // self-closing tags that will maintain whitespace around them
-var selfClosingInlineTags = createMapFromString('comment,img,input');
+var selfClosingInlineTags = createMapFromString('comment,img,input,wbr');
 
 function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
   var trimLeft = prevTag && !selfClosingInlineTags(prevTag);
@@ -1097,9 +1097,9 @@ function minify(value, options, partialMarkup) {
             }
           }
           if (prevTag) {
-            if (prevTag === '/nobr') {
+            if (prevTag === '/nobr' || prevTag === 'wbr') {
               if (/^\s/.test(text)) {
-                trimTrailingWhitespace(buffer.length - 1, 'br');
+                trimTrailingWhitespace(buffer.length - 2, 'br');
               }
             }
             else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
