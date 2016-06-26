@@ -713,6 +713,20 @@ QUnit.test('custom processors', function(assert) {
   output = '<p style="Some CSS"></p>';
   assert.equal(minify(input, { minifyCSS: css }), output);
 
+  input = '<link rel="stylesheet" href="css/style-mobile.css" media="(max-width: 737px)">';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, { minifyCSS: null }), input);
+  assert.equal(minify(input, { minifyCSS: false }), input);
+  output = '<link rel="stylesheet" href="css/style-mobile.css" media="Some CSS">';
+  assert.equal(minify(input, { minifyCSS: css }), output);
+
+  input = '<style media="(max-width: 737px)"></style>';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, { minifyCSS: null }), input);
+  assert.equal(minify(input, { minifyCSS: false }), input);
+  output = '<style media="Some CSS">Some CSS</style>';
+  assert.equal(minify(input, { minifyCSS: css }), output);
+
   function js(text, inline) {
     return inline ? 'Inline JS' : 'Normal JS';
   }
@@ -1996,6 +2010,26 @@ QUnit.test('style minification', function(assert) {
   assert.equal(minify(input, {
     collapseWhitespace: true,
     minifyCSS: true
+  }), output);
+
+  input = '<link rel="stylesheet" href="css/style-mobile.css" media="(max-width: 737px)">';
+  assert.equal(minify(input), input);
+  output = '<link rel="stylesheet" href="css/style-mobile.css" media="(max-width:737px)">';
+  assert.equal(minify(input, { minifyCSS: true }), output);
+  output = '<link rel=stylesheet href=css/style-mobile.css media=(max-width:737px)>';
+  assert.equal(minify(input, {
+    minifyCSS: true,
+    removeAttributeQuotes: true
+  }), output);
+
+  input = '<style media="(max-width: 737px)"></style>';
+  assert.equal(minify(input), input);
+  output = '<style media="(max-width:737px)"></style>';
+  assert.equal(minify(input, { minifyCSS: true }), output);
+  output = '<style media=(max-width:737px)></style>';
+  assert.equal(minify(input, {
+    minifyCSS: true,
+    removeAttributeQuotes: true
   }), output);
 });
 

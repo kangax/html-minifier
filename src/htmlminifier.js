@@ -228,15 +228,19 @@ function isNumberTypeAttribute(attrName, tag) {
   );
 }
 
-function isCanonicalURL(tag, attrs) {
+function isLinkType(tag, attrs, value) {
   if (tag !== 'link') {
     return false;
   }
   for (var i = 0, len = attrs.length; i < len; i++) {
-    if (attrs[i].name === 'rel' && attrs[i].value === 'canonical') {
+    if (attrs[i].name === 'rel' && attrs[i].value === value) {
       return true;
     }
   }
+}
+
+function isMediaQuery(tag, attrs, attrName) {
+  return attrName === 'media' && (isLinkType(tag, attrs, 'stylesheet') || isStyleSheet(tag, attrs));
 }
 
 var srcsetTags = createMapFromString('img,source');
@@ -262,7 +266,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (isUriTypeAttribute(attrName, tag)) {
     attrValue = trimWhitespace(attrValue);
-    return isCanonicalURL(tag, attrs) ? attrValue : options.minifyURLs(attrValue);
+    return isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue);
   }
   else if (isNumberTypeAttribute(attrName, tag)) {
     return trimWhitespace(attrValue);
@@ -308,6 +312,10 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   else if (tag === 'script' && attrName === 'type') {
     attrValue = trimWhitespace(attrValue.replace(/\s*;\s*/g, ';'));
   }
+  else if (isMediaQuery(tag, attrs, attrName)) {
+    attrValue = trimWhitespace(attrValue);
+    return unwrapMediaQuery(options.minifyCSS(wrapMediaQuery(attrValue)));
+  }
   return attrValue;
 }
 
@@ -330,6 +338,15 @@ function wrapInlineCSS(text) {
 
 function unwrapInlineCSS(text) {
   var matches = text.match(/^\*\{([\s\S]*)\}$/);
+  return matches ? matches[1] : text;
+}
+
+function wrapMediaQuery(text) {
+  return '@media ' + text + '{a{top:0}}';
+}
+
+function unwrapMediaQuery(text) {
+  var matches = text.match(/^@media ([\s\S]*?)\s*{[\s\S]*}$/);
   return matches ? matches[1] : text;
 }
 
