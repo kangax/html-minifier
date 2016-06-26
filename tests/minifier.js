@@ -1951,19 +1951,52 @@ QUnit.test('style minification', function(assert) {
   var input, output;
 
   input = '<style></style>div#foo { background-color: red; color: white }';
-
   assert.equal(minify(input, { minifyCSS: true }), input);
 
   input = '<style>div#foo { background-color: red; color: white }</style>';
   output = '<style>div#foo{background-color:red;color:#fff}</style>';
-
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: true }), output);
 
   input = '<style>div > p.foo + span { border: 10px solid black }</style>';
   output = '<style>div>p.foo+span{border:10px solid #000}</style>';
-
   assert.equal(minify(input, { minifyCSS: true }), output);
+
+  input = '<div style="background: url(images/<% image %>)"></div>';
+  assert.equal(minify(input), input);
+  output = '<div style="background:url(images/<% image %>)"></div>';
+  assert.equal(minify(input, { minifyCSS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyCSS: true
+  }), output);
+
+  input = '<div style="background: url(\'images/<% image %>\')"></div>';
+  assert.equal(minify(input), input);
+  output = '<div style="background:url(\'images/<% image %>\')"></div>';
+  assert.equal(minify(input, { minifyCSS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyCSS: true
+  }), output);
+
+  input = '<style>\np {\n  background: url(images/<% image %>);\n}\n</style>';
+  assert.equal(minify(input), input);
+  output = '<style>p{background:url(images/<% image %>)}</style>';
+  assert.equal(minify(input, { minifyCSS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyCSS: true
+  }), output);
+
+  input = '<style>p { background: url("images/<% image %>") }</style>';
+  assert.equal(minify(input), input);
+  output = '<style>p{background:url("images/<% image %>")}</style>';
+  assert.equal(minify(input, { minifyCSS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyCSS: true
+  }), output);
 });
 
 QUnit.test('style attribute minification', function(assert) {

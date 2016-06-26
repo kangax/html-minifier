@@ -822,7 +822,8 @@ function minify(value, options, partialMarkup) {
       ignoredMarkupChunks = [],
       ignoredCustomMarkupChunks = [],
       uidIgnore,
-      uidAttr;
+      uidAttr,
+      uidPattern;
 
   // temporarily replace ignored chunks with comments,
   // so that we don't have to worry what's there.
@@ -846,6 +847,15 @@ function minify(value, options, partialMarkup) {
     value = value.replace(reCustomIgnore, function(match) {
       if (!uidAttr) {
         uidAttr = uniqueId(value);
+        uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
+        var minifyCSS = options.minifyCSS;
+        if (minifyCSS) {
+          options.minifyCSS = function(text, inline) {
+            return minifyCSS(text, inline).replace(uidPattern, function(match, prefix, index, suffix) {
+              return (prefix && '\t') + uidAttr + index + (suffix && '\t');
+            });
+          };
+        }
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
       ignoredCustomMarkupChunks.push(match);
@@ -1203,8 +1213,8 @@ function minify(value, options, partialMarkup) {
 
   var str = joinResultSegments(buffer, options);
 
-  if (uidAttr) {
-    str = str.replace(new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g'), function(match, prefix, index, suffix) {
+  if (uidPattern) {
+    str = str.replace(uidPattern, function(match, prefix, index, suffix) {
       var chunk = ignoredCustomMarkupChunks[+index];
       if (options.collapseWhitespace) {
         if (prefix !== '\t') {
