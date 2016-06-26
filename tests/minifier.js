@@ -695,22 +695,22 @@ QUnit.test('remove CDATA sections from scripts/styles', function(assert) {
 QUnit.test('custom processors', function(assert) {
   var input, output;
 
-  function css(text, inline) {
-    return inline ? 'Inline CSS' : 'Normal CSS';
+  function css() {
+    return 'Some CSS';
   }
 
   input = '<style>\n.foo { font: 12pt "bar" } </style>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: null }), input);
   assert.equal(minify(input, { minifyCSS: false }), input);
-  output = '<style>Normal CSS</style>';
+  output = '<style>Some CSS</style>';
   assert.equal(minify(input, { minifyCSS: css }), output);
 
   input = '<p style="font: 12pt \'bar\'"></p>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: null }), input);
   assert.equal(minify(input, { minifyCSS: false }), input);
-  output = '<p style="Inline CSS"></p>';
+  output = '<p style="Some CSS"></p>';
   assert.equal(minify(input, { minifyCSS: css }), output);
 
   function js(text, inline) {

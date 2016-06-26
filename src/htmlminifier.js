@@ -269,10 +269,13 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (attrName === 'style') {
     attrValue = trimWhitespace(attrValue);
-    if (attrValue && /;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
-      attrValue = attrValue.replace(/\s*;$/, '');
+    if (attrValue) {
+      if (/;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
+        attrValue = attrValue.replace(/\s*;$/, '');
+      }
+      attrValue = unwrapInlineCSS(options.minifyCSS(wrapInlineCSS(attrValue)));
     }
-    return options.minifyCSS(attrValue, true);
+    return attrValue;
   }
   else if (isSrcset(attrName, tag)) {
     // https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
@@ -321,16 +324,13 @@ function isMetaViewport(tag, attrs) {
 
 // Wrap CSS declarations for CleanCSS > 3.x
 // See https://github.com/jakubpawlowicz/clean-css/issues/418
-function wrapCSS(text) {
+function wrapInlineCSS(text) {
   return '*{' + text + '}';
 }
 
-function unwrapCSS(text) {
-  var matches = text.match(/^\*\{([\s\S]*)\}$/m);
-  if (matches && matches[1]) {
-    return matches[1];
-  }
-  return text;
+function unwrapInlineCSS(text) {
+  var matches = text.match(/^\*\{([\s\S]*)\}$/);
+  return matches ? matches[1] : text;
 }
 
 function cleanConditionalComment(comment, options) {
@@ -685,18 +685,14 @@ function processOptions(options) {
     if (typeof minifyCSS.advanced === 'undefined') {
       minifyCSS.advanced = false;
     }
-    options.minifyCSS = function(text, inline) {
+    options.minifyCSS = function(text) {
       text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, function(match, prefix, quote, url, suffix) {
         return prefix + quote + options.minifyURLs(url) + quote + suffix;
       });
       var start = text.match(/^\s*<!--/);
       var style = start ? text.slice(start[0].length).replace(/-->\s*$/, '') : text;
       try {
-        var cleanCSS = new CleanCSS(minifyCSS);
-        if (inline) {
-          return unwrapCSS(cleanCSS.minify(wrapCSS(style)).styles);
-        }
-        return cleanCSS.minify(style).styles;
+        return new CleanCSS(minifyCSS).minify(style).styles;
       }
       catch (err) {
         options.log(err);
@@ -850,8 +846,8 @@ function minify(value, options, partialMarkup) {
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
         var minifyCSS = options.minifyCSS;
         if (minifyCSS) {
-          options.minifyCSS = function(text, inline) {
-            return minifyCSS(text, inline).replace(uidPattern, function(match, prefix, index, suffix) {
+          options.minifyCSS = function(text) {
+            return minifyCSS(text).replace(uidPattern, function(match, prefix, index, suffix) {
               return (prefix && '\t') + uidAttr + index + (suffix && '\t');
             });
           };
