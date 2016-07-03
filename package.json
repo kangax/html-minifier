@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "Highly configurable, well-tested, JavaScript-based HTML minifier.",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "keywords": [
     "cli",
     "compress",
@@ -66,7 +66,7 @@
     "grunt": "1.0.x",
     "grunt-browserify": "5.0.x",
     "grunt-contrib-uglify": "1.0.x",
-    "grunt-eslint": "18.1.x",
+    "grunt-eslint": "19.0.x",
     "phantomjs-prebuilt": "2.1.x",
     "qunitjs": "2.x"
   },
