@@ -722,7 +722,7 @@ function processOptions(options) {
 function uniqueId(value) {
   var id;
   do {
-    id = Math.random().toString(36).slice(2);
+    id = Math.random().toString(36).replace(/^0\.[0-9]*/, '');
   } while (~value.indexOf(id));
   return id;
 }
@@ -865,6 +865,15 @@ function minify(value, options, partialMarkup) {
         if (minifyCSS) {
           options.minifyCSS = function(text) {
             return minifyCSS(text).replace(uidPattern, function(match, prefix, index, suffix) {
+              return (prefix && '\t') + uidAttr + index + (suffix && '\t');
+            });
+          };
+        }
+        var minifyJS = options.minifyJS;
+        if (minifyJS) {
+          var pattern = new RegExp('(\\\\t|)' + uidAttr + '([0-9]+)(\\\\t|)', 'g');
+          options.minifyJS = function(text, inline) {
+            return minifyJS(text, inline).replace(pattern, function(match, prefix, index, suffix) {
               return (prefix && '\t') + uidAttr + index + (suffix && '\t');
             });
           };
