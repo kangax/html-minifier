@@ -1864,95 +1864,97 @@ QUnit.test('minification of scripts with different mimetypes', function(assert) 
 
   input = '<script type="">function f(){  return 1  }</script>';
   output = '<script type="">function f(){return 1}</script>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script type="text/javascript">function f(){  return 1  }</script>';
   output = '<script type="text/javascript">function f(){return 1}</script>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script foo="bar">function f(){  return 1  }</script>';
   output = '<script foo="bar">function f(){return 1}</script>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script type="text/ecmascript">function f(){  return 1  }</script>';
   output = '<script type="text/ecmascript">function f(){return 1}</script>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script type="application/javascript">function f(){  return 1  }</script>';
   output = '<script type="application/javascript">function f(){return 1}</script>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script type="boo">function f(){  return 1  }</script>';
-
   assert.equal(minify(input, { minifyJS: true }), input);
 
   input = '<script type="text/html"><!-- ko if: true -->\n\n\n<div></div>\n\n\n<!-- /ko --></script>';
-
   assert.equal(minify(input, { minifyJS: true }), input);
+
+  input = '<script type=""><?php ?></script>';
+  assert.equal(minify(input, { minifyJS: true }), input);
+
+  input = '<script type="">function f(){  return <?php ?>  }</script>';
+  output = '<script type="">function f(){return <?php ?>  }</script>';
+  assert.equal(minify(input, { minifyJS: true }), output);
+
+  input = '<script type="">function f(){  return "<?php ?>"  }</script>';
+  output = '<script type="">function f(){return"<?php ?>"}</script>';
+  assert.equal(minify(input, { minifyJS: true }), output);
 });
 
 QUnit.test('event minification', function(assert) {
   var input, output;
 
   input = '<div only="alert(a + b)" one=";return false;"></div>';
-
   assert.equal(minify(input, { minifyJS: true }), input);
 
   input = '<div onclick="alert(a + b)"></div>';
   output = '<div onclick="alert(a+b)"></div>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<a href="/" onclick="this.href = getUpdatedURL (this.href);return true;">test</a>';
   output = '<a href="/" onclick="return this.href=getUpdatedURL(this.href),!0">test</a>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<a onclick="try{ dcsMultiTrack(\'DCS.dcsuri\',\'USPS\',\'WT.ti\') }catch(e){}"> foobar</a>';
   output = '<a onclick=\'try{dcsMultiTrack("DCS.dcsuri","USPS","WT.ti")}catch(e){}\'> foobar</a>';
-
   assert.equal(minify(input, { minifyJS: { mangle: false } }), output);
   assert.equal(minify(input, { minifyJS: { mangle: false }, quoteCharacter: '\'' }), output);
 
   input = '<a onclick="try{ dcsMultiTrack(\'DCS.dcsuri\',\'USPS\',\'WT.ti\') }catch(e){}"> foobar</a>';
   output = '<a onclick="try{dcsMultiTrack(&#34;DCS.dcsuri&#34;,&#34;USPS&#34;,&#34;WT.ti&#34;)}catch(e){}"> foobar</a>';
-
   assert.equal(minify(input, { minifyJS: { mangle: false }, quoteCharacter: '"' }), output);
 
   input = '<a onClick="_gaq.push([\'_trackEvent\', \'FGF\', \'banner_click\']);"></a>';
   output = '<a onclick=\'_gaq.push(["_trackEvent","FGF","banner_click"])\'></a>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
   assert.equal(minify(input, { minifyJS: true, quoteCharacter: '\'' }), output);
 
   input = '<a onClick="_gaq.push([\'_trackEvent\', \'FGF\', \'banner_click\']);"></a>';
   output = '<a onclick="_gaq.push([&#34;_trackEvent&#34;,&#34;FGF&#34;,&#34;banner_click&#34;])"></a>';
-
   assert.equal(minify(input, { minifyJS: true, quoteCharacter: '"' }), output);
 
   input = '<button type="button" onclick=";return false;" id="appbar-guide-button"></button>';
   output = '<button type="button" onclick="return!1" id="appbar-guide-button"></button>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<button type="button" onclick=";return false;" ng-click="a(1 + 2)" data-click="a(1 + 2)"></button>';
   output = '<button type="button" onclick="return!1" ng-click="a(1 + 2)" data-click="a(1 + 2)"></button>';
-
   assert.equal(minify(input, { minifyJS: true }), output);
   assert.equal(minify(input, { minifyJS: true, customEventAttributes: [] }), input);
-
   output = '<button type="button" onclick=";return false;" ng-click="a(3)" data-click="a(1 + 2)"></button>';
-
   assert.equal(minify(input, { minifyJS: true, customEventAttributes: [/^ng-/] }), output);
-
   output = '<button type="button" onclick="return!1" ng-click="a(3)" data-click="a(1 + 2)"></button>';
-
   assert.equal(minify(input, { minifyJS: true, customEventAttributes: [/^on/, /^ng-/] }), output);
+
+  input = '<div onclick="<?= b ?>"></div>';
+  assert.equal(minify(input, { minifyJS: true }), input);
+
+  input = '<div onclick="alert(a + <?= b ?>)"></div>';
+  output = '<div onclick="alert(a+ <?= b ?>)"></div>';
+  assert.equal(minify(input, { minifyJS: true }), output);
+
+  input = '<div onclick="alert(a + \'<?= b ?>\')"></div>';
+  output = '<div onclick=\'alert(a+"<?= b ?>")\'></div>';
+  assert.equal(minify(input, { minifyJS: true }), output);
 });
 
 QUnit.test('escaping closing script tag', function(assert) {
