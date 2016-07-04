@@ -1064,6 +1064,41 @@ QUnit.test('removing attribute quotes', function(assert) {
   assert.equal(minify(input, { removeAttributeQuotes: true }), '<p class=foo|bar:baz></p>');
 });
 
+QUnit.test('removing prohibited attributes (&lt;a href="..." ...>)', function(assert) {
+  var input;
+
+  input = '<a href="foo" id="keep">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: ['href'] }), '<a id="keep">blah</a>');
+
+  input = '<a href="foo" id="keep">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: [] }), input);
+
+  input = '<a name="foo">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: ['href'] }), input);
+
+  input = '<a bref="foo" id="keep">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: ['href', 'bref'] }), '<a id="keep">blah</a>');
+});
+
+QUnit.test('removing prohibited attributes (&lt;a data-key="..." ...>)', function(assert) {
+  var input;
+
+  input = '<a data-url="foo" id="keep">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: [/^data-/] }), '<a id="keep">blah</a>');
+
+  input = '<a data-url="foo" id="keep">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: [] }), input);
+
+  input = '<a name="foo">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: [/^data-/] }), input);
+
+  input = '<a data-url="foo" data-key="bar" ng-attr-src="foo" id="keep">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: [/^data-/, /^ng-/] }), '<a id="keep">blah</a>');
+
+  input = '<a data-url="foo" data-key="bar" href="foo" id="keep">blah</a>';
+  assert.equal(minify(input, { prohibitedAttributes: [/^data-/, 'href'] }), '<a id="keep">blah</a>');
+});
+
 QUnit.test('preserving custom attribute-wrapping markup', function(assert) {
   var input, customAttrOptions;
 

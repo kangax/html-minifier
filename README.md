@@ -63,6 +63,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `preventAttributesEscaping`    | Prevents the escaping of the values of attributes | `false` |
 | `processConditionalComments`   | Process contents of conditional comments through minifier | `false` |
 | `processScripts`               | Array of strings corresponding to types of script elements to process through minifier (e.g. `text/ng-template`, `text/x-handlebars-template`, etc.) | `[ ]` |
+| `prohibitedAttributes`         | Array of strings or RegExp objects corresponding to unwanted attribute names (e.g. `href`, `/^data-/`, `/^ng-/`) | `[ ]` |
 | `quoteCharacter`               | Type of quote to use for attribute values (' or ") | |
 | `removeAttributeQuotes`        | [Remove quotes around attributes when possible](http://perfectionkills.com/experimenting-with-html-minifier/#remove_attribute_quotes) | `false` |
 | `removeComments`               | [Strip HTML comments](http://perfectionkills.com/experimenting-with-html-minifier/#remove_comments) | `false` |
