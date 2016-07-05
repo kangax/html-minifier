@@ -220,7 +220,7 @@ function processDirectory(inputDir, outputDir, fileExt) {
       files.forEach(function(file) {
         var inputFile = path.join(inputDir, file);
         var outputFile = path.join(outputDir, file);
-        if ((fileExt)? path.extname(file) === '.'+fileExt:true) {
+        if ((fileExt) ? path.extname(file) === '.'+fileExt : true) {
           fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
             if (!err) {
               var minified;
