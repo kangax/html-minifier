@@ -220,29 +220,30 @@ function processDirectory(inputDir, outputDir, fileExt) {
       files.forEach(function(file) {
         var inputFile = path.join(inputDir, file);
         var outputFile = path.join(outputDir, file);
-        if((fileExt)?path.extname(file) === "."+fileExt:true)
-        fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
-          if (!err) {
-            var minified;
-            try {
-              minified = minify(data, createOptions());
-            }
-            catch (e) {
-              fatal('Minification error on ' + inputFile + '\n' + e.message);
-            }
-            fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
-              if (err) {
-                fatal('Cannot write ' + outputFile + '\n' + err.message);
+        if ((fileExt)? path.extname(file) === '.'+fileExt:true) {
+          fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
+            if (!err) {
+              var minified;
+              try {
+                minified = minify(data, createOptions());
               }
-            });
-          }
-          else if (err.code === 'EISDIR') {
-            processDirectory(inputFile, outputFile, fileExt);
-          }
-          else {
-            fatal('Cannot read ' + inputFile + '\n' + err.message);
-          }
-        });
+              catch (e) {
+                fatal('Minification error on ' + inputFile + '\n' + e.message);
+              }
+              fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
+                if (err) {
+                  fatal('Cannot write ' + outputFile + '\n' + err.message);
+                }
+              });
+            }
+            else if (err.code === 'EISDIR') {
+              processDirectory(inputFile, outputFile, fileExt);
+            }
+            else {
+              fatal('Cannot read ' + inputFile + '\n' + err.message);
+            }
+          });
+        }
       });
     });
   });
