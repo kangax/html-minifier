@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v2.1.7 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.0.0 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -21627,10 +21627,19 @@ function makePredicate(words) {
             }
         cats.push([words[i]]);
     }
+    function quote(word) {
+        return JSON.stringify(word).replace(/[\u2028\u2029]/g, function(s) {
+            switch (s) {
+                case "\u2028": return "\\u2028";
+                case "\u2029": return "\\u2029";
+            }
+            return s;
+        });
+    }
     function compareTo(arr) {
-        if (arr.length == 1) return f += "return str === " + JSON.stringify(arr[0]) + ";";
+        if (arr.length == 1) return f += "return str === " + quote(arr[0]) + ";";
         f += "switch(str){";
-        for (var i = 0; i < arr.length; ++i) f += "case " + JSON.stringify(arr[i]) + ":";
+        for (var i = 0; i < arr.length; ++i) f += "case " + quote(arr[i]) + ":";
         f += "return true}return false;";
     }
     // When there are more than three length categories, an outer
@@ -22841,7 +22850,9 @@ var OPERATORS = makePredicate([
     "||"
 ]);
 
-var WHITESPACE_CHARS = makePredicate(characters(" \u00a0\n\r\t\f\u000b\u200b\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\uFEFF"));
+var WHITESPACE_CHARS = makePredicate(characters(" \u00a0\n\r\t\f\u000b\u200b\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\uFEFF"));
+
+var NEWLINE_CHARS = makePredicate(characters("\n\r\u2028\u2029"));
 
 var PUNC_BEFORE_EXPRESSION = makePredicate(characters("[{(,.;:"));
 
@@ -22968,7 +22979,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         var ch = S.text.charAt(S.pos++);
         if (signal_eof && !ch)
             throw EX_EOF;
-        if ("\r\n\u2028\u2029".indexOf(ch) >= 0) {
+        if (NEWLINE_CHARS(ch)) {
             S.newline_before = S.newline_before || !in_string;
             ++S.line;
             S.col = 0;
@@ -22995,7 +23006,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         var text = S.text;
         for (var i = S.pos, n = S.text.length; i < n; ++i) {
             var ch = text[i];
-            if (ch == '\n' || ch == '\r')
+            if (NEWLINE_CHARS(ch))
                 return i;
         }
         return -1;
@@ -23047,8 +23058,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
     };
 
     function skip_whitespace() {
-        var ch;
-        while (WHITESPACE_CHARS(ch = peek()) || ch == "\u2028" || ch == "\u2029")
+        while (WHITESPACE_CHARS(peek()))
             next();
     };
 
@@ -23086,7 +23096,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         if (!isNaN(valid)) {
             return token("num", valid);
         } else {
-            parse_error("Invalid syntax: " + num);
+            parse_error("SyntaxError: Invalid syntax: " + num);
         }
     };
 
@@ -23099,7 +23109,6 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
           case 98  : return "\b";
           case 118 : return "\u000b"; // \v
           case 102 : return "\f";
-          case 48  : return "\0";
           case 120 : return String.fromCharCode(hex_bytes(2)); // \x
           case 117 : return String.fromCharCode(hex_bytes(4)); // \u
           case 10  : return ""; // newline
@@ -23109,46 +23118,44 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
                 return "";
             }
         }
+        if (ch >= "0" && ch <= "7")
+            return read_octal_escape_sequence(ch);
         return ch;
     };
+
+    function read_octal_escape_sequence(ch) {
+        // Read
+        var p = peek();
+        if (p >= "0" && p <= "7") {
+            ch += next(true);
+            if (ch[0] <= "3" && (p = peek()) >= "0" && p <= "7")
+                ch += next(true);
+        }
+
+        // Parse
+        if (ch === "0") return "\0";
+        if (ch.length > 0 && next_token.has_directive("use strict"))
+            parse_error("SyntaxError: Octal literals are not allowed in strict mode");
+        return String.fromCharCode(parseInt(ch, 8));
+    }
 
     function hex_bytes(n) {
         var num = 0;
         for (; n > 0; --n) {
             var digit = parseInt(next(true), 16);
             if (isNaN(digit))
-                parse_error("Invalid hex-character pattern in string");
+                parse_error("SyntaxError: Invalid hex-character pattern in string");
             num = (num << 4) | digit;
         }
         return num;
     };
 
-    var read_string = with_eof_error("Unterminated string constant", function(quote_char){
+    var read_string = with_eof_error("SyntaxError: Unterminated string constant", function(quote_char){
         var quote = next(), ret = "";
         for (;;) {
             var ch = next(true, true);
-            if (ch == "\\") {
-                var octal_len = 0, first = null;
-                ch = read_while(function(ch){
-                    if (ch >= "0" && ch <= "7") {
-                        if (!first) {
-                            first = ch;
-                            return ++octal_len;
-                        }
-                        else if (first <= "3" && octal_len <= 2) return ++octal_len;
-                        else if (first >= "4" && octal_len <= 1) return ++octal_len;
-                    }
-                    return false;
-                });
-                if (octal_len > 0) {
-                    if (ch !== "0" && next_token.has_directive("use strict"))
-                        parse_error("Octal literals are not allowed in strict mode");
-                    ch = String.fromCharCode(parseInt(ch, 8));
-                } else {
-                    ch = read_escaped_char(true);
-                }
-            }
-            else if ("\r\n\u2028\u2029".indexOf(ch) >= 0) parse_error("Unterminated string constant");
+            if (ch == "\\") ch = read_escaped_char(true);
+            else if (NEWLINE_CHARS(ch)) parse_error("SyntaxError: Unterminated string constant");
             else if (ch == quote) break;
             ret += ch;
         }
@@ -23173,21 +23180,14 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         return next_token;
     };
 
-    var skip_multiline_comment = with_eof_error("Unterminated multiline comment", function(){
+    var skip_multiline_comment = with_eof_error("SyntaxError: Unterminated multiline comment", function(){
         var regex_allowed = S.regex_allowed;
         var i = find("*/", true);
-        var text = S.text.substring(S.pos, i).replace(/\r\n|\r/g, '\n');
-        var a = text.split("\n"), n = a.length;
+        var text = S.text.substring(S.pos, i).replace(/\r\n|\r|\u2028|\u2029/g, '\n');
         // update stream position
-        S.pos = i + 2;
-        S.line += n - 1;
-        if (n > 1) S.col = a[n - 1].length;
-        else S.col += a[n - 1].length;
-        S.col += 2;
-        var nlb = S.newline_before = S.newline_before || text.indexOf("\n") >= 0;
+        forward(text.length /* doesn't count \r\n as 2 char while S.pos - i does */ + 2);
         S.comments_before.push(token("comment2", text, true));
         S.regex_allowed = regex_allowed;
-        S.newline_before = nlb;
         return next_token;
     });
 
@@ -23200,9 +23200,9 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
                 else break;
             }
             else {
-                if (ch != "u") parse_error("Expecting UnicodeEscapeSequence -- uXXXX");
+                if (ch != "u") parse_error("SyntaxError: Expecting UnicodeEscapeSequence -- uXXXX");
                 ch = read_escaped_char();
-                if (!is_identifier_char(ch)) parse_error("Unicode char: " + ch.charCodeAt(0) + " is not valid in identifier");
+                if (!is_identifier_char(ch)) parse_error("SyntaxError: Unicode char: " + ch.charCodeAt(0) + " is not valid in identifier");
                 name += ch;
                 backslash = false;
             }
@@ -23214,9 +23214,11 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         return name;
     };
 
-    var read_regexp = with_eof_error("Unterminated regular expression", function(regexp){
+    var read_regexp = with_eof_error("SyntaxError: Unterminated regular expression", function(regexp){
         var prev_backslash = false, ch, in_class = false;
-        while ((ch = next(true))) if (prev_backslash) {
+        while ((ch = next(true))) if (NEWLINE_CHARS(ch)) {
+            parse_error("SyntaxError: Unexpected line terminator");
+        } else if (prev_backslash) {
             regexp += "\\" + ch;
             prev_backslash = false;
         } else if (ch == "[") {
@@ -23229,8 +23231,6 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
             break;
         } else if (ch == "\\") {
             prev_backslash = true;
-        } else if ("\r\n\u2028\u2029".indexOf(ch) >= 0) {
-            parse_error("Unexpected line terminator");
         } else {
             regexp += ch;
         }
@@ -23339,7 +23339,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
             }
             break;
         }
-        parse_error("Unexpected character '" + ch + "'");
+        parse_error("SyntaxError: Unexpected character '" + ch + "'");
     };
 
     next_token.context = function(nc) {
@@ -24621,7 +24621,7 @@ SymbolDef.prototype = {
 
 AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
     options = defaults(options, {
-        screw_ie8: false,
+        screw_ie8: true,
         cache: null
     });
 
@@ -24910,7 +24910,7 @@ AST_Toplevel.DEFMETHOD("_default_mangler_options", function(options){
         eval        : false,
         sort        : false, // Ignored. Flag retained for backwards compatibility.
         toplevel    : false,
-        screw_ie8   : false,
+        screw_ie8   : true,
         keep_fnames : false
     });
 });
@@ -25234,7 +25234,7 @@ function OutputStream(options) {
         comments         : false,
         shebang          : true,
         preserve_line    : false,
-        screw_ie8        : false,
+        screw_ie8        : true,
         preamble         : null,
         quote_style      : 0,
         keep_quoted_props: false
@@ -26031,8 +26031,8 @@ function OutputStream(options) {
         // adds the block brackets if needed.
         if (!self.body)
             return output.force_semicolon();
-        if (self.body instanceof AST_Do
-            && !output.option("screw_ie8")) {
+        if (self.body instanceof AST_Do) {
+            // Unconditionally use the if/do-while workaround for all browsers.
             // https://github.com/mishoo/UglifyJS/issues/#issue/57 IE
             // croaks with "syntax error" on code like this: if (foo)
             // do ... while(cond); else ...  we need block brackets
@@ -26660,13 +26660,15 @@ function Compressor(options, false_by_default) {
         pure_getters  : false,
         pure_funcs    : null,
         negate_iife   : !false_by_default,
-        screw_ie8     : false,
+        screw_ie8     : true,
         drop_console  : false,
         angular       : false,
         warnings      : true,
         global_defs   : {},
         passes        : 1,
     }, true);
+    var sequences = this.options["sequences"];
+    this.sequences_limit = sequences == 1 ? 200 : sequences | 0;
     this.warnings_produced = {};
 };
 
@@ -26778,7 +26780,7 @@ merge(Compressor.prototype, {
             if ((1 / val) < 0) {
                 return make_node(AST_UnaryPrefix, orig, {
                     operator: "-",
-                    expression: make_node(AST_Number, null, { value: -val })
+                    expression: make_node(AST_Number, orig, { value: -val })
                 });
             }
 
@@ -26854,7 +26856,7 @@ merge(Compressor.prototype, {
             if (compressor.option("if_return")) {
                 statements = handle_if_return(statements, compressor);
             }
-            if (compressor.option("sequences")) {
+            if (compressor.sequences_limit > 0) {
                 statements = sequencesize(statements, compressor);
             }
             if (compressor.option("join_vars")) {
@@ -27309,7 +27311,7 @@ merge(Compressor.prototype, {
                 seq = [];
             };
             statements.forEach(function(stat){
-                if (stat instanceof AST_SimpleStatement && seqLength(seq) < 2000) {
+                if (stat instanceof AST_SimpleStatement && seqLength(seq) < compressor.sequences_limit) {
                     seq.push(stat.body);
                 } else {
                     push_seq();
@@ -29625,20 +29627,55 @@ function SourceMap(options) {
 
 (function(){
 
-    var MOZ_TO_ME = {
-        ExpressionStatement: function(M) {
-            var expr = M.expression;
-            if (expr.type === "Literal" && typeof expr.value === "string") {
-                return new AST_Directive({
-                    start: my_start_token(M),
-                    end: my_end_token(M),
-                    value: expr.value
+    var normalize_directives = function(body) {
+        var in_directive = true;
+
+        for (var i = 0; i < body.length; i++) {
+            if (in_directive && body[i] instanceof AST_Statement && body[i].body instanceof AST_String) {
+                body[i] = new AST_Directive({
+                    start: body[i].start,
+                    end: body[i].end,
+                    value: body[i].body.value
                 });
+            } else if (in_directive && !(body[i] instanceof AST_Statement && body[i].body instanceof AST_String)) {
+                in_directive = false;
             }
+        }
+
+        return body;
+    };
+
+    var MOZ_TO_ME = {
+        Program: function(M) {
+            return new AST_Toplevel({
+                start: my_start_token(M),
+                end: my_end_token(M),
+                body: normalize_directives(M.body.map(from_moz))
+            });
+        },
+        FunctionDeclaration: function(M) {
+            return new AST_Defun({
+                start: my_start_token(M),
+                end: my_end_token(M),
+                name: from_moz(M.id),
+                argnames: M.params.map(from_moz),
+                body: normalize_directives(from_moz(M.body).body)
+            });
+        },
+        FunctionExpression: function(M) {
+            return new AST_Function({
+                start: my_start_token(M),
+                end: my_end_token(M),
+                name: from_moz(M.id),
+                argnames: M.params.map(from_moz),
+                body: normalize_directives(from_moz(M.body).body)
+            });
+        },
+        ExpressionStatement: function(M) {
             return new AST_SimpleStatement({
                 start: my_start_token(M),
                 end: my_end_token(M),
-                body: from_moz(expr)
+                body: from_moz(M.expression)
             });
         },
         TryStatement: function(M) {
@@ -29673,6 +29710,15 @@ function SourceMap(options) {
                 args.value.name = from_moz(key);
                 return new AST_ObjectGetter(args);
             }
+        },
+        ArrayExpression: function(M) {
+            return new AST_Array({
+                start    : my_start_token(M),
+                end      : my_end_token(M),
+                elements : M.elements.map(function(elem){
+                    return elem === null ? new AST_Hole() : from_moz(elem);
+                })
+            });
         },
         ObjectExpression: function(M) {
             return new AST_Object({
@@ -29765,7 +29811,6 @@ function SourceMap(options) {
         });
     };
 
-    map("Program", AST_Toplevel, "body@body");
     map("EmptyStatement", AST_EmptyStatement);
     map("BlockStatement", AST_BlockStatement, "body@body");
     map("IfStatement", AST_If, "test>condition, consequent>body, alternate>alternative");
@@ -29781,19 +29826,41 @@ function SourceMap(options) {
     map("ForStatement", AST_For, "init>init, test>condition, update>step, body>body");
     map("ForInStatement", AST_ForIn, "left>init, right>object, body>body");
     map("DebuggerStatement", AST_Debugger);
-    map("FunctionDeclaration", AST_Defun, "id>name, params@argnames, body%body");
     map("VariableDeclarator", AST_VarDef, "id>name, init>value");
     map("CatchClause", AST_Catch, "param>argname, body%body");
 
     map("ThisExpression", AST_This);
-    map("ArrayExpression", AST_Array, "elements@elements");
-    map("FunctionExpression", AST_Function, "id>name, params@argnames, body%body");
     map("BinaryExpression", AST_Binary, "operator=operator, left>left, right>right");
     map("LogicalExpression", AST_Binary, "operator=operator, left>left, right>right");
     map("AssignmentExpression", AST_Assign, "operator=operator, left>left, right>right");
     map("ConditionalExpression", AST_Conditional, "test>condition, consequent>consequent, alternate>alternative");
     map("NewExpression", AST_New, "callee>expression, arguments@args");
     map("CallExpression", AST_Call, "callee>expression, arguments@args");
+
+    def_to_moz(AST_Toplevel, function To_Moz_Program(M) {
+        return {
+            type: "Program",
+            body: M.body.map(to_moz)
+        };
+    });
+
+    def_to_moz(AST_Defun, function To_Moz_FunctionDeclaration(M) {
+        return {
+            type: "FunctionDeclaration",
+            id: to_moz(M.name),
+            params: M.argnames.map(to_moz),
+            body: to_moz_block(M)
+        }
+    });
+
+    def_to_moz(AST_Function, function To_Moz_FunctionExpression(M) {
+        return {
+            type: "FunctionExpression",
+            id: to_moz(M.name),
+            params: M.argnames.map(to_moz),
+            body: to_moz_block(M)
+        }
+    });
 
     def_to_moz(AST_Directive, function To_Moz_Directive(M) {
         return {
@@ -29879,6 +29946,13 @@ function SourceMap(options) {
             left: to_moz(M.left),
             operator: M.operator,
             right: to_moz(M.right)
+        };
+    });
+
+    def_to_moz(AST_Array, function To_Moz_ArrayExpression(M) {
+        return {
+            type: "ArrayExpression",
+            elements: M.elements.map(to_moz)
         };
     });
 
@@ -30494,6 +30568,7 @@ exports.RE_HEX_NUMBER = RE_HEX_NUMBER;
 exports.RE_OCT_NUMBER = RE_OCT_NUMBER;
 exports.OPERATORS = OPERATORS;
 exports.WHITESPACE_CHARS = WHITESPACE_CHARS;
+exports.NEWLINE_CHARS = NEWLINE_CHARS;
 exports.PUNC_BEFORE_EXPRESSION = PUNC_BEFORE_EXPRESSION;
 exports.PUNC_CHARS = PUNC_CHARS;
 exports.REGEXP_MODIFIERS = REGEXP_MODIFIERS;
@@ -30557,18 +30632,25 @@ exports.minify = function (files, options) {
     if (options.spidermonkey) {
         toplevel = UglifyJS.AST_Node.from_mozilla_ast(files);
     } else {
-        if (typeof files == "string")
-            files = [ files ];
-        files.forEach(function(file, i){
+        function addFile(file, fileUrl) {
             var code = options.fromString
                 ? file
                 : fs.readFileSync(file, "utf8");
-            sourcesContent[file] = code;
+            sourcesContent[fileUrl] = code;
             toplevel = UglifyJS.parse(code, {
-                filename: options.fromString ? i : file,
+                filename: fileUrl,
                 toplevel: toplevel,
                 bare_returns: options.parse ? options.parse.bare_returns : undefined
             });
+        }
+        [].concat(files).forEach(function (files, i) {
+            if (typeof files === 'string') {
+                addFile(files, options.fromString ? i : files);
+            } else {
+                for (var fileUrl in files) {
+                    addFile(files[fileUrl], fileUrl);
+                }
+            }
         });
     }
     if (options.wrap) {
