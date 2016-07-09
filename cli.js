@@ -107,7 +107,6 @@ var mainOptions = {
   customAttrSurround: ['Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', parseJSONRegExpArray],
   customEventAttributes: ['Arrays of regex\'es that allow to support custom event attributes for minifyJS (e.g. ng-click)', parseJSONRegExpArray],
   decodeEntities: 'Use direct Unicode characters whenever possible',
-
   html5: 'Parse input according to HTML5 specifications',
   ignoreCustomComments: ['Array of regex\'es that allow to ignore certain comments, when matched', parseJSONRegExpArray],
   ignoreCustomFragments: ['Array of regex\'es that allow to ignore certain fragments, when matched (e.g. <?php ... ?>, {{ ... }})', parseJSONRegExpArray],
@@ -220,30 +219,35 @@ function processDirectory(inputDir, outputDir, fileExt) {
       files.forEach(function(file) {
         var inputFile = path.join(inputDir, file);
         var outputFile = path.join(outputDir, file);
-        if (fileExt ? path.extname(file) === '.' + fileExt : true) {
-          fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
-            if (!err) {
-              var minified;
-              try {
-                minified = minify(data, createOptions());
+        fs.stat(inputFile, function(err, stat) {
+          if (err) {
+            fatal('Cannot read ' + inputFile + '\n' + err.message);
+          }
+          else if (stat.isDirectory()) {
+            processDirectory(inputFile, outputFile, fileExt);
+          }
+          else if (!fileExt || path.extname(file) === '.' + fileExt) {
+            fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
+              if (err) {
+                fatal('Cannot read ' + inputFile + '\n' + err.message);
               }
-              catch (e) {
-                fatal('Minification error on ' + inputFile + '\n' + e.message);
-              }
-              fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
-                if (err) {
-                  fatal('Cannot write ' + outputFile + '\n' + err.message);
+              else {
+                var minified;
+                try {
+                  minified = minify(data, createOptions());
                 }
-              });
-            }
-            else if (err.code === 'EISDIR') {
-              processDirectory(inputFile, outputFile, fileExt);
-            }
-            else {
-              fatal('Cannot read ' + inputFile + '\n' + err.message);
-            }
-          });
-        }
+                catch (e) {
+                  fatal('Minification error on ' + inputFile + '\n' + e.message);
+                }
+                fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
+                  if (err) {
+                    fatal('Cannot write ' + outputFile + '\n' + err.message);
+                  }
+                });
+              }
+            });
+          }
+        });
       });
     });
   });
