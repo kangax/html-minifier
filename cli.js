@@ -207,47 +207,64 @@ function createOptions() {
   return options;
 }
 
+function mkdir(outputDir, callback) {
+  fs.mkdir(outputDir, function(err) {
+    if (err) {
+      switch (err.code) {
+        case 'ENOENT':
+          return mkdir(path.join(outputDir, '..'), function() {
+            mkdir(outputDir, callback);
+          });
+        case 'EEXIST':
+          break;
+        default:
+          fatal('Cannot create directory ' + outputDir + '\n' + err.message);
+      }
+    }
+    callback();
+  });
+}
+
+function processFile(inputFile, outputFile) {
+  fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
+    if (err) {
+      fatal('Cannot read ' + inputFile + '\n' + err.message);
+    }
+    var minified;
+    try {
+      minified = minify(data, createOptions());
+    }
+    catch (e) {
+      fatal('Minification error on ' + inputFile + '\n' + e.message);
+    }
+    fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
+      if (err) {
+        fatal('Cannot write ' + outputFile + '\n' + err.message);
+      }
+    });
+  });
+}
+
 function processDirectory(inputDir, outputDir, fileExt) {
   fs.readdir(inputDir, function(err, files) {
     if (err) {
       fatal('Cannot read directory ' + inputDir + '\n' + err.message);
     }
-    fs.mkdir(outputDir, function(err) {
-      if (err && err.code !== 'EEXIST') {
-        fatal('Cannot create directory ' + outputDir + '\n' + err.message);
-      }
-      files.forEach(function(file) {
-        var inputFile = path.join(inputDir, file);
-        var outputFile = path.join(outputDir, file);
-        fs.stat(inputFile, function(err, stat) {
-          if (err) {
-            fatal('Cannot read ' + inputFile + '\n' + err.message);
-          }
-          else if (stat.isDirectory()) {
-            processDirectory(inputFile, outputFile, fileExt);
-          }
-          else if (!fileExt || path.extname(file) === '.' + fileExt) {
-            fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
-              if (err) {
-                fatal('Cannot read ' + inputFile + '\n' + err.message);
-              }
-              else {
-                var minified;
-                try {
-                  minified = minify(data, createOptions());
-                }
-                catch (e) {
-                  fatal('Minification error on ' + inputFile + '\n' + e.message);
-                }
-                fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
-                  if (err) {
-                    fatal('Cannot write ' + outputFile + '\n' + err.message);
-                  }
-                });
-              }
-            });
-          }
-        });
+    files.forEach(function(file) {
+      var inputFile = path.join(inputDir, file);
+      var outputFile = path.join(outputDir, file);
+      fs.stat(inputFile, function(err, stat) {
+        if (err) {
+          fatal('Cannot read ' + inputFile + '\n' + err.message);
+        }
+        else if (stat.isDirectory()) {
+          processDirectory(inputFile, outputFile, fileExt);
+        }
+        else if (!fileExt || path.extname(file) === '.' + fileExt) {
+          mkdir(outputDir, function() {
+            processFile(inputFile, outputFile);
+          });
+        }
       });
     });
   });
