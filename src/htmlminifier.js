@@ -514,6 +514,19 @@ function normalizeAttr(attr, attrs, tag, options) {
   var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
       attrValue = attr.value;
 
+  if (options.prohibitedAttributes) {
+    for (var i = 0; i < options.prohibitedAttributes.length; i++) {
+      if (options.prohibitedAttributes[i] instanceof RegExp) {
+        if (options.prohibitedAttributes[i].test(attrName)) {
+          return;
+        }
+      }
+      else if (options.prohibitedAttributes[i] === attrName) {
+        return;
+      }
+    }
+  }
+
   if (options.decodeEntities && attrValue) {
     attrValue = decode(attrValue, { isAttributeValue: true });
   }
