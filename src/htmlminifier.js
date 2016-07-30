@@ -845,8 +845,15 @@ function minify(value, options, partialMarkup) {
   value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, function(match, group1) {
     if (!uidIgnore) {
       uidIgnore = uniqueId(value);
+      var pattern = new RegExp('^' + uidIgnore + '([0-9]+)$');
+      if (options.ignoreCustomComments) {
+        options.ignoreCustomComments.push(pattern);
+      }
+      else {
+        options.ignoreCustomComments = [pattern];
+      }
     }
-    var token = '<!--!' + uidIgnore + ignoredMarkupChunks.length + '-->';
+    var token = '<!--' + uidIgnore + ignoredMarkupChunks.length + '-->';
     ignoredMarkupChunks.push(group1);
     return token;
   });
@@ -1254,7 +1261,7 @@ function minify(value, options, partialMarkup) {
     });
   }
   if (uidIgnore) {
-    str = str.replace(new RegExp('<!--!' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
+    str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
       return ignoredMarkupChunks[+index];
     });
   }

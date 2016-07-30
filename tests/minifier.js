@@ -2247,10 +2247,36 @@ QUnit.test('collapse inline tag whitespace', function(assert) {
 });
 
 QUnit.test('ignore custom comments', function(assert) {
-  var input;
+  var input, output;
+
+  input = '<!--! test -->';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, { removeComments: true }), input);
+  assert.equal(minify(input, { ignoreCustomComments: false }), input);
+  assert.equal(minify(input, {
+    removeComments: true,
+    ignoreCustomComments: []
+  }), '');
+  assert.equal(minify(input, {
+    removeComments: true,
+    ignoreCustomComments: false
+  }), '');
+
+  input = '<!-- htmlmin:ignore -->test<!-- htmlmin:ignore -->';
+  output = 'test';
+  assert.equal(minify(input), output);
+  assert.equal(minify(input, { removeComments: true }), output);
+  assert.equal(minify(input, { ignoreCustomComments: false }), output);
+  assert.equal(minify(input, {
+    removeComments: true,
+    ignoreCustomComments: []
+  }), output);
+  assert.equal(minify(input, {
+    removeComments: true,
+    ignoreCustomComments: false
+  }), output);
 
   input = '<!-- ko if: someExpressionGoesHere --><li>test</li><!-- /ko -->';
-
   assert.equal(minify(input, {
     removeComments: true,
     // ignore knockout comments
@@ -2261,7 +2287,6 @@ QUnit.test('ignore custom comments', function(assert) {
   }), input);
 
   input = '<!--#include virtual="/cgi-bin/counter.pl" -->';
-
   assert.equal(minify(input, {
     removeComments: true,
     // ignore Apache SSI includes
