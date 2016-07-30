@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.0.1 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.0.2 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -792,7 +792,9 @@ function fromArrayBuffer (that, array, byteOffset, length) {
     throw new RangeError('\'length\' is out of bounds')
   }
 
-  if (length === undefined) {
+  if (byteOffset === undefined && length === undefined) {
+    array = new Uint8Array(array)
+  } else if (length === undefined) {
     array = new Uint8Array(array, byteOffset)
   } else {
     array = new Uint8Array(array, byteOffset, length)
@@ -4574,6 +4576,11 @@ function compactOverrides(properties, compatibility, validator) {
         // maybe `right` can be pulled into `left` which is a shorthand?
         if (right.important && !left.important)
           continue;
+
+        if (!right.important && left.important) {
+          right.unused = true;
+          continue;
+        }
 
         // Pending more clever algorithm in #527
         if (moreSameShorthands(properties, i - 1, left.name))
@@ -10977,7 +10984,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = cachedSetTimeout(cleanUpNextTick);
+    var timeout = cachedSetTimeout.call(null, cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -10994,7 +11001,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    cachedClearTimeout(timeout);
+    cachedClearTimeout.call(null, timeout);
 }
 
 process.nextTick = function (fun) {
@@ -11006,7 +11013,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        cachedSetTimeout(drainQueue, 0);
+        cachedSetTimeout.call(null, drainQueue, 0);
     }
 };
 
@@ -14081,6 +14088,9 @@ module.exports = parsePort;
 
 },{}],101:[function(require,module,exports){
 "use strict";
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+
 
 function parseQuery(urlObj, options)
 {
@@ -14102,7 +14112,7 @@ function stringify(queryObj, removeEmptyQueries)
 	
 	for (var i in queryObj)
 	{
-		if ( i!=="" && queryObj.hasOwnProperty(i) )
+		if ( i!=="" && hasOwnProperty.call(queryObj, i)===true )
 		{
 			var value = queryObj[i];
 			
@@ -14611,7 +14621,7 @@ module.exports =
 
 function joinPath(pathArray)
 {
-	if (pathArray.length)
+	if (pathArray.length > 0)
 	{
 		return pathArray.join("/") + "/";
 	}
@@ -14639,7 +14649,7 @@ function resolveDotSegments(pathArray)
 		else
 		{
 			// Remove parent
-			if (pathAbsolute.length)
+			if (pathAbsolute.length > 0)
 			{
 				pathAbsolute.splice(pathAbsolute.length-1, 1);
 			}
@@ -17680,7 +17690,7 @@ http.METHODS = [
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./lib/request":122,"builtin-status-codes":7,"url":138,"xtend":144}],121:[function(require,module,exports){
 (function (global){
-exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableByteStream)
+exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableStream)
 
 exports.blobConstructor = false
 try {
@@ -33678,8 +33688,15 @@ function minify(value, options, partialMarkup) {
   value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, function(match, group1) {
     if (!uidIgnore) {
       uidIgnore = uniqueId(value);
+      var pattern = new RegExp('^' + uidIgnore + '([0-9]+)$');
+      if (options.ignoreCustomComments) {
+        options.ignoreCustomComments.push(pattern);
+      }
+      else {
+        options.ignoreCustomComments = [pattern];
+      }
     }
-    var token = '<!--!' + uidIgnore + ignoredMarkupChunks.length + '-->';
+    var token = '<!--' + uidIgnore + ignoredMarkupChunks.length + '-->';
     ignoredMarkupChunks.push(group1);
     return token;
   });
@@ -34087,7 +34104,7 @@ function minify(value, options, partialMarkup) {
     });
   }
   if (uidIgnore) {
-    str = str.replace(new RegExp('<!--!' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
+    str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
       return ignoredMarkupChunks[+index];
     });
   }
