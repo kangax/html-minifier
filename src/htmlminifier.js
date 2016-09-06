@@ -63,7 +63,7 @@ var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,c
 // non-empty tags that will maintain whitespace within them
 var inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,nobr,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
 // self-closing tags that will maintain whitespace around them
-var selfClosingInlineTags = createMapFromString('comment,img,input,wbr');
+var selfClosingInlineTags = createMapFromString('br,comment,img,input,wbr');
 
 function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
   var trimLeft = prevTag && !selfClosingInlineTags(prevTag);
