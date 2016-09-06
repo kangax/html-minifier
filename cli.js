@@ -187,6 +187,7 @@ program.option('-c --config-file <file>', 'Use config file', function(configPath
 });
 program.option('--input-dir <dir>', 'Specify an input directory');
 program.option('--output-dir <dir>', 'Specify an output directory');
+program.option('--file-ext <text>', 'Specify an extension to be read, ex: html');
 var content;
 program.arguments('[files...]').action(function(files) {
   content = files.map(readFile).join('');
@@ -206,40 +207,64 @@ function createOptions() {
   return options;
 }
 
-function processDirectory(inputDir, outputDir) {
+function mkdir(outputDir, callback) {
+  fs.mkdir(outputDir, function(err) {
+    if (err) {
+      switch (err.code) {
+        case 'ENOENT':
+          return mkdir(path.join(outputDir, '..'), function() {
+            mkdir(outputDir, callback);
+          });
+        case 'EEXIST':
+          break;
+        default:
+          fatal('Cannot create directory ' + outputDir + '\n' + err.message);
+      }
+    }
+    callback();
+  });
+}
+
+function processFile(inputFile, outputFile) {
+  fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
+    if (err) {
+      fatal('Cannot read ' + inputFile + '\n' + err.message);
+    }
+    var minified;
+    try {
+      minified = minify(data, createOptions());
+    }
+    catch (e) {
+      fatal('Minification error on ' + inputFile + '\n' + e.message);
+    }
+    fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
+      if (err) {
+        fatal('Cannot write ' + outputFile + '\n' + err.message);
+      }
+    });
+  });
+}
+
+function processDirectory(inputDir, outputDir, fileExt) {
   fs.readdir(inputDir, function(err, files) {
     if (err) {
       fatal('Cannot read directory ' + inputDir + '\n' + err.message);
     }
-    fs.mkdir(outputDir, function(err) {
-      if (err && err.code !== 'EEXIST') {
-        fatal('Cannot create directory ' + outputDir + '\n' + err.message);
-      }
-      files.forEach(function(file) {
-        var inputFile = path.join(inputDir, file);
-        var outputFile = path.join(outputDir, file);
-        fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
-          if (!err) {
-            var minified;
-            try {
-              minified = minify(data, createOptions());
-            }
-            catch (e) {
-              fatal('Minification error on ' + inputFile + '\n' + e.message);
-            }
-            fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
-              if (err) {
-                fatal('Cannot write ' + outputFile + '\n' + err.message);
-              }
-            });
-          }
-          else if (err.code === 'EISDIR') {
-            processDirectory(inputFile, outputFile);
-          }
-          else {
-            fatal('Cannot read ' + inputFile + '\n' + err.message);
-          }
-        });
+    files.forEach(function(file) {
+      var inputFile = path.join(inputDir, file);
+      var outputFile = path.join(outputDir, file);
+      fs.stat(inputFile, function(err, stat) {
+        if (err) {
+          fatal('Cannot read ' + inputFile + '\n' + err.message);
+        }
+        else if (stat.isDirectory()) {
+          processDirectory(inputFile, outputFile, fileExt);
+        }
+        else if (!fileExt || path.extname(file) === '.' + fileExt) {
+          mkdir(outputDir, function() {
+            processFile(inputFile, outputFile);
+          });
+        }
       });
     });
   });
@@ -258,6 +283,7 @@ function writeMinify() {
 
 var inputDir = program.inputDir;
 var outputDir = program.outputDir;
+var fileExt = program.fileExt;
 if (inputDir || outputDir) {
   if (!inputDir) {
     fatal('The option output-dir needs to be used with the option input-dir. If you are working with a single file, use -o.');
@@ -265,7 +291,7 @@ if (inputDir || outputDir) {
   else if (!outputDir) {
     fatal('You need to specify where to write the output files with the option --output-dir');
   }
-  processDirectory(inputDir, outputDir);
+  processDirectory(inputDir, outputDir, fileExt);
 }
 // Minifying one or more files specified on the CMD line
 else if (typeof content === 'string') {

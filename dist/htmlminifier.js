@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v2.1.5 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.0.2 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -592,7 +592,7 @@ exports.kMaxLength = kMaxLength()
 function typedArraySupport () {
   try {
     var arr = new Uint8Array(1)
-    arr.foo = function () { return 42 }
+    arr.__proto__ = {__proto__: Uint8Array.prototype, foo: function () { return 42 }}
     return arr.foo() === 42 && // typed array instances can be augmented
         typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
         arr.subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
@@ -736,7 +736,7 @@ function allocUnsafe (that, size) {
   assertSize(size)
   that = createBuffer(that, size < 0 ? 0 : checked(size) | 0)
   if (!Buffer.TYPED_ARRAY_SUPPORT) {
-    for (var i = 0; i < size; i++) {
+    for (var i = 0; i < size; ++i) {
       that[i] = 0
     }
   }
@@ -792,7 +792,9 @@ function fromArrayBuffer (that, array, byteOffset, length) {
     throw new RangeError('\'length\' is out of bounds')
   }
 
-  if (length === undefined) {
+  if (byteOffset === undefined && length === undefined) {
+    array = new Uint8Array(array)
+  } else if (length === undefined) {
     array = new Uint8Array(array, byteOffset)
   } else {
     array = new Uint8Array(array, byteOffset, length)
@@ -914,14 +916,14 @@ Buffer.concat = function concat (list, length) {
   var i
   if (length === undefined) {
     length = 0
-    for (i = 0; i < list.length; i++) {
+    for (i = 0; i < list.length; ++i) {
       length += list[i].length
     }
   }
 
   var buffer = Buffer.allocUnsafe(length)
   var pos = 0
-  for (i = 0; i < list.length; i++) {
+  for (i = 0; i < list.length; ++i) {
     var buf = list[i]
     if (!Buffer.isBuffer(buf)) {
       throw new TypeError('"list" argument must be an Array of Buffers')
@@ -953,7 +955,6 @@ function byteLength (string, encoding) {
     switch (encoding) {
       case 'ascii':
       case 'binary':
-      // Deprecated
       case 'raw':
       case 'raws':
         return len
@@ -1191,15 +1192,16 @@ function arrayIndexOf (arr, val, byteOffset, encoding) {
   }
 
   var foundIndex = -1
-  for (var i = 0; byteOffset + i < arrLength; i++) {
-    if (read(arr, byteOffset + i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
+  for (var i = byteOffset; i < arrLength; ++i) {
+    if (read(arr, i) === read(val, foundIndex === -1 ? 0 : i - foundIndex)) {
       if (foundIndex === -1) foundIndex = i
-      if (i - foundIndex + 1 === valLength) return (byteOffset + foundIndex) * indexSize
+      if (i - foundIndex + 1 === valLength) return foundIndex * indexSize
     } else {
       if (foundIndex !== -1) i -= i - foundIndex
       foundIndex = -1
     }
   }
+
   return -1
 }
 
@@ -1264,7 +1266,7 @@ function hexWrite (buf, string, offset, length) {
   if (length > strLen / 2) {
     length = strLen / 2
   }
-  for (var i = 0; i < length; i++) {
+  for (var i = 0; i < length; ++i) {
     var parsed = parseInt(string.substr(i * 2, 2), 16)
     if (isNaN(parsed)) return i
     buf[offset + i] = parsed
@@ -1478,7 +1480,7 @@ function asciiSlice (buf, start, end) {
   var ret = ''
   end = Math.min(buf.length, end)
 
-  for (var i = start; i < end; i++) {
+  for (var i = start; i < end; ++i) {
     ret += String.fromCharCode(buf[i] & 0x7F)
   }
   return ret
@@ -1488,7 +1490,7 @@ function binarySlice (buf, start, end) {
   var ret = ''
   end = Math.min(buf.length, end)
 
-  for (var i = start; i < end; i++) {
+  for (var i = start; i < end; ++i) {
     ret += String.fromCharCode(buf[i])
   }
   return ret
@@ -1501,7 +1503,7 @@ function hexSlice (buf, start, end) {
   if (!end || end < 0 || end > len) end = len
 
   var out = ''
-  for (var i = start; i < end; i++) {
+  for (var i = start; i < end; ++i) {
     out += toHex(buf[i])
   }
   return out
@@ -1544,7 +1546,7 @@ Buffer.prototype.slice = function slice (start, end) {
   } else {
     var sliceLen = end - start
     newBuf = new Buffer(sliceLen, undefined)
-    for (var i = 0; i < sliceLen; i++) {
+    for (var i = 0; i < sliceLen; ++i) {
       newBuf[i] = this[i + start]
     }
   }
@@ -1771,7 +1773,7 @@ Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
 
 function objectWriteUInt16 (buf, value, offset, littleEndian) {
   if (value < 0) value = 0xffff + value + 1
-  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; i++) {
+  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; ++i) {
     buf[offset + i] = (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
       (littleEndian ? i : 1 - i) * 8
   }
@@ -1805,7 +1807,7 @@ Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert
 
 function objectWriteUInt32 (buf, value, offset, littleEndian) {
   if (value < 0) value = 0xffffffff + value + 1
-  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; i++) {
+  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; ++i) {
     buf[offset + i] = (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
   }
 }
@@ -2020,12 +2022,12 @@ Buffer.prototype.copy = function copy (target, targetStart, start, end) {
 
   if (this === target && start < targetStart && targetStart < end) {
     // descending copy from end
-    for (i = len - 1; i >= 0; i--) {
+    for (i = len - 1; i >= 0; --i) {
       target[i + targetStart] = this[i + start]
     }
   } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
     // ascending copy from start
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < len; ++i) {
       target[i + targetStart] = this[i + start]
     }
   } else {
@@ -2086,7 +2088,7 @@ Buffer.prototype.fill = function fill (val, start, end, encoding) {
 
   var i
   if (typeof val === 'number') {
-    for (i = start; i < end; i++) {
+    for (i = start; i < end; ++i) {
       this[i] = val
     }
   } else {
@@ -2094,7 +2096,7 @@ Buffer.prototype.fill = function fill (val, start, end, encoding) {
       ? val
       : utf8ToBytes(new Buffer(val, encoding).toString())
     var len = bytes.length
-    for (i = 0; i < end - start; i++) {
+    for (i = 0; i < end - start; ++i) {
       this[i + start] = bytes[i % len]
     }
   }
@@ -2136,7 +2138,7 @@ function utf8ToBytes (string, units) {
   var leadSurrogate = null
   var bytes = []
 
-  for (var i = 0; i < length; i++) {
+  for (var i = 0; i < length; ++i) {
     codePoint = string.charCodeAt(i)
 
     // is surrogate component
@@ -2211,7 +2213,7 @@ function utf8ToBytes (string, units) {
 
 function asciiToBytes (str) {
   var byteArray = []
-  for (var i = 0; i < str.length; i++) {
+  for (var i = 0; i < str.length; ++i) {
     // Node's code seems to be doing this and not & 0x7F..
     byteArray.push(str.charCodeAt(i) & 0xFF)
   }
@@ -2221,7 +2223,7 @@ function asciiToBytes (str) {
 function utf16leToBytes (str, units) {
   var c, hi, lo
   var byteArray = []
-  for (var i = 0; i < str.length; i++) {
+  for (var i = 0; i < str.length; ++i) {
     if ((units -= 2) < 0) break
 
     c = str.charCodeAt(i)
@@ -2239,7 +2241,7 @@ function base64ToBytes (str) {
 }
 
 function blitBuffer (src, dst, offset, length) {
-  for (var i = 0; i < length; i++) {
+  for (var i = 0; i < length; ++i) {
     if ((i + offset >= dst.length) || (i >= src.length)) break
     dst[i + offset] = src[i]
   }
@@ -4574,6 +4576,11 @@ function compactOverrides(properties, compatibility, validator) {
         // maybe `right` can be pulled into `left` which is a shorthand?
         if (right.important && !left.important)
           continue;
+
+        if (!right.important && left.important) {
+          right.unused = true;
+          continue;
+        }
 
         // Pending more clever algorithm in #527
         if (moreSameShorthands(properties, i - 1, left.name))
@@ -9848,8 +9855,12 @@ EventEmitter.prototype.emit = function(type) {
       er = arguments[1];
       if (er instanceof Error) {
         throw er; // Unhandled 'error' event
+      } else {
+        // At least give some kind of context to the user
+        var err = new Error('Uncaught, unspecified "error" event. (' + er + ')');
+        err.context = er;
+        throw err;
       }
-      throw TypeError('Uncaught, unspecified "error" event.');
     }
   }
 
@@ -10973,7 +10984,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = cachedSetTimeout(cleanUpNextTick);
+    var timeout = cachedSetTimeout.call(null, cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -10990,7 +11001,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    cachedClearTimeout(timeout);
+    cachedClearTimeout.call(null, timeout);
 }
 
 process.nextTick = function (fun) {
@@ -11002,7 +11013,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        cachedSetTimeout(drainQueue, 0);
+        cachedSetTimeout.call(null, drainQueue, 0);
     }
 };
 
@@ -14077,6 +14088,9 @@ module.exports = parsePort;
 
 },{}],101:[function(require,module,exports){
 "use strict";
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+
 
 function parseQuery(urlObj, options)
 {
@@ -14098,7 +14112,7 @@ function stringify(queryObj, removeEmptyQueries)
 	
 	for (var i in queryObj)
 	{
-		if ( i!=="" && queryObj.hasOwnProperty(i) )
+		if ( i!=="" && hasOwnProperty.call(queryObj, i)===true )
 		{
 			var value = queryObj[i];
 			
@@ -14607,7 +14621,7 @@ module.exports =
 
 function joinPath(pathArray)
 {
-	if (pathArray.length)
+	if (pathArray.length > 0)
 	{
 		return pathArray.join("/") + "/";
 	}
@@ -14635,7 +14649,7 @@ function resolveDotSegments(pathArray)
 		else
 		{
 			// Remove parent
-			if (pathAbsolute.length)
+			if (pathAbsolute.length > 0)
 			{
 				pathAbsolute.splice(pathAbsolute.length-1, 1);
 			}
@@ -17676,7 +17690,7 @@ http.METHODS = [
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./lib/request":122,"builtin-status-codes":7,"url":138,"xtend":144}],121:[function(require,module,exports){
 (function (global){
-exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableByteStream)
+exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableStream)
 
 exports.blobConstructor = false
 try {
@@ -21455,10 +21469,7 @@ function characters(str) {
 };
 
 function member(name, array) {
-    for (var i = array.length; --i >= 0;)
-        if (array[i] == name)
-            return true;
-    return false;
+    return array.indexOf(name) >= 0;
 };
 
 function find_if(func, array) {
@@ -21493,17 +21504,17 @@ function defaults(args, defs, croak) {
     if (args === true)
         args = {};
     var ret = args || {};
-    if (croak) for (var i in ret) if (ret.hasOwnProperty(i) && !defs.hasOwnProperty(i))
+    if (croak) for (var i in ret) if (HOP(ret, i) && !HOP(defs, i))
         DefaultsError.croak("`" + i + "` is not a supported option", defs);
-    for (var i in defs) if (defs.hasOwnProperty(i)) {
-        ret[i] = (args && args.hasOwnProperty(i)) ? args[i] : defs[i];
+    for (var i in defs) if (HOP(defs, i)) {
+        ret[i] = (args && HOP(args, i)) ? args[i] : defs[i];
     }
     return ret;
 };
 
 function merge(obj, ext) {
     var count = 0;
-    for (var i in ext) if (ext.hasOwnProperty(i)) {
+    for (var i in ext) if (HOP(ext, i)) {
         obj[i] = ext[i];
         count++;
     }
@@ -21546,7 +21557,7 @@ var MAP = (function(){
             }
         }
         else {
-            for (i in a) if (a.hasOwnProperty(i)) if (doit()) break;
+            for (i in a) if (HOP(a, i)) if (doit()) break;
         }
         return top.concat(ret);
     };
@@ -21626,10 +21637,19 @@ function makePredicate(words) {
             }
         cats.push([words[i]]);
     }
+    function quote(word) {
+        return JSON.stringify(word).replace(/[\u2028\u2029]/g, function(s) {
+            switch (s) {
+                case "\u2028": return "\\u2028";
+                case "\u2029": return "\\u2029";
+            }
+            return s;
+        });
+    }
     function compareTo(arr) {
-        if (arr.length == 1) return f += "return str === " + JSON.stringify(arr[0]) + ";";
+        if (arr.length == 1) return f += "return str === " + quote(arr[0]) + ";";
         f += "switch(str){";
-        for (var i = 0; i < arr.length; ++i) f += "case " + JSON.stringify(arr[i]) + ":";
+        for (var i = 0; i < arr.length; ++i) f += "case " + quote(arr[i]) + ":";
         f += "return true}return false;";
     }
     // When there are more than three length categories, an outer
@@ -21705,6 +21725,10 @@ Dictionary.fromObject = function(obj) {
     return dict;
 };
 
+function HOP(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
 /***********************************************************************
 
   A JavaScript tokenizer / parser / beautifier / compressor.
@@ -21778,7 +21802,7 @@ function DEFNODE(type, props, methods, base) {
     if (type) {
         ctor.prototype.TYPE = ctor.TYPE = type;
     }
-    if (methods) for (i in methods) if (methods.hasOwnProperty(i)) {
+    if (methods) for (i in methods) if (HOP(methods, i)) {
         if (/^\$/.test(i)) {
             ctor[i.substr(1)] = methods[i];
         } else {
@@ -22340,6 +22364,13 @@ var AST_Seq = DEFNODE("Seq", "car cdr", {
             p = p.cdr;
         }
     },
+    len: function() {
+        if (this.cdr instanceof AST_Seq) {
+            return this.cdr.len() + 1;
+        } else {
+            return 2;
+        }
+    },
     _walk: function(visitor) {
         return visitor._visit(this, function(){
             this.car._walk(visitor);
@@ -22768,7 +22799,7 @@ TreeWalker.prototype = {
 
 var KEYWORDS = 'break case catch const continue debugger default delete do else finally for function if in instanceof new return switch throw try typeof var void while with';
 var KEYWORDS_ATOM = 'false null true';
-var RESERVED_WORDS = 'abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized this throws transient volatile yield'
+var RESERVED_WORDS = 'abstract boolean byte char class double enum export extends final float goto implements import int interface let long native package private protected public short static super synchronized this throws transient volatile yield'
     + " " + KEYWORDS_ATOM + " " + KEYWORDS;
 var KEYWORDS_BEFORE_EXPRESSION = 'return new delete throw else case';
 
@@ -22829,7 +22860,9 @@ var OPERATORS = makePredicate([
     "||"
 ]);
 
-var WHITESPACE_CHARS = makePredicate(characters(" \u00a0\n\r\t\f\u000b\u200b\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\uFEFF"));
+var WHITESPACE_CHARS = makePredicate(characters(" \u00a0\n\r\t\f\u000b\u200b\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\uFEFF"));
+
+var NEWLINE_CHARS = makePredicate(characters("\n\r\u2028\u2029"));
 
 var PUNC_BEFORE_EXPRESSION = makePredicate(characters("[{(,.;:"));
 
@@ -22945,7 +22978,9 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         tokcol          : 0,
         newline_before  : false,
         regex_allowed   : false,
-        comments_before : []
+        comments_before : [],
+        directives      : {},
+        directive_stack : []
     };
 
     function peek() { return S.text.charAt(S.pos); };
@@ -22954,7 +22989,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         var ch = S.text.charAt(S.pos++);
         if (signal_eof && !ch)
             throw EX_EOF;
-        if ("\r\n\u2028\u2029".indexOf(ch) >= 0) {
+        if (NEWLINE_CHARS(ch)) {
             S.newline_before = S.newline_before || !in_string;
             ++S.line;
             S.col = 0;
@@ -22975,6 +23010,16 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
 
     function looking_at(str) {
         return S.text.substr(S.pos, str.length) == str;
+    };
+
+    function find_eol() {
+        var text = S.text;
+        for (var i = S.pos, n = S.text.length; i < n; ++i) {
+            var ch = text[i];
+            if (NEWLINE_CHARS(ch))
+                return i;
+        }
+        return -1;
     };
 
     function find(what, signal_eof) {
@@ -23023,8 +23068,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
     };
 
     function skip_whitespace() {
-        var ch;
-        while (WHITESPACE_CHARS(ch = peek()) || ch == "\u2028" || ch == "\u2029")
+        while (WHITESPACE_CHARS(peek()))
             next();
     };
 
@@ -23062,7 +23106,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         if (!isNaN(valid)) {
             return token("num", valid);
         } else {
-            parse_error("Invalid syntax: " + num);
+            parse_error("SyntaxError: Invalid syntax: " + num);
         }
     };
 
@@ -23075,7 +23119,6 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
           case 98  : return "\b";
           case 118 : return "\u000b"; // \v
           case 102 : return "\f";
-          case 48  : return "\0";
           case 120 : return String.fromCharCode(hex_bytes(2)); // \x
           case 117 : return String.fromCharCode(hex_bytes(4)); // \u
           case 10  : return ""; // newline
@@ -23085,43 +23128,44 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
                 return "";
             }
         }
+        if (ch >= "0" && ch <= "7")
+            return read_octal_escape_sequence(ch);
         return ch;
     };
+
+    function read_octal_escape_sequence(ch) {
+        // Read
+        var p = peek();
+        if (p >= "0" && p <= "7") {
+            ch += next(true);
+            if (ch[0] <= "3" && (p = peek()) >= "0" && p <= "7")
+                ch += next(true);
+        }
+
+        // Parse
+        if (ch === "0") return "\0";
+        if (ch.length > 0 && next_token.has_directive("use strict"))
+            parse_error("SyntaxError: Octal literals are not allowed in strict mode");
+        return String.fromCharCode(parseInt(ch, 8));
+    }
 
     function hex_bytes(n) {
         var num = 0;
         for (; n > 0; --n) {
             var digit = parseInt(next(true), 16);
             if (isNaN(digit))
-                parse_error("Invalid hex-character pattern in string");
+                parse_error("SyntaxError: Invalid hex-character pattern in string");
             num = (num << 4) | digit;
         }
         return num;
     };
 
-    var read_string = with_eof_error("Unterminated string constant", function(quote_char){
+    var read_string = with_eof_error("SyntaxError: Unterminated string constant", function(quote_char){
         var quote = next(), ret = "";
         for (;;) {
             var ch = next(true, true);
-            if (ch == "\\") {
-                // read OctalEscapeSequence (XXX: deprecated if "strict mode")
-                // https://github.com/mishoo/UglifyJS/issues/178
-                var octal_len = 0, first = null;
-                ch = read_while(function(ch){
-                    if (ch >= "0" && ch <= "7") {
-                        if (!first) {
-                            first = ch;
-                            return ++octal_len;
-                        }
-                        else if (first <= "3" && octal_len <= 2) return ++octal_len;
-                        else if (first >= "4" && octal_len <= 1) return ++octal_len;
-                    }
-                    return false;
-                });
-                if (octal_len > 0) ch = String.fromCharCode(parseInt(ch, 8));
-                else ch = read_escaped_char(true);
-            }
-            else if ("\r\n\u2028\u2029".indexOf(ch) >= 0) parse_error("Unterminated string constant");
+            if (ch == "\\") ch = read_escaped_char(true);
+            else if (NEWLINE_CHARS(ch)) parse_error("SyntaxError: Unterminated string constant");
             else if (ch == quote) break;
             ret += ch;
         }
@@ -23132,7 +23176,7 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
 
     function skip_line_comment(type) {
         var regex_allowed = S.regex_allowed;
-        var i = find("\n"), ret;
+        var i = find_eol(), ret;
         if (i == -1) {
             ret = S.text.substr(S.pos);
             S.pos = S.text.length;
@@ -23143,25 +23187,18 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         S.col = S.tokcol + (S.pos - S.tokpos);
         S.comments_before.push(token(type, ret, true));
         S.regex_allowed = regex_allowed;
-        return next_token();
+        return next_token;
     };
 
-    var skip_multiline_comment = with_eof_error("Unterminated multiline comment", function(){
+    var skip_multiline_comment = with_eof_error("SyntaxError: Unterminated multiline comment", function(){
         var regex_allowed = S.regex_allowed;
         var i = find("*/", true);
-        var text = S.text.substring(S.pos, i);
-        var a = text.split("\n"), n = a.length;
+        var text = S.text.substring(S.pos, i).replace(/\r\n|\r|\u2028|\u2029/g, '\n');
         // update stream position
-        S.pos = i + 2;
-        S.line += n - 1;
-        if (n > 1) S.col = a[n - 1].length;
-        else S.col += a[n - 1].length;
-        S.col += 2;
-        var nlb = S.newline_before = S.newline_before || text.indexOf("\n") >= 0;
+        forward(text.length /* doesn't count \r\n as 2 char while S.pos - i does */ + 2);
         S.comments_before.push(token("comment2", text, true));
         S.regex_allowed = regex_allowed;
-        S.newline_before = nlb;
-        return next_token();
+        return next_token;
     });
 
     function read_name() {
@@ -23173,9 +23210,9 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
                 else break;
             }
             else {
-                if (ch != "u") parse_error("Expecting UnicodeEscapeSequence -- uXXXX");
+                if (ch != "u") parse_error("SyntaxError: Expecting UnicodeEscapeSequence -- uXXXX");
                 ch = read_escaped_char();
-                if (!is_identifier_char(ch)) parse_error("Unicode char: " + ch.charCodeAt(0) + " is not valid in identifier");
+                if (!is_identifier_char(ch)) parse_error("SyntaxError: Unicode char: " + ch.charCodeAt(0) + " is not valid in identifier");
                 name += ch;
                 backslash = false;
             }
@@ -23187,9 +23224,11 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
         return name;
     };
 
-    var read_regexp = with_eof_error("Unterminated regular expression", function(regexp){
+    var read_regexp = with_eof_error("SyntaxError: Unterminated regular expression", function(regexp){
         var prev_backslash = false, ch, in_class = false;
-        while ((ch = next(true))) if (prev_backslash) {
+        while ((ch = next(true))) if (NEWLINE_CHARS(ch)) {
+            parse_error("SyntaxError: Unexpected line terminator");
+        } else if (prev_backslash) {
             regexp += "\\" + ch;
             prev_backslash = false;
         } else if (ch == "[") {
@@ -23270,44 +23309,82 @@ function tokenizer($TEXT, filename, html5_comments, shebang) {
     function next_token(force_regexp) {
         if (force_regexp != null)
             return read_regexp(force_regexp);
-        skip_whitespace();
-        start_token();
-        if (html5_comments) {
-            if (looking_at("<!--")) {
-                forward(4);
-                return skip_line_comment("comment3");
+        for (;;) {
+            skip_whitespace();
+            start_token();
+            if (html5_comments) {
+                if (looking_at("<!--")) {
+                    forward(4);
+                    skip_line_comment("comment3");
+                    continue;
+                }
+                if (looking_at("-->") && S.newline_before) {
+                    forward(3);
+                    skip_line_comment("comment4");
+                    continue;
+                }
             }
-            if (looking_at("-->") && S.newline_before) {
-                forward(3);
-                return skip_line_comment("comment4");
+            var ch = peek();
+            if (!ch) return token("eof");
+            var code = ch.charCodeAt(0);
+            switch (code) {
+              case 34: case 39: return read_string(ch);
+              case 46: return handle_dot();
+              case 47: {
+                  var tok = handle_slash();
+                  if (tok === next_token) continue;
+                  return tok;
+              }
             }
-        }
-        var ch = peek();
-        if (!ch) return token("eof");
-        var code = ch.charCodeAt(0);
-        switch (code) {
-          case 34: case 39: return read_string(ch);
-          case 46: return handle_dot();
-          case 47: return handle_slash();
-        }
-        if (is_digit(code)) return read_num();
-        if (PUNC_CHARS(ch)) return token("punc", next());
-        if (OPERATOR_CHARS(ch)) return read_operator();
-        if (code == 92 || is_identifier_start(code)) return read_word();
-
-        if (shebang) {
-            if (S.pos == 0 && looking_at("#!")) {
-                forward(2);
-                return skip_line_comment("comment5");
+            if (is_digit(code)) return read_num();
+            if (PUNC_CHARS(ch)) return token("punc", next());
+            if (OPERATOR_CHARS(ch)) return read_operator();
+            if (code == 92 || is_identifier_start(code)) return read_word();
+            if (shebang) {
+                if (S.pos == 0 && looking_at("#!")) {
+                    forward(2);
+                    skip_line_comment("comment5");
+                    continue;
+                }
             }
+            break;
         }
-        parse_error("Unexpected character '" + ch + "'");
+        parse_error("SyntaxError: Unexpected character '" + ch + "'");
     };
 
     next_token.context = function(nc) {
         if (nc) S = nc;
         return S;
     };
+
+    next_token.add_directive = function(directive) {
+        S.directive_stack[S.directive_stack.length - 1].push(directive);
+
+        if (S.directives[directive] === undefined) {
+            S.directives[directive] = 1;
+        } else {
+            S.directives[directive]++;
+        }
+    }
+
+    next_token.push_directives_stack = function() {
+        S.directive_stack.push([]);
+    }
+
+    next_token.pop_directives_stack = function() {
+        var directives = S.directive_stack[S.directive_stack.length - 1];
+
+        for (var i = 0; i < directives.length; i++) {
+            S.directives[directives[i]]--;
+        }
+
+        S.directive_stack.pop();
+    }
+
+    next_token.has_directive = function(directive) {
+        return S.directives[directive] !== undefined &&
+            S.directives[directive] > 0;
+    }
 
     return next_token;
 
@@ -23429,14 +23506,14 @@ function parse($TEXT, options) {
     function unexpected(token) {
         if (token == null)
             token = S.token;
-        token_error(token, "Unexpected token: " + token.type + " (" + token.value + ")");
+        token_error(token, "SyntaxError: Unexpected token: " + token.type + " (" + token.value + ")");
     };
 
     function expect_token(type, val) {
         if (is(type, val)) {
             return next();
         }
-        token_error(S.token, "Unexpected token " + S.token.type + " «" + S.token.value + "»" + ", expected " + type + " «" + val + "»");
+        token_error(S.token, "SyntaxError: Unexpected token " + S.token.type + " «" + S.token.value + "»" + ", expected " + type + " «" + val + "»");
     };
 
     function expect(punc) { return expect_token("punc", punc); };
@@ -23482,9 +23559,16 @@ function parse($TEXT, options) {
         handle_regexp();
         switch (S.token.type) {
           case "string":
+            var dir = false;
+            if (S.in_directives === true) {
+                if ((is_token(peek(), "punc", ";") || peek().nlb) && S.token.raw.indexOf("\\") === -1) {
+                    S.input.add_directive(S.token.value);
+                } else {
+                    S.in_directives = false;
+                }
+            }
             var dir = S.in_directives, stat = simple_statement();
-            // XXXv2: decide how to fix directives
-            if (dir && stat.body instanceof AST_String && !is("punc", ",")) {
+            if (dir) {
                 return new AST_Directive({
                     start : stat.body.start,
                     end   : stat.body.end,
@@ -23516,6 +23600,7 @@ function parse($TEXT, options) {
               case "(":
                 return simple_statement();
               case ";":
+                S.in_directives = false;
                 next();
                 return new AST_EmptyStatement();
               default:
@@ -23557,7 +23642,7 @@ function parse($TEXT, options) {
 
               case "return":
                 if (S.in_function == 0 && !options.bare_returns)
-                    croak("'return' outside of function");
+                    croak("SyntaxError: 'return' outside of function");
                 return new AST_Return({
                     value: ( is("punc", ";")
                              ? (next(), null)
@@ -23574,7 +23659,7 @@ function parse($TEXT, options) {
 
               case "throw":
                 if (S.token.nlb)
-                    croak("Illegal newline after 'throw'");
+                    croak("SyntaxError: Illegal newline after 'throw'");
                 return new AST_Throw({
                     value: (tmp = expression(true), semicolon(), tmp)
                 });
@@ -23589,6 +23674,9 @@ function parse($TEXT, options) {
                 return tmp = const_(), semicolon(), tmp;
 
               case "with":
+                if (S.input.has_directive("use strict")) {
+                    croak("SyntaxError: Strict mode may not include a with statement");
+                }
                 return new AST_With({
                     expression : parenthesised(),
                     body       : statement()
@@ -23607,7 +23695,7 @@ function parse($TEXT, options) {
             // syntactically incorrect if it contains a
             // LabelledStatement that is enclosed by a
             // LabelledStatement with the same Identifier as label.
-            croak("Label " + label.name + " defined twice");
+            croak("SyntaxError: Label " + label.name + " defined twice");
         }
         expect(":");
         S.labels.push(label);
@@ -23620,7 +23708,7 @@ function parse($TEXT, options) {
             label.references.forEach(function(ref){
                 if (ref instanceof AST_Continue) {
                     ref = ref.label.start;
-                    croak("Continue label `" + label.name + "` refers to non-IterationStatement.",
+                    croak("SyntaxError: Continue label `" + label.name + "` refers to non-IterationStatement.",
                           ref.line, ref.col, ref.pos);
                 }
             });
@@ -23640,11 +23728,11 @@ function parse($TEXT, options) {
         if (label != null) {
             ldef = find_if(function(l){ return l.name == label.name }, S.labels);
             if (!ldef)
-                croak("Undefined label " + label.name);
+                croak("SyntaxError: Undefined label " + label.name);
             label.thedef = ldef;
         }
         else if (S.in_loop == 0)
-            croak(type.TYPE + " not inside a loop or switch");
+            croak("SyntaxError: " + type.TYPE + " not inside a loop or switch");
         semicolon();
         var stat = new type({ label: label });
         if (ldef) ldef.references.push(stat);
@@ -23660,7 +23748,7 @@ function parse($TEXT, options) {
                 : expression(true, true);
             if (is("operator", "in")) {
                 if (init instanceof AST_Var && init.definitions.length > 1)
-                    croak("Only one variable declaration allowed in for..in loop");
+                    croak("SyntaxError: Only one variable declaration allowed in for..in loop");
                 next();
                 return for_in(init);
             }
@@ -23713,9 +23801,11 @@ function parse($TEXT, options) {
             body: (function(loop, labels){
                 ++S.in_function;
                 S.in_directives = true;
+                S.input.push_directives_stack();
                 S.in_loop = 0;
                 S.labels = [];
                 var a = block_();
+                S.input.pop_directives_stack();
                 --S.in_function;
                 S.in_loop = loop;
                 S.labels = labels;
@@ -23808,7 +23898,7 @@ function parse($TEXT, options) {
             });
         }
         if (!bcatch && !bfinally)
-            croak("Missing catch/finally blocks");
+            croak("SyntaxError: Missing catch/finally blocks");
         return new AST_Try({
             body     : body,
             bcatch   : bcatch,
@@ -23902,8 +23992,8 @@ function parse($TEXT, options) {
             break;
           case "operator":
             if (!is_identifier_string(tok.value)) {
-                throw new JS_Parse_Error("Invalid getter/setter name: " + tok.value,
-                    tok.file, tok.line, tok.col, tok.pos);
+                croak("SyntaxError: Invalid getter/setter name: " + tok.value,
+                    tok.line, tok.col, tok.pos);
             }
             ret = _make_symbol(AST_SymbolRef);
             break;
@@ -24053,7 +24143,7 @@ function parse($TEXT, options) {
 
     function as_symbol(type, noerror) {
         if (!is("name")) {
-            if (!noerror) croak("Name expected");
+            if (!noerror) croak("SyntaxError: Name expected");
             return null;
         }
         var sym = _make_symbol(type);
@@ -24117,7 +24207,7 @@ function parse($TEXT, options) {
 
     function make_unary(ctor, op, expr) {
         if ((op == "++" || op == "--") && !is_assignable(expr))
-            croak("Invalid use of " + op + " operator");
+            croak("SyntaxError: Invalid use of " + op + " operator");
         return new ctor({ operator: op, expression: expr });
     };
 
@@ -24181,7 +24271,7 @@ function parse($TEXT, options) {
                     end      : prev()
                 });
             }
-            croak("Invalid assignment");
+            croak("SyntaxError: Invalid assignment");
         }
         return left;
     };
@@ -24215,8 +24305,10 @@ function parse($TEXT, options) {
     return (function(){
         var start = S.token;
         var body = [];
+        S.input.push_directives_stack();
         while (!is("eof"))
             body.push(statement());
+        S.input.pop_directives_stack();
         var end = prev();
         var toplevel = options.toplevel;
         if (toplevel) {
@@ -24504,7 +24596,10 @@ function SymbolDef(scope, index, orig) {
     this.undeclared = false;
     this.constant = false;
     this.index = index;
+    this.id = SymbolDef.next_id++;
 };
+
+SymbolDef.next_id = 1;
 
 SymbolDef.prototype = {
     unmangleable: function(options) {
@@ -24536,7 +24631,7 @@ SymbolDef.prototype = {
 
 AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
     options = defaults(options, {
-        screw_ie8: false,
+        screw_ie8: true,
         cache: null
     });
 
@@ -24823,9 +24918,9 @@ AST_Toplevel.DEFMETHOD("_default_mangler_options", function(options){
     return defaults(options, {
         except      : [],
         eval        : false,
-        sort        : false,
+        sort        : false, // Ignored. Flag retained for backwards compatibility.
         toplevel    : false,
-        screw_ie8   : false,
+        screw_ie8   : true,
         keep_fnames : false
     });
 });
@@ -24865,9 +24960,6 @@ AST_Toplevel.DEFMETHOD("mangle_names", function(options){
                 if (options.except.indexOf(symbol.name) < 0) {
                     a.push(symbol);
                 }
-            });
-            if (options.sort) a.sort(function(a, b){
-                return b.references.length - a.references.length;
             });
             to_mangle.push.apply(to_mangle, a);
             return;
@@ -25131,6 +25223,8 @@ AST_Toplevel.DEFMETHOD("scope_warnings", function(options){
 
 "use strict";
 
+var EXPECT_DIRECTIVE = /^$|[;{][\s\n]*$/;
+
 function OutputStream(options) {
 
     options = defaults(options, {
@@ -25150,9 +25244,10 @@ function OutputStream(options) {
         comments         : false,
         shebang          : true,
         preserve_line    : false,
-        screw_ie8        : false,
+        screw_ie8        : true,
         preamble         : null,
-        quote_style      : 0
+        quote_style      : 0,
+        keep_quoted_props: false
     }, true);
 
     var indentation = 0;
@@ -25162,7 +25257,7 @@ function OutputStream(options) {
     var OUTPUT = "";
 
     function to_ascii(str, identifier) {
-        return str.replace(/[\u0080-\uffff]/g, function(ch) {
+        return str.replace(/[\u0000-\u001f\u007f-\uffff]/g, function(ch) {
             var code = ch.charCodeAt(0).toString(16);
             if (code.length <= 2 && !identifier) {
                 while (code.length < 2) code = "0" + code;
@@ -25176,20 +25271,23 @@ function OutputStream(options) {
 
     function make_string(str, quote) {
         var dq = 0, sq = 0;
-        str = str.replace(/[\\\b\f\n\r\v\t\x22\x27\u2028\u2029\0\ufeff]/g, function(s){
+        str = str.replace(/[\\\b\f\n\r\v\t\x22\x27\u2028\u2029\0\ufeff]/g,
+          function(s, i){
             switch (s) {
+              case '"': ++dq; return '"';
+              case "'": ++sq; return "'";
               case "\\": return "\\\\";
-              case "\b": return "\\b";
-              case "\f": return "\\f";
               case "\n": return "\\n";
               case "\r": return "\\r";
+              case "\t": return "\\t";
+              case "\b": return "\\b";
+              case "\f": return "\\f";
               case "\x0B": return options.screw_ie8 ? "\\v" : "\\x0B";
               case "\u2028": return "\\u2028";
               case "\u2029": return "\\u2029";
-              case '"': ++dq; return '"';
-              case "'": ++sq; return "'";
-              case "\0": return "\\x00";
               case "\ufeff": return "\\ufeff";
+              case "\0":
+                  return /[0-7]/.test(str.charAt(i+1)) ? "\\x00" : "\\0";
             }
             return s;
         });
@@ -25439,7 +25537,18 @@ function OutputStream(options) {
         force_semicolon : force_semicolon,
         to_ascii        : to_ascii,
         print_name      : function(name) { print(make_name(name)) },
-        print_string    : function(str, quote) { print(encode_string(str, quote)) },
+        print_string    : function(str, quote, escape_directive) {
+            var encoded = encode_string(str, quote);
+            if (escape_directive === true && encoded.indexOf("\\") === -1) {
+                // Insert semicolons to break directive prologue
+                if (!EXPECT_DIRECTIVE.test(OUTPUT)) {
+                    force_semicolon();
+                }
+                force_semicolon();
+            }
+            print(encoded);
+        },
+        encode_string   : encode_string,
         next_indent     : next_indent,
         with_indent     : with_indent,
         with_block      : with_block,
@@ -25471,10 +25580,11 @@ function OutputStream(options) {
     };
 
     var use_asm = false;
+    var in_directive = false;
 
     AST_Node.DEFMETHOD("print", function(stream, force_parens){
         var self = this, generator = self._codegen, prev_use_asm = use_asm;
-        if (self instanceof AST_Directive && self.value == "use asm") {
+        if (self instanceof AST_Directive && self.value == "use asm" && stream.parent() instanceof AST_Scope) {
             use_asm = true;
         }
         function doit() {
@@ -25489,13 +25599,14 @@ function OutputStream(options) {
             doit();
         }
         stream.pop_node();
-        if (self instanceof AST_Lambda) {
+        if (self instanceof AST_Scope) {
             use_asm = prev_use_asm;
         }
     });
 
     AST_Node.DEFMETHOD("print_to_string", function(options){
         var s = OutputStream(options);
+        if (!options) s._readonly = true;
         this.print(s);
         return s.get();
     });
@@ -25503,6 +25614,7 @@ function OutputStream(options) {
     /* -----[ comments ]----- */
 
     AST_Node.DEFMETHOD("add_comments", function(output){
+        if (output._readonly) return;
         var c = output.option("comments"), self = this;
         var start = self.start;
         if (start && !start._comments_dumped) {
@@ -25600,7 +25712,8 @@ function OutputStream(options) {
 
     PARENS([ AST_Unary, AST_Undefined ], function(output){
         var p = output.parent();
-        return p instanceof AST_PropAccess && p.expression === this;
+        return p instanceof AST_PropAccess && p.expression === this
+            || p instanceof AST_New;
     });
 
     PARENS(AST_Seq, function(output){
@@ -25676,7 +25789,7 @@ function OutputStream(options) {
 
     PARENS(AST_New, function(output){
         var p = output.parent();
-        if (no_constructor_parens(this, output)
+        if (!need_constructor_parens(this, output)
             && (p instanceof AST_PropAccess // (new Date).getTime(), (new Date)["getTime"]()
                 || p instanceof AST_Call && p.expression === this)) // (new foo)(bar)
             return true;
@@ -25684,8 +25797,12 @@ function OutputStream(options) {
 
     PARENS(AST_Number, function(output){
         var p = output.parent();
-        if (this.getValue() < 0 && p instanceof AST_PropAccess && p.expression === this)
-            return true;
+        if (p instanceof AST_PropAccess && p.expression === this) {
+            var value = this.getValue();
+            if (value < 0 || /^0/.test(make_num(value))) {
+                return true;
+            }
+        }
     });
 
     PARENS([ AST_Assign, AST_Conditional ], function (output){
@@ -25720,9 +25837,16 @@ function OutputStream(options) {
 
     /* -----[ statements ]----- */
 
-    function display_body(body, is_toplevel, output) {
+    function display_body(body, is_toplevel, output, allow_directives) {
         var last = body.length - 1;
+        in_directive = allow_directives;
         body.forEach(function(stmt, i){
+            if (in_directive === true && !(stmt instanceof AST_Directive ||
+                stmt instanceof AST_EmptyStatement ||
+                (stmt instanceof AST_SimpleStatement && stmt.body instanceof AST_String)
+            )) {
+                in_directive = false;
+            }
             if (!(stmt instanceof AST_EmptyStatement)) {
                 output.indent();
                 stmt.print(output);
@@ -25731,7 +25855,14 @@ function OutputStream(options) {
                     if (is_toplevel) output.newline();
                 }
             }
+            if (in_directive === true &&
+                stmt instanceof AST_SimpleStatement &&
+                stmt.body instanceof AST_String
+            ) {
+                in_directive = false;
+            }
         });
+        in_directive = false;
     };
 
     AST_StatementWithBody.DEFMETHOD("_do_print_body", function(output){
@@ -25743,7 +25874,7 @@ function OutputStream(options) {
         output.semicolon();
     });
     DEFPRINT(AST_Toplevel, function(self, output){
-        display_body(self.body, true, output);
+        display_body(self.body, true, output, true);
         output.print("");
     });
     DEFPRINT(AST_LabeledStatement, function(self, output){
@@ -25755,9 +25886,9 @@ function OutputStream(options) {
         self.body.print(output);
         output.semicolon();
     });
-    function print_bracketed(body, output) {
+    function print_bracketed(body, output, allow_directives) {
         if (body.length > 0) output.with_block(function(){
-            display_body(body, false, output);
+            display_body(body, false, output, allow_directives);
         });
         else output.print("{}");
     };
@@ -25857,7 +25988,7 @@ function OutputStream(options) {
             });
         });
         output.space();
-        print_bracketed(self.body, output);
+        print_bracketed(self.body, output, true);
     });
     DEFPRINT(AST_Lambda, function(self, output){
         self._do_print(output);
@@ -25910,8 +26041,8 @@ function OutputStream(options) {
         // adds the block brackets if needed.
         if (!self.body)
             return output.force_semicolon();
-        if (self.body instanceof AST_Do
-            && !output.option("screw_ie8")) {
+        if (self.body instanceof AST_Do) {
+            // Unconditionally use the if/do-while workaround for all browsers.
             // https://github.com/mishoo/UglifyJS/issues/#issue/57 IE
             // croaks with "syntax error" on code like this: if (foo)
             // do ... while(cond); else ...  we need block brackets
@@ -26073,7 +26204,7 @@ function OutputStream(options) {
     /* -----[ other expressions ]----- */
     DEFPRINT(AST_Call, function(self, output){
         self.expression.print(output);
-        if (self instanceof AST_New && no_constructor_parens(self, output))
+        if (self instanceof AST_New && !need_constructor_parens(self, output))
             return;
         output.with_parens(function(){
             self.args.forEach(function(expr, i){
@@ -26114,7 +26245,7 @@ function OutputStream(options) {
         var expr = self.expression;
         expr.print(output);
         if (expr instanceof AST_Number && expr.getValue() >= 0) {
-            if (!/[xa-f.]/i.test(output.last())) {
+            if (!/[xa-f.)]/i.test(output.last())) {
                 output.print(".");
             }
         }
@@ -26223,7 +26354,11 @@ function OutputStream(options) {
                    && parseFloat(key) >= 0) {
             output.print(make_num(key));
         } else if (RESERVED_WORDS(key) ? output.option("screw_ie8") : is_identifier_string(key)) {
-            output.print_name(key);
+            if (quote && output.option("keep_quoted_props")) {
+                output.print_string(key, quote);
+            } else {
+                output.print_name(key);
+            }
         } else {
             output.print_string(key, quote);
         }
@@ -26263,10 +26398,10 @@ function OutputStream(options) {
         output.print(self.getValue());
     });
     DEFPRINT(AST_String, function(self, output){
-        output.print_string(self.getValue(), self.quote);
+        output.print_string(self.getValue(), self.quote, in_directive);
     });
     DEFPRINT(AST_Number, function(self, output){
-        if (use_asm && self.start.raw != null) {
+        if (use_asm && self.start && self.start.raw != null) {
             output.print(self.start.raw);
         } else {
             output.print(make_num(self.getValue()));
@@ -26363,8 +26498,11 @@ function OutputStream(options) {
     };
 
     // self should be AST_New.  decide if we want to show parens or not.
-    function no_constructor_parens(self, output) {
-        return self.args.length == 0 && !output.option("beautify");
+    function need_constructor_parens(self, output) {
+        // Always print parentheses with arguments
+        if (self.args.length > 0) return true;
+
+        return output.option("beautify");
     };
 
     function best_of(a) {
@@ -26532,21 +26670,41 @@ function Compressor(options, false_by_default) {
         pure_getters  : false,
         pure_funcs    : null,
         negate_iife   : !false_by_default,
-        screw_ie8     : false,
+        screw_ie8     : true,
         drop_console  : false,
         angular       : false,
-
         warnings      : true,
-        global_defs   : {}
+        global_defs   : {},
+        passes        : 1,
     }, true);
+    var sequences = this.options["sequences"];
+    this.sequences_limit = sequences == 1 ? 200 : sequences | 0;
+    this.warnings_produced = {};
 };
 
 Compressor.prototype = new TreeTransformer;
 merge(Compressor.prototype, {
     option: function(key) { return this.options[key] },
-    warn: function() {
-        if (this.options.warnings)
-            AST_Node.warn.apply(AST_Node, arguments);
+    compress: function(node) {
+        var passes = +this.options.passes || 1;
+        for (var pass = 0; pass < passes && pass < 3; ++pass) {
+            if (pass > 0) node.clear_opt_flags();
+            node = node.transform(this);
+        }
+        return node;
+    },
+    warn: function(text, props) {
+        if (this.options.warnings) {
+            // only emit unique warnings
+            var message = string_template(text, props);
+            if (!(message in this.warnings_produced)) {
+                this.warnings_produced[message] = true;
+                AST_Node.warn.apply(AST_Node, arguments);
+            }
+        }
+    },
+    clear_warnings: function() {
+        this.warnings_produced = {};
     },
     before: function(node, descend, in_list) {
         if (node._squeezed) return node;
@@ -26589,6 +26747,15 @@ merge(Compressor.prototype, {
         return this.print_to_string() == node.print_to_string();
     });
 
+    AST_Node.DEFMETHOD("clear_opt_flags", function(){
+        this.walk(new TreeWalker(function(node){
+            if (!(node instanceof AST_Directive || node instanceof AST_Constant)) {
+                node._squeezed = false;
+                node._optimized = false;
+            }
+        }));
+    });
+
     function make_node(ctor, orig, props) {
         if (!props) props = {};
         if (orig) {
@@ -26616,9 +26783,18 @@ merge(Compressor.prototype, {
                 value: val
             }).optimize(compressor);
           case "number":
-            return make_node(isNaN(val) ? AST_NaN : AST_Number, orig, {
-                value: val
-            }).optimize(compressor);
+            if (isNaN(val)) {
+                return make_node(AST_NaN, orig);
+            }
+
+            if ((1 / val) < 0) {
+                return make_node(AST_UnaryPrefix, orig, {
+                    operator: "-",
+                    expression: make_node(AST_Number, orig, { value: -val })
+                });
+            }
+
+            return make_node(AST_Number, orig, { value: val }).optimize(compressor);
           case "boolean":
             return make_node(val ? AST_True : AST_False, orig).optimize(compressor);
           case "undefined":
@@ -26690,7 +26866,7 @@ merge(Compressor.prototype, {
             if (compressor.option("if_return")) {
                 statements = handle_if_return(statements, compressor);
             }
-            if (compressor.option("sequences")) {
+            if (compressor.sequences_limit > 0) {
                 statements = sequencesize(statements, compressor);
             }
             if (compressor.option("join_vars")) {
@@ -26762,7 +26938,7 @@ merge(Compressor.prototype, {
                     if (ref.scope.uses_eval || ref.scope.uses_with) break;
 
                     // Constant single use vars can be replaced in any scope.
-                    if (var_decl.value.is_constant(compressor)) {
+                    if (!(var_decl.value instanceof AST_RegExp) && var_decl.value.is_constant(compressor)) {
                         var ctt = new TreeTransformer(function(node) {
                             if (node === ref)
                                 return replace_var(node, ctt.parent(), true);
@@ -26852,10 +27028,7 @@ merge(Compressor.prototype, {
                     var_defs_removed = true;
                 }
                 // Further optimize statement after substitution.
-                stat.walk(new TreeWalker(function(node){
-                    delete node._squeezed;
-                    delete node._optimized;
-                }));
+                stat.clear_opt_flags();
 
                 compressor.warn("Replacing " + (is_constant ? "constant" : "variable") +
                     " " + var_name + " [{file}:{line},{col}]", node.start);
@@ -26962,6 +27135,7 @@ merge(Compressor.prototype, {
 
         function handle_if_return(statements, compressor) {
             var self = compressor.self();
+            var multiple_if_returns = has_multiple_if_returns(statements);
             var in_lambda = self instanceof AST_Lambda;
             var ret = [];
             loop: for (var i = statements.length; --i >= 0;) {
@@ -26999,7 +27173,8 @@ merge(Compressor.prototype, {
                         }
                         //---
                         // if (foo()) return x; [ return ; ] ==> return foo() ? x : undefined;
-                        if ((ret.length == 0 || ret[0] instanceof AST_Return) && stat.body.value && !stat.alternative && in_lambda) {
+                        if (multiple_if_returns && (ret.length == 0 || ret[0] instanceof AST_Return)
+                            && stat.body.value && !stat.alternative && in_lambda) {
                             CHANGED = true;
                             stat = stat.clone();
                             stat.alternative = ret[0] || make_node(AST_Return, stat, {
@@ -27014,11 +27189,13 @@ merge(Compressor.prototype, {
                             CHANGED = true;
                             stat = stat.clone();
                             stat.condition = stat.condition.negate(compressor);
+                            var body = as_statement_array(stat.alternative).concat(ret);
+                            var funs = extract_functions_from_statement_array(body);
                             stat.body = make_node(AST_BlockStatement, stat, {
-                                body: as_statement_array(stat.alternative).concat(ret)
+                                body: body
                             });
                             stat.alternative = null;
-                            ret = [ stat.transform(compressor) ];
+                            ret = funs.concat([ stat.transform(compressor) ]);
                             continue loop;
                         }
                         //---
@@ -27089,6 +27266,17 @@ merge(Compressor.prototype, {
                 }
             }
             return ret;
+
+            function has_multiple_if_returns(statements) {
+                var n = 0;
+                for (var i = statements.length; --i >= 0;) {
+                    var stat = statements[i];
+                    if (stat instanceof AST_If && stat.body instanceof AST_Return) {
+                        if (++n > 1) return true;
+                    }
+                }
+                return false;
+            }
         };
 
         function eliminate_dead_code(statements, compressor) {
@@ -27133,13 +27321,29 @@ merge(Compressor.prototype, {
                 seq = [];
             };
             statements.forEach(function(stat){
-                if (stat instanceof AST_SimpleStatement && seq.length < 2000) seq.push(stat.body);
-                else push_seq(), ret.push(stat);
+                if (stat instanceof AST_SimpleStatement && seqLength(seq) < compressor.sequences_limit) {
+                    seq.push(stat.body);
+                } else {
+                    push_seq();
+                    ret.push(stat);
+                }
             });
             push_seq();
             ret = sequencesize_2(ret, compressor);
             CHANGED = ret.length != statements.length;
             return ret;
+        };
+
+        function seqLength(a) {
+            for (var len = 0, i = 0; i < a.length; ++i) {
+                var stat = a[i];
+                if (stat instanceof AST_Seq) {
+                    len += stat.len();
+                } else {
+                    len++;
+                }
+            }
+            return len;
         };
 
         function sequencesize_2(statements, compressor) {
@@ -27229,6 +27433,9 @@ merge(Compressor.prototype, {
                 if (stat instanceof AST_SimpleStatement) {
                     stat.body = (function transform(thing) {
                         return thing.transform(new TreeTransformer(function(node){
+                            if (node instanceof AST_New) {
+                                return node;
+                            }
                             if (node instanceof AST_Call && node.expression instanceof AST_Function) {
                                 return make_node(AST_UnaryPrefix, node, {
                                     operator: "!",
@@ -27260,8 +27467,22 @@ merge(Compressor.prototype, {
 
     };
 
+    function extract_functions_from_statement_array(statements) {
+        var funs = [];
+        for (var i = statements.length - 1; i >= 0; --i) {
+            var stat = statements[i];
+            if (stat instanceof AST_Defun) {
+                statements.splice(i, 1);
+                funs.unshift(stat);
+            }
+        }
+        return funs;
+    }
+
     function extract_declarations_from_unreachable_code(compressor, stat, target) {
-        compressor.warn("Dropping unreachable code [{file}:{line},{col}]", stat.start);
+        if (!(stat instanceof AST_Defun)) {
+            compressor.warn("Dropping unreachable code [{file}:{line},{col}]", stat.start);
+        }
         stat.walk(new TreeWalker(function(node){
             if (node instanceof AST_Definitions) {
                 compressor.warn("Declarations in unreachable code! [{file}:{line},{col}]", node.start);
@@ -27429,42 +27650,43 @@ merge(Compressor.prototype, {
                 return typeof e;
               case "void": return void ev(e, compressor);
               case "~": return ~ev(e, compressor);
-              case "-":
-                e = ev(e, compressor);
-                if (e === 0) throw def;
-                return -e;
+              case "-": return -ev(e, compressor);
               case "+": return +ev(e, compressor);
             }
             throw def;
         });
         def(AST_Binary, function(c){
-            var left = this.left, right = this.right;
+            var left = this.left, right = this.right, result;
             switch (this.operator) {
-              case "&&"         : return ev(left, c) &&         ev(right, c);
-              case "||"         : return ev(left, c) ||         ev(right, c);
-              case "|"          : return ev(left, c) |          ev(right, c);
-              case "&"          : return ev(left, c) &          ev(right, c);
-              case "^"          : return ev(left, c) ^          ev(right, c);
-              case "+"          : return ev(left, c) +          ev(right, c);
-              case "*"          : return ev(left, c) *          ev(right, c);
-              case "/"          : return ev(left, c) /          ev(right, c);
-              case "%"          : return ev(left, c) %          ev(right, c);
-              case "-"          : return ev(left, c) -          ev(right, c);
-              case "<<"         : return ev(left, c) <<         ev(right, c);
-              case ">>"         : return ev(left, c) >>         ev(right, c);
-              case ">>>"        : return ev(left, c) >>>        ev(right, c);
-              case "=="         : return ev(left, c) ==         ev(right, c);
-              case "==="        : return ev(left, c) ===        ev(right, c);
-              case "!="         : return ev(left, c) !=         ev(right, c);
-              case "!=="        : return ev(left, c) !==        ev(right, c);
-              case "<"          : return ev(left, c) <          ev(right, c);
-              case "<="         : return ev(left, c) <=         ev(right, c);
-              case ">"          : return ev(left, c) >          ev(right, c);
-              case ">="         : return ev(left, c) >=         ev(right, c);
-              case "in"         : return ev(left, c) in         ev(right, c);
-              case "instanceof" : return ev(left, c) instanceof ev(right, c);
+              case "&&"  : result = ev(left, c) &&  ev(right, c); break;
+              case "||"  : result = ev(left, c) ||  ev(right, c); break;
+              case "|"   : result = ev(left, c) |   ev(right, c); break;
+              case "&"   : result = ev(left, c) &   ev(right, c); break;
+              case "^"   : result = ev(left, c) ^   ev(right, c); break;
+              case "+"   : result = ev(left, c) +   ev(right, c); break;
+              case "*"   : result = ev(left, c) *   ev(right, c); break;
+              case "/"   : result = ev(left, c) /   ev(right, c); break;
+              case "%"   : result = ev(left, c) %   ev(right, c); break;
+              case "-"   : result = ev(left, c) -   ev(right, c); break;
+              case "<<"  : result = ev(left, c) <<  ev(right, c); break;
+              case ">>"  : result = ev(left, c) >>  ev(right, c); break;
+              case ">>>" : result = ev(left, c) >>> ev(right, c); break;
+              case "=="  : result = ev(left, c) ==  ev(right, c); break;
+              case "===" : result = ev(left, c) === ev(right, c); break;
+              case "!="  : result = ev(left, c) !=  ev(right, c); break;
+              case "!==" : result = ev(left, c) !== ev(right, c); break;
+              case "<"   : result = ev(left, c) <   ev(right, c); break;
+              case "<="  : result = ev(left, c) <=  ev(right, c); break;
+              case ">"   : result = ev(left, c) >   ev(right, c); break;
+              case ">="  : result = ev(left, c) >=  ev(right, c); break;
+              default:
+                  throw def;
             }
-            throw def;
+            if (isNaN(result) && c.find_parent(AST_With)) {
+                // leave original expression as is
+                throw def;
+            }
+            return result;
         });
         def(AST_Conditional, function(compressor){
             return ev(this.condition, compressor)
@@ -27472,8 +27694,16 @@ merge(Compressor.prototype, {
                 : ev(this.alternative, compressor);
         });
         def(AST_SymbolRef, function(compressor){
-            var d = this.definition();
-            if (d && d.constant && d.init) return ev(d.init, compressor);
+            if (this._evaluating) throw def;
+            this._evaluating = true;
+            try {
+                var d = this.definition();
+                if (d && d.constant && d.init) {
+                    return ev(d.init, compressor);
+                }
+            } finally {
+                this._evaluating = false;
+            }
             throw def;
         });
         def(AST_Dot, function(compressor){
@@ -27700,8 +27930,10 @@ merge(Compressor.prototype, {
         if (compressor.option("unused")
             && !(self instanceof AST_Toplevel)
             && !self.uses_eval
+            && !self.uses_with
            ) {
             var in_use = [];
+            var in_use_ids = {}; // avoid expensive linear scans of in_use
             var initializations = new Dictionary();
             // pass 1: find out which symbols are directly used in
             // this scope (not in nested scopes).
@@ -27724,7 +27956,11 @@ merge(Compressor.prototype, {
                         return true;
                     }
                     if (node instanceof AST_SymbolRef) {
-                        push_uniq(in_use, node.definition());
+                        var node_def = node.definition();
+                        if (!(node_def.id in in_use_ids)) {
+                            in_use_ids[node_def.id] = true;
+                            in_use.push(node_def);
+                        }
                         return true;
                     }
                     if (node instanceof AST_Scope) {
@@ -27747,7 +27983,11 @@ merge(Compressor.prototype, {
                     if (init) init.forEach(function(init){
                         var tw = new TreeWalker(function(node){
                             if (node instanceof AST_SymbolRef) {
-                                push_uniq(in_use, node.definition());
+                                var node_def = node.definition();
+                                if (!(node_def.id in in_use_ids)) {
+                                    in_use_ids[node_def.id] = true;
+                                    in_use.push(node_def);
+                                }
                             }
                         });
                         init.walk(tw);
@@ -27775,7 +28015,7 @@ merge(Compressor.prototype, {
                         }
                     }
                     if (node instanceof AST_Defun && node !== self) {
-                        if (!member(node.name.definition(), in_use)) {
+                        if (!(node.name.definition().id in in_use_ids)) {
                             compressor.warn("Dropping unused function {name} [{file}:{line},{col}]", {
                                 name : node.name.name,
                                 file : node.name.start.file,
@@ -27788,7 +28028,7 @@ merge(Compressor.prototype, {
                     }
                     if (node instanceof AST_Definitions && !(tt.parent() instanceof AST_ForIn)) {
                         var def = node.definitions.filter(function(def){
-                            if (member(def.name.definition(), in_use)) return true;
+                            if (def.name.definition().id in in_use_ids) return true;
                             var w = {
                                 name : def.name.name,
                                 file : def.name.start.file,
@@ -28866,9 +29106,11 @@ merge(Compressor.prototype, {
                 });
                 self = best_of(self, negated);
             }
-            switch (self.operator) {
-              case "<": reverse(">"); break;
-              case "<=": reverse(">="); break;
+            if (compressor.option("unsafe_comps")) {
+                switch (self.operator) {
+                  case "<": reverse(">"); break;
+                  case "<=": reverse(">="); break;
+                }
             }
         }
         if (self.operator == "+" && self.right instanceof AST_String
@@ -28960,16 +29202,19 @@ merge(Compressor.prototype, {
 
         if (self.undeclared() && !isLHS(self, compressor.parent())) {
             var defines = compressor.option("global_defs");
-            if (defines && defines.hasOwnProperty(self.name)) {
+            if (defines && HOP(defines, self.name)) {
                 return make_node_from_constant(compressor, defines[self.name], self);
             }
-            switch (self.name) {
-              case "undefined":
-                return make_node(AST_Undefined, self);
-              case "NaN":
-                return make_node(AST_NaN, self).transform(compressor);
-              case "Infinity":
-                return make_node(AST_Infinity, self).transform(compressor);
+            // testing against !self.scope.uses_with first is an optimization
+            if (!self.scope.uses_with || !compressor.find_parent(AST_With)) {
+                switch (self.name) {
+                  case "undefined":
+                    return make_node(AST_Undefined, self);
+                  case "NaN":
+                    return make_node(AST_NaN, self).transform(compressor);
+                  case "Infinity":
+                    return make_node(AST_Infinity, self).transform(compressor);
+                }
             }
         }
         return self;
@@ -29101,7 +29346,7 @@ merge(Compressor.prototype, {
         if (consequent.is_constant(compressor)
             && alternative.is_constant(compressor)
             && consequent.equivalent_to(alternative)) {
-            var consequent_value = consequent.constant_value();
+            var consequent_value = consequent.constant_value(compressor);
             if (self.condition.has_side_effects(compressor)) {
                 return AST_Seq.from_array([self.condition, make_node_from_constant(compressor, consequent_value, self)]);
             } else {
@@ -29109,23 +29354,57 @@ merge(Compressor.prototype, {
             }
         }
 
-        // y?true:false --> !!y
-        if (is_true(consequent) && is_false(alternative)) {
-            if (self.condition.is_boolean()) {
-                // boolean_expression ? true : false --> boolean_expression
-                return self.condition;
+        if (is_true(self.consequent)) {
+            if (is_false(self.alternative)) {
+                // c ? true : false ---> !!c
+                return booleanize(self.condition);
             }
-            self.condition = self.condition.negate(compressor);
-            return make_node(AST_UnaryPrefix, self.condition, {
-                operator: "!",
-                expression: self.condition
+            // c ? true : x ---> !!c || x
+            return make_node(AST_Binary, self, {
+                operator: "||",
+                left: booleanize(self.condition),
+                right: self.alternative
             });
         }
-        // y?false:true --> !y
-        if (is_false(consequent) && is_true(alternative)) {
-            return self.condition.negate(compressor)
+        if (is_false(self.consequent)) {
+            if (is_true(self.alternative)) {
+                // c ? false : true ---> !c
+                return booleanize(self.condition.negate(compressor));
+            }
+            // c ? false : x ---> !c && x
+            return make_node(AST_Binary, self, {
+                operator: "&&",
+                left: booleanize(self.condition.negate(compressor)),
+                right: self.alternative
+            });
         }
+        if (is_true(self.alternative)) {
+            // c ? x : true ---> !c || x
+            return make_node(AST_Binary, self, {
+                operator: "||",
+                left: booleanize(self.condition.negate(compressor)),
+                right: self.consequent
+            });
+        }
+        if (is_false(self.alternative)) {
+            // c ? x : false ---> !!c && x
+            return make_node(AST_Binary, self, {
+                operator: "&&",
+                left: booleanize(self.condition),
+                right: self.consequent
+            });
+        }
+
         return self;
+
+        function booleanize(node) {
+            if (node.is_boolean()) return node;
+            // !!expression
+            return make_node(AST_UnaryPrefix, node, {
+                operator: "!",
+                expression: node.negate(compressor)
+            });
+        }
 
         // AST_True or !0
         function is_true(node) {
@@ -29358,20 +29637,55 @@ function SourceMap(options) {
 
 (function(){
 
-    var MOZ_TO_ME = {
-        ExpressionStatement: function(M) {
-            var expr = M.expression;
-            if (expr.type === "Literal" && typeof expr.value === "string") {
-                return new AST_Directive({
-                    start: my_start_token(M),
-                    end: my_end_token(M),
-                    value: expr.value
+    var normalize_directives = function(body) {
+        var in_directive = true;
+
+        for (var i = 0; i < body.length; i++) {
+            if (in_directive && body[i] instanceof AST_Statement && body[i].body instanceof AST_String) {
+                body[i] = new AST_Directive({
+                    start: body[i].start,
+                    end: body[i].end,
+                    value: body[i].body.value
                 });
+            } else if (in_directive && !(body[i] instanceof AST_Statement && body[i].body instanceof AST_String)) {
+                in_directive = false;
             }
+        }
+
+        return body;
+    };
+
+    var MOZ_TO_ME = {
+        Program: function(M) {
+            return new AST_Toplevel({
+                start: my_start_token(M),
+                end: my_end_token(M),
+                body: normalize_directives(M.body.map(from_moz))
+            });
+        },
+        FunctionDeclaration: function(M) {
+            return new AST_Defun({
+                start: my_start_token(M),
+                end: my_end_token(M),
+                name: from_moz(M.id),
+                argnames: M.params.map(from_moz),
+                body: normalize_directives(from_moz(M.body).body)
+            });
+        },
+        FunctionExpression: function(M) {
+            return new AST_Function({
+                start: my_start_token(M),
+                end: my_end_token(M),
+                name: from_moz(M.id),
+                argnames: M.params.map(from_moz),
+                body: normalize_directives(from_moz(M.body).body)
+            });
+        },
+        ExpressionStatement: function(M) {
             return new AST_SimpleStatement({
                 start: my_start_token(M),
                 end: my_end_token(M),
-                body: from_moz(expr)
+                body: from_moz(M.expression)
             });
         },
         TryStatement: function(M) {
@@ -29406,6 +29720,15 @@ function SourceMap(options) {
                 args.value.name = from_moz(key);
                 return new AST_ObjectGetter(args);
             }
+        },
+        ArrayExpression: function(M) {
+            return new AST_Array({
+                start    : my_start_token(M),
+                end      : my_end_token(M),
+                elements : M.elements.map(function(elem){
+                    return elem === null ? new AST_Hole() : from_moz(elem);
+                })
+            });
         },
         ObjectExpression: function(M) {
             return new AST_Object({
@@ -29498,7 +29821,6 @@ function SourceMap(options) {
         });
     };
 
-    map("Program", AST_Toplevel, "body@body");
     map("EmptyStatement", AST_EmptyStatement);
     map("BlockStatement", AST_BlockStatement, "body@body");
     map("IfStatement", AST_If, "test>condition, consequent>body, alternate>alternative");
@@ -29514,19 +29836,41 @@ function SourceMap(options) {
     map("ForStatement", AST_For, "init>init, test>condition, update>step, body>body");
     map("ForInStatement", AST_ForIn, "left>init, right>object, body>body");
     map("DebuggerStatement", AST_Debugger);
-    map("FunctionDeclaration", AST_Defun, "id>name, params@argnames, body%body");
     map("VariableDeclarator", AST_VarDef, "id>name, init>value");
     map("CatchClause", AST_Catch, "param>argname, body%body");
 
     map("ThisExpression", AST_This);
-    map("ArrayExpression", AST_Array, "elements@elements");
-    map("FunctionExpression", AST_Function, "id>name, params@argnames, body%body");
     map("BinaryExpression", AST_Binary, "operator=operator, left>left, right>right");
     map("LogicalExpression", AST_Binary, "operator=operator, left>left, right>right");
     map("AssignmentExpression", AST_Assign, "operator=operator, left>left, right>right");
     map("ConditionalExpression", AST_Conditional, "test>condition, consequent>consequent, alternate>alternative");
     map("NewExpression", AST_New, "callee>expression, arguments@args");
     map("CallExpression", AST_Call, "callee>expression, arguments@args");
+
+    def_to_moz(AST_Toplevel, function To_Moz_Program(M) {
+        return {
+            type: "Program",
+            body: M.body.map(to_moz)
+        };
+    });
+
+    def_to_moz(AST_Defun, function To_Moz_FunctionDeclaration(M) {
+        return {
+            type: "FunctionDeclaration",
+            id: to_moz(M.name),
+            params: M.argnames.map(to_moz),
+            body: to_moz_block(M)
+        }
+    });
+
+    def_to_moz(AST_Function, function To_Moz_FunctionExpression(M) {
+        return {
+            type: "FunctionExpression",
+            id: to_moz(M.name),
+            params: M.argnames.map(to_moz),
+            body: to_moz_block(M)
+        }
+    });
 
     def_to_moz(AST_Directive, function To_Moz_Directive(M) {
         return {
@@ -29612,6 +29956,13 @@ function SourceMap(options) {
             left: to_moz(M.left),
             operator: M.operator,
             right: to_moz(M.right)
+        };
+    });
+
+    def_to_moz(AST_Array, function To_Moz_ArrayExpression(M) {
+        return {
+            type: "ArrayExpression",
+            elements: M.elements.map(to_moz)
         };
     });
 
@@ -29916,7 +30267,8 @@ function mangle_properties(ast, options) {
         reserved : null,
         cache : null,
         only_cache : false,
-        regex : null
+        regex : null,
+        ignore_quoted : false
     });
 
     var reserved = options.reserved;
@@ -29932,6 +30284,7 @@ function mangle_properties(ast, options) {
     }
 
     var regex = options.regex;
+    var ignore_quoted = options.ignore_quoted;
 
     var names_to_mangle = [];
     var unmangleable = [];
@@ -29939,7 +30292,8 @@ function mangle_properties(ast, options) {
     // step 1: find candidates to mangle
     ast.walk(new TreeWalker(function(node){
         if (node instanceof AST_ObjectKeyVal) {
-            add(node.key);
+            if (!(ignore_quoted && node.quote))
+                add(node.key);
         }
         else if (node instanceof AST_ObjectProperty) {
             // setter or getter, since KeyVal is handled above
@@ -29952,7 +30306,8 @@ function mangle_properties(ast, options) {
         }
         else if (node instanceof AST_Sub) {
             if (this.parent() instanceof AST_Assign) {
-                addStrings(node.property);
+                if (!ignore_quoted)
+                    addStrings(node.property);
             }
         }
     }));
@@ -29960,7 +30315,8 @@ function mangle_properties(ast, options) {
     // step 2: transform the tree, renaming properties
     return ast.transform(new TreeTransformer(function(node){
         if (node instanceof AST_ObjectKeyVal) {
-            node.key = mangle(node.key);
+            if (!(ignore_quoted && node.quote))
+                node.key = mangle(node.key);
         }
         else if (node instanceof AST_ObjectProperty) {
             // setter or getter
@@ -29970,7 +30326,8 @@ function mangle_properties(ast, options) {
             node.property = mangle(node.property);
         }
         else if (node instanceof AST_Sub) {
-            node.property = mangleStrings(node.property);
+            if (!ignore_quoted)
+                node.property = mangleStrings(node.property);
         }
         // else if (node instanceof AST_String) {
         //     if (should_mangle(node.value)) {
@@ -30089,8 +30446,13 @@ exports["merge"] = merge;
 exports["parse"] = parse;
 exports["push_uniq"] = push_uniq;
 exports["string_template"] = string_template;
+exports["tokenizer"] = tokenizer;
 exports["is_identifier"] = is_identifier;
 exports["SymbolDef"] = SymbolDef;
+
+if (typeof DEBUG !== "undefined" && DEBUG) {
+    exports["EXPECT_DIRECTIVE"] = EXPECT_DIRECTIVE;
+}
 
 
 exports.sys = sys;
@@ -30116,6 +30478,7 @@ exports.set_intersection = set_intersection;
 exports.makePredicate = makePredicate;
 exports.all = all;
 exports.Dictionary = Dictionary;
+exports.HOP = HOP;
 exports.DEFNODE = DEFNODE;
 exports.AST_Token = AST_Token;
 exports.AST_Node = AST_Node;
@@ -30215,6 +30578,7 @@ exports.RE_HEX_NUMBER = RE_HEX_NUMBER;
 exports.RE_OCT_NUMBER = RE_OCT_NUMBER;
 exports.OPERATORS = OPERATORS;
 exports.WHITESPACE_CHARS = WHITESPACE_CHARS;
+exports.NEWLINE_CHARS = NEWLINE_CHARS;
 exports.PUNC_BEFORE_EXPRESSION = PUNC_BEFORE_EXPRESSION;
 exports.PUNC_CHARS = PUNC_CHARS;
 exports.REGEXP_MODIFIERS = REGEXP_MODIFIERS;
@@ -30245,6 +30609,7 @@ exports.parse = parse;
 exports.TreeTransformer = TreeTransformer;
 exports.SymbolDef = SymbolDef;
 exports.base54 = base54;
+exports.EXPECT_DIRECTIVE = EXPECT_DIRECTIVE;
 exports.OutputStream = OutputStream;
 exports.Compressor = Compressor;
 exports.SourceMap = SourceMap;
@@ -30277,18 +30642,25 @@ exports.minify = function (files, options) {
     if (options.spidermonkey) {
         toplevel = UglifyJS.AST_Node.from_mozilla_ast(files);
     } else {
-        if (typeof files == "string")
-            files = [ files ];
-        files.forEach(function(file, i){
+        function addFile(file, fileUrl) {
             var code = options.fromString
                 ? file
                 : fs.readFileSync(file, "utf8");
-            sourcesContent[file] = code;
+            sourcesContent[fileUrl] = code;
             toplevel = UglifyJS.parse(code, {
-                filename: options.fromString ? i : file,
+                filename: fileUrl,
                 toplevel: toplevel,
                 bare_returns: options.parse ? options.parse.bare_returns : undefined
             });
+        }
+        [].concat(files).forEach(function (files, i) {
+            if (typeof files === 'string') {
+                addFile(files, options.fromString ? i : files);
+            } else {
+                for (var fileUrl in files) {
+                    addFile(files[fileUrl], fileUrl);
+                }
+            }
         });
     }
     if (options.wrap) {
@@ -30301,7 +30673,7 @@ exports.minify = function (files, options) {
         UglifyJS.merge(compress, options.compress);
         toplevel.figure_out_scope();
         var sq = UglifyJS.Compressor(compress);
-        toplevel = toplevel.transform(sq);
+        toplevel = sq.compress(toplevel);
     }
 
     // 3. mangle properties
@@ -32534,7 +32906,7 @@ var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,c
 // non-empty tags that will maintain whitespace within them
 var inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,nobr,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
 // self-closing tags that will maintain whitespace around them
-var selfClosingInlineTags = createMapFromString('comment,img,input');
+var selfClosingInlineTags = createMapFromString('comment,img,input,wbr');
 
 function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
   var trimLeft = prevTag && !selfClosingInlineTags(prevTag);
@@ -32699,15 +33071,19 @@ function isNumberTypeAttribute(attrName, tag) {
   );
 }
 
-function isCanonicalURL(tag, attrs) {
+function isLinkType(tag, attrs, value) {
   if (tag !== 'link') {
     return false;
   }
   for (var i = 0, len = attrs.length; i < len; i++) {
-    if (attrs[i].name === 'rel' && attrs[i].value === 'canonical') {
+    if (attrs[i].name === 'rel' && attrs[i].value === value) {
       return true;
     }
   }
+}
+
+function isMediaQuery(tag, attrs, attrName) {
+  return attrName === 'media' && (isLinkType(tag, attrs, 'stylesheet') || isStyleSheet(tag, attrs));
 }
 
 var srcsetTags = createMapFromString('img,source');
@@ -32733,17 +33109,20 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (isUriTypeAttribute(attrName, tag)) {
     attrValue = trimWhitespace(attrValue);
-    return isCanonicalURL(tag, attrs) ? attrValue : options.minifyURLs(attrValue);
+    return isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue);
   }
   else if (isNumberTypeAttribute(attrName, tag)) {
     return trimWhitespace(attrValue);
   }
   else if (attrName === 'style') {
     attrValue = trimWhitespace(attrValue);
-    if (attrValue && /;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
-      attrValue = attrValue.replace(/\s*;$/, '');
+    if (attrValue) {
+      if (/;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
+        attrValue = attrValue.replace(/\s*;$/, '');
+      }
+      attrValue = unwrapInlineCSS(options.minifyCSS(wrapInlineCSS(attrValue)));
     }
-    return options.minifyCSS(attrValue, true);
+    return attrValue;
   }
   else if (isSrcset(attrName, tag)) {
     // https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
@@ -32776,6 +33155,10 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   else if (tag === 'script' && attrName === 'type') {
     attrValue = trimWhitespace(attrValue.replace(/\s*;\s*/g, ';'));
   }
+  else if (isMediaQuery(tag, attrs, attrName)) {
+    attrValue = trimWhitespace(attrValue);
+    return unwrapMediaQuery(options.minifyCSS(wrapMediaQuery(attrValue)));
+  }
   return attrValue;
 }
 
@@ -32792,16 +33175,22 @@ function isMetaViewport(tag, attrs) {
 
 // Wrap CSS declarations for CleanCSS > 3.x
 // See https://github.com/jakubpawlowicz/clean-css/issues/418
-function wrapCSS(text) {
+function wrapInlineCSS(text) {
   return '*{' + text + '}';
 }
 
-function unwrapCSS(text) {
-  var matches = text.match(/^\*\{([\s\S]*)\}$/m);
-  if (matches && matches[1]) {
-    return matches[1];
-  }
-  return text;
+function unwrapInlineCSS(text) {
+  var matches = text.match(/^\*\{([\s\S]*)\}$/);
+  return matches ? matches[1] : text;
+}
+
+function wrapMediaQuery(text) {
+  return '@media ' + text + '{a{top:0}}';
+}
+
+function unwrapMediaQuery(text) {
+  var matches = text.match(/^@media ([\s\S]*?)\s*{[\s\S]*}$/);
+  return matches ? matches[1] : text;
 }
 
 function cleanConditionalComment(comment, options) {
@@ -33156,18 +33545,14 @@ function processOptions(options) {
     if (typeof minifyCSS.advanced === 'undefined') {
       minifyCSS.advanced = false;
     }
-    options.minifyCSS = function(text, inline) {
+    options.minifyCSS = function(text) {
       text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, function(match, prefix, quote, url, suffix) {
         return prefix + quote + options.minifyURLs(url) + quote + suffix;
       });
       var start = text.match(/^\s*<!--/);
       var style = start ? text.slice(start[0].length).replace(/-->\s*$/, '') : text;
       try {
-        var cleanCSS = new CleanCSS(minifyCSS);
-        if (inline) {
-          return unwrapCSS(cleanCSS.minify(wrapCSS(style)).styles);
-        }
-        return cleanCSS.minify(style).styles;
+        return new CleanCSS(minifyCSS).minify(style).styles;
       }
       catch (err) {
         options.log(err);
@@ -33180,7 +33565,7 @@ function processOptions(options) {
 function uniqueId(value) {
   var id;
   do {
-    id = Math.random().toString(36).slice(2);
+    id = Math.random().toString(36).replace(/^0\.[0-9]*/, '');
   } while (~value.indexOf(id));
   return id;
 }
@@ -33293,7 +33678,8 @@ function minify(value, options, partialMarkup) {
       ignoredMarkupChunks = [],
       ignoredCustomMarkupChunks = [],
       uidIgnore,
-      uidAttr;
+      uidAttr,
+      uidPattern;
 
   // temporarily replace ignored chunks with comments,
   // so that we don't have to worry what's there.
@@ -33302,8 +33688,15 @@ function minify(value, options, partialMarkup) {
   value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, function(match, group1) {
     if (!uidIgnore) {
       uidIgnore = uniqueId(value);
+      var pattern = new RegExp('^' + uidIgnore + '([0-9]+)$');
+      if (options.ignoreCustomComments) {
+        options.ignoreCustomComments.push(pattern);
+      }
+      else {
+        options.ignoreCustomComments = [pattern];
+      }
     }
-    var token = '<!--!' + uidIgnore + ignoredMarkupChunks.length + '-->';
+    var token = '<!--' + uidIgnore + ignoredMarkupChunks.length + '-->';
     ignoredMarkupChunks.push(group1);
     return token;
   });
@@ -33317,6 +33710,24 @@ function minify(value, options, partialMarkup) {
     value = value.replace(reCustomIgnore, function(match) {
       if (!uidAttr) {
         uidAttr = uniqueId(value);
+        uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
+        var minifyCSS = options.minifyCSS;
+        if (minifyCSS) {
+          options.minifyCSS = function(text) {
+            return minifyCSS(text).replace(uidPattern, function(match, prefix, index, suffix) {
+              return (prefix && '\t') + uidAttr + index + (suffix && '\t');
+            });
+          };
+        }
+        var minifyJS = options.minifyJS;
+        if (minifyJS) {
+          var pattern = new RegExp('(\\\\t|)' + uidAttr + '([0-9]+)(\\\\t|)', 'g');
+          options.minifyJS = function(text, inline) {
+            return minifyJS(text, inline).replace(pattern, function(match, prefix, index, suffix) {
+              return (prefix && '\t') + uidAttr + index + (suffix && '\t');
+            });
+          };
+        }
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
       ignoredCustomMarkupChunks.push(match);
@@ -33568,9 +33979,9 @@ function minify(value, options, partialMarkup) {
             }
           }
           if (prevTag) {
-            if (prevTag === '/nobr') {
+            if (prevTag === '/nobr' || prevTag === 'wbr') {
               if (/^\s/.test(text)) {
-                trimTrailingWhitespace(buffer.length - 1, 'br');
+                trimTrailingWhitespace(buffer.length - 2, 'br');
               }
             }
             else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
@@ -33674,8 +34085,8 @@ function minify(value, options, partialMarkup) {
 
   var str = joinResultSegments(buffer, options);
 
-  if (uidAttr) {
-    str = str.replace(new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g'), function(match, prefix, index, suffix) {
+  if (uidPattern) {
+    str = str.replace(uidPattern, function(match, prefix, index, suffix) {
       var chunk = ignoredCustomMarkupChunks[+index];
       if (options.collapseWhitespace) {
         if (prefix !== '\t') {
@@ -33693,7 +34104,7 @@ function minify(value, options, partialMarkup) {
     });
   }
   if (uidIgnore) {
-    str = str.replace(new RegExp('<!--!' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
+    str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
       return ignoredMarkupChunks[+index];
     });
   }

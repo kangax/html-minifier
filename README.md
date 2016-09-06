@@ -3,7 +3,7 @@
 [![NPM version](https://img.shields.io/npm/v/html-minifier.svg)](https://www.npmjs.com/package/html-minifier)
 [![Build Status](https://img.shields.io/travis/kangax/html-minifier.svg)](https://travis-ci.org/kangax/html-minifier)
 [![Dependency Status](https://img.shields.io/david/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier)
-[![devDependency Status](https://img.shields.io/david/dev/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
+[![devDependency Status](https://img.shields.io/david/dev/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier?type=dev)
 [![Gitter](https://img.shields.io/gitter/room/kangax/html-minifier.svg)](https://gitter.im/kangax/html-minifier)
 
 [HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, JavaScript-based HTML minifier.
@@ -12,7 +12,7 @@ See [corresponding blog post](http://perfectionkills.com/experimenting-with-html
 
 [Test suite is available online](http://kangax.github.io/html-minifier/tests/).
 
-Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_minifier), and for Node.js, [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin), [Gulp module](https://github.com/jonschlinkert/gulp-htmlmin), and [Koa middleware wrapper](https://github.com/koajs/html-minifier).
+Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_minifier), and for Node.js, [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin), [Gulp module](https://github.com/jonschlinkert/gulp-htmlmin), [Koa middleware wrapper](https://github.com/koajs/html-minifier) and [Express middleware wrapper](https://github.com/melonmanchan/express-minify-html).
 
 For lint-like capabilities take a look at [HTMLLint](https://github.com/kangax/html-lint).
 
@@ -22,19 +22,19 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 
 | Site                                                                        | Original size *(KB)* | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
 | --------------------------------------------------------------------------- |:--------------------:| ------------:| --------:| ----------:| ------------------:|
-| [Google](https://www.google.com/)                                           | 57                   | **54**       | 57       | 59         | 57                 |
-| [HTMLMinifier](https://github.com/kangax/html-minifier)                     | 114                  | **77**       | 97       | 101        | 97                 |
-| [CNN](http://www.cnn.com/)                                                  | 115                  | **105**      | 111      | 113        | 109                |
-| [New York Times](http://www.nytimes.com/)                                   | 176                  | **119**      | 126      | 130        | 126                |
-| [BBC](http://www.bbc.co.uk/)                                                | 185                  | **150**      | 178      | 183        | 174                |
-| [Stack Overflow](http://stackoverflow.com/)                                 | 236                  | **182**      | 190      | 199        | 189                |
-| [Bootstrap CSS](http://getbootstrap.com/css/)                               | 277                  | **264**      | 274      | 232        | 274                |
-| [Amazon](http://www.amazon.co.uk/)                                          | 423                  | **370**      | 404      | 416        | n/a                |
-| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 479                  | **435**      | 462      | 477        | n/a                |
-| [NBC](http://www.nbc.com/)                                                  | 506                  | **485**      | 504      | 506        | n/a                |
+| [Google](https://www.google.com/)                                           | 44                   | **43**       | 45       | 46         | 45                 |
+| [CNN](http://www.cnn.com/)                                                  | 108                  | **97**       | 104      | 105        | 102                |
+| [HTMLMinifier](https://github.com/kangax/html-minifier)                     | 118                  | **81**       | 101      | 105        | 101                |
+| [New York Times](http://www.nytimes.com/)                                   | 175                  | **118**      | 127      | 131        | 124                |
+| [BBC](http://www.bbc.co.uk/)                                                | 199                  | **161**      | 192      | 197        | 188                |
+| [Stack Overflow](http://stackoverflow.com/)                                 | 238                  | **184**      | 193      | 201        | 191                |
+| [Bootstrap CSS](http://getbootstrap.com/css/)                               | 276                  | **264**      | 273      | 231        | 274                |
+| [Amazon](http://www.amazon.co.uk/)                                          | 372                  | **324**      | 354      | 366        | n/a                |
+| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 480                  | **437**      | 463      | 479        | n/a                |
+| [NBC](http://www.nbc.com/)                                                  | 513                  | **491**      | 511      | 513        | n/a                |
 | [Eloquent Javascript](http://eloquentjavascript.net/1st_edition/print.html) | 870                  | **815**      | 840      | 864        | n/a                |
-| [ES6 table](http://kangax.github.io/compat-table/es6/)                      | 3816                 | **3207**     | 3593     | 3771       | n/a                |
-| [ES6 draft](https://tc39.github.io/ecma262/)                                | 4800                 | **4246**     | 4376     | 4499       | n/a                |
+| [ES6 table](http://kangax.github.io/compat-table/es6/)                      | 3900                 | **3285**     | 3679     | 3855       | n/a                |
+| [ES6 draft](https://tc39.github.io/ecma262/)                                | 4796                 | **4247**     | 4376     | 4499       | n/a                |
 
 ## Options Quick Reference
 
@@ -56,7 +56,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `includeAutoGeneratedTags`     | Insert tags generated by HTML parser | `true` |
 | `keepClosingSlash`             | Keep the trailing slash on singleton elements | `false` |
 | `maxLineLength`                | Specify a maximum line length. Compressed output will be split by newlines at valid HTML split-points |
-| `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/jakubpawlowicz/clean-css)) | `false` (could be `true`, `Object`, `Function(text, inline)`) |
+| `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/jakubpawlowicz/clean-css)) | `false` (could be `true`, `Object`, `Function(text)`) |
 | `minifyJS`                     | Minify JavaScript in script elements and event attributes (uses [UglifyJS](https://github.com/mishoo/UglifyJS2)) | `false` (could be `true`, `Object`, `Function(text, inline)`) |
 | `minifyURLs`                   | Minify URLs in various attributes (uses [relateurl](https://github.com/stevenvachon/relateurl)) | `false` (could be `String`, `Object`, `Function(text)`) |
 | `preserveLineBreaks`           | Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break. Must be used in conjunction with `collapseWhitespace=true` | `false` |

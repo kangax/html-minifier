@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "Highly configurable, well-tested, JavaScript-based HTML minifier.",
-  "version": "2.1.5",
+  "version": "3.0.2",
   "keywords": [
     "cli",
     "compress",
@@ -47,7 +47,7 @@
     "url": "https://github.com/kangax/html-minifier/issues"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=4"
   },
   "scripts": {
     "dist": "grunt dist",
@@ -60,13 +60,13 @@
     "he": "1.1.x",
     "ncname": "1.0.x",
     "relateurl": "0.2.x",
-    "uglify-js": "2.6.x"
+    "uglify-js": "2.7.x"
   },
   "devDependencies": {
     "grunt": "1.0.x",
     "grunt-browserify": "5.0.x",
-    "grunt-contrib-uglify": "1.0.x",
-    "grunt-eslint": "18.1.x",
+    "grunt-contrib-uglify": "2.0.x",
+    "grunt-eslint": "19.0.x",
     "phantomjs-prebuilt": "2.1.x",
     "qunitjs": "2.x"
   },
