@@ -888,7 +888,9 @@ function minify(value, options, partialMarkup) {
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
       ignoredCustomMarkupChunks.push(match);
-      return '\t' + token + '\t';
+      var prefix = /^\s*\n/.test(match) ? '\n' : '\t';
+      var postfix = /\n\s*$/.test(match) ? '\n' : '\t';
+      return prefix + token + postfix;
     });
   }
 
