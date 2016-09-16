@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "Highly configurable, well-tested, JavaScript-based HTML minifier.",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "keywords": [
     "cli",
     "compress",
@@ -71,7 +71,7 @@
     "qunitjs": "2.x"
   },
   "benchmarkDependencies": {
-    "brotli": "1.2.x",
+    "brotli": "1.3.x",
     "chalk": "1.1.x",
     "cli-table": "0.3.x",
     "lzma": "2.3.x",
