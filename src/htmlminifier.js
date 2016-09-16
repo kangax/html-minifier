@@ -1138,7 +1138,11 @@ function minify(value, options, partialMarkup) {
           if (prevTag) {
             if (prevTag === '/nobr' || prevTag === 'wbr') {
               if (/^\s/.test(text)) {
-                trimTrailingWhitespace(buffer.length - 2, 'br');
+                var tagIndex = buffer.length - 1;
+                while (tagIndex > 0 && buffer[tagIndex].lastIndexOf('<' + prevTag) !== 0) {
+                  tagIndex--;
+                }
+                trimTrailingWhitespace(tagIndex - 1, 'br');
               }
             }
             else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
