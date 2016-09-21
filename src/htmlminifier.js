@@ -858,36 +858,38 @@ function minify(value, options, partialMarkup) {
     return token;
   });
 
+  function escapeFragments(text) {
+    return text.replace(uidPattern, function(match, prefix, index) {
+      var chunks = ignoredCustomMarkupChunks[+index];
+      return chunks[1] + uidAttr + index + chunks[2];
+    });
+  }
+
   var customFragments = options.ignoreCustomFragments.map(function(re) {
     return re.source;
   });
   if (customFragments.length) {
-    var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')+\\s*', 'g');
+    var reCustomIgnore = new RegExp('(\\s*)(?:' + customFragments.join('|') + ')+(\\s*)', 'g');
     // temporarily replace custom ignored fragments with unique attributes
-    value = value.replace(reCustomIgnore, function(match) {
+    value = value.replace(reCustomIgnore, function(match, prefix, suffix) {
       if (!uidAttr) {
         uidAttr = uniqueId(value);
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
         var minifyCSS = options.minifyCSS;
         if (minifyCSS) {
           options.minifyCSS = function(text) {
-            return minifyCSS(text).replace(uidPattern, function(match, prefix, index, suffix) {
-              return (prefix && '\t') + uidAttr + index + (suffix && '\t');
-            });
+            return minifyCSS(escapeFragments(text));
           };
         }
         var minifyJS = options.minifyJS;
         if (minifyJS) {
-          var pattern = new RegExp('(\\\\t|)' + uidAttr + '([0-9]+)(\\\\t|)', 'g');
           options.minifyJS = function(text, inline) {
-            return minifyJS(text, inline).replace(pattern, function(match, prefix, index, suffix) {
-              return (prefix && '\t') + uidAttr + index + (suffix && '\t');
-            });
+            return minifyJS(escapeFragments(text), inline);
           };
         }
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
-      ignoredCustomMarkupChunks.push(match);
+      ignoredCustomMarkupChunks.push([match, prefix, suffix]);
       return '\t' + token + '\t';
     });
   }
@@ -1248,7 +1250,7 @@ function minify(value, options, partialMarkup) {
 
   if (uidPattern) {
     str = str.replace(uidPattern, function(match, prefix, index, suffix) {
-      var chunk = ignoredCustomMarkupChunks[+index];
+      var chunk = ignoredCustomMarkupChunks[+index][0];
       if (options.collapseWhitespace) {
         if (prefix !== '\t') {
           chunk = prefix + chunk;
