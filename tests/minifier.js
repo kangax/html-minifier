@@ -1633,6 +1633,13 @@ QUnit.test('Ignore custom fragments', function(assert) {
     ignoreCustomFragments: reFragments
   }), output);
 
+  input = '<script>//\r\n<% ... %></script>';
+  output = '<script>\r\n<% ... %></script>';
+  assert.equal(minify(input, {
+    minifyJS: true,
+    ignoreCustomFragments: reFragments,
+  }), output);
+
   input = '{{ if foo? }}\r\n  <div class="bar">\r\n    ...\r\n  </div>\r\n{{ end \n}}';
   output = '{{ if foo? }}<div class="bar">...</div>{{ end }}';
   assert.equal(minify(input, {}), input);
