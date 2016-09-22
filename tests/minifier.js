@@ -252,6 +252,10 @@ QUnit.test('space normalization around text', function(assert) {
   assert.equal(minify('<p>foo<wbr>bar</p>', { collapseWhitespace: true }), '<p>foo<wbr>bar</p>');
   assert.equal(minify('<p>foo <wbr>bar</p>', { collapseWhitespace: true }), '<p>foo <wbr>bar</p>');
   assert.equal(minify('<p>foo<wbr> bar</p>', { collapseWhitespace: true }), '<p>foo<wbr> bar</p>');
+  assert.equal(minify('<p>foo <wbr baz moo=""> bar</p>', { collapseWhitespace: true }), '<p>foo<wbr baz moo=""> bar</p>');
+  assert.equal(minify('<p>foo<wbr baz moo="">bar</p>', { collapseWhitespace: true }), '<p>foo<wbr baz moo="">bar</p>');
+  assert.equal(minify('<p>foo <wbr baz moo="">bar</p>', { collapseWhitespace: true }), '<p>foo <wbr baz moo="">bar</p>');
+  assert.equal(minify('<p>foo<wbr baz moo=""> bar</p>', { collapseWhitespace: true }), '<p>foo<wbr baz moo=""> bar</p>');
   assert.equal(minify('<p>  <a href="#">  <code>foo</code></a> bar</p>', { collapseWhitespace: true }), '<p><a href="#"><code>foo</code></a> bar</p>');
   assert.equal(minify('<p><a href="#"><code>foo  </code></a> bar</p>', { collapseWhitespace: true }), '<p><a href="#"><code>foo</code></a> bar</p>');
   assert.equal(minify('<p>  <a href="#">  <code>   foo</code></a> bar   </p>', { collapseWhitespace: true }), '<p><a href="#"><code>foo</code></a> bar</p>');
@@ -1887,16 +1891,45 @@ QUnit.test('minification of scripts with different mimetypes', function(assert) 
 
   input = '<script type="text/html"><!-- ko if: true -->\n\n\n<div></div>\n\n\n<!-- /ko --></script>';
   assert.equal(minify(input, { minifyJS: true }), input);
+});
 
-  input = '<script type=""><?php ?></script>';
+QUnit.test('minification of scripts with custom fragments', function(assert) {
+  var input, output;
+
+  input = '<script><?php ?></script>';
   assert.equal(minify(input, { minifyJS: true }), input);
 
-  input = '<script type="">function f(){  return <?php ?>  }</script>';
-  output = '<script type="">function f(){return <?php ?>  }</script>';
+  input = '<script>\n<?php ?></script>';
+  assert.equal(minify(input, { minifyJS: true }), input);
+
+  input = '<script><?php ?>\n</script>';
+  assert.equal(minify(input, { minifyJS: true }), input);
+
+  input = '<script>\n<?php ?>\n</script>';
+  assert.equal(minify(input, { minifyJS: true }), input);
+
+  input = '<script>// <% ... %></script>';
+  output = '<script></script>';
   assert.equal(minify(input, { minifyJS: true }), output);
 
-  input = '<script type="">function f(){  return "<?php ?>"  }</script>';
-  output = '<script type="">function f(){return"<?php ?>"}</script>';
+  input = '<script>// \n<% ... %></script>';
+  output = '<script> \n<% ... %></script>';
+  assert.equal(minify(input, { minifyJS: true }), output);
+
+  input = '<script>// <% ... %>\n</script>';
+  output = '<script></script>';
+  assert.equal(minify(input, { minifyJS: true }), output);
+
+  input = '<script>// \n<% ... %>\n</script>';
+  output = '<script> \n<% ... %>\n</script>';
+  assert.equal(minify(input, { minifyJS: true }), output);
+
+  input = '<script>function f(){  return <?php ?>  }</script>';
+  output = '<script>function f(){return <?php ?>  }</script>';
+  assert.equal(minify(input, { minifyJS: true }), output);
+
+  input = '<script>function f(){  return "<?php ?>"  }</script>';
+  output = '<script>function f(){return"<?php ?>"}</script>';
   assert.equal(minify(input, { minifyJS: true }), output);
 });
 
@@ -1989,7 +2022,7 @@ QUnit.test('style minification', function(assert) {
 
   input = '<div style="background: url(\'images/<% image %>\')"></div>';
   assert.equal(minify(input), input);
-  output = '<div style="background:url(\'images/<% image %>\')"></div>';
+  output = '<div style="background:url(images/<% image %>)"></div>';
   assert.equal(minify(input, { minifyCSS: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
@@ -2007,7 +2040,7 @@ QUnit.test('style minification', function(assert) {
 
   input = '<style>p { background: url("images/<% image %>") }</style>';
   assert.equal(minify(input), input);
-  output = '<style>p{background:url("images/<% image %>")}</style>';
+  output = '<style>p{background:url(images/<% image %>)}</style>';
   assert.equal(minify(input, { minifyCSS: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
