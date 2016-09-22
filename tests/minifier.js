@@ -1898,39 +1898,97 @@ QUnit.test('minification of scripts with custom fragments', function(assert) {
 
   input = '<script><?php ?></script>';
   assert.equal(minify(input, { minifyJS: true }), input);
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), input);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyJS: true,
+    preserveLineBreaks: true
+  }), input);
 
   input = '<script>\n<?php ?></script>';
   assert.equal(minify(input, { minifyJS: true }), input);
+  output = '<script> <?php ?></script>';
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyJS: true,
+    preserveLineBreaks: true
+  }), input);
 
   input = '<script><?php ?>\n</script>';
   assert.equal(minify(input, { minifyJS: true }), input);
+  output = '<script><?php ?> </script>';
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyJS: true,
+    preserveLineBreaks: true
+  }), input);
 
   input = '<script>\n<?php ?>\n</script>';
   assert.equal(minify(input, { minifyJS: true }), input);
+  output = '<script> <?php ?> </script>';
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyJS: true,
+    preserveLineBreaks: true
+  }), input);
 
   input = '<script>// <% ... %></script>';
   output = '<script></script>';
   assert.equal(minify(input, { minifyJS: true }), output);
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyJS: true,
+    preserveLineBreaks: true
+  }), output);
 
   input = '<script>// \n<% ... %></script>';
   output = '<script> \n<% ... %></script>';
   assert.equal(minify(input, { minifyJS: true }), output);
+  output = '<script> <% ... %></script>';
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
+  output = '<script>\n<% ... %></script>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyJS: true,
+    preserveLineBreaks: true
+  }), output);
 
   input = '<script>// <% ... %>\n</script>';
   output = '<script></script>';
   assert.equal(minify(input, { minifyJS: true }), output);
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyJS: true,
+    preserveLineBreaks: true
+  }), output);
 
   input = '<script>// \n<% ... %>\n</script>';
   output = '<script> \n<% ... %>\n</script>';
   assert.equal(minify(input, { minifyJS: true }), output);
+  output = '<script> <% ... %> </script>';
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
+  output = '<script>\n<% ... %>\n</script>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    minifyJS: true,
+    preserveLineBreaks: true
+  }), output);
 
   input = '<script>function f(){  return <?php ?>  }</script>';
   output = '<script>function f(){return <?php ?>  }</script>';
   assert.equal(minify(input, { minifyJS: true }), output);
+  output = '<script>function f(){return <?php ?> }</script>';
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
 
   input = '<script>function f(){  return "<?php ?>"  }</script>';
   output = '<script>function f(){return"<?php ?>"}</script>';
   assert.equal(minify(input, { minifyJS: true }), output);
+  assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
 });
 
 QUnit.test('event minification', function(assert) {
