@@ -101,6 +101,7 @@ var mainOptions = {
   collapseBooleanAttributes: 'Omit attribute values from boolean attributes',
   collapseInlineTagWhitespace: 'Collapse white space around inline tag',
   collapseWhitespace: 'Collapse white space that contributes to text nodes in a document tree.',
+  collapseCustomFragments: 'Collapse white space around ignoreCustomFragments.',
   conservativeCollapse: 'Always collapse to 1 space (never remove it entirely)',
   customAttrAssign: ['Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', parseJSONRegExpArray],
   customAttrCollapse: ['Regex that specifies custom attribute to strip newlines from (e.g. /ng-class/)', parseRegExp],

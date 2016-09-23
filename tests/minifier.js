@@ -1750,6 +1750,17 @@ QUnit.test('Ignore custom fragments', function(assert) {
       /\{\{.*?\}\}/g
     ]
   }), output);
+
+  input = '<?php echo "foo"; ?> <span>bar</span>';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, {
+    collapseWhitespace: true
+  }), input);
+  output = '<?php echo "foo"; ?><span>bar</span>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    collapseCustomFragments: true
+  }), output);
 });
 
 QUnit.test('bootstrap\'s span > button > span', function(assert) {
