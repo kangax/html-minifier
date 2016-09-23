@@ -865,6 +865,12 @@ function minify(value, options, partialMarkup) {
     });
   }
 
+  function restoreCustomFragments(text) {
+    return text.replace(uidPattern, function(match, prefix, index) {
+      return ignoredCustomMarkupChunks[+index][0];
+    });
+  }
+
   var customFragments = options.ignoreCustomFragments.map(function(re) {
     return re.source;
   });
@@ -878,12 +884,18 @@ function minify(value, options, partialMarkup) {
         var minifyCSS = options.minifyCSS;
         if (minifyCSS) {
           options.minifyCSS = function(text) {
+            if (options.preserveCustomFragmentsInStyle) {
+              text = restoreCustomFragments(text);
+            }
             return minifyCSS(escapeFragments(text));
           };
         }
         var minifyJS = options.minifyJS;
         if (minifyJS) {
           options.minifyJS = function(text, inline) {
+            if (options.preserveCustomFragmentsInScripts) {
+              text = restoreCustomFragments(text);
+            }
             return minifyJS(escapeFragments(text), inline);
           };
         }
