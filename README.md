@@ -75,6 +75,7 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 | `removeTagWhitespace`          | Remove space between attributes whenever possible. **Note that this will result in invalid HTML!** | `false` |
 | `sortAttributes`               | [Sort attributes by frequency](#sorting-attributes--style-classes) | `false` |
 | `sortClassName`                | [Sort style classes by frequency](#sorting-attributes--style-classes) | `false` |
+| `trimCustomFragments`          | Trim white space around `ignoreCustomFragments`. | `false` |
 | `useShortDoctype`              | [Replaces the `doctype` with the short (HTML5) doctype](http://perfectionkills.com/experimenting-with-html-minifier/#use_short_doctype) | `false` |
 
 ### Sorting attributes / style classes

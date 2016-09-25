@@ -1728,6 +1728,23 @@ QUnit.test('Ignore custom fragments', function(assert) {
       /\{%[^%]*?%\}/g
     ]
   }), input);
+  // trimCustomFragments withOUT collapseWhitespace, does
+  // not break the "{% foo %} {% bar %}" test
+  assert.equal(minify(input, {
+    ignoreCustomFragments: [
+      /\{%[^%]*?%\}/g
+    ],
+    trimCustomFragments: true
+  }), input);
+  // trimCustomFragments WITH collapseWhitespace, changes output
+  output = '<img class="{% foo %}{% bar %}">';
+  assert.equal(minify(input, {
+    ignoreCustomFragments: [
+      /\{%[^%]*?%\}/g
+    ],
+    collapseWhitespace: true,
+    trimCustomFragments: true
+  }), output);
 
   input = '<img class="titi.<%=tsItem_[0]%>">';
   assert.equal(minify(input), input);
@@ -1749,6 +1766,52 @@ QUnit.test('Ignore custom fragments', function(assert) {
     ignoreCustomFragments: [
       /\{\{.*?\}\}/g
     ]
+  }), output);
+
+  // https://github.com/kangax/html-minifier/issues/722
+  input = '<? echo "foo"; ?> <span>bar</span>';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, {
+    collapseWhitespace: true
+  }), input);
+  output = '<? echo "foo"; ?><span>bar</span>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    trimCustomFragments: true
+  }), output);
+
+  input = ' <? echo "foo"; ?> bar';
+  assert.equal(minify(input), input);
+  output = '<? echo "foo"; ?> bar';
+  assert.equal(minify(input, {
+    collapseWhitespace: true
+  }), output);
+  output = '<? echo "foo"; ?>bar';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    trimCustomFragments: true
+  }), output);
+
+  input = '<span>foo</span> <? echo "bar"; ?> baz';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, {
+    collapseWhitespace: true
+  }), input);
+  output = '<span>foo</span><? echo "bar"; ?>baz';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    trimCustomFragments: true
+  }), output);
+
+  input = '<span>foo</span> <? echo "bar"; ?> <? echo "baz"; ?> <span>foo</span>';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, {
+    collapseWhitespace: true
+  }), input);
+  output = '<span>foo</span><? echo "bar"; ?><? echo "baz"; ?><span>foo</span>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    trimCustomFragments: true
   }), output);
 });
 

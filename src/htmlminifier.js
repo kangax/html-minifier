@@ -1260,7 +1260,7 @@ function minify(value, options, partialMarkup) {
         }
         return collapseWhitespace(chunk, {
           preserveLineBreaks: options.preserveLineBreaks,
-          conservativeCollapse: true
+          conservativeCollapse: !options.trimCustomFragments
         }, /^\s/.test(chunk), /\s$/.test(chunk));
       }
       return chunk;

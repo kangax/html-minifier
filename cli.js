@@ -132,6 +132,7 @@ var mainOptions = {
   removeTagWhitespace: 'Remove space between attributes whenever possible',
   sortAttributes: 'Sort attributes by frequency',
   sortClassName: 'Sort style classes by frequency',
+  trimCustomFragments: 'Trim white space around ignoreCustomFragments.',
   useShortDoctype: 'Replaces the doctype with the short (HTML5) doctype'
 };
 var mainOptionKeys = Object.keys(mainOptions);
