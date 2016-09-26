@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.0.3 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.1.0 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -312,6 +312,7 @@ module.exports = amdefine;
 },{"_process":81,"path":79}],2:[function(require,module,exports){
 'use strict'
 
+exports.byteLength = byteLength
 exports.toByteArray = toByteArray
 exports.fromByteArray = fromByteArray
 
@@ -319,23 +320,17 @@ var lookup = []
 var revLookup = []
 var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
 
-function init () {
-  var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-  for (var i = 0, len = code.length; i < len; ++i) {
-    lookup[i] = code[i]
-    revLookup[code.charCodeAt(i)] = i
-  }
-
-  revLookup['-'.charCodeAt(0)] = 62
-  revLookup['_'.charCodeAt(0)] = 63
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+for (var i = 0, len = code.length; i < len; ++i) {
+  lookup[i] = code[i]
+  revLookup[code.charCodeAt(i)] = i
 }
 
-init()
+revLookup['-'.charCodeAt(0)] = 62
+revLookup['_'.charCodeAt(0)] = 63
 
-function toByteArray (b64) {
-  var i, j, l, tmp, placeHolders, arr
+function placeHoldersCount (b64) {
   var len = b64.length
-
   if (len % 4 > 0) {
     throw new Error('Invalid string. Length must be a multiple of 4')
   }
@@ -345,9 +340,19 @@ function toByteArray (b64) {
   // represent one byte
   // if there is only one, then the three characters before it represent 2 bytes
   // this is just a cheap hack to not do indexOf twice
-  placeHolders = b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
+  return b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
+}
 
+function byteLength (b64) {
   // base64 is 4/3 + up to two characters of the original data
+  return b64.length * 3 / 4 - placeHoldersCount(b64)
+}
+
+function toByteArray (b64) {
+  var i, j, l, tmp, placeHolders, arr
+  var len = b64.length
+  placeHolders = placeHoldersCount(b64)
+
   arr = new Arr(len * 3 / 4 - placeHolders)
 
   // if there are placeholders, only get up to the last complete 4 chars
@@ -33986,36 +33991,38 @@ function minify(value, options, partialMarkup) {
     return token;
   });
 
+  function escapeFragments(text) {
+    return text.replace(uidPattern, function(match, prefix, index) {
+      var chunks = ignoredCustomMarkupChunks[+index];
+      return chunks[1] + uidAttr + index + chunks[2];
+    });
+  }
+
   var customFragments = options.ignoreCustomFragments.map(function(re) {
     return re.source;
   });
   if (customFragments.length) {
-    var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')+\\s*', 'g');
+    var reCustomIgnore = new RegExp('(\\s*)(?:' + customFragments.join('|') + ')+(\\s*)', 'g');
     // temporarily replace custom ignored fragments with unique attributes
-    value = value.replace(reCustomIgnore, function(match) {
+    value = value.replace(reCustomIgnore, function(match, prefix, suffix) {
       if (!uidAttr) {
         uidAttr = uniqueId(value);
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
         var minifyCSS = options.minifyCSS;
         if (minifyCSS) {
           options.minifyCSS = function(text) {
-            return minifyCSS(text).replace(uidPattern, function(match, prefix, index, suffix) {
-              return (prefix && '\t') + uidAttr + index + (suffix && '\t');
-            });
+            return minifyCSS(escapeFragments(text));
           };
         }
         var minifyJS = options.minifyJS;
         if (minifyJS) {
-          var pattern = new RegExp('(\\\\t|)' + uidAttr + '([0-9]+)(\\\\t|)', 'g');
           options.minifyJS = function(text, inline) {
-            return minifyJS(text, inline).replace(pattern, function(match, prefix, index, suffix) {
-              return (prefix && '\t') + uidAttr + index + (suffix && '\t');
-            });
+            return minifyJS(escapeFragments(text), inline);
           };
         }
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
-      ignoredCustomMarkupChunks.push(match);
+      ignoredCustomMarkupChunks.push([match, prefix, suffix]);
       return '\t' + token + '\t';
     });
   }
@@ -34376,7 +34383,7 @@ function minify(value, options, partialMarkup) {
 
   if (uidPattern) {
     str = str.replace(uidPattern, function(match, prefix, index, suffix) {
-      var chunk = ignoredCustomMarkupChunks[+index];
+      var chunk = ignoredCustomMarkupChunks[+index][0];
       if (options.collapseWhitespace) {
         if (prefix !== '\t') {
           chunk = prefix + chunk;
@@ -34386,7 +34393,7 @@ function minify(value, options, partialMarkup) {
         }
         return collapseWhitespace(chunk, {
           preserveLineBreaks: options.preserveLineBreaks,
-          conservativeCollapse: true
+          conservativeCollapse: !options.trimCustomFragments
         }, /^\s/.test(chunk), /\s$/.test(chunk));
       }
       return chunk;
