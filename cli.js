@@ -27,10 +27,11 @@
 
 'use strict';
 
-var changeCase = require('change-case');
+var camelCase = require('camel-case');
 var fs = require('fs');
 var info = require('./package.json');
 var minify = require('./' + info.main).minify;
+var paramCase = require('param-case');
 var path = require('path');
 var program = require('commander');
 
@@ -138,7 +139,7 @@ var mainOptions = {
 var mainOptionKeys = Object.keys(mainOptions);
 mainOptionKeys.forEach(function(key) {
   var option = mainOptions[key];
-  key = '--' + changeCase.paramCase(key);
+  key = '--' + paramCase(key);
   if (Array.isArray(option)) {
     var optional = option[1] === parseJSON;
     program.option(key + (optional ? ' [value]' : ' <value>'), option[0], option[1]);
@@ -197,7 +198,7 @@ program.arguments('[files...]').action(function(files) {
 function createOptions() {
   var options = {};
   mainOptionKeys.forEach(function(key) {
-    var param = program[changeCase.camelCase(key)];
+    var param = program[camelCase(key)];
     if (typeof param !== 'undefined') {
       options[key] = param;
     }
