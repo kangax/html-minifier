@@ -1813,6 +1813,18 @@ QUnit.test('Ignore custom fragments', function(assert) {
     collapseWhitespace: true,
     trimCustomFragments: true
   }), output);
+
+  input = 'foo <WC@bar> baz moo </WC@bar> loo';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    ignoreCustomFragments: [
+      /<(WC@[\s\S]*?)>(.*?)<\/\1>/
+    ]
+  }), input);
+  output = 'foo<wc @bar>baz moo</wc>loo';
+  assert.equal(minify(input, {
+    collapseWhitespace: true
+  }), output);
 });
 
 QUnit.test('bootstrap\'s span > button > span', function(assert) {
