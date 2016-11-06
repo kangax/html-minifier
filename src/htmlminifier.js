@@ -869,9 +869,9 @@ function minify(value, options, partialMarkup) {
     return re.source;
   });
   if (customFragments.length) {
-    var reCustomIgnore = new RegExp('(\\s*)(?:' + customFragments.join('|') + ')+(\\s*)', 'g');
+    var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')+\\s*', 'g');
     // temporarily replace custom ignored fragments with unique attributes
-    value = value.replace(reCustomIgnore, function(match, prefix, suffix) {
+    value = value.replace(reCustomIgnore, function(match) {
       if (!uidAttr) {
         uidAttr = uniqueId(value);
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
@@ -889,7 +889,7 @@ function minify(value, options, partialMarkup) {
         }
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
-      ignoredCustomMarkupChunks.push([match, prefix, suffix]);
+      ignoredCustomMarkupChunks.push(/^(\s*)[\s\S]*?(\s*)$/.exec(match));
       return '\t' + token + '\t';
     });
   }
