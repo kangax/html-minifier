@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.1.0 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.1.1 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -7,7 +7,7 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
- * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
+ * @license amdefine 1.0.1 Copyright (c) 2011-2016, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/amdefine for details
  */
@@ -9016,7 +9016,7 @@ var DEFAULTS = {
     selectors: {
       adjacentSpace: false, // div+ nav Android stock browser hack
       ie7Hack: false, // *+html hack
-      special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder|:host|::content|\/deep\/|::shadow|^,)/ // special selectors which prevent merging
+      special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder|:host|:content|\/deep\/|:shadow|:selection|^,)/ // special selectors which prevent merging
     },
     units: {
       ch: true,
@@ -17954,9 +17954,9 @@ try {
 } catch (e) {}
 
 var xhr = new global.XMLHttpRequest()
-// If location.host is empty, e.g. if this page/worker was loaded
-// from a Blob, then use example.com to avoid an error
-xhr.open('GET', global.location.host ? '/' : 'https://example.com')
+// If XDomainRequest is available (ie only, where xhr might not work
+// cross domain), use the page location. Otherwise use example.com
+xhr.open('GET', global.XDomainRequest ? '/' : 'https://example.com')
 
 function checkTypeSupport (type) {
 	try {
@@ -18089,7 +18089,7 @@ ClientRequest.prototype._onFinish = function () {
 
 	var headersObj = self._headers
 	var body
-	if (opts.method === 'POST' || opts.method === 'PUT' || opts.method === 'PATCH') {
+	if (opts.method === 'POST' || opts.method === 'PUT' || opts.method === 'PATCH' || opts.method === 'MERGE') {
 		if (capability.blobConstructor) {
 			body = new global.Blob(self._body.map(function (buffer) {
 				return toArrayBuffer(buffer)
@@ -18311,12 +18311,12 @@ var IncomingMessage = exports.IncomingMessage = function (xhr, response, mode) {
 		self.url = response.url
 		self.statusCode = response.status
 		self.statusMessage = response.statusText
-		// backwards compatible version of for (<item> of <iterable>):
-		// for (var <item>,_i,_it = <iterable>[Symbol.iterator](); <item> = (_i = _it.next()).value,!_i.done;)
-		for (var header, _i, _it = response.headers[Symbol.iterator](); header = (_i = _it.next()).value, !_i.done;) {
-			self.headers[header[0].toLowerCase()] = header[1]
-			self.rawHeaders.push(header[0], header[1])
-		}
+		
+		response.headers.forEach(function(header, key){
+			self.headers[key.toLowerCase()] = header
+			self.rawHeaders.push(key, header)
+		})
+
 
 		// TODO: this doesn't respect backpressure. Once WritableStream is available, this can be fixed
 		var reader = response.body.getReader()
@@ -21665,6 +21665,7 @@ exports.SourceMapConsumer = require('./lib/source-map-consumer').SourceMapConsum
 exports.SourceNode = require('./lib/source-node').SourceNode;
 
 },{"./lib/source-map-consumer":133,"./lib/source-map-generator":134,"./lib/source-node":135}],138:[function(require,module,exports){
+(function (Buffer){
 var sys = require("util");
 var MOZ_SourceMap = require("source-map");
 var UglifyJS = exports;
@@ -25003,12 +25004,16 @@ AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
         }
         if (node instanceof AST_SymbolRef) {
             var name = node.name;
-            if (name == "eval" && tw.parent() instanceof AST_Call) {
+            var parent = tw.parent();
+            if (name == "eval" && parent instanceof AST_Call) {
                 for (var s = node.scope; s && !s.uses_eval; s = s.parent_scope) {
                     s.uses_eval = true;
                 }
             }
             var sym = node.scope.find_variable(name);
+            if (node.scope instanceof AST_Lambda && name == "arguments") {
+                node.scope.uses_arguments = true;
+            }
             if (!sym) {
                 var g;
                 if (globals.has(name)) {
@@ -25019,12 +25024,12 @@ AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
                     g.global = true;
                     globals.set(name, g);
                 }
-                node.thedef = g;
-                if (func && name == "arguments") {
-                    func.uses_arguments = true;
-                }
-            } else {
-                node.thedef = sym;
+                sym = g;
+            }
+            node.thedef = sym;
+            if (parent instanceof AST_Unary && (parent.operator === '++' || parent.operator === '--')
+             || parent instanceof AST_Assign && parent.left === node) {
+                sym.modified = true;
             }
             node.reference();
             return true;
@@ -25514,8 +25519,53 @@ function OutputStream(options) {
         screw_ie8        : true,
         preamble         : null,
         quote_style      : 0,
-        keep_quoted_props: false
+        keep_quoted_props: false,
+        wrap_iife        : false,
     }, true);
+
+    // Convert comment option to RegExp if neccessary and set up comments filter
+    if (typeof options.comments === "string" && /^\/.*\/[a-zA-Z]*$/.test(options.comments)) {
+        var regex_pos = options.comments.lastIndexOf("/");
+        options.comments = new RegExp(
+            options.comments.substr(1, regex_pos - 1),
+            options.comments.substr(regex_pos + 1)
+        );
+    }
+    if (options.comments instanceof RegExp) {
+        options.comments = (function(f) {
+            return function(comment) {
+                return comment.type == "comment5" || f.test(comment.value);
+            }
+        })(options.comments);
+    }
+    else if (typeof options.comments === "function") {
+        options.comments = (function(f) {
+            return function(comment) {
+                return comment.type == "comment5" || f(this, comment);
+            }
+        })(options.comments);
+    }
+    else if (options.comments === "some") {
+        options.comments = function(comment) {
+            var text = comment.value;
+            var type = comment.type;
+            if (type == "comment2") {
+                // multiline comment
+                return /@preserve|@license|@cc_on/i.test(text);
+            }
+            return type == "comment5";
+        }
+    }
+    else if (options.comments){ // NOTE includes "all" option
+        options.comments = function() {
+            return true;
+        }
+    } else {
+        // Falsy case, so reject all comments, except shebangs
+        options.comments = function(comment) {
+            return comment.type == "comment5";
+        }
+    }
 
     var indentation = 0;
     var current_col = 0;
@@ -25882,7 +25932,7 @@ function OutputStream(options) {
 
     AST_Node.DEFMETHOD("add_comments", function(output){
         if (output._readonly) return;
-        var c = output.option("comments"), self = this;
+        var self = this;
         var start = self.start;
         if (start && !start._comments_dumped) {
             start._comments_dumped = true;
@@ -25905,19 +25955,7 @@ function OutputStream(options) {
                 }));
             }
 
-            if (!c) {
-                comments = comments.filter(function(comment) {
-                    return comment.type == "comment5";
-                });
-            } else if (c.test) {
-                comments = comments.filter(function(comment){
-                    return comment.type == "comment5" || c.test(comment.value);
-                });
-            } else if (typeof c == "function") {
-                comments = comments.filter(function(comment){
-                    return comment.type == "comment5" || c(self, comment);
-                });
-            }
+            comments = comments.filter(output.option("comments"), self);
 
             // Keep single line comments after nlb, after nlb
             if (!output.option("beautify") && comments.length > 0 &&
@@ -25968,7 +26006,16 @@ function OutputStream(options) {
     // a function expression needs parens around it when it's provably
     // the first token to appear in a statement.
     PARENS(AST_Function, function(output){
-        return first_in_statement(output);
+        if (first_in_statement(output)) {
+            return true;
+        }
+
+        if (output.option('wrap_iife')) {
+            var p = output.parent();
+            return p instanceof AST_Call && p.expression === this;
+        }
+
+        return false;
     });
 
     // same goes for an object literal, because otherwise it would be
@@ -26932,6 +26979,7 @@ function Compressor(options, false_by_default) {
         if_return     : !false_by_default,
         join_vars     : !false_by_default,
         collapse_vars : false,
+        reduce_vars   : false,
         cascade       : !false_by_default,
         side_effects  : !false_by_default,
         pure_getters  : false,
@@ -27972,7 +28020,7 @@ merge(Compressor.prototype, {
             this._evaluating = true;
             try {
                 var d = this.definition();
-                if (d && d.constant && d.init) {
+                if (d && (d.constant || compressor.option("reduce_vars") && !d.modified) && d.init) {
                     return ev(d.init, compressor);
                 }
             } finally {
@@ -29178,6 +29226,12 @@ merge(Compressor.prototype, {
                 // typeof always returns a non-empty string, thus it's
                 // always true in booleans
                 compressor.warn("Boolean expression always true [{file}:{line},{col}]", self.start);
+                if (self.expression.has_side_effects(compressor)) {
+                    return make_node(AST_Seq, self, {
+                        car: self.expression,
+                        cdr: make_node(AST_True, self)
+                    });
+                }
                 return make_node(AST_True, self);
             }
             if (e instanceof AST_Binary && self.operator == "!") {
@@ -29364,8 +29418,8 @@ merge(Compressor.prototype, {
           case "+":
             var ll = self.left.evaluate(compressor);
             var rr = self.right.evaluate(compressor);
-            if ((ll.length > 1 && ll[0] instanceof AST_String && ll[1]) ||
-                (rr.length > 1 && rr[0] instanceof AST_String && rr[1])) {
+            if ((ll.length > 1 && ll[0] instanceof AST_String && ll[1] && !self.right.has_side_effects(compressor)) ||
+                (rr.length > 1 && rr[0] instanceof AST_String && rr[1] && !self.left.has_side_effects(compressor))) {
                 compressor.warn("+ in boolean context always true [{file}:{line},{col}]", self.start);
                 return make_node(AST_True, self);
             }
@@ -29520,16 +29574,26 @@ merge(Compressor.prototype, {
     });
 
     var ASSIGN_OPS = [ '+', '-', '/', '*', '%', '>>', '<<', '>>>', '|', '^', '&' ];
+    var ASSIGN_OPS_COMMUTATIVE = [ '*', '|', '^', '&' ];
     OPT(AST_Assign, function(self, compressor){
         self = self.lift_sequences(compressor);
-        if (self.operator == "="
-            && self.left instanceof AST_SymbolRef
-            && self.right instanceof AST_Binary
-            && self.right.left instanceof AST_SymbolRef
-            && self.right.left.name == self.left.name
-            && member(self.right.operator, ASSIGN_OPS)) {
-            self.operator = self.right.operator + "=";
-            self.right = self.right.right;
+        if (self.operator == "=" && self.left instanceof AST_SymbolRef && self.right instanceof AST_Binary) {
+            // x = expr1 OP expr2
+            if (self.right.left instanceof AST_SymbolRef
+                && self.right.left.name == self.left.name
+                && member(self.right.operator, ASSIGN_OPS)) {
+                // x = x - 2  --->  x -= 2
+                self.operator = self.right.operator + "=";
+                self.right = self.right.right;
+            }
+            else if (self.right.right instanceof AST_SymbolRef
+                && self.right.right.name == self.left.name
+                && member(self.right.operator, ASSIGN_OPS_COMMUTATIVE)
+                && !self.right.left.has_side_effects(compressor)) {
+                // x = 2 & x  --->  x &= 2
+                self.operator = self.right.operator + "=";
+                self.right = self.right.left;
+            }
         }
         return self;
     });
@@ -30910,6 +30974,7 @@ exports.minify = function (files, options) {
         sourceRoot       : null,
         inSourceMap      : null,
         sourceMapUrl     : null,
+        sourceMapInline  : false,
         fromString       : false,
         warnings         : false,
         mangle           : {},
@@ -30983,7 +31048,7 @@ exports.minify = function (files, options) {
     if (typeof options.inSourceMap == "string") {
         inMap = JSON.parse(fs.readFileSync(options.inSourceMap, "utf8"));
     }
-    if (options.outSourceMap) {
+    if (options.outSourceMap || options.sourceMapInline) {
         output.source_map = UglifyJS.SourceMap({
             file: options.outSourceMap,
             orig: inMap,
@@ -31004,14 +31069,17 @@ exports.minify = function (files, options) {
     var stream = UglifyJS.OutputStream(output);
     toplevel.print(stream);
 
-    var mappingUrlPrefix = "\n//# sourceMappingURL=";
-    if (options.outSourceMap && typeof options.outSourceMap === "string" && options.sourceMapUrl !== false) {
-        stream += mappingUrlPrefix + (typeof options.sourceMapUrl === "string" ? options.sourceMapUrl : options.outSourceMap);
-    }
 
     var source_map = output.source_map;
     if (source_map) {
         source_map = source_map + "";
+    }
+
+    var mappingUrlPrefix = "\n//# sourceMappingURL=";
+    if (options.sourceMapInline) {
+        stream += mappingUrlPrefix + "data:application/json;charset=utf-8;base64," + new Buffer(source_map).toString("base64");
+    } else if (options.outSourceMap && typeof options.outSourceMap === "string" && options.sourceMapUrl !== false) {
+        stream += mappingUrlPrefix + (typeof options.sourceMapUrl === "string" ? options.sourceMapUrl : options.outSourceMap);
     }
 
     return {
@@ -31054,7 +31122,8 @@ exports.describe_ast = function () {
     doitem(UglifyJS.AST_Node);
     return out + "";
 };
-},{"source-map":137,"util":144}],139:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"buffer":6,"source-map":137,"util":144}],139:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -32549,7 +32618,7 @@ function makeMap(values) {
 }
 
 // Regular Expressions for parsing tags and attributes
-var singleAttrIdentifier = /([^\s"'<>\/=]+)/,
+var singleAttrIdentifier = /([^\s"'<>/=]+)/,
     singleAttrAssign = /=/,
     singleAttrAssigns = [singleAttrAssign],
     singleAttrValues = [
@@ -32731,7 +32800,7 @@ function HTMLParser(html, handler) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
-            .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
         }
 
         if (handler.chars) {
@@ -33211,7 +33280,7 @@ function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
 }
 
 function isConditionalComment(text) {
-  return /^\[if\s[^\]]+\]|\[endif\]$/.test(text);
+  return /^\[if\s[^\]]+]|\[endif]$/.test(text);
 }
 
 function isIgnoredComment(text, options) {
@@ -33484,7 +33553,7 @@ function unwrapMediaQuery(text) {
 }
 
 function cleanConditionalComment(comment, options) {
-  return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+\]>)([\s\S]*?)(<!\[endif\])$/, function(match, prefix, text, suffix) {
+  return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/, function(match, prefix, text, suffix) {
     return prefix + minify(text, options, true) + suffix;
   }) : comment;
 }
@@ -34002,9 +34071,9 @@ function minify(value, options, partialMarkup) {
     return re.source;
   });
   if (customFragments.length) {
-    var reCustomIgnore = new RegExp('(\\s*)(?:' + customFragments.join('|') + ')+(\\s*)', 'g');
+    var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')+\\s*', 'g');
     // temporarily replace custom ignored fragments with unique attributes
-    value = value.replace(reCustomIgnore, function(match, prefix, suffix) {
+    value = value.replace(reCustomIgnore, function(match) {
       if (!uidAttr) {
         uidAttr = uniqueId(value);
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
@@ -34022,7 +34091,7 @@ function minify(value, options, partialMarkup) {
         }
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
-      ignoredCustomMarkupChunks.push([match, prefix, suffix]);
+      ignoredCustomMarkupChunks.push(/^(\s*)[\s\S]*?(\s*)$/.exec(match));
       return '\t' + token + '\t';
     });
   }
