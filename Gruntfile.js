@@ -67,7 +67,7 @@ module.exports = function(grunt) {
         '$1(v<%= pkg.version %>)$2'
       ],
       './tests/index.html': [
-        /("[^"]+\/qunit-)[0-9\.]+?(\.(?:css|js)")/g,
+        /("[^"]+\/qunit-)[0-9.]+?(\.(?:css|js)")/g,
         '$1<%= qunit_ver %>$2'
       ]
     },

@@ -37,7 +37,7 @@ function makeMap(values) {
 }
 
 // Regular Expressions for parsing tags and attributes
-var singleAttrIdentifier = /([^\s"'<>\/=]+)/,
+var singleAttrIdentifier = /([^\s"'<>/=]+)/,
     singleAttrAssign = /=/,
     singleAttrAssigns = [singleAttrAssign],
     singleAttrValues = [
@@ -219,7 +219,7 @@ function HTMLParser(html, handler) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
-            .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
         }
 
         if (handler.chars) {

@@ -1610,7 +1610,7 @@ QUnit.test('phrasing content with Web Components', function(assert) {
 // https://github.com/kangax/html-minifier/issues/10
 QUnit.test('Ignore custom fragments', function(assert) {
   var input, output;
-  var reFragments = [/<\?[^\?]+\?>/, /<%[^%]+%>/, /\{\{[^\}]*\}\}/];
+  var reFragments = [/<\?[^?]+\?>/, /<%[^%]+%>/, /\{\{[^}]*\}\}/];
 
   input = 'This is the start. <% ... %>\r\n<%= ... %>\r\n<? ... ?>\r\n<!-- This is the middle, and a comment. -->\r\nNo comment, but middle.\r\n{{ ... }}\r\n<?php ... ?>\r\n<?xml ... ?>\r\nHello, this is the end!';
   output = 'This is the start. <% ... %> <%= ... %> <? ... ?> No comment, but middle. {{ ... }} <?php ... ?> <?xml ... ?> Hello, this is the end!';
@@ -2604,7 +2604,7 @@ QUnit.test('custom attribute collapse', function(assert) {
   output = '<div data-bind="css: {fadeIn: selected(),fadeOut: !selected()},visible: function () {return pageWeAreOn() == \'home\';}">foo</div>';
 
   assert.equal(minify(input), input);
-  assert.equal(minify(input, { customAttrCollapse: /data\-bind/ }), output);
+  assert.equal(minify(input, { customAttrCollapse: /data-bind/ }), output);
 
   input = '<div style="' +
             'color: red;' +
@@ -2623,7 +2623,7 @@ QUnit.test('custom attribute collapse', function(assert) {
   '> ' +
   '</div>';
   output = '<div class="fragment square" ng-hide="square1.hide" ng-class="{\'bounceInDown\': !square1.hide, \'bounceOutDown\': square1.hide }"> </div>';
-  assert.equal(minify(input, { customAttrCollapse: /ng\-class/ }), output);
+  assert.equal(minify(input, { customAttrCollapse: /ng-class/ }), output);
 });
 
 QUnit.test('custom attribute collapse with empty attribute value', function(assert) {
@@ -2638,7 +2638,7 @@ QUnit.test('custom attribute collapse with newlines, whitespace, and carriage re
           '               value2:false \n\r' +
           '               }"></div>';
   var output = '<div ng-class="{value:true,value2:false}"></div>';
-  assert.equal(minify(input, { customAttrCollapse: /ng\-class/ }), output);
+  assert.equal(minify(input, { customAttrCollapse: /ng-class/ }), output);
 });
 
 QUnit.test('do not escape attribute value', function(assert) {
