@@ -1113,6 +1113,22 @@ function minify(value, options, partialMarkup) {
           currentChars += '|';
         }
       }
+
+      if (options.removeEmptyScriptTags) {
+        if (isElementEmpty && tag === 'script') {
+          removeStartTag();
+        }
+        optionalStartTag = '';
+        optionalEndTag = '';
+      }
+
+      if (options.removeEmptyStyleTags) {
+        if (isElementEmpty && tag === 'style') {
+          removeStartTag();
+        }
+        optionalStartTag = '';
+        optionalEndTag = '';
+      }
     },
     chars: function(text, prevTag, nextTag) {
       prevTag = prevTag === '' ? 'comment' : prevTag;
