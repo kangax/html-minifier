@@ -455,12 +455,15 @@ var reEmptyAttribute = new RegExp(
   '^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(' +
     '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
-function canDeleteEmptyAttribute(tag, attrName, attrValue) {
+function canDeleteEmptyAttribute(tag, attrName, attrValue, options) {
   var isValueEmpty = !attrValue || /^\s*$/.test(attrValue);
-  if (isValueEmpty) {
-    return tag === 'input' && attrName === 'value' || reEmptyAttribute.test(attrName);
+  if (!isValueEmpty) {
+    return false;
   }
-  return false;
+  if (typeof options.removeEmptyAttributes === 'function') {
+    return options.removeEmptyAttributes(attrName, tag);
+  }
+  return tag === 'input' && attrName === 'value' || reEmptyAttribute.test(attrName);
 }
 
 function hasAttrName(name, attrs) {
@@ -530,7 +533,7 @@ function normalizeAttr(attr, attrs, tag, options) {
   attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
   if (options.removeEmptyAttributes &&
-      canDeleteEmptyAttribute(tag, attrName, attrValue)) {
+      canDeleteEmptyAttribute(tag, attrName, attrValue, options)) {
     return;
   }
 
