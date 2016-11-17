@@ -792,6 +792,10 @@ QUnit.test('empty attributes', function(assert) {
   // remove recognized attrs with unspecified values
   input = '<div data-foo class id style title lang dir onfocus onblur onchange onclick ondblclick onmousedown onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup></div>';
   assert.equal(minify(input, { removeEmptyAttributes: true }), '<div data-foo></div>');
+
+  // additional remove attributes
+  input = '<img src="" alt="">';
+  assert.equal(minify(input, { removeEmptyAttributes: function(attrName, tag) { return tag === 'img' && attrName === 'src'; } }), '<img alt="">');
 });
 
 QUnit.test('cleaning class/style attributes', function(assert) {
