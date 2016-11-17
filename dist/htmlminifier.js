@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.1.1 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.2.0 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2016 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -6244,7 +6244,7 @@ function reduceSelector(tokens, selector, data, context, options, outerContext) 
 
   for (j = 0, m = bodiesAsList.length; j < m; j++) {
     if (bodiesAsList[j].length > 0)
-      joinsAt.push((joinsAt[j - 1] || 0) + bodiesAsList[j].length);
+      joinsAt.push((joinsAt.length > 0 ? joinsAt[joinsAt.length - 1] : 0) + bodiesAsList[j].length);
   }
 
   optimizeProperties(selector, bodies, joinsAt, false, options, outerContext);
@@ -6369,9 +6369,9 @@ function canReorderSingle(left, right) {
     return false;
   if (leftNameRoot == rightNameRoot && unprefixed(leftName) == unprefixed(rightName) && (vendorPrefixed(leftName) ^ vendorPrefixed(rightName)))
     return false;
-  if (leftNameRoot == 'border' && BORDER_PROPERTIES.test(rightNameRoot) && (leftName == 'border' || leftName == rightNameRoot))
+  if (leftNameRoot == 'border' && BORDER_PROPERTIES.test(rightNameRoot) && (leftName == 'border' || leftName == rightNameRoot || (leftValue != rightValue && sameBorderComponent(leftName, rightName))))
     return false;
-  if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot))
+  if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot || (leftValue != rightValue && sameBorderComponent(leftName, rightName))))
     return false;
   if (leftNameRoot == 'border' && rightNameRoot == 'border' && leftName != rightName && (isSideBorder(leftName) && isStyleBorder(rightName) || isStyleBorder(leftName) && isSideBorder(rightName)))
     return false;
@@ -6395,6 +6395,10 @@ function vendorPrefixed(name) {
 
 function unprefixed(name) {
   return name.replace(/^\-(?:moz|webkit|ms|o)\-/, '');
+}
+
+function sameBorderComponent(name1, name2) {
+  return name1.split('-').pop() == name2.split('-').pop();
 }
 
 function isSideBorder(name) {
@@ -8495,6 +8499,10 @@ function whatsNext(context) {
   var nextEscape = chunk.indexOf('__ESCAPED_', context.cursor);
   var nextBodyStart = chunk.indexOf('{', context.cursor);
   var nextBodyEnd = chunk.indexOf('}', context.cursor);
+
+  if (nextSpecial > -1 && context.cursor > 0 && !/\s|\{|\}|\/|_|,|;/.test(chunk.substring(nextSpecial - 1, nextSpecial))) {
+    nextSpecial = -1;
+  }
 
   if (nextEscape > -1 && /\S/.test(chunk.substring(context.cursor, nextEscape)))
     nextEscape = -1;
@@ -12031,6 +12039,10 @@ var processNextTick = require('process-nextick-args');
 var isArray = require('isarray');
 /*</replacement>*/
 
+/*<replacement>*/
+var Duplex;
+/*</replacement>*/
+
 Readable.ReadableState = ReadableState;
 
 /*<replacement>*/
@@ -12078,6 +12090,8 @@ var StringDecoder;
 util.inherits(Readable, Stream);
 
 function prependListener(emitter, event, fn) {
+  // Sadly this is not cacheable as some libraries bundle their own
+  // event emitter implementation with them.
   if (typeof emitter.prependListener === 'function') {
     return emitter.prependListener(event, fn);
   } else {
@@ -12089,7 +12103,6 @@ function prependListener(emitter, event, fn) {
   }
 }
 
-var Duplex;
 function ReadableState(options, stream) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -12159,7 +12172,6 @@ function ReadableState(options, stream) {
   }
 }
 
-var Duplex;
 function Readable(options) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -12482,7 +12494,7 @@ function maybeReadMore_(stream, state) {
 // for virtual (non-string, non-buffer) streams, "length" is somewhat
 // arbitrary, and perhaps not very meaningful.
 Readable.prototype._read = function (n) {
-  this.emit('error', new Error('not implemented'));
+  this.emit('error', new Error('_read() is not implemented'));
 };
 
 Readable.prototype.pipe = function (dest, pipeOpts) {
@@ -12660,16 +12672,16 @@ Readable.prototype.unpipe = function (dest) {
     state.pipesCount = 0;
     state.flowing = false;
 
-    for (var _i = 0; _i < len; _i++) {
-      dests[_i].emit('unpipe', this);
+    for (var i = 0; i < len; i++) {
+      dests[i].emit('unpipe', this);
     }return this;
   }
 
   // try to find the right one.
-  var i = indexOf(state.pipes, dest);
-  if (i === -1) return this;
+  var index = indexOf(state.pipes, dest);
+  if (index === -1) return this;
 
-  state.pipes.splice(i, 1);
+  state.pipes.splice(index, 1);
   state.pipesCount -= 1;
   if (state.pipesCount === 1) state.pipes = state.pipes[0];
 
@@ -13054,7 +13066,6 @@ function Transform(options) {
 
   this._transformState = new TransformState(this);
 
-  // when the writable side finishes, then flush out anything remaining.
   var stream = this;
 
   // start out asking for a readable event once data is transformed.
@@ -13071,9 +13082,10 @@ function Transform(options) {
     if (typeof options.flush === 'function') this._flush = options.flush;
   }
 
+  // When the writable side finishes, then flush out anything remaining.
   this.once('prefinish', function () {
-    if (typeof this._flush === 'function') this._flush(function (er) {
-      done(stream, er);
+    if (typeof this._flush === 'function') this._flush(function (er, data) {
+      done(stream, er, data);
     });else done(stream);
   });
 }
@@ -13094,7 +13106,7 @@ Transform.prototype.push = function (chunk, encoding) {
 // an error, then that'll put the hurt on the whole operation.  If you
 // never call cb(), then you'll never get another chunk.
 Transform.prototype._transform = function (chunk, encoding, cb) {
-  throw new Error('Not implemented');
+  throw new Error('_transform() is not implemented');
 };
 
 Transform.prototype._write = function (chunk, encoding, cb) {
@@ -13124,8 +13136,10 @@ Transform.prototype._read = function (n) {
   }
 };
 
-function done(stream, er) {
+function done(stream, er, data) {
   if (er) return stream.emit('error', er);
+
+  if (data !== null && data !== undefined) stream.push(data);
 
   // if there's nothing in the write buffer, then that means
   // that nothing more will ever be provided
@@ -13154,6 +13168,10 @@ var processNextTick = require('process-nextick-args');
 
 /*<replacement>*/
 var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
+/*</replacement>*/
+
+/*<replacement>*/
+var Duplex;
 /*</replacement>*/
 
 Writable.WritableState = WritableState;
@@ -13196,7 +13214,6 @@ function WriteReq(chunk, encoding, cb) {
   this.next = null;
 }
 
-var Duplex;
 function WritableState(options, stream) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -13218,6 +13235,7 @@ function WritableState(options, stream) {
   // cast to ints.
   this.highWaterMark = ~ ~this.highWaterMark;
 
+  // drain event flag.
   this.needDrain = false;
   // at the start of calling end()
   this.ending = false;
@@ -13292,7 +13310,7 @@ function WritableState(options, stream) {
   this.corkedRequestsFree = new CorkedRequest(this);
 }
 
-WritableState.prototype.getBuffer = function writableStateGetBuffer() {
+WritableState.prototype.getBuffer = function getBuffer() {
   var current = this.bufferedRequest;
   var out = [];
   while (current) {
@@ -13312,13 +13330,37 @@ WritableState.prototype.getBuffer = function writableStateGetBuffer() {
   } catch (_) {}
 })();
 
-var Duplex;
+// Test _writableState for inheritance to account for Duplex streams,
+// whose prototype chain only points to Readable.
+var realHasInstance;
+if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.prototype[Symbol.hasInstance] === 'function') {
+  realHasInstance = Function.prototype[Symbol.hasInstance];
+  Object.defineProperty(Writable, Symbol.hasInstance, {
+    value: function (object) {
+      if (realHasInstance.call(this, object)) return true;
+
+      return object && object._writableState instanceof WritableState;
+    }
+  });
+} else {
+  realHasInstance = function (object) {
+    return object instanceof this;
+  };
+}
+
 function Writable(options) {
   Duplex = Duplex || require('./_stream_duplex');
 
-  // Writable ctor is applied to Duplexes, though they're not
-  // instanceof Writable, they're instanceof Readable.
-  if (!(this instanceof Writable) && !(this instanceof Duplex)) return new Writable(options);
+  // Writable ctor is applied to Duplexes, too.
+  // `realHasInstance` is necessary because using plain `instanceof`
+  // would return false, as no `_writableState` property is attached.
+
+  // Trying to use the custom `instanceof` for Writable here will also break the
+  // Node.js LazyTransform implementation, which has a non-trivial getter for
+  // `_writableState` that would lead to infinite recursion.
+  if (!realHasInstance.call(Writable, this) && !(this instanceof Duplex)) {
+    return new Writable(options);
+  }
 
   this._writableState = new WritableState(options, this);
 
@@ -13578,7 +13620,7 @@ function clearBuffer(stream, state) {
 }
 
 Writable.prototype._write = function (chunk, encoding, cb) {
-  cb(new Error('not implemented'));
+  cb(new Error('_write() is not implemented'));
 };
 
 Writable.prototype._writev = null;
@@ -33657,12 +33699,15 @@ var reEmptyAttribute = new RegExp(
   '^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(' +
     '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
-function canDeleteEmptyAttribute(tag, attrName, attrValue) {
+function canDeleteEmptyAttribute(tag, attrName, attrValue, options) {
   var isValueEmpty = !attrValue || /^\s*$/.test(attrValue);
-  if (isValueEmpty) {
-    return tag === 'input' && attrName === 'value' || reEmptyAttribute.test(attrName);
+  if (!isValueEmpty) {
+    return false;
   }
-  return false;
+  if (typeof options.removeEmptyAttributes === 'function') {
+    return options.removeEmptyAttributes(attrName, tag);
+  }
+  return tag === 'input' && attrName === 'value' || reEmptyAttribute.test(attrName);
 }
 
 function hasAttrName(name, attrs) {
@@ -33732,7 +33777,7 @@ function normalizeAttr(attr, attrs, tag, options) {
   attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
 
   if (options.removeEmptyAttributes &&
-      canDeleteEmptyAttribute(tag, attrName, attrValue)) {
+      canDeleteEmptyAttribute(tag, attrName, attrValue, options)) {
     return;
   }
 
