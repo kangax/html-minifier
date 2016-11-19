@@ -50,7 +50,7 @@ module.exports = function(grunt) {
         src: ['tests/*.js', 'test.js']
       },
       web: {
-        src: 'assets/master.js'
+        src: ['assets/master.js', 'assets/worker.js']
       },
       other: {
         src: ['backtest.js', 'benchmark.js']

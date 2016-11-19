@@ -1,7 +1,31 @@
 (function() {
   'use strict';
 
-  var minify = require('html-minifier').minify;
+  var minify = (function() {
+    var minify = require('html-minifier').minify;
+    return function(value, options, callback, errorback) {
+      var minified;
+      try {
+        minified = minify(value, options);
+      }
+      catch (err) {
+        return errorback(err);
+      }
+      callback(minified);
+    };
+  })();
+  var worker = new Worker('worker.js');
+  worker.onmessage = function() {
+    minify = function(value, options, callback, errorback) {
+      postMessage({
+        value: value,
+        options: options
+      });
+      worker.onmessage = function(event) {
+        (typeof event.data === 'string' ? callback : errorback)(event.data);
+      };
+    };
+  };
 
   function byId(id) {
     return document.getElementById(id);
@@ -53,12 +77,11 @@
   }
 
   byId('minify-btn').onclick = function() {
-    try {
-      var options = getOptions(),
-          originalValue = byId('input').value,
-          minifiedValue = minify(originalValue, options),
-          diff = originalValue.length - minifiedValue.length,
-          savings = originalValue.length ? (100 * diff / originalValue.length).toFixed(2) : 0;
+    byId('minify-btn').disabled = true;
+    var originalValue = byId('input').value;
+    minify(originalValue, getOptions(), function(minifiedValue) {
+      var diff = originalValue.length - minifiedValue.length;
+      var savings = originalValue.length ? (100 * diff / originalValue.length).toFixed(2) : 0;
 
       byId('output').value = minifiedValue;
 
@@ -68,11 +91,12 @@
           '. Minified size: <strong>' + commify(minifiedValue.length) + '</strong>' +
           '. Savings: <strong>' + commify(diff) + ' (' + savings + '%)</strong>.' +
         '</span>';
-    }
-    catch (err) {
+      byId('minify-btn').disabled = false;
+    }, function(err) {
       byId('output').value = '';
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
-    }
+      byId('minify-btn').disabled = false;
+    });
   };
 
   byId('select-all').onclick = function() {
