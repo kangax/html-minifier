@@ -18,13 +18,13 @@
     var worker = new Worker('assets/worker.js');
     worker.onmessage = function() {
       minify = function(value, options, callback, errorback) {
-        postMessage({
-          value: value,
-          options: options
-        });
         worker.onmessage = function(event) {
           (typeof event.data === 'string' ? callback : errorback)(event.data);
         };
+        worker.postMessage({
+          value: value,
+          options: options
+        });
       };
     };
   }
