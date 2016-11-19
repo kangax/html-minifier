@@ -5,7 +5,11 @@
   var minify = require('html-minifier').minify;
   addEventListener('message', function(event) {
     try {
-      postMessage(minify(event.data.value, event.data.options));
+      var options = event.data.options;
+      options.log = function(message) {
+        console.log(message);
+      };
+      postMessage(minify(event.data.value, options));
     }
     catch (err) {
       postMessage(err);
