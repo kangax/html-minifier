@@ -4,6 +4,9 @@
   var minify = (function() {
     var minify = require('html-minifier').minify;
     return function(value, options, callback, errorback) {
+      options.log = function(message) {
+        console.log(message);
+      };
       var minified;
       try {
         minified = minify(value, options);
@@ -41,12 +44,8 @@
     [].forEach.call(byId('options').getElementsByTagName('input'), fn);
   }
 
-  function log(message) {
-    console.log(message);
-  }
-
   function getOptions() {
-    var options = { log: log };
+    var options = {};
     forEachOption(function(element) {
       var key = element.id;
       var value;
