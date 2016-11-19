@@ -14,18 +14,20 @@
       callback(minified);
     };
   })();
-  var worker = new Worker('worker.js');
-  worker.onmessage = function() {
-    minify = function(value, options, callback, errorback) {
-      postMessage({
-        value: value,
-        options: options
-      });
-      worker.onmessage = function(event) {
-        (typeof event.data === 'string' ? callback : errorback)(event.data);
+  if (typeof Worker === 'function') {
+    var worker = new Worker('worker.js');
+    worker.onmessage = function() {
+      minify = function(value, options, callback, errorback) {
+        postMessage({
+          value: value,
+          options: options
+        });
+        worker.onmessage = function(event) {
+          (typeof event.data === 'string' ? callback : errorback)(event.data);
+        };
       };
     };
-  };
+  }
 
   function byId(id) {
     return document.getElementById(id);
