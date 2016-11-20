@@ -1,22 +1,45 @@
-module.exports = function(grunt) {
-  'use strict';
+'use strict';
 
+function qunitVersion() {
+  var prepareStackTrace = Error.prepareStackTrace;
+  Error.prepareStackTrace = function() {
+    return '';
+  };
+  try {
+    return require('qunitjs').version;
+  }
+  finally {
+    Error.prepareStackTrace = prepareStackTrace;
+  }
+}
+
+module.exports = function(grunt) {
   // Force use of Unix newlines
   grunt.util.linefeed = '\n';
 
   grunt.initConfig({
-
     pkg: grunt.file.readJSON('package.json'),
+    qunit_ver: qunitVersion(),
     banner: '/*!\n' +
             ' * HTMLMinifier v<%= pkg.version %> (<%= pkg.homepage %>)\n' +
             ' * Copyright 2010-<%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
             ' * Licensed under the <%= pkg.license %> license\n' +
             ' */\n',
 
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc'
-      },
+    browserify: {
+      src: {
+        options: {
+          banner: '<%= banner %>',
+          require: [
+            './src/htmlminifier.js:html-minifier'
+          ]
+        },
+        src: 'src/htmlminifier.js',
+        dest: 'dist/htmlminifier.js'
+      }
+    },
+
+    eslint: {
       grunt: {
         src: 'Gruntfile.js'
       },
@@ -27,48 +50,26 @@ module.exports = function(grunt) {
         src: ['tests/*.js', 'test.js']
       },
       web: {
-        src: 'assets/master.js'
+        src: ['assets/master.js', 'assets/worker.js']
       },
       other: {
-        src: 'benchmark.js'
+        src: ['backtest.js', 'benchmark.js']
       }
     },
 
-    jscs: {
-      options: {
-        config: '.jscsrc'
-      },
-      grunt: {
-        src: '<%= jshint.grunt.src %>'
-      },
-      src: {
-        src: '<%= jshint.src.src %>'
-      },
-      tests: {
-        src: '<%= jshint.tests.src %>'
-      },
-      web: {
-        src: '<%= jshint.web.src %>'
-      },
-      other: {
-        src: '<%= jshint.other.src %>'
-      }
+    qunit: {
+      htmlminifier: ['./tests/minifier', 'tests/index.html']
     },
 
-    exec: {
-      test: {
-        command: 'node ./test.js'
-      }
-    },
-
-    concat: {
-      options: {
-        banner: '<%= banner %>'
-      },
-      dist: {
-        src: ['src/htmlparser.js', 'src/htmlminifier.js', 'src/htmllint.js'],
-        dest: 'dist/htmlminifier.js'
-      }
+    replace: {
+      './index.html': [
+        /(<h1>.*?<span>).*?(<\/span><\/h1>)/,
+        '$1(v<%= pkg.version %>)$2'
+      ],
+      './tests/index.html': [
+        /("[^"]+\/qunit-)[0-9.]+?(\.(?:css|js)")/g,
+        '$1<%= qunit_ver %>$2'
+      ]
     },
 
     uglify: {
@@ -81,32 +82,78 @@ module.exports = function(grunt) {
       },
       minify: {
         files: {
-          'dist/htmlminifier.min.js': '<%= concat.dist.dest %>'
+          'dist/htmlminifier.min.js': '<%= browserify.src.dest %>'
         }
       }
     }
-
   });
 
-  require('load-grunt-tasks')(grunt, { scope: 'devDependencies' });
-  require('time-grunt')(grunt);
+  grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('gruntify-eslint');
 
-  grunt.registerTask('build', [
-    'concat'
-  ]);
+  function report(type, details) {
+    grunt.log.writeln(type + ' completed in ' + details.runtime + 'ms');
+    details.failures.forEach(function(details) {
+      grunt.log.error();
+      grunt.log.error(details.name + (details.message ? ' [' + details.message + ']' : ''));
+      grunt.log.error(details.source);
+      grunt.log.error('Actual:');
+      grunt.log.error(details.actual);
+      grunt.log.error('Expected:');
+      grunt.log.error(details.expected);
+    });
+    grunt.log[details.failed ? 'error' : 'ok'](details.passed + ' of ' + details.total + ' passed, ' + details.failed + ' failed');
+    return details.failed;
+  }
+
+  var phantomjs = require('phantomjs-prebuilt').path;
+  grunt.registerMultiTask('qunit', function() {
+    var done = this.async();
+    var errors = [];
+
+    function run(testType, binPath, testPath) {
+      grunt.util.spawn({
+        cmd: binPath,
+        args: ['test.js', testPath]
+      }, function(error, result) {
+        if (error) {
+          grunt.log.error(result.stderr);
+          grunt.log.error(testType + ' test failed to load');
+          errors.push(-1);
+        }
+        else {
+          errors.push(report(testType, JSON.parse(result.stdout)));
+        }
+        if (errors.length === 2) {
+          done(!errors[0] && !errors[1]);
+        }
+      });
+    }
+
+    run('node', process.argv[0], this.data[0]);
+    run('web', phantomjs, this.data[1]);
+  });
+
+  grunt.registerMultiTask('replace', function() {
+    var pattern = this.data[0];
+    var path = this.target;
+    var html = grunt.file.read(path);
+    html = html.replace(pattern, this.data[1]);
+    grunt.file.write(path, html);
+  });
 
   grunt.registerTask('dist', [
-    'concat',
+    'replace',
+    'browserify',
     'uglify'
   ]);
 
   grunt.registerTask('test', [
+    'eslint',
     'dist',
-    'jshint',
-    'jscs',
-    'exec'
+    'qunit'
   ]);
 
   grunt.registerTask('default', 'test');
-
 };

@@ -1,25 +1,51 @@
+/* eslint-env phantomjs, qunit */
 'use strict';
 
-var testrunner = require('qunit');
-
-testrunner.options.log.summary = true;
-testrunner.options.log.tests = false;
-testrunner.options.log.assertions = false;
-
-testrunner.run({
-  deps: ['./src/htmlparser.js', './src/htmllint.js'],
-  code: './src/htmlminifier.js',
-  tests: [
-    './tests/minifier.js',
-    './tests/lint.js'
-  ]
-}, function(err, report) {
-  if (report.failed > 0) {
-    process.on('exit', function() {
-      process.exit(1);
-    });
+function load(path) {
+  var obj = require(path);
+  for (var key in obj) {
+    global[key] = obj[key];
   }
-  if (err) {
-    console.log(err);
-  }
-});
+  return obj;
+}
+
+var alert = console.log;
+var QUnit = load('qunitjs');
+
+function hook() {
+  var failures = [];
+  QUnit.log(function(details) {
+    if (!details.result) {
+      failures.push(details);
+    }
+  });
+  QUnit.done(function(details) {
+    details.failures = failures;
+    alert(JSON.stringify(details));
+  });
+}
+
+if (typeof phantom === 'undefined') {
+  load('./src/htmlminifier');
+  hook();
+  require(process.argv[2]);
+  QUnit.load();
+}
+else {
+  var system = require('system');
+  setTimeout(function() {
+    system.stderr.write('timed out');
+    phantom.exit(1);
+  }, 15000);
+  var page = require('webpage').create();
+  page.onAlert = function(details) {
+    console.log(details);
+    phantom.exit();
+  };
+  page.open(system.args[1], function(status) {
+    if (status !== 'success') {
+      phantom.exit(1);
+    }
+    page.evaluate(hook);
+  });
+}

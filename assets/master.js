@@ -1,6 +1,36 @@
-/* global HTMLLint, minify */
 (function() {
   'use strict';
+
+  var minify = (function() {
+    var minify = require('html-minifier').minify;
+    return function(value, options, callback, errorback) {
+      options.log = function(message) {
+        console.log(message);
+      };
+      var minified;
+      try {
+        minified = minify(value, options);
+      }
+      catch (err) {
+        return errorback(err);
+      }
+      callback(minified);
+    };
+  })();
+  if (typeof Worker === 'function') {
+    var worker = new Worker('assets/worker.js');
+    worker.onmessage = function() {
+      minify = function(value, options, callback, errorback) {
+        worker.onmessage = function(event) {
+          (typeof event.data === 'string' ? callback : errorback)(event.data);
+        };
+        worker.postMessage({
+          value: value,
+          options: options
+        });
+      };
+    };
+  }
 
   function byId(id) {
     return document.getElementById(id);
@@ -10,31 +40,34 @@
     return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  function forEachOption(fn) {
+    [].forEach.call(byId('options').getElementsByTagName('input'), fn);
+  }
+
   function getOptions() {
-    return {
-      removeComments:                 byId('remove-comments').checked,
-      removeCommentsFromCDATA:        byId('remove-comments-from-cdata').checked,
-      removeCDATASectionsFromCDATA:   byId('remove-cdata-sections-from-cdata').checked,
-      collapseWhitespace:             byId('collapse-whitespace').checked,
-      conservativeCollapse:           byId('conservative-collapse').checked,
-      collapseBooleanAttributes:      byId('collapse-boolean-attributes').checked,
-      removeAttributeQuotes:          byId('remove-attribute-quotes').checked,
-      removeRedundantAttributes:      byId('remove-redundant-attributes').checked,
-      useShortDoctype:                byId('use-short-doctype').checked,
-      removeEmptyAttributes:          byId('remove-empty-attributes').checked,
-      removeEmptyElements:            byId('remove-empty-elements').checked,
-      removeOptionalTags:             byId('remove-optional-tags').checked,
-      removeScriptTypeAttributes:     byId('remove-script-type-attributes').checked,
-      removeStyleLinkTypeAttributes:  byId('remove-style-link-type-attributes').checked,
-      caseSensitive:                  byId('case-sensitive').checked,
-      keepClosingSlash:               byId('keep-closing-slash').checked,
-      minifyJS:                       byId('minify-js').checked,
-      processScripts:                 byId('minify-js-templates').checked ? byId('minify-js-templates-type').value : false,
-      minifyCSS:                      byId('minify-css').checked,
-      minifyURLs:                     byId('minify-urls').checked ? { site:byId('minify-urls-siteurl').value } : false,
-      lint:                           byId('use-htmllint').checked ? new HTMLLint() : null,
-      maxLineLength:                  parseInt(byId('max-line-length').value, 10)
-    };
+    var options = {};
+    forEachOption(function(element) {
+      var key = element.id;
+      var value;
+      if (element.type === 'checkbox') {
+        value = element.checked;
+      }
+      else {
+        value = element.value.replace(/^\s+|\s+$/, '');
+        if (!value) {
+          return;
+        }
+      }
+      switch (key) {
+        case 'maxLineLength':
+          value = parseInt(value);
+          break;
+        case 'processScripts':
+          value = value.split(/\s*,\s*/);
+      }
+      options[key] = value;
+    });
+    return options;
   }
 
   function commify(str) {
@@ -44,14 +77,12 @@
       .split('').reverse().join('');
   }
 
-  function minifyTextarea() {
-    try {
-      var options = getOptions(),
-          lint = options.lint,
-          originalValue = byId('input').value,
-          minifiedValue = minify(originalValue, options),
-          diff = originalValue.length - minifiedValue.length,
-          savings = originalValue.length ? ((100 * diff) / originalValue.length).toFixed(2) : 0;
+  byId('minify-btn').onclick = function() {
+    byId('minify-btn').disabled = true;
+    var originalValue = byId('input').value;
+    minify(originalValue, getOptions(), function(minifiedValue) {
+      var diff = originalValue.length - minifiedValue.length;
+      var savings = originalValue.length ? (100 * diff / originalValue.length).toFixed(2) : 0;
 
       byId('output').value = minifiedValue;
 
@@ -61,60 +92,61 @@
           '. Minified size: <strong>' + commify(minifiedValue.length) + '</strong>' +
           '. Savings: <strong>' + commify(diff) + ' (' + savings + '%)</strong>.' +
         '</span>';
-
-      if (lint) {
-        lint.populate(byId('report'));
-      }
-    }
-    catch (err) {
+      byId('minify-btn').disabled = false;
+    }, function(err) {
       byId('output').value = '';
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
-    }
-  }
-
-  byId('max-line-length').oninput = function() { minifyTextarea(); };
-  byId('minify-btn').onclick = function() { minifyTextarea(); };
-
-  function setCheckedAttrOnCheckboxes(attrValue) {
-    var checkboxes = byId('options').getElementsByTagName('input');
-    for (var i = checkboxes.length; i--; ) {
-      checkboxes[i].checked = attrValue;
-    }
-  }
+      byId('minify-btn').disabled = false;
+    });
+  };
 
   byId('select-all').onclick = function() {
-    setCheckedAttrOnCheckboxes(true);
+    forEachOption(function(element) {
+      if (element.type === 'checkbox') {
+        element.checked = true;
+      }
+    });
     return false;
   };
 
   byId('select-none').onclick = function() {
-    setCheckedAttrOnCheckboxes(false);
+    forEachOption(function(element) {
+      if (element.type === 'checkbox') {
+        element.checked = false;
+      }
+      else {
+        element.value = '';
+      }
+    });
     return false;
   };
 
-  byId('select-safe').onclick = function() {
-    setCheckedAttrOnCheckboxes(true);
-    var inputEls = byId('options').getElementsByTagName('input');
-    inputEls[10].checked = false;
-    inputEls[11].checked = false;
-    inputEls[18].checked = false;
+  var defaultOptions = getOptions();
+  byId('select-defaults').onclick = function() {
+    for (var key in defaultOptions) {
+      var element = byId(key);
+      element[element.type === 'checkbox' ? 'checked' : 'value'] = defaultOptions[key];
+    }
     return false;
   };
-
 })();
 
-/* jshint ignore:start */
+/* eslint-disable */
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-1128111-22']);
-_gaq.push(['_trackPageview']);
+ga('create', 'UA-1128111-22', 'auto');
+ga('send', 'pageview');
 
-(function() {
-  var ga = document.createElement('script');
-  ga.type = 'text/javascript';
-  ga.async = true;
-  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-  document.getElementsByTagName('head')[0].appendChild(ga);
-})();
-
-/* jshint ignore:end */
+(function(i){
+  var s = document.getElementById(i);
+  var f = document.createElement('iframe');
+  f.src = (document.location.protocol === 'https:' ? 'https' : 'http') + '://api.flattr.com/button/view/?uid=kangax&button=compact&url=' + encodeURIComponent(document.URL);
+  f.title = 'Flattr';
+  f.height = 20;
+  f.width = 110;
+  f.style.borderWidth = 0;
+  s.parentNode.insertBefore(f, s);
+})('wrapper');

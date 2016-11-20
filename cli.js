@@ -4,7 +4,7 @@
  *
  * The MIT License (MIT)
  *
- *  Copyright (c) 2014-2015 Zoltan Frombach
+ *  Copyright (c) 2014-2016 Zoltan Frombach
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of
  *  this software and associated documentation files (the "Software"), to deal in
@@ -25,324 +25,285 @@
  *
  */
 
-/* globals JSON:true */
-
 'use strict';
 
-var cli = require('cli');
-var concat = require('concat-stream');
-var changeCase = require('change-case');
-var path = require('path');
+var camelCase = require('camel-case');
 var fs = require('fs');
-var appName = require('./package.json').name;
-var appVersion = require('./package.json').version;
-var minify = require('./dist/htmlminifier.min.js').minify;
-var HTMLLint = require('./dist/htmlminifier.min.js').HTMLLint;
-var minifyOptions = {};
-var input = null;
-var output = null;
+var info = require('./package.json');
+var minify = require('./' + info.main).minify;
+var paramCase = require('param-case');
+var path = require('path');
+var program = require('commander');
 
-cli.width = 100;
-cli.option_width = 40;
-cli.setApp(appName, appVersion);
+program._name = info.name;
+program.version(info.version);
 
-var usage = appName + ' [OPTIONS] [FILE(s)]\n\n';
-usage += '  If no input file(s) specified then STDIN will be used for input.\n';
-usage += '  If more than one input file specified those will be concatenated and minified together.\n\n';
-usage += '  When you specify a config file with the --config-file option (see sample-cli-config-file.conf for format)\n';
-usage += '    you can still override some of its contents by providing individual command line options, too.\n\n';
-usage += '  When you want to provide an array of strings for --ignore-custom-comments or --process-scripts options\n';
-usage += '    on the command line you must escape those such as --ignore-custom-comments "[\\"string1\\",\\"string1\\"]"\n';
+function fatal(message) {
+  console.error(message);
+  process.exit(1);
+}
 
-cli.setUsage(usage);
+/**
+ * JSON does not support regexes, so, e.g., JSON.parse() will not create
+ * a RegExp from the JSON value `[ "/matchString/" ]`, which is
+ * technically just an array containing a string that begins and end with
+ * a forward slash. To get a RegExp from a JSON string, it must be
+ * constructed explicitly in JavaScript.
+ *
+ * The likelihood of actually wanting to match text that is enclosed in
+ * forward slashes is probably quite rare, so if forward slashes were
+ * included in an argument that requires a regex, the user most likely
+ * thought they were part of the syntax for specifying a regex.
+ *
+ * In the unlikely case that forward slashes are indeed desired in the
+ * search string, the user would need to enclose the expression in a
+ * second set of slashes:
+ *
+ *    --customAttrSrround "[\"//matchString//\"]"
+ */
+function parseRegExp(value) {
+  if (value) {
+    return new RegExp(value.replace(/^\/(.*)\/$/, '$1'));
+  }
+}
+
+function parseJSON(value) {
+  if (value) {
+    try {
+      return JSON.parse(value);
+    }
+    catch (e) {
+      if (/^{/.test(value)) {
+        fatal('Could not parse JSON value \'' + value + '\'');
+      }
+      return value;
+    }
+  }
+}
+
+function parseJSONArray(value) {
+  if (value) {
+    value = parseJSON(value);
+    return Array.isArray(value) ? value : [value];
+  }
+}
+
+function parseJSONRegExpArray(value) {
+  value = parseJSONArray(value);
+  return value && value.map(parseRegExp);
+}
+
+function parseString(value) {
+  return value;
+}
 
 var mainOptions = {
-  removeComments: [[false, 'Strip HTML comments']],
-  removeCommentsFromCDATA: [[false, 'Strip HTML comments from scripts and styles']],
-  removeCDATASectionsFromCDATA: [[false, 'Remove CDATA sections from script and style elements']],
-  collapseWhitespace: [[false, 'Collapse white space that contributes to text nodes in a document tree.']],
-  conservativeCollapse: [[false, 'Always collapse to 1 space (never remove it entirely)']],
-  preserveLineBreaks: [[false, 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.']],
-  collapseInlineTagWhitespace: [[false, 'Collapse white space around inline tag']],
-  collapseBooleanAttributes: [[false, 'Omit attribute values from boolean attributes']],
-  removeAttributeQuotes: [[false, 'Remove quotes around attributes when possible.']],
-  removeRedundantAttributes: [[false, 'Remove attributes when value matches default.']],
-  preventAttributesEscaping: [[false, 'Prevents the escaping of the values of attributes.']],
-  useShortDoctype: [[false, 'Replaces the doctype with the short (HTML5) doctype']],
-  removeEmptyAttributes: [[false, 'Remove all attributes with whitespace-only values']],
-  removeScriptTypeAttributes: [[false, 'Remove type="text/javascript" from script tags. Other type attribute values are left intact.']],
-  removeStyleLinkTypeAttributes: [[false, 'Remove type="text/css" from style and link tags. Other type attribute values are left intact.']],
-  removeOptionalTags: [[false, 'Remove unrequired tags']],
-  removeEmptyElements: [[false, 'Remove all elements with empty contents']],
-  lint: [[false, 'Toggle linting']],
-  keepClosingSlash: [[false, 'Keep the trailing slash on singleton elements']],
-  caseSensitive: [[false, 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)']],
-  minifyJS: [[false, 'Minify Javascript in script elements and on* attributes (uses UglifyJS)']],
-  minifyCSS: [[false, 'Minify CSS in style elements and style attributes (uses clean-css)']],
-  minifyURLs: [[false, 'Minify URLs in various attributes (uses relateurl)']],
-  ignoreCustomComments: [[false, 'Array of regex\'es that allow to ignore certain comments, when matched', 'string'], 'json-regex'],
-  processScripts: [[false, 'Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', 'string'], 'json-regex'],
-  maxLineLength: [[false, 'Max line length', 'number'], true],
-  customAttrAssign: [[false, 'Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', 'string'], 'json-regex'],
-  customAttrSurround: [[false, 'Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', 'string'], 'json-regex'],
-  customAttrCollapse: [[false, 'Regex that specifies custom attribute to strip newlines from (e.g. /ng\-class/)', 'string'], 'string-regex']
+  caseSensitive: 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)',
+  collapseBooleanAttributes: 'Omit attribute values from boolean attributes',
+  collapseInlineTagWhitespace: 'Collapse white space around inline tag',
+  collapseWhitespace: 'Collapse white space that contributes to text nodes in a document tree.',
+  conservativeCollapse: 'Always collapse to 1 space (never remove it entirely)',
+  customAttrAssign: ['Arrays of regex\'es that allow to support custom attribute assign expressions (e.g. \'<div flex?="{{mode != cover}}"></div>\')', parseJSONRegExpArray],
+  customAttrCollapse: ['Regex that specifies custom attribute to strip newlines from (e.g. /ng-class/)', parseRegExp],
+  customAttrSurround: ['Arrays of regex\'es that allow to support custom attribute surround expressions (e.g. <input {{#if value}}checked="checked"{{/if}}>)', parseJSONRegExpArray],
+  customEventAttributes: ['Arrays of regex\'es that allow to support custom event attributes for minifyJS (e.g. ng-click)', parseJSONRegExpArray],
+  decodeEntities: 'Use direct Unicode characters whenever possible',
+  html5: 'Parse input according to HTML5 specifications',
+  ignoreCustomComments: ['Array of regex\'es that allow to ignore certain comments, when matched', parseJSONRegExpArray],
+  ignoreCustomFragments: ['Array of regex\'es that allow to ignore certain fragments, when matched (e.g. <?php ... ?>, {{ ... }})', parseJSONRegExpArray],
+  includeAutoGeneratedTags: 'Insert tags generated by HTML parser',
+  keepClosingSlash: 'Keep the trailing slash on singleton elements',
+  maxLineLength: ['Max line length', parseInt],
+  minifyCSS: ['Minify CSS in style elements and style attributes (uses clean-css)', parseJSON],
+  minifyJS: ['Minify Javascript in script elements and on* attributes (uses uglify-js)', parseJSON],
+  minifyURLs: ['Minify URLs in various attributes (uses relateurl)', parseJSON],
+  preserveLineBreaks: 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.',
+  preventAttributesEscaping: 'Prevents the escaping of the values of attributes.',
+  processConditionalComments: 'Process contents of conditional comments through minifier',
+  processScripts: ['Array of strings corresponding to types of script elements to process through minifier (e.g. "text/ng-template", "text/x-handlebars-template", etc.)', parseJSONArray],
+  quoteCharacter: ['Type of quote to use for attribute values (\' or ")', parseString],
+  removeAttributeQuotes: 'Remove quotes around attributes when possible.',
+  removeComments: 'Strip HTML comments',
+  removeEmptyAttributes: 'Remove all attributes with whitespace-only values',
+  removeEmptyElements: 'Remove all elements with empty contents',
+  removeOptionalTags: 'Remove unrequired tags',
+  removeRedundantAttributes: 'Remove attributes when value matches default.',
+  removeScriptTypeAttributes: 'Remove type="text/javascript" from script tags. Other type attribute values are left intact.',
+  removeStyleLinkTypeAttributes: 'Remove type="text/css" from style and link tags. Other type attribute values are left intact.',
+  removeTagWhitespace: 'Remove space between attributes whenever possible',
+  sortAttributes: 'Sort attributes by frequency',
+  sortClassName: 'Sort style classes by frequency',
+  trimCustomFragments: 'Trim white space around ignoreCustomFragments.',
+  useShortDoctype: 'Replaces the doctype with the short (HTML5) doctype'
 };
-
-var cliOptions = {
-  version: ['v', 'Version information'],
-  output: ['o', 'Specify output file (if not specified STDOUT will be used for output)', 'file'],
-  'config-file': ['c', 'Use config file', 'file'],
-  'input-dir': [false, 'Specify an input directory', 'dir'],
-  'output-dir': [false, 'Specify an output directory', 'dir']
-};
-
 var mainOptionKeys = Object.keys(mainOptions);
 mainOptionKeys.forEach(function(key) {
-  cliOptions[changeCase.paramCase(key)] = mainOptions[key][0];
+  var option = mainOptions[key];
+  key = '--' + paramCase(key);
+  if (Array.isArray(option)) {
+    var optional = option[1] === parseJSON;
+    program.option(key + (optional ? ' [value]' : ' <value>'), option[0], option[1]);
+  }
+  else {
+    program.option(key, option);
+  }
 });
+program.option('-o --output <file>', 'Specify output file (if not specified STDOUT will be used for output)', function(outputPath) {
+  return fs.createWriteStream(outputPath).on('error', function(e) {
+    fatal('Cannot write ' + outputPath + '\n' + e.message);
+  });
+}, process.stdout);
 
-cli.parse(cliOptions);
-
-cli.main(function(args, options) {
-
-  function stringToRegExp(value) {
-    // JSON does not support regexes, so, e.g., JSON.parse() will not create
-    // a RegExp from the JSON value `[ "/matchString/" ]`, which is
-    // technically just an array containing a string that begins and end with
-    // a forward slash. To get a RegExp from a JSON string, it must be
-    // constructed explicitly in JavaScript.
-    //
-    // The likelihood of actually wanting to match text that is enclosed in
-    // forward slashes is probably quite rare, so if forward slashes were
-    // included in an argument that requires a regex, the user most likely
-    // thought they were part of the syntax for specifying a regex.
-    //
-    // In the unlikely case that forward slashes are indeed desired in the
-    // search string, the user would need to enclose the expression in a
-    // second set of slashes:
-    //
-    //    --customAttrSrround "[\"//matchString//\"]"
-    //
-    if (value) {
-      var stripSlashes = /^\/(.*)\/$/.exec(value);
-      if (stripSlashes) {
-        value = stripSlashes[1];
-      }
-      return new RegExp(value);
-    }
+function readFile(file) {
+  try {
+    return fs.readFileSync(file, { encoding: 'utf8' });
   }
-
-  function parseJSONOption(value, options) {
-    var opts = options || {};
-    if (value !== null) {
-      var jsonArray;
-      try {
-        jsonArray = JSON.parse(value);
-        if (opts.regexArray) {
-          jsonArray = jsonArray.map(function (regexString) {
-            return stringToRegExp(regexString);
-          });
-        }
-      }
-      catch (e) {
-        cli.fatal('Could not parse JSON value \'' + value + '\'');
-      }
-      if (jsonArray instanceof Array) {
-        return jsonArray;
-      }
-      else {
-        return [value];
-      }
-    }
+  catch (e) {
+    fatal('Cannot read ' + file + '\n' + e.message);
   }
+}
 
-  function runMinify(original, output) {
-    var status = 0;
-    var minified = null;
+var config = {};
+program.option('-c --config-file <file>', 'Use config file', function(configPath) {
+  var data = readFile(configPath);
+  try {
+    config = JSON.parse(data);
+  }
+  catch (je) {
     try {
-      minified = minify(original, minifyOptions);
+      config = require(path.resolve(configPath));
     }
-    catch (e) {
-      status = 3;
-      cli.error('Minification error');
-      process.stderr.write(e);
-    }
-
-    if (minifyOptions.lint) {
-      minifyOptions.lint.populate();
-    }
-
-    if (minified !== null) {
-      // Write the output
-      try {
-        if (output !== null) {
-          fs.writeFileSync(path.resolve(output), minified);
-        }
-        else {
-          process.stdout.write(minified);
-        }
-      }
-      catch (e) {
-        status = 4;
-        console.log(output);
-        cli.error('Cannot write to output');
-      }
-    }
-
-    cli.exit(status);
-  }
-
-  function createDirectory(path) {
-    try {
-      fs.mkdirSync(path);
-    }
-    catch (e) {
-      if (e.code === 'EEXIST') {
-        return;
-      }
-      cli.fatal('Can not create directory ' + path);
-      cli.exit(3);
-    }
-  }
-
-  function processDirectory(inputDir, outputDir) {
-    createDirectory(outputDir);
-    var fileList = fs.readdirSync(inputDir);
-
-    fileList.forEach(function(fileName) {
-      var inputFilePath = inputDir + '/' + fileName;
-      var outputFilePath = outputDir + '/' + fileName;
-
-      var stat = fs.statSync(inputFilePath);
-      if (stat.isDirectory()) {
-        processDirectory(inputFilePath, outputFilePath);
-        return;
-      }
-
-      var originalContent = fs.readFileSync(inputFilePath, 'utf8');
-      runMinify(originalContent, outputFilePath);
-    });
-  }
-
-  if (options.version) {
-    cli.output(appName + ' v' + appVersion);
-    cli.exit(0);
-  }
-
-  if (options['config-file']) {
-    var fileOptions;
-    var fileOptionsPath = path.resolve(options['config-file']);
-    try {
-      fs.accessSync(fileOptionsPath, fs.R_OK);
-    }
-    catch (e) {
-      cli.fatal('The specified config file doesn’t exist or is unreadable:\n' + fileOptionsPath);
-    }
-    try {
-      fileOptions = JSON.parse(fs.readFileSync(fileOptionsPath), 'utf8');
-    }
-    catch (je) {
-      try {
-        fileOptions = require(fileOptionsPath);
-      }
-      catch (ne) {
-        cli.fatal('Cannot read the specified config file. \nAs JSON: ' + je.message + '\nAs module: ' + ne.message);
-      }
-    }
-
-    if (fileOptions && typeof fileOptions === 'object') {
-      minifyOptions = fileOptions;
+    catch (ne) {
+      fatal('Cannot read the specified config file.\nAs JSON: ' + je.message + '\nAs module: ' + ne.message);
     }
   }
   mainOptionKeys.forEach(function(key) {
-    var paramKey = changeCase.paramCase(key);
-    var value = options[paramKey];
-    if (options[paramKey] !== null) {
-      switch (mainOptions[key][1]) {
-        case 'json':
-          minifyOptions[key] = parseJSONOption(value);
-          break;
-        case 'json-regex':
-          minifyOptions[key] = parseJSONOption(value, { regexArray: true });
-          break;
-        case 'string-regex':
-          minifyOptions[key] = stringToRegExp(value);
-          break;
-        case true:
-          minifyOptions[key] = value;
-          break;
-        default:
-          minifyOptions[key] = true;
+    if (key in config) {
+      var option = mainOptions[key];
+      if (Array.isArray(option)) {
+        var value = config[key];
+        config[key] = option[1](typeof value === 'string' ? value : JSON.stringify(value));
       }
     }
   });
+});
+program.option('--input-dir <dir>', 'Specify an input directory');
+program.option('--output-dir <dir>', 'Specify an output directory');
+program.option('--file-ext <text>', 'Specify an extension to be read, ex: html');
+var content;
+program.arguments('[files...]').action(function(files) {
+  content = files.map(readFile).join('');
+}).parse(process.argv);
 
-  if (minifyOptions.lint === true) {
-    minifyOptions.lint = new HTMLLint();
-  }
-
-  if (args.length) {
-    input = args;
-  }
-
-  if (options['input-dir'] || options['output-dir']) {
-    var inputDir = options['input-dir'];
-    var outputDir = options['output-dir'];
-
-    if (!inputDir) {
-      cli.error('The option output-dir need to be use with the option include-dir. If you are working with only 1 file, use -o.');
-      cli.exit(2);
+function createOptions() {
+  var options = {};
+  mainOptionKeys.forEach(function(key) {
+    var param = program[camelCase(key)];
+    if (typeof param !== 'undefined') {
+      options[key] = param;
     }
-
-    try {
-      fs.statSync(inputDir);
+    else if (key in config) {
+      options[key] = config[key];
     }
-    catch (e) {
-      cli.error('The input directory does not exits');
-      cli.exit(2);
-    }
+  });
+  return options;
+}
 
-
-    if (!outputDir) {
-      cli.error('You need to specify where to write the output files with the option --output-dir');
-      cli.exit(2);
-    }
-
-    try {
-      processDirectory(inputDir, outputDir);
-    }
-    catch (e) {
-      cli.error('Something wrong happened');
-      cli.error(e);
-      cli.exit(3);
-    }
-
-    cli.exit(0);
-    return;
-  }
-
-  if (options.output) {
-    output = options.output;
-  }
-
-  if (input !== null) { // Minifying one or more files specified on the CMD line
-
-    var original = '';
-
-    input.forEach(function(afile) {
-      try {
-        original += fs.readFileSync(afile, 'utf8');
+function mkdir(outputDir, callback) {
+  fs.mkdir(outputDir, function(err) {
+    if (err) {
+      switch (err.code) {
+        case 'ENOENT':
+          return mkdir(path.join(outputDir, '..'), function() {
+            mkdir(outputDir, callback);
+          });
+        case 'EEXIST':
+          break;
+        default:
+          fatal('Cannot create directory ' + outputDir + '\n' + err.message);
       }
-      catch (e) {
-        cli.error('Cannot read file ' + afile);
-        cli.exit(2);
+    }
+    callback();
+  });
+}
+
+function processFile(inputFile, outputFile) {
+  fs.readFile(inputFile, { encoding: 'utf8' }, function(err, data) {
+    if (err) {
+      fatal('Cannot read ' + inputFile + '\n' + err.message);
+    }
+    var minified;
+    try {
+      minified = minify(data, createOptions());
+    }
+    catch (e) {
+      fatal('Minification error on ' + inputFile + '\n' + e.message);
+    }
+    fs.writeFile(outputFile, minified, { encoding: 'utf8' }, function(err) {
+      if (err) {
+        fatal('Cannot write ' + outputFile + '\n' + err.message);
       }
     });
+  });
+}
 
-    runMinify(original, output);
+function processDirectory(inputDir, outputDir, fileExt) {
+  fs.readdir(inputDir, function(err, files) {
+    if (err) {
+      fatal('Cannot read directory ' + inputDir + '\n' + err.message);
+    }
+    files.forEach(function(file) {
+      var inputFile = path.join(inputDir, file);
+      var outputFile = path.join(outputDir, file);
+      fs.stat(inputFile, function(err, stat) {
+        if (err) {
+          fatal('Cannot read ' + inputFile + '\n' + err.message);
+        }
+        else if (stat.isDirectory()) {
+          processDirectory(inputFile, outputFile, fileExt);
+        }
+        else if (!fileExt || path.extname(file) === '.' + fileExt) {
+          mkdir(outputDir, function() {
+            processFile(inputFile, outputFile);
+          });
+        }
+      });
+    });
+  });
+}
 
+function writeMinify() {
+  var minified;
+  try {
+    minified = minify(content, createOptions());
   }
-  else { // Minifying input coming from STDIN
-    process.stdin.pipe(concat({ encoding: 'string' }, runMinify));
+  catch (e) {
+    fatal('Minification error:\n' + e.message);
   }
-});
+  program.output.write(minified);
+}
+
+var inputDir = program.inputDir;
+var outputDir = program.outputDir;
+var fileExt = program.fileExt;
+if (inputDir || outputDir) {
+  if (!inputDir) {
+    fatal('The option output-dir needs to be used with the option input-dir. If you are working with a single file, use -o.');
+  }
+  else if (!outputDir) {
+    fatal('You need to specify where to write the output files with the option --output-dir');
+  }
+  processDirectory(inputDir, outputDir, fileExt);
+}
+// Minifying one or more files specified on the CMD line
+else if (typeof content === 'string') {
+  writeMinify();
+}
+// Minifying input coming from STDIN
+else {
+  content = '';
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', function(data) {
+    content += data;
+  }).on('end', writeMinify);
+}

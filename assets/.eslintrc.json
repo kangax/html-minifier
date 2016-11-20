@@ -1,0 +1,12 @@
+{
+  "env": {
+    "browser": true,
+    "worker": true
+  },
+  "rules": {
+    "strict": [
+      "error",
+      "function"
+    ]
+  }
+}
