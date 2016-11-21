@@ -12,7 +12,9 @@
       postMessage(minify(event.data.value, options));
     }
     catch (err) {
-      postMessage(err);
+      postMessage({
+        error: err + ''
+      });
     }
   });
   postMessage(null);

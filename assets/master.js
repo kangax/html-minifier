@@ -22,7 +22,13 @@
     worker.onmessage = function() {
       minify = function(value, options, callback, errorback) {
         worker.onmessage = function(event) {
-          (typeof event.data === 'string' ? callback : errorback)(event.data);
+          var data = event.data;
+          if (data.error) {
+            errorback(data.error);
+          }
+          else {
+            callback(data);
+          }
         };
         worker.postMessage({
           value: value,
