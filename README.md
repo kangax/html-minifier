@@ -112,6 +112,10 @@ Output of resulting markup (e.g. `<p>foo</p>`)
 
 HTMLMinifier can't know that original markup was only half of the tree; it does its best to try to parse it as a full tree and it loses information about tree being malformed or partial in the beginning. As a result, it can't create a partial/malformed tree at the time of the output.
 
+### Minifying email templates
+
+By default, style tags within the `<head>` of the HTML are not minified. To do that, set `minifyCSS: true`. In theory, you can even minify _only_ the CSS styles in the `<head>` because it is separate from the HTML minification.
+
 ## Installation Instructions
 
 From NPM for use as a command line app:
