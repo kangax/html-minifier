@@ -309,14 +309,24 @@ run(fileNames.map(function(fileName) {
           res.on('data', function(chunk) {
             response += chunk;
           }).on('end', function() {
-            // Extract result from <textarea/>
-            var start = response.indexOf('>', response.indexOf('<textarea'));
-            var end = response.lastIndexOf('</textarea>');
-            var result = response.slice(start + 1, end).replace(/<\\\//g, '</');
             var info = infos.willpeavy;
-            writeText(info.filePath, result, function() {
-              readSizes(info, done);
-            });
+            if (res.statusCode === 200) {
+              // Extract result from <textarea/>
+              var start = response.indexOf('>', response.indexOf('<textarea'));
+              var end = response.lastIndexOf('</textarea>');
+              var result = response.slice(start + 1, end).replace(/<\\\//g, '</');
+              writeText(info.filePath, result, function() {
+                readSizes(info, done);
+              });
+            }
+            // Site refused to process content
+            else {
+              info.size = 0;
+              info.gzSize = 0;
+              info.lzSize = 0;
+              info.brSize = 0;
+              done();
+            }
           });
         }).end(querystring.stringify({
           html: data
