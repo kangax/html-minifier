@@ -548,7 +548,7 @@ function normalizeAttr(attr, attrs, tag, options) {
   };
 }
 
-function buildAttr(normalized, hasUnarySlash, options, isLast) {
+function buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr) {
   var attrName = normalized.name,
       attrValue = normalized.value,
       attr = normalized.attr,
@@ -556,8 +556,8 @@ function buildAttr(normalized, hasUnarySlash, options, isLast) {
       attrFragment,
       emittedAttrValue;
 
-  if (typeof attrValue !== 'undefined' && !options.removeAttributeQuotes ||
-      !canRemoveAttributeQuotes(attrValue)) {
+  if (typeof attrValue !== 'undefined' && (!options.removeAttributeQuotes ||
+      ~attrValue.indexOf(uidAttr) || !canRemoveAttributeQuotes(attrValue))) {
     if (!options.preventAttributesEscaping) {
       if (typeof options.quoteCharacter === 'undefined') {
         var apos = (attrValue.match(/'/g) || []).length;
@@ -1030,7 +1030,7 @@ function minify(value, options, partialMarkup) {
       for (var i = attrs.length, isLast = true; --i >= 0;) {
         var normalized = normalizeAttr(attrs[i], attrs, tag, options);
         if (normalized) {
-          parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast));
+          parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr));
           isLast = false;
         }
       }
