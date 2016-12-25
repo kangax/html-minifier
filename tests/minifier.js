@@ -688,7 +688,7 @@ QUnit.test('remove CDATA sections from scripts/styles', function(assert) {
 
   input = '<style>/* <![CDATA[ */p { color: red } // ]]></style>';
   assert.equal(minify(input), input);
-  output = '<style>p{color:red} // ]]></style>';
+  output = '<style>p{color:red}</style>';
   assert.equal(minify(input, { minifyCSS: true }), output);
 
   input = '<style type="text/html">\n<div>\n</div>\n<![CDATA[ aa ]]>\n</style>';
