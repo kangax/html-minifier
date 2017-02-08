@@ -323,6 +323,9 @@ QUnit.test('space normalization around text', function(assert) {
   input = '<head> <!-- a --> <!-- b --> <!-- c --><link> </head>';
   output = '<head><!-- a --><!-- b --><!-- c --><link></head>';
   assert.equal(minify(input, { collapseWhitespace: true }), output);
+  input = '<p> foo\u00A0bar\nbaz  \u00A0\nmoo\t</p>';
+  output = '<p>foo\u00A0bar baz\u00A0moo</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
 });
 
 QUnit.test('doctype normalization', function(assert) {
@@ -2315,6 +2318,12 @@ QUnit.test('conservative collapse', function(assert) {
     collapseWhitespace: true,
     conservativeCollapse: true
   }), output);
+
+  input = '<p>\u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), input);
 });
 
 QUnit.test('collapse preseving a line break', function(assert) {
