@@ -21,21 +21,21 @@ var trimWhitespace = String.prototype.trim ? function(str) {
 };
 
 function compressWhitespace(spaces) {
-  return spaces === '\t' ? spaces : ' ';
+  return spaces === '\t' ? '\t' : ~spaces.indexOf('\xA0') ? '\xA0' : ' ';
 }
 
 function collapseWhitespaceAll(str) {
-  return str ? str.replace(/[\t\n\r ]+/g, compressWhitespace) : str;
+  return str ? str.replace(/\s+/g, compressWhitespace) : str;
 }
 
 function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   var lineBreakBefore = '', lineBreakAfter = '';
 
   if (options.preserveLineBreaks) {
-    str = str.replace(/^[\t ]*[\n\r][\t\n\r ]*/, function() {
+    str = str.replace(/^\s*?[\n\r]\s*/, function() {
       lineBreakBefore = '\n';
       return '';
-    }).replace(/[\t ]*[\n\r][\t\n\r ]*$/, function() {
+    }).replace(/\s*?[\n\r]\s*$/, function() {
       lineBreakAfter = '\n';
       return '';
     });
