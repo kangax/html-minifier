@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.3.1 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.3.2 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2017 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -2668,7 +2668,7 @@ function optimizeZeroUnits(name, value) {
 }
 
 function removeQuotes(name, value) {
-  if (name == 'content') {
+  if (name == 'content' || name.indexOf('font-feature-settings') > -1) {
     return value;
   }
 
@@ -5058,8 +5058,6 @@ function extractPseudoFrom(selector) {
 
     if (isEscaped) {
       buffer.push(character);
-    } else if (isQuoted) {
-      buffer.push(character);
     } else if (character == Marker.DOUBLE_QUOTE && level == Level.ROOT) {
       buffer.push(character);
       level = Level.DOUBLE_QUOTE;
@@ -5072,6 +5070,8 @@ function extractPseudoFrom(selector) {
     } else if (character == Marker.SINGLE_QUOTE && level == Level.SINGLE_QUOTE) {
       buffer.push(character);
       level = Level.ROOT;
+    } else if (isQuoted) {
+      buffer.push(character);
     } else if (character == Marker.OPEN_ROUND_BRACKET) {
       buffer.push(character);
       roundBracketLevel++;
@@ -32198,11 +32198,19 @@ var trimWhitespace = String.prototype.trim ? function(str) {
 };
 
 function compressWhitespace(spaces) {
-  return spaces === '\t' ? '\t' : ~spaces.indexOf('\xA0') ? '\xA0' : ' ';
+  return spaces === '\t' ? '\t' : spaces.replace(/(^|\xA0+)[^\xA0]+/g, '$1 ');
 }
 
 function collapseWhitespaceAll(str) {
-  return str ? str.replace(/\s+/g, compressWhitespace) : str;
+  return str && str.replace(/\s+/g, compressWhitespace);
+}
+
+function compressWhitespaceLeft(spaces) {
+  return spaces === '\t' ? '\t' : spaces.replace(/^[^\xA0]+/, '').replace(/(\xA0+)[^\xA0]+/g, '$1 ') || ' ';
+}
+
+function compressWhitespaceRight(spaces) {
+  return spaces === '\t' ? '\t' : spaces.replace(/[^\xA0]+(\xA0+)/g, ' $1').replace(/[^\xA0]+$/, '') || ' ';
 }
 
 function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
@@ -32219,11 +32227,11 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   }
 
   if (trimLeft) {
-    str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? compressWhitespace : '');
+    str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? compressWhitespaceLeft : '');
   }
 
   if (trimRight) {
-    str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? compressWhitespace : '');
+    str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? compressWhitespaceRight : '');
   }
 
   if (collapseAll) {
