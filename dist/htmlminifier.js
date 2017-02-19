@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.3.2 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.3.3 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2017 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -32197,20 +32197,10 @@ var trimWhitespace = String.prototype.trim ? function(str) {
   return str.replace(/^\s+/, '').replace(/\s+$/, '');
 };
 
-function compressWhitespace(spaces) {
-  return spaces === '\t' ? '\t' : spaces.replace(/(^|\xA0+)[^\xA0]+/g, '$1 ');
-}
-
 function collapseWhitespaceAll(str) {
-  return str && str.replace(/\s+/g, compressWhitespace);
-}
-
-function compressWhitespaceLeft(spaces) {
-  return spaces === '\t' ? '\t' : spaces.replace(/^[^\xA0]+/, '').replace(/(\xA0+)[^\xA0]+/g, '$1 ') || ' ';
-}
-
-function compressWhitespaceRight(spaces) {
-  return spaces === '\t' ? '\t' : spaces.replace(/[^\xA0]+(\xA0+)/g, ' $1').replace(/[^\xA0]+$/, '') || ' ';
+  return str && str.replace(/\s+/g, function(spaces) {
+    return spaces === '\t' ? '\t' : spaces.replace(/(^|\xA0+)[^\xA0]+/g, '$1 ');
+  });
 }
 
 function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
@@ -32227,11 +32217,23 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   }
 
   if (trimLeft) {
-    str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? compressWhitespaceLeft : '');
+    str = str.replace(/^\s+/, function(spaces) {
+      var conservative = !lineBreakBefore && options.conservativeCollapse;
+      if (conservative && spaces === '\t') {
+        return '\t';
+      }
+      return spaces.replace(/^[^\xA0]+/, '').replace(/(\xA0+)[^\xA0]+/g, '$1 ') || (conservative ? ' ' : '');
+    });
   }
 
   if (trimRight) {
-    str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? compressWhitespaceRight : '');
+    str = str.replace(/\s+$/, function(spaces) {
+      var conservative = !lineBreakAfter && options.conservativeCollapse;
+      if (conservative && spaces === '\t') {
+        return '\t';
+      }
+      return spaces.replace(/[^\xA0]+(\xA0+)/g, ' $1').replace(/[^\xA0]+$/, '') || (conservative ? ' ' : '');
+    });
   }
 
   if (collapseAll) {
