@@ -2320,6 +2320,7 @@ QUnit.test('conservative collapse', function(assert) {
   }), output);
 
   input = '<p>\u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), input);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
@@ -2327,6 +2328,7 @@ QUnit.test('conservative collapse', function(assert) {
 
   input = '<p> \u00A0</p>';
   output = '<p>\u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
@@ -2334,6 +2336,7 @@ QUnit.test('conservative collapse', function(assert) {
 
   input = '<p>\u00A0 </p>';
   output = '<p>\u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
@@ -2341,6 +2344,7 @@ QUnit.test('conservative collapse', function(assert) {
 
   input = '<p> \u00A0 </p>';
   output = '<p>\u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
@@ -2348,6 +2352,31 @@ QUnit.test('conservative collapse', function(assert) {
 
   input = '<p>  \u00A0\u00A0  \u00A0  </p>';
   output = '<p>\u00A0\u00A0 \u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+  input = '<p>foo  \u00A0\u00A0  \u00A0  </p>';
+  output = '<p>foo \u00A0\u00A0 \u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+  input = '<p>  \u00A0\u00A0  \u00A0  bar</p>';
+  output = '<p>\u00A0\u00A0 \u00A0 bar</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+  input = '<p>foo  \u00A0\u00A0  \u00A0  bar</p>';
+  output = '<p>foo \u00A0\u00A0 \u00A0 bar</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
@@ -2355,6 +2384,7 @@ QUnit.test('conservative collapse', function(assert) {
 
   input = '<p> \u00A0foo\u00A0\t</p>';
   output = '<p>\u00A0foo\u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
@@ -2363,6 +2393,7 @@ QUnit.test('conservative collapse', function(assert) {
 
   input = '<p> \u00A0\nfoo\u00A0\t</p>';
   output = '<p>\u00A0 foo\u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
@@ -2371,6 +2402,7 @@ QUnit.test('conservative collapse', function(assert) {
 
   input = '<p> \u00A0foo \u00A0\t</p>';
   output = '<p>\u00A0foo \u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
@@ -2378,6 +2410,7 @@ QUnit.test('conservative collapse', function(assert) {
 
   input = '<p> \u00A0\nfoo \u00A0\t</p>';
   output = '<p>\u00A0 foo \u00A0</p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
     conservativeCollapse: true
