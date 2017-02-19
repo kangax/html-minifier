@@ -21,11 +21,19 @@ var trimWhitespace = String.prototype.trim ? function(str) {
 };
 
 function compressWhitespace(spaces) {
-  return spaces === '\t' ? '\t' : ~spaces.indexOf('\xA0') ? '\xA0' : ' ';
+  return spaces === '\t' ? '\t' : spaces.replace(/(^|\xA0+)[^\xA0]+/g, '$1 ');
 }
 
 function collapseWhitespaceAll(str) {
-  return str ? str.replace(/\s+/g, compressWhitespace) : str;
+  return str && str.replace(/\s+/g, compressWhitespace);
+}
+
+function compressWhitespaceLeft(spaces) {
+  return spaces === '\t' ? '\t' : spaces.replace(/^[^\xA0]+/, '').replace(/(\xA0+)[^\xA0]+/g, '$1 ') || ' ';
+}
+
+function compressWhitespaceRight(spaces) {
+  return spaces === '\t' ? '\t' : spaces.replace(/[^\xA0]+(\xA0+)/g, ' $1').replace(/[^\xA0]+$/, '') || ' ';
 }
 
 function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
@@ -42,11 +50,11 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   }
 
   if (trimLeft) {
-    str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? compressWhitespace : '');
+    str = str.replace(/^\s+/, !lineBreakBefore && options.conservativeCollapse ? compressWhitespaceLeft : '');
   }
 
   if (trimRight) {
-    str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? compressWhitespace : '');
+    str = str.replace(/\s+$/, !lineBreakAfter && options.conservativeCollapse ? compressWhitespaceRight : '');
   }
 
   if (collapseAll) {

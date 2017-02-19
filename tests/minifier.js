@@ -324,7 +324,7 @@ QUnit.test('space normalization around text', function(assert) {
   output = '<head><!-- a --><!-- b --><!-- c --><link></head>';
   assert.equal(minify(input, { collapseWhitespace: true }), output);
   input = '<p> foo\u00A0bar\nbaz  \u00A0\nmoo\t</p>';
-  output = '<p>foo\u00A0bar baz\u00A0moo</p>';
+  output = '<p>foo\u00A0bar baz \u00A0 moo</p>';
   assert.equal(minify(input, { collapseWhitespace: true }), output);
 });
 
@@ -2324,6 +2324,64 @@ QUnit.test('conservative collapse', function(assert) {
     collapseWhitespace: true,
     conservativeCollapse: true
   }), input);
+
+  input = '<p> \u00A0</p>';
+  output = '<p>\u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+  input = '<p>\u00A0 </p>';
+  output = '<p>\u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+  input = '<p> \u00A0 </p>';
+  output = '<p>\u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+  input = '<p>  \u00A0\u00A0  \u00A0  </p>';
+  output = '<p>\u00A0\u00A0 \u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+  input = '<p> \u00A0foo\u00A0\t</p>';
+  output = '<p>\u00A0foo\u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+
+  input = '<p> \u00A0\nfoo\u00A0\t</p>';
+  output = '<p>\u00A0 foo\u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+
+  input = '<p> \u00A0foo \u00A0\t</p>';
+  output = '<p>\u00A0foo \u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
+
+  input = '<p> \u00A0\nfoo \u00A0\t</p>';
+  output = '<p>\u00A0 foo \u00A0</p>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    conservativeCollapse: true
+  }), output);
 });
 
 QUnit.test('collapse preseving a line break', function(assert) {
