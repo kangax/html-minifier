@@ -61,7 +61,7 @@
     "ncname": "1.0.x",
     "param-case": "2.1.x",
     "relateurl": "0.2.x",
-    "uglify-js": "2.7.x"
+    "uglify-js": "2.8.x"
   },
   "devDependencies": {
     "grunt": "1.0.x",
