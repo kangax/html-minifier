@@ -1,70 +1,92 @@
+# HTMLMinifier
+
 [![NPM version](https://img.shields.io/npm/v/html-minifier.svg)](https://www.npmjs.com/package/html-minifier)
 [![Build Status](https://img.shields.io/travis/kangax/html-minifier.svg)](https://travis-ci.org/kangax/html-minifier)
 [![Dependency Status](https://img.shields.io/david/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier)
-[![devDependency Status](https://img.shields.io/david/dev/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier#info=devDependencies)
+[![devDependency Status](https://img.shields.io/david/dev/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier?type=dev)
+[![Gitter](https://img.shields.io/gitter/room/kangax/html-minifier.svg)](https://gitter.im/kangax/html-minifier)
 
-[HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, Javascript-based HTML minifier, with lint-like capabilities.
+[HTMLMinifier](http://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, JavaScript-based HTML minifier.
 
 See [corresponding blog post](http://perfectionkills.com/experimenting-with-html-minifier/) for all the gory details of [how it works](http://perfectionkills.com/experimenting-with-html-minifier/#how_it_works), [description of each option](http://perfectionkills.com/experimenting-with-html-minifier/#options), [testing results](http://perfectionkills.com/experimenting-with-html-minifier/#field_testing) and [conclusions](http://perfectionkills.com/experimenting-with-html-minifier/#cost_and_benefits).
 
 [Test suite is available online](http://kangax.github.io/html-minifier/tests/).
 
-Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_minifier), and for Node.js, [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin), [Gulp module](https://github.com/jonschlinkert/gulp-htmlmin), and [Koa middleware wrapper](https://github.com/koajs/html-minifier).
+Also see corresponding [Ruby wrapper](https://github.com/stereobooster/html_minifier), and for Node.js, [Grunt plugin](https://github.com/gruntjs/grunt-contrib-htmlmin), [Gulp module](https://github.com/jonschlinkert/gulp-htmlmin), [Koa middleware wrapper](https://github.com/koajs/html-minifier) and [Express middleware wrapper](https://github.com/melonmanchan/express-minify-html).
+
+For lint-like capabilities take a look at [HTMLLint](https://github.com/kangax/html-lint).
 
 ## Minification comparison
 
-How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Peavy](http://www.willpeavy.com/minifier/) (1st result in [google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as [htmlcompressor.com](http://htmlcompressor.com) and [minimize](https://github.com/Swaagie/minimize)?
+How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Peavy](http://www.willpeavy.com/minifier/) (1st result in [Google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as [htmlcompressor.com](http://htmlcompressor.com) and [minimize](https://github.com/Swaagie/minimize)?
 
-| Site | Original size _(KB)_ | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
-| --------------------------------------------------------------------------- |:-----------:| ----------------:| ----------------:| ------------:| ----------------:|
-| [HTMLMinifier page](https://github.com/kangax/html-minifier)                | 48.8        | <b>37.3</b>      | 41.8      |   43.3       | 41.9 |
-| [ES6 table](http://kangax.github.io/es5-compat-table/es6/)                  | 117.9       | <b>79.9</b>      | 94.1      |   92         | 91.9 |
-| [MSN](http://msn.com)                                                       | 156.6       | <b>133</b>       | 137.7     |   145        | 138.3 |
-| [Stackoverflow](http://stackoverflow.com)                                   | 200.4       | <b>159.5</b>     | 165.1     |   168.3      | 163.3 |
-| [Amazon](http://amazon.com)                                                 | 245.9       | <b>206.3</b>     | 234.1     |   225        | 218.5 |
-| [Wikipedia](http://en.wikipedia.org/wiki/President_of_the_United_States)    | 401.4       | <b>380.6</b>     | 386.6     |   396.3      | n/a |
-| [Eloquent Javascript](http://eloquentjavascript.net/print.html)             | 869.5       | <b>830</b>       | 838       |   872        | n/a |
-
-
+| Site                                                                        | Original size *(KB)* | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
+| --------------------------------------------------------------------------- |:--------------------:| ------------:| --------:| ----------:| ------------------:|
+| [Google](https://www.google.com/)                                           | 44                   | **42**       | 45       | 46         | 45                 |
+| [HTMLMinifier](https://github.com/kangax/html-minifier)                     | 123                  | **96**       | 104      | 108        | 103                |
+| [CNN](http://www.cnn.com/)                                                  | 131                  | **120**      | 128      | 129        | 124                |
+| [Amazon](http://www.amazon.co.uk/)                                          | 193                  | **161**      | 185      | 188        | n/a                |
+| [BBC](http://www.bbc.co.uk/)                                                | 204                  | **169**      | 198      | 203        | 192                |
+| [Stack Overflow](http://stackoverflow.com/)                                 | 240                  | **188**      | 198      | 206        | 195                |
+| [New York Times](http://www.nytimes.com/)                                   | 261                  | **182**      | 207      | 204        | 191                |
+| [Bootstrap CSS](http://getbootstrap.com/css/)                               | 272                  | **260**      | 269      | 229        | 269                |
+| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 546                  | **499**      | 527      | 545        | 526                |
+| [NBC](http://www.nbc.com/)                                                  | 566                  | **543**      | 564      | 566        | 549                |
+| [Eloquent Javascript](http://eloquentjavascript.net/1st_edition/print.html) | 870                  | **815**      | 840      | 864        | n/a                |
+| [ES6 table](http://kangax.github.io/compat-table/es6/)                      | 4197                 | **3531**     | 3959     | n/a        | n/a                |
+| [ES6 draft](https://tc39.github.io/ecma262/)                                | 5507                 | **4914**     | 5060     | n/a        | n/a                |
 
 ## Options Quick Reference
 
+Most of the options are disabled by default.
+
 | Option                         | Description     | Default |
 |--------------------------------|-----------------|---------|
-| `removeComments`               | [Strip HTML comments](http://perfectionkills.com/experimenting-with-html-minifier/#remove_comments) | `false` |
-| `removeCommentsFromCDATA`      | [Strip HTML comments from scripts and styles](http://perfectionkills.com/experimenting-with-html-minifier/#remove_comments_from_scripts_and_styles) | `false` |
-| `removeCDATASectionsFromCDATA` | [Remove CDATA sections from script and style elements](http://perfectionkills.com/experimenting-with-html-minifier/#remove_cdata_sections) | `false` |
-| `collapseWhitespace`           | [Collapse white space that contributes to text nodes in a document tree.](http://perfectionkills.com/experimenting-with-html-minifier/#collapse_whitespace) | `false` |
-| `conservativeCollapse`         | Always collapse to 1 space (never remove it entirely). Must be used in conjunction with `collapseWhitespace=true` | `false` |
-| `preserveLineBreaks`           | Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break. Must be used in conjunction with `collapseWhitespace=true` | `false` |
+| `caseSensitive`                | Treat attributes in case sensitive manner (useful for custom HTML tags) | `false` |
 | `collapseBooleanAttributes`    | [Omit attribute values from boolean attributes](http://perfectionkills.com/experimenting-with-html-minifier/#collapse_boolean_attributes) | `false` |
-| `removeAttributeQuotes`        | [Remove quotes around attributes when possible.](http://perfectionkills.com/experimenting-with-html-minifier/#remove_attribute_quotes) | `false` |
-| `removeRedundantAttributes`    | [Remove attributes when value matches default.](http://perfectionkills.com/experimenting-with-html-minifier/#remove_redundant_attributes) | `false` |
-| `preventAttributesEscaping`    | Prevents the escaping of the values of attributes. | `false` |
-| `useShortDoctype`              | [Replaces the doctype with the short (HTML5) doctype](http://perfectionkills.com/experimenting-with-html-minifier/#use_short_doctype) | `false` |
-| `removeEmptyAttributes`        | [Remove all attributes with whitespace-only values](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_or_blank_attributes) | `false` |
-| `removeScriptTypeAttributes`   | Remove `type="text/javascript"` from `script` tags. Other `type` attribute values are left intact. | `false` |
-| `removeStyleLinkTypeAttributes`| Remove `type="text/css"` from `style` and `link` tags. Other `type` attribute values are left intact. | `false` |
-| `removeOptionalTags`           | [Remove unrequired tags](http://perfectionkills.com/experimenting-with-html-minifier/#remove_optional_tags) | `false` |
-| `removeEmptyElements`          | [Remove all elements with empty contents](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_elements) | `false` |
-| `lint`                         | [Toggle linting](http://perfectionkills.com/experimenting-with-html-minifier/#validate_input_through_html_lint) | `false` |
-| `keepClosingSlash`             | Keep the trailing slash on singleton elements                            | `false` |
-| `caseSensitive`                | Treat attributes in case sensitive manner (useful for custom HTML tags.) | `false` |
-| `minifyJS`                     | Minify Javascript in script elements and on* attributes (uses [UglifyJS](https://github.com/mishoo/UglifyJS2)) | `false` (could be `true`, `false`, `Object` (options)) |
-| `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/GoalSmashers/clean-css)) | `false` (could be `true`, `false`, `Object` (options)) |
-| `minifyURLs`                   | Minify URLs in various attributes (uses [relateurl](https://github.com/stevenvachon/relateurl)) | `false` (could be `Object` (options)) |
-| `ignoreCustomComments`         | Array of regex'es that allow to ignore certain comments, when matched  | `[ ]` |
-| `ignoreCustomFragments`         | Array of regex'es that allow to ignore certain fragments, when matched (e.g. `<?php ... ?>`, `{{ ... }}`, etc.)  | `[ ]` |
-| `processScripts`               | Array of strings corresponding to types of script elements to process through minifier (e.g. `text/ng-template`, `text/x-handlebars-template`, etc.) | `[ ]` |
-| `maxLineLength`                | Specify a maximum line length. Compressed output will be split by newlines at valid HTML split-points. |
+| `collapseInlineTagWhitespace`  | Don't leave any spaces between `display:inline;` elements when collapsing. Must be used in conjunction with `collapseWhitespace=true` | `false` |
+| `collapseWhitespace`           | [Collapse white space that contributes to text nodes in a document tree](http://perfectionkills.com/experimenting-with-html-minifier/#collapse_whitespace) | `false` |
+| `conservativeCollapse`         | Always collapse to 1 space (never remove it entirely). Must be used in conjunction with `collapseWhitespace=true` | `false` |
 | `customAttrAssign`             | Arrays of regex'es that allow to support custom attribute assign expressions (e.g. `'<div flex?="{{mode != cover}}"></div>'`) | `[ ]` |
+| `customAttrCollapse`           | Regex that specifies custom attribute to strip newlines from (e.g. `/ng-class/`) | |
 | `customAttrSurround`           | Arrays of regex'es that allow to support custom attribute surround expressions (e.g. `<input {{#if value}}checked="checked"{{/if}}>`) | `[ ]` |
-| `customAttrCollapse`           | Regex that specifies custom attribute to strip newlines from (e.g. `/ng\-class/`) | |
-| `quoteCharacter`               | Type of quote to use for attribute values (' or ") | " |
+| `customEventAttributes`        | Arrays of regex'es that allow to support custom event attributes for `minifyJS` (e.g. `ng-click`) | `[ /^on[a-z]{3,}$/ ]` |
+| `decodeEntities`               | Use direct Unicode characters whenever possible | `false` |
+| `html5`                        | Parse input according to HTML5 specifications | `true` |
+| `ignoreCustomComments`         | Array of regex'es that allow to ignore certain comments, when matched | `[ /^!/ ]` |
+| `ignoreCustomFragments`        | Array of regex'es that allow to ignore certain fragments, when matched (e.g. `<?php ... ?>`, `{{ ... }}`, etc.)  | `[ /<%[\s\S]*?%>/, /<\?[\s\S]*?\?>/ ]` |
+| `includeAutoGeneratedTags`     | Insert tags generated by HTML parser | `true` |
+| `keepClosingSlash`             | Keep the trailing slash on singleton elements | `false` |
+| `maxLineLength`                | Specify a maximum line length. Compressed output will be split by newlines at valid HTML split-points |
+| `minifyCSS`                    | Minify CSS in style elements and style attributes (uses [clean-css](https://github.com/jakubpawlowicz/clean-css)) | `false` (could be `true`, `Object`, `Function(text)`) |
+| `minifyJS`                     | Minify JavaScript in script elements and event attributes (uses [UglifyJS](https://github.com/mishoo/UglifyJS2)) | `false` (could be `true`, `Object`, `Function(text, inline)`) |
+| `minifyURLs`                   | Minify URLs in various attributes (uses [relateurl](https://github.com/stevenvachon/relateurl)) | `false` (could be `String`, `Object`, `Function(text)`) |
+| `preserveLineBreaks`           | Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break. Must be used in conjunction with `collapseWhitespace=true` | `false` |
+| `preventAttributesEscaping`    | Prevents the escaping of the values of attributes | `false` |
+| `processConditionalComments`   | Process contents of conditional comments through minifier | `false` |
+| `processScripts`               | Array of strings corresponding to types of script elements to process through minifier (e.g. `text/ng-template`, `text/x-handlebars-template`, etc.) | `[ ]` |
+| `quoteCharacter`               | Type of quote to use for attribute values (' or ") | |
+| `removeAttributeQuotes`        | [Remove quotes around attributes when possible](http://perfectionkills.com/experimenting-with-html-minifier/#remove_attribute_quotes) | `false` |
+| `removeComments`               | [Strip HTML comments](http://perfectionkills.com/experimenting-with-html-minifier/#remove_comments) | `false` |
+| `removeEmptyAttributes`        | [Remove all attributes with whitespace-only values](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_or_blank_attributes) | `false` (could be `true`, `Function(attrName, tag)`) |
+| `removeEmptyElements`          | [Remove all elements with empty contents](http://perfectionkills.com/experimenting-with-html-minifier/#remove_empty_elements) | `false` |
+| `removeOptionalTags`           | [Remove optional tags](http://perfectionkills.com/experimenting-with-html-minifier/#remove_optional_tags) | `false` |
+| `removeRedundantAttributes`    | [Remove attributes when value matches default.](http://perfectionkills.com/experimenting-with-html-minifier/#remove_redundant_attributes) | `false` |
+| `removeScriptTypeAttributes`   | Remove `type="text/javascript"` from `script` tags. Other `type` attribute values are left intact | `false` |
+| `removeStyleLinkTypeAttributes`| Remove `type="text/css"` from `style` and `link` tags. Other `type` attribute values are left intact | `false` |
+| `removeTagWhitespace`          | Remove space between attributes whenever possible. **Note that this will result in invalid HTML!** | `false` |
+| `sortAttributes`               | [Sort attributes by frequency](#sorting-attributes--style-classes) | `false` |
+| `sortClassName`                | [Sort style classes by frequency](#sorting-attributes--style-classes) | `false` |
+| `trimCustomFragments`          | Trim white space around `ignoreCustomFragments`. | `false` |
+| `useShortDoctype`              | [Replaces the `doctype` with the short (HTML5) doctype](http://perfectionkills.com/experimenting-with-html-minifier/#use_short_doctype) | `false` |
+
+### Sorting attributes / style classes
+
+Minifier options like `sortAttributes` and `sortClassName` won't impact the plain-text size of the output. However, they form long repetitive chains of characters that should improve compression ratio of gzip used in HTTP compression.
 
 ## Special cases
 
-### Ignoring chunks of markup.
+### Ignoring chunks of markup
 
 If you have chunks of markup you would like preserved, you can wrap them `<!-- htmlmin:ignore -->`.
 
@@ -74,17 +96,17 @@ SVG tags are automatically recognized, and when they are minified, both case-sen
 
 ### Working with invalid markup
 
-HTMLMinifier **can't work with invalid or partial chunks of markup**. This is because it parses markup into a tree structure, then modifies it (removing anything that was specified for removal, ignoring anything that was specified to be ingored, etc.), then it creates a markup out of that tree and returns it.
+HTMLMinifier **can't work with invalid or partial chunks of markup**. This is because it parses markup into a tree structure, then modifies it (removing anything that was specified for removal, ignoring anything that was specified to be ignored, etc.), then it creates a markup out of that tree and returns it.
 
 Input markup (e.g. `<p id="">foo`)
 
 ↓
 
-Internal representation of markup in a form of tree (e.g. `{tag: "p", attr: "id", children: ["foo"] }`)
+Internal representation of markup in a form of tree (e.g. `{ tag: "p", attr: "id", children: ["foo"] }`)
 
 ↓
 
-Transformation of internal representation (e.g. removal of "id" attribute)
+Transformation of internal representation (e.g. removal of `id` attribute)
 
 ↓
 
@@ -95,17 +117,20 @@ HTMLMinifier can't know that original markup was only half of the tree; it does 
 ## Installation Instructions
 
 From NPM for use as a command line app:
-```bash
+
+```shell
 npm install html-minifier -g
 ```
 
 From NPM for programmatic use:
-```bash
+
+```shell
 npm install html-minifier
 ```
 
 From Git:
-```bash
+
+```shell
 git clone git://github.com/kangax/html-minifier.git
 cd html-minifier
 npm link .
@@ -128,6 +153,7 @@ result; // '<p title=blah id=moo>foo</p>'
 ## Running benchmarks
 
 Benchmarks for minified HTML:
-```
+
+```shell
 node benchmark.js
 ```
