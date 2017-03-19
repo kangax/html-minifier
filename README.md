@@ -22,16 +22,16 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 
 | Site                                                                        | Original size *(KB)* | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
 | --------------------------------------------------------------------------- |:--------------------:| ------------:| --------:| ----------:| ------------------:|
-| [Google](https://www.google.com/)                                           | 44                   | **42**       | 44       | 46         | 45                 |
-| [HTMLMinifier](https://github.com/kangax/html-minifier)                     | 123                  | **96**       | 104      | 108        | 104                |
-| [CNN](http://www.cnn.com/)                                                  | 135                  | **125**      | 133      | 134        | 128                |
-| [Amazon](http://www.amazon.co.uk/)                                          | 193                  | **161**      | 184      | 187        | n/a                |
-| [New York Times](http://www.nytimes.com/)                                   | 205                  | **137**      | 154      | 155        | 145                |
-| [BBC](http://www.bbc.co.uk/)                                                | 206                  | **171**      | 199      | 204        | 194                |
-| [Stack Overflow](http://stackoverflow.com/)                                 | 223                  | **173**      | 182      | 190        | 179                |
+| [Google](https://www.google.com/)                                           | 44                   | **42**       | 45       | 46         | 45                 |
+| [HTMLMinifier](https://github.com/kangax/html-minifier)                     | 124                  | **97**       | 105      | 109        | 104                |
+| [CNN](http://www.cnn.com/)                                                  | 130                  | **119**      | 127      | 128        | 123                |
+| [Amazon](http://www.amazon.co.uk/)                                          | 195                  | **163**      | 186      | 189        | n/a                |
+| [New York Times](http://www.nytimes.com/)                                   | 216                  | **146**      | 163      | 164        | 154                |
+| [Stack Overflow](http://stackoverflow.com/)                                 | 223                  | **172**      | 181      | 188        | 178                |
+| [BBC](http://www.bbc.co.uk/)                                                | 227                  | **188**      | 220      | 226        | 215                |
 | [Bootstrap CSS](http://getbootstrap.com/css/)                               | 272                  | **260**      | 269      | 229        | 269                |
 | [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 545                  | **498**      | 526      | 544        | 525                |
-| [NBC](http://www.nbc.com/)                                                  | 560                  | **538**      | 558      | 560        | 543                |
+| [NBC](http://www.nbc.com/)                                                  | 567                  | **544**      | 565      | 567        | 549                |
 | [Eloquent Javascript](http://eloquentjavascript.net/1st_edition/print.html) | 870                  | **815**      | 840      | 864        | n/a                |
 | [ES6 table](http://kangax.github.io/compat-table/es6/)                      | 4287                 | **3607**     | 4044     | n/a        | n/a                |
 | [ES6 draft](https://tc39.github.io/ecma262/)                                | 5506                 | **4914**     | 5060     | n/a        | n/a                |
