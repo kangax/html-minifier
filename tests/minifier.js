@@ -117,6 +117,25 @@ QUnit.test('parsing non-trivial markup', function(assert) {
       ' data-options="vm.datepickerOptions">'
     );
   }, 'HTML comment inside tag');
+
+  input = '<br a=\u00A0 b="&nbsp;" c="\u00A0">';
+  output = '<br a="\u00A0" b="&nbsp;" c="\u00A0">';
+  assert.equal(minify(input), output);
+  output = '<br a="\u00A0"b="\u00A0"c="\u00A0">';
+  assert.equal(minify(input, {
+    decodeEntities: true,
+    removeTagWhitespace: true,
+  }), output);
+  output = '<br a=\u00A0 b=\u00A0 c=\u00A0>';
+  assert.equal(minify(input, {
+    decodeEntities: true,
+    removeAttributeQuotes: true
+  }), output);
+  assert.equal(minify(input, {
+    decodeEntities: true,
+    removeAttributeQuotes: true,
+    removeTagWhitespace: true,
+  }), output);
 });
 
 QUnit.test('options', function(assert) {
