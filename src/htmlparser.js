@@ -38,15 +38,14 @@ function makeMap(values) {
 
 // Regular Expressions for parsing tags and attributes
 var singleAttrIdentifier = /([^\s"'<>/=]+)/,
-    singleAttrAssign = /=/,
-    singleAttrAssigns = [singleAttrAssign],
+    singleAttrAssigns = [/=/],
     singleAttrValues = [
       // attr value double quotes
       /"([^"]*)"+/.source,
       // attr value, single quotes
       /'([^']*)'+/.source,
       // attr value, no quotes
-      /([^\s"'=<>`]+)/.source
+      /([^ \t\n\f\r"'`=<>]+)/.source
     ],
     // https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
     qnameCapture = (function() {
@@ -88,7 +87,7 @@ var reCache = {};
 function attrForHandler(handler) {
   var pattern = singleAttrIdentifier.source +
                 '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')' +
-                '\\s*(?:' + singleAttrValues.join('|') + '))?';
+                '[ \\t\\n\\f\\r]*(?:' + singleAttrValues.join('|') + '))?';
   if (handler.customAttrSurround) {
     var attrClauses = [];
     for (var i = handler.customAttrSurround.length - 1; i >= 0; i--) {
