@@ -677,7 +677,6 @@ function processOptions(options) {
       minifyJS = {};
     }
     minifyJS.fromString = true;
-    (minifyJS.output || (minifyJS.output = {})).inline_script = true;
     (minifyJS.parse || (minifyJS.parse = {})).bare_returns = false;
     options.minifyJS = function(text, inline) {
       var start = text.match(/^\s*<!--.*/);
