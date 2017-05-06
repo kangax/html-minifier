@@ -3075,11 +3075,44 @@ QUnit.test('sort style classes', function(assert) {
   output = '<a class="add createSorter keys sort"></a>';
   assert.equal(minify(input, { sortClassName: true }), output);
 
-  input = '<span class="sprite sprite-{{sprite}}"></span>\n<span class="{{sprite}}"></span>';
-  output = '<span class="sprite sprite-{{sprite}}"></span> <span class="{{sprite}}"></span>';
+  input = '<span class="sprite sprite-{{sprite}}"></span>';
   assert.equal(minify(input, {
     collapseWhitespace: true,
-    ignoreCustomFragments: [/{{.*}}/],
+    ignoreCustomFragments: [/{{.*?}}/],
+    removeAttributeQuotes: true,
+    sortClassName: true
+  }), input);
+
+  input = '<span class="{{sprite}}-sprite sprite"></span>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    ignoreCustomFragments: [/{{.*?}}/],
+    removeAttributeQuotes: true,
+    sortClassName: true
+  }), input);
+
+  input = '<span class="sprite-{{sprite}}-sprite"></span>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    ignoreCustomFragments: [/{{.*?}}/],
+    removeAttributeQuotes: true,
+    sortClassName: true
+  }), input);
+
+  input = '<span class="{{sprite}}"></span>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    ignoreCustomFragments: [/{{.*?}}/],
+    removeAttributeQuotes: true,
+    sortClassName: true
+  }), input);
+
+  input = '<span class={{sprite}}></span>';
+  output = '<span class="{{sprite}}"></span>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    ignoreCustomFragments: [/{{.*?}}/],
+    removeAttributeQuotes: true,
     sortClassName: true
   }), output);
 });
