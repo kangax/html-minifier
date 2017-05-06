@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.4.3 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.4.4 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2017 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -3477,9 +3477,9 @@ function removeWhitespace(value, format) {
     wasWhitespace = isWhitespace;
   }
 
-  return stripped
-    .join('')
-    .replace(withCaseAttribute ? CASE_RESTORE_PATTERN : null, '$1 $2]');
+  return withCaseAttribute ?
+    stripped.join('').replace(CASE_RESTORE_PATTERN, '$1 $2]') :
+    stripped.join('');
 }
 
 function removeQuotes(value) {
@@ -13031,6 +13031,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -34155,7 +34159,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
         for (var i = 0, len = attrs.length; i < len; i++) {
           var attr = attrs[i];
           if (classChain && (options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
-            classChain.add(trimWhitespace(attr.value).split(/\s+/).filter(shouldSkipUIDs));
+            classChain.add(trimWhitespace(attr.value).split(/[ \t\n\f\r]+/).filter(shouldSkipUIDs));
           }
           else if (options.processScripts && attr.name.toLowerCase() === 'type') {
             currentTag = tag;
@@ -34203,7 +34207,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   if (classChain) {
     var sorter = classChain.createSorter();
     options.sortClassName = function(value) {
-      return sorter.sort(value.split(/\s+/)).join(' ');
+      return sorter.sort(value.split(/[ \n\f\r]+/)).join(' ');
     };
   }
 }
