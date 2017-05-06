@@ -760,7 +760,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
         for (var i = 0, len = attrs.length; i < len; i++) {
           var attr = attrs[i];
           if (classChain && (options.caseSensitive ? attr.name : attr.name.toLowerCase()) === 'class') {
-            classChain.add(trimWhitespace(attr.value).split(/\s+/).filter(shouldSkipUIDs));
+            classChain.add(trimWhitespace(attr.value).split(/[ \t\n\f\r]+/).filter(shouldSkipUIDs));
           }
           else if (options.processScripts && attr.name.toLowerCase() === 'type') {
             currentTag = tag;
@@ -808,7 +808,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   if (classChain) {
     var sorter = classChain.createSorter();
     options.sortClassName = function(value) {
-      return sorter.sort(value.split(/\s+/)).join(' ');
+      return sorter.sort(value.split(/[ \n\f\r]+/)).join(' ');
     };
   }
 }
