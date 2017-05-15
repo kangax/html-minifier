@@ -30,7 +30,25 @@ module.exports = function(grunt) {
       src: {
         options: {
           banner: '<%= banner %>',
+          preBundleCB: function() {
+            var fs = require('fs');
+            var UglifyJS = require('uglify-js');
+            var files = {};
+            UglifyJS.FILES.forEach(function(file) {
+              files[file] = fs.readFileSync(file, 'utf8');
+            });
+            fs.writeFileSync('./dist/uglify.js', UglifyJS.minify(files, {
+              compress: false,
+              mangle: false,
+              wrap: 'exports'
+            }).code);
+          },
+          postBundleCB: function(err, src, next) {
+            require('fs').unlinkSync('./dist/uglify.js');
+            next(err, src);
+          },
           require: [
+            './dist/uglify.js:uglify-js',
             './src/htmlminifier.js:html-minifier'
           ]
         },

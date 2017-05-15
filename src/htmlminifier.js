@@ -676,23 +676,17 @@ function processOptions(options) {
     if (typeof minifyJS !== 'object') {
       minifyJS = {};
     }
-    minifyJS.fromString = true;
     (minifyJS.parse || (minifyJS.parse = {})).bare_returns = false;
     options.minifyJS = function(text, inline) {
       var start = text.match(/^\s*<!--.*/);
       var code = start ? text.slice(start[0].length).replace(/\n\s*-->\s*$/, '') : text;
-      try {
-        minifyJS.parse.bare_returns = inline;
-        code = UglifyJS.minify(code, minifyJS).code;
-        if (/;$/.test(code)) {
-          code = code.slice(0, -1);
-        }
-        return code;
-      }
-      catch (err) {
-        options.log(err);
+      minifyJS.parse.bare_returns = inline;
+      var result = UglifyJS.minify(code, minifyJS);
+      if (result.error) {
+        options.log(result.error);
         return text;
       }
+      return result.code.replace(/;$/, '');
     };
   }
 
