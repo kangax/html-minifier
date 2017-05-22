@@ -519,8 +519,13 @@ function canCollapseWhitespace(tag) {
   return !/^(?:script|style|pre|textarea)$/.test(tag);
 }
 
-function canTrimWhitespace(tag) {
-  return !/^(?:pre|textarea)$/.test(tag);
+function isStyleAttributeWithWhiteSpacePre(attr) {
+  // Any value starting with "pre" (pre, pre-wrap, pre-line)
+  return attr.name === 'style' && /\bwhite-space\s*:\s*pre/.test(attr.value);
+}
+
+function canTrimWhitespace(tag, attrs) {
+  return !/^(?:pre|textarea)$/.test(tag) && (!attrs || !attrs.some(isStyleAttributeWithWhiteSpacePre));
 }
 
 function normalizeAttr(attr, attrs, tag, options) {

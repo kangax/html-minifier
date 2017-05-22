@@ -345,6 +345,23 @@ QUnit.test('space normalization around text', function(assert) {
   input = '<p> foo\u00A0bar\nbaz  \u00A0\nmoo\t</p>';
   output = '<p>foo\u00A0bar baz \u00A0 moo</p>';
   assert.equal(minify(input, { collapseWhitespace: true }), output);
+
+  input = '<div>  a  b  c  <span style="white-space: pre">  d  e  f  </span>  g  h  i  </div>';
+  output = '<div>a b c <span style="white-space: pre">  d  e  f  </span>g h i</div>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
+  input = '<div>  a  b  c  <span style="white-space: pre-wrap">  d  e  f  </span>  g  h  i  </div>';
+  output = '<div>a b c <span style="white-space: pre-wrap">  d  e  f  </span>g h i</div>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
+  input = '<div>  a  b  c  <span style="white-space: pre-line">  d  e  f  </span>  g  h  i  </div>';
+  output = '<div>a b c <span style="white-space: pre-line">  d  e  f  </span>g h i</div>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
+  input = '<div>  a  b  c  <span style="white-space: foo">d  e  f  </span>  g  h  i  </div>';
+  output = '<div>a b c <span style="white-space: foo">d e f </span>g h i</div>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
+
+  input = '<div style="white-space: pre">  a  b  c  <span>  d  e  f  </span>  g  h  i  </div>';
+  output = '<div style="white-space: pre">  a  b  c  <span>  d  e  f  </span>  g  h  i</div>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
 });
 
 QUnit.test('doctype normalization', function(assert) {
