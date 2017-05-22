@@ -626,13 +626,11 @@ function processOptions(options) {
     options.log = identity;
   }
 
-  var defaultTesters = ['canCollapseWhitespace', 'canTrimWhitespace'];
-  for (var i = 0, len = defaultTesters.length; i < len; i++) {
-    if (!options[defaultTesters[i]]) {
-      options[defaultTesters[i]] = function() {
-        return false;
-      };
-    }
+  if (!options.canCollapseWhitespace) {
+    options.canCollapseWhitespace = canCollapseWhitespace;
+  }
+  if (!options.canTrimWhitespace) {
+    options.canTrimWhitespace = canTrimWhitespace;
   }
 
   if (!('ignoreCustomComments' in options)) {
@@ -894,11 +892,11 @@ function minify(value, options, partialMarkup) {
   }
 
   function _canCollapseWhitespace(tag, attrs) {
-    return canCollapseWhitespace(tag) || options.canCollapseWhitespace(tag, attrs);
+    return options.canCollapseWhitespace(tag, attrs, canCollapseWhitespace);
   }
 
   function _canTrimWhitespace(tag, attrs) {
-    return canTrimWhitespace(tag) || options.canTrimWhitespace(tag, attrs);
+    return options.canTrimWhitespace(tag, attrs, canTrimWhitespace);
   }
 
   function removeStartTag() {
