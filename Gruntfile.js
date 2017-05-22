@@ -141,7 +141,15 @@ module.exports = function(grunt) {
           errors.push(-1);
         }
         else {
-          errors.push(report(testType, JSON.parse(result.stdout)));
+          var output = result.stdout;
+          var index = output.lastIndexOf('\n');
+          if (index !== -1) {
+            // There's something before the report JSON
+            // Log it to the console -- it's probably some debug output:
+            console.log(output.slice(0, index));
+            output = output.slice(index);
+          }
+          errors.push(report(testType, JSON.parse(output)));
         }
         if (errors.length === 2) {
           done(!errors[0] && !errors[1]);
