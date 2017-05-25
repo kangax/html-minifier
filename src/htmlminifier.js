@@ -998,10 +998,10 @@ function minify(value, options, partialMarkup) {
         if (!stackNoTrimWhitespace.length) {
           squashTrailingWhitespace(tag);
         }
-        if (!_canTrimWhitespace(tag, attrs)) {
+        if (!_canTrimWhitespace(tag, attrs) || stackNoTrimWhitespace.length) {
           stackNoTrimWhitespace.push(tag);
         }
-        if (!_canCollapseWhitespace(tag, attrs)) {
+        if (!_canCollapseWhitespace(tag, attrs) || stackNoCollapseWhitespace.length) {
           stackNoCollapseWhitespace.push(tag);
         }
       }

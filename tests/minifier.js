@@ -3245,3 +3245,43 @@ QUnit.test('tests from PHPTAL', function(assert) {
     }), tokens[0]);
   });
 });
+
+QUnit.test('canCollapseWhitespace and canTrimWhitespace hooks', function(assert) {
+  function canCollapseAndTrimWhitespace(tagName, attrs, defaultFn) {
+    if ((attrs || []).some(function(attr) { return attr.name === 'class' && attr.value === 'leaveAlone'; })) {
+      return false;
+    }
+    return defaultFn(tagName, attrs);
+  }
+
+  var input = '<div class="leaveAlone"><span> </span> foo  bar</div>';
+  var output = '<div class="leaveAlone"><span> </span> foo  bar</div>';
+
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    canTrimWhitespace: canCollapseAndTrimWhitespace,
+    canCollapseWhitespace: canCollapseAndTrimWhitespace
+  }), output);
+
+  // Regression test: Previously the first </div> would clear the internal
+  // stackNo{Collapse,Trim}Whitespace, so that ' foo  bar' turned into ' foo bar'
+  input = '<div class="leaveAlone"><div></div><span> </span> foo  bar</div>';
+  output = '<div class="leaveAlone"><div></div><span> </span> foo  bar</div>';
+
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    canTrimWhitespace: canCollapseAndTrimWhitespace,
+    canCollapseWhitespace: canCollapseAndTrimWhitespace
+  }), output);
+
+  // Make sure that the stack does get reset when leaving the element for which
+  // the hooks returned fales:
+  input = '<div class="leaveAlone"></div><div> foo  bar </div>';
+  output = '<div class="leaveAlone"></div><div>foo bar</div>';
+
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    canTrimWhitespace: canCollapseAndTrimWhitespace,
+    canCollapseWhitespace: canCollapseAndTrimWhitespace
+  }), output);
+});
