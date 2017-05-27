@@ -3275,7 +3275,7 @@ QUnit.test('canCollapseWhitespace and canTrimWhitespace hooks', function(assert)
   }), output);
 
   // Make sure that the stack does get reset when leaving the element for which
-  // the hooks returned fales:
+  // the hooks returned false:
   input = '<div class="leaveAlone"></div><div> foo  bar </div>';
   output = '<div class="leaveAlone"></div><div>foo bar</div>';
 
