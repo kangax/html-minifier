@@ -151,7 +151,14 @@ mainOptionKeys.forEach(function(key) {
     program.option('--' + paramCase(key), option);
   }
 });
-program.option('-o --output <file>', 'Specify output file (if not specified STDOUT will be used for output)');
+var inplace = false;
+program.option('--inplace', 'Specify that the files should be overwritten.', function(newInplace) {
+  inplace = true; });
+program.option('-o --output <file>', 'Specify output file (if not specified STDOUT will be used for output)', function(outputPath) {
+  return fs.createWriteStream(outputPath).on('error', function(e) {
+    fatal('Cannot write ' + outputPath + '\n' + e.message);
+  });
+}, process.stdout);
 
 function readFile(file) {
   try {
@@ -190,8 +197,9 @@ program.option('--input-dir <dir>', 'Specify an input directory');
 program.option('--output-dir <dir>', 'Specify an output directory');
 program.option('--file-ext <text>', 'Specify an extension to be read, ex: html');
 var content;
-program.arguments('[files...]').action(function(files) {
-  content = files.map(readFile).join('');
+var files;
+program.arguments('[files...]').action(function(newFiles) {
+  files = newFiles;
 }).parse(process.argv);
 
 function createOptions() {
@@ -287,24 +295,31 @@ function writeMinify() {
 var inputDir = program.inputDir;
 var outputDir = program.outputDir;
 var fileExt = program.fileExt;
-if (inputDir || outputDir) {
-  if (!inputDir) {
-    fatal('The option output-dir needs to be used with the option input-dir. If you are working with a single file, use -o.');
+if (inplace) {
+  files.forEach(function (file) { processFile(file, file); });
+} else {
+  if (files) {
+    content = files.map(readFile).join('');
   }
-  else if (!outputDir) {
-    fatal('You need to specify where to write the output files with the option --output-dir');
+  if (inputDir || outputDir) {
+    if (!inputDir) {
+      fatal('The option output-dir needs to be used with the option input-dir. If you are working with a single file, use -o.');
+    }
+    else if (!outputDir) {
+      fatal('You need to specify where to write the output files with the option --output-dir');
+    }
+    processDirectory(inputDir, outputDir, fileExt);
   }
-  processDirectory(inputDir, outputDir, fileExt);
-}
-// Minifying one or more files specified on the CMD line
-else if (content) {
-  writeMinify();
-}
-// Minifying input coming from STDIN
-else {
-  content = '';
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('data', function(data) {
-    content += data;
-  }).on('end', writeMinify);
+  // Minifying one or more files specified on the CMD line
+  else if (typeof content === 'string') {
+    writeMinify();
+  }
+  // Minifying input coming from STDIN
+  else {
+    content = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', function(data) {
+      content += data;
+    }).on('end', writeMinify);
+  }
 }
