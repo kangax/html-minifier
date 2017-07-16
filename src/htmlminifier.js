@@ -131,29 +131,29 @@ function isAttributeRedundant(tag, attrName, attrValue, attrs) {
   attrValue = attrValue ? trimWhitespace(attrValue.toLowerCase()) : '';
 
   return (
-      tag === 'script' &&
-      attrName === 'language' &&
-      attrValue === 'javascript' ||
+    tag === 'script' &&
+    attrName === 'language' &&
+    attrValue === 'javascript' ||
 
-      tag === 'form' &&
-      attrName === 'method' &&
-      attrValue === 'get' ||
+    tag === 'form' &&
+    attrName === 'method' &&
+    attrValue === 'get' ||
 
-      tag === 'input' &&
-      attrName === 'type' &&
-      attrValue === 'text' ||
+    tag === 'input' &&
+    attrName === 'type' &&
+    attrValue === 'text' ||
 
-      tag === 'script' &&
-      attrName === 'charset' &&
-      !attributesInclude(attrs, 'src') ||
+    tag === 'script' &&
+    attrName === 'charset' &&
+    !attributesInclude(attrs, 'src') ||
 
-      tag === 'a' &&
-      attrName === 'name' &&
-      attributesInclude(attrs, 'id') ||
+    tag === 'a' &&
+    attrName === 'name' &&
+    attributesInclude(attrs, 'id') ||
 
-      tag === 'area' &&
-      attrName === 'shape' &&
-      attrValue === 'rect'
+    tag === 'area' &&
+    attrName === 'shape' &&
+    attrValue === 'rect'
   );
 }
 

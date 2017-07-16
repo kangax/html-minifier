@@ -26,7 +26,7 @@
  *
  */
 
- /* global ActiveXObject, DOMDocument */
+/* global ActiveXObject, DOMDocument */
 
 'use strict';
 

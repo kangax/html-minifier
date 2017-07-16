@@ -1,4 +1,4 @@
- /* global minify */
+/* global minify */
 'use strict';
 
 if (typeof minify === 'undefined') {
@@ -1930,22 +1930,22 @@ QUnit.test('script minification', function(assert) {
   assert.equal(minify(input, { minifyJS: true }), input);
 
   input = '<script>(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
-  output = '<script>!function(){alert("1 2")}()</script>';
+  output = '<script>alert("1 2")</script>';
 
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script type="text/JavaScript">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
-  output = '<script type="text/JavaScript">!function(){alert("1 2")}()</script>';
+  output = '<script type="text/JavaScript">alert("1 2")</script>';
 
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script type="application/javascript;version=1.8">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
-  output = '<script type="application/javascript;version=1.8">!function(){alert("1 2")}()</script>';
+  output = '<script type="application/javascript;version=1.8">alert("1 2")</script>';
 
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script type=" application/javascript  ; charset=utf-8 ">(function(){ var foo = 1; var bar = 2; alert(foo + " " + bar); })()</script>';
-  output = '<script type="application/javascript;charset=utf-8">!function(){alert("1 2")}()</script>';
+  output = '<script type="application/javascript;charset=utf-8">alert("1 2")</script>';
 
   assert.equal(minify(input, { minifyJS: true }), output);
 
