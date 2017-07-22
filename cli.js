@@ -148,11 +148,7 @@ mainOptionKeys.forEach(function(key) {
     program.option(key, option);
   }
 });
-program.option('-o --output <file>', 'Specify output file (if not specified STDOUT will be used for output)', function(outputPath) {
-  return fs.createWriteStream(outputPath).on('error', function(e) {
-    fatal('Cannot write ' + outputPath + '\n' + e.message);
-  });
-}, process.stdout);
+program.option('-o --output <file>', 'Specify output file (if not specified STDOUT will be used for output)');
 
 function readFile(file) {
   try {
@@ -280,7 +276,9 @@ function writeMinify() {
   catch (e) {
     fatal('Minification error:\n' + e.message);
   }
-  program.output.write(minified);
+  (program.output ? fs.createWriteStream(program.output).on('error', function(e) {
+    fatal('Cannot write ' + program.output + '\n' + e.message);
+  }) : process.stdout).write(minified);
 }
 
 var inputDir = program.inputDir;
