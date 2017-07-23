@@ -6,7 +6,7 @@ var packages = require('./package.json').benchmarkDependencies;
 packages = Object.keys(packages).map(function(name) {
   return name + '@' + packages[name];
 });
-packages.unshift('install');
+packages.unshift('install', '--no-save', '--no-optional');
 var installed = require('child_process').spawnSync('npm', packages, {
   encoding: 'utf-8',
   shell: true
