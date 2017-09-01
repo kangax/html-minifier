@@ -5,7 +5,7 @@ var decode = require('he').decode;
 var HTMLParser = require('./htmlparser').HTMLParser;
 var RelateUrl = require('relateurl');
 var TokenChain = require('./tokenchain');
-var UglifyJS = require('uglify-js');
+var UglifyJS = require('uglify-es');
 var utils = require('./utils');
 
 var trimWhitespace = String.prototype.trim ? function(str) {

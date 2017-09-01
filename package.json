@@ -61,12 +61,12 @@
     "ncname": "1.0.x",
     "param-case": "2.1.x",
     "relateurl": "0.2.x",
-    "uglify-js": "3.0.x"
+    "uglify-es": "^3.0.28"
   },
   "devDependencies": {
     "grunt": "1.0.x",
     "grunt-browserify": "5.0.x",
-    "grunt-contrib-uglify": "3.0.x",
+    "grunt-contrib-uglify": "git+https://github.com/gruntjs/grunt-contrib-uglify.git#harmony",
     "gruntify-eslint": "4.0.x",
     "phantomjs-prebuilt": "2.1.x",
     "qunitjs": "2.x"
