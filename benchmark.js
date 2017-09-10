@@ -24,7 +24,6 @@ var brotli = require('brotli'),
     chalk = require('chalk'),
     fork = require('child_process').fork,
     fs = require('fs'),
-    http = require('http'),
     https = require('https'),
     lzma = require('lzma'),
     Minimize = require('minimize'),
@@ -298,12 +297,12 @@ run(fileNames.map(function(fileName) {
 
     function testWillPeavy(done) {
       readText(filePath, function(data) {
-        var options = url.parse('http://www.willpeavy.com/minifier/');
+        var options = url.parse('https://www.willpeavy.com/minifier/');
         options.method = 'POST';
         options.headers = {
           'Content-Type': 'application/x-www-form-urlencoded'
         };
-        http.request(options, function(res) {
+        https.request(options, function(res) {
           res.setEncoding('utf8');
           var response = '';
           res.on('data', function(chunk) {
@@ -336,13 +335,27 @@ run(fileNames.map(function(fileName) {
 
     function testHTMLCompressor(done) {
       readText(filePath, function(data) {
-        var options = url.parse('http://htmlcompressor.com/compress_ajax_v2.php');
+        var options = url.parse('https://htmlcompressor.com/compress_ajax_v2.php');
         options.method = 'POST';
         options.headers = {
           'Accept-Encoding': 'gzip',
           'Content-Type': 'application/x-www-form-urlencoded'
         };
-        http.request(options, function(res) {
+        var info = infos.compressor;
+
+        function failed() {
+          // Site refused to process content
+          if (info) {
+            info.size = 0;
+            info.gzSize = 0;
+            info.lzSize = 0;
+            info.brSize = 0;
+            info = null;
+            done();
+          }
+        }
+
+        https.request(options, function(res) {
           if (res.headers['content-encoding'] === 'gzip') {
             res = res.pipe(zlib.createGunzip());
           }
@@ -357,22 +370,17 @@ run(fileNames.map(function(fileName) {
             catch (e) {
               response = {};
             }
-            var info = infos.compressor;
-            if (response.success) {
+            if (info && response.success) {
               writeText(info.filePath, response.result, function() {
                 readSizes(info, done);
               });
             }
             // Site refused to process content
             else {
-              info.size = 0;
-              info.gzSize = 0;
-              info.lzSize = 0;
-              info.brSize = 0;
-              done();
+              failed();
             }
           });
-        }).end(querystring.stringify({
+        }).on('error', failed).end(querystring.stringify({
           code_type: 'html',
           html_level: 3,
           html_strip_quotes: 1,
@@ -436,8 +444,7 @@ run(fileNames.map(function(fileName) {
 
   function get(site, callback) {
     var options = url.parse(site);
-    var protocol = options.protocol === 'https:' ? https : http;
-    protocol.get(options, function(res) {
+    https.get(options, function(res) {
       var status = res.statusCode;
       if (status === 200) {
         if (res.headers['content-encoding'] === 'gzip') {
