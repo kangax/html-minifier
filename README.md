@@ -20,21 +20,21 @@ For lint-like capabilities take a look at [HTMLLint](https://github.com/kangax/h
 
 How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Peavy](http://www.willpeavy.com/minifier/) (1st result in [Google search for "html minifier"](https://www.google.com/#q=html+minifier)) as well as [htmlcompressor.com](http://htmlcompressor.com) and [minimize](https://github.com/Swaagie/minimize)?
 
-| Site                                                                        | Original size *(KB)* | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
-| --------------------------------------------------------------------------- |:--------------------:| ------------:| --------:| ----------:| ------------------:|
-| [Google](https://www.google.com/)                                           | 45                   | **42**       | 45       | 46         | 45                 |
-| [HTMLMinifier](https://github.com/kangax/html-minifier)                     | 131                  | **102**      | 110      | 114        | 109                |
-| [CNN](http://www.cnn.com/)                                                  | 134                  | **122**      | 131      | 132        | 126                |
-| [Amazon](http://www.amazon.co.uk/)                                          | 201                  | **169**      | 193      | 197        | n/a                |
-| [New York Times](http://www.nytimes.com/)                                   | 216                  | **144**      | 165      | 161        | 151                |
-| [Stack Overflow](http://stackoverflow.com/)                                 | 240                  | **187**      | 196      | 203        | 193                |
-| [Bootstrap CSS](http://getbootstrap.com/css/)                               | 272                  | **260**      | 269      | 229        | 269                |
-| [BBC](http://www.bbc.co.uk/)                                                | 287                  | **235**      | 279      | 286        | 271                |
-| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)   | 530                  | **486**      | 511      | 529        | 510                |
-| [NBC](http://www.nbc.com/)                                                  | 662                  | **623**      | 658      | 661        | n/a                |
-| [Eloquent Javascript](http://eloquentjavascript.net/1st_edition/print.html) | 870                  | **815**      | 840      | 864        | n/a                |
-| [ES6 table](http://kangax.github.io/compat-table/es6/)                      | 3844                 | **3252**     | 3630     | n/a        | n/a                |
-| [ES6 draft](https://tc39.github.io/ecma262/)                                | 5576                 | **4974**     | 5122     | n/a        | n/a                |
+| Site                                                                         | Original size *(KB)* | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
+| ---------------------------------------------------------------------------- |:--------------------:| ------------:| --------:| ----------:| ------------------:|
+| [Google](https://www.google.com/)                                            | 45                   | **42**       | 45       | 47         | 45                 |
+| [HTMLMinifier](https://github.com/kangax/html-minifier)                      | 131                  | **102**      | 110      | 114        | 109                |
+| [Amazon](https://www.amazon.co.uk/)                                          | 204                  | **171**      | 195      | 199        | n/a                |
+| [New York Times](https://www.nytimes.com/)                                   | 233                  | **159**      | 182      | 178        | 166                |
+| [Stack Overflow](https://stackoverflow.com/)                                 | 246                  | **193**      | 202      | 210        | 199                |
+| [Bootstrap CSS](https://getbootstrap.com/docs/3.3/css/)                      | 272                  | **260**      | 269      | 229        | 269                |
+| [Twitter](https://twitter.com/)                                              | 291                  | **216**      | 257      | 280        | 257                |
+| [BBC](https://www.bbc.co.uk/)                                                | 311                  | **256**      | 302      | 310        | 294                |
+| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)    | 469                  | **437**      | 453      | 468        | 453                |
+| [NBC](https://www.nbc.com/)                                                  | 663                  | **626**      | 659      | 663        | n/a                |
+| [Eloquent Javascript](https://eloquentjavascript.net/1st_edition/print.html) | 870                  | **815**      | 840      | 864        | n/a                |
+| [ES6 table](https://kangax.github.io/compat-table/es6/)                      | 4227                 | **3585**     | 3998     | n/a        | n/a                |
+| [ES6 draft](https://tc39.github.io/ecma262/)                                 | 5701                 | **5087**     | 5236     | n/a        | n/a                |
 
 ## Options Quick Reference
 
