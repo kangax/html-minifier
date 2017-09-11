@@ -370,6 +370,10 @@ QUnit.test('types of whitespace that should always be preserved', function(asser
 
   // Non-breaking space passed as HTML entity, in decodeEntities:true mode:
   assert.equal(minify(inputWithEntities, { collapseWhitespace: true, decodeEntities: true }), input);
+
+  // Do not remove hair space when preserving line breaks between tags:
+  input = '<p></p>\u200a\n<p></p>\n';
+  assert.equal(minify(input, { collapseWhitespace: true, preserveLineBreaks: true }), input);
 });
 
 QUnit.test('doctype normalization', function(assert) {
