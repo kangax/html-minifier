@@ -8,17 +8,12 @@ var TokenChain = require('./tokenchain');
 var UglifyJS = require('uglify-js');
 var utils = require('./utils');
 
-var trimWhitespace = String.prototype.trim ? function(str) {
-  if (typeof str !== 'string') {
-    return str;
-  }
-  return str.trim();
-} : function(str) {
+function trimWhitespace(str) {
   if (typeof str !== 'string') {
     return str;
   }
   return str.replace(/^[ \n\r\t\f]+/, '').replace(/[ \n\r\t\f]+$/, '');
-};
+}
 
 function collapseWhitespaceAll(str) {
   // Non-breaking space is specifically handled inside the replacer function here:

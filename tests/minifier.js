@@ -374,6 +374,15 @@ QUnit.test('types of whitespace that should always be preserved', function(asser
   // Do not remove hair space when preserving line breaks between tags:
   input = '<p></p>\u200a\n<p></p>\n';
   assert.equal(minify(input, { collapseWhitespace: true, preserveLineBreaks: true }), input);
+
+  // Preserve hair space in attributes:
+  input = '<p class="foo\u200abar"></p>';
+  assert.equal(minify(input, { collapseWhitespace: true }), input);
+
+  // Preserve hair space in class names when deduplicating and reordering:
+  input = '<a class="0 1\u200a3 2 3"></a>';
+  assert.equal(minify(input, { sortClassName: false }), input);
+  assert.equal(minify(input, { sortClassName: true }), input);
 });
 
 QUnit.test('doctype normalization', function(assert) {
