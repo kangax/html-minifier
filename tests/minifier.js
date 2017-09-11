@@ -347,6 +347,31 @@ QUnit.test('space normalization around text', function(assert) {
   assert.equal(minify(input, { collapseWhitespace: true }), output);
 });
 
+QUnit.test('types of whitespace that should always be preserved', function(assert) {
+  // Hair space:
+  var input = '<div>\u200afo\u200ao\u200a</div>';
+  assert.equal(minify(input, { collapseWhitespace: true }), input);
+
+  // Hair space passed as HTML entity:
+  var inputWithEntities = '<div>&#8202;fo&#8202;o&#8202;</div>';
+  assert.equal(minify(inputWithEntities, { collapseWhitespace: true }), inputWithEntities);
+
+  // Hair space passed as HTML entity, in decodeEntities:true mode:
+  assert.equal(minify(inputWithEntities, { collapseWhitespace: true, decodeEntities: true }), input);
+
+
+  // Non-breaking space:
+  input = '<div>\xa0fo\xa0o\xa0</div>';
+  assert.equal(minify(input, { collapseWhitespace: true }), input);
+
+  // Non-breaking space passed as HTML entity:
+  inputWithEntities = '<div>&nbsp;fo&nbsp;o&nbsp;</div>';
+  assert.equal(minify(inputWithEntities, { collapseWhitespace: true }), inputWithEntities);
+
+  // Non-breaking space passed as HTML entity, in decodeEntities:true mode:
+  assert.equal(minify(inputWithEntities, { collapseWhitespace: true, decodeEntities: true }), input);
+});
+
 QUnit.test('doctype normalization', function(assert) {
   var input;
 

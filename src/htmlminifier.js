@@ -17,11 +17,11 @@ var trimWhitespace = String.prototype.trim ? function(str) {
   if (typeof str !== 'string') {
     return str;
   }
-  return str.replace(/^\s+/, '').replace(/\s+$/, '');
+  return str.replace(/^[ \n\r\t]+/, '').replace(/[ \n\r\t]+$/, '');
 };
 
 function collapseWhitespaceAll(str) {
-  return str && str.replace(/\s+/g, function(spaces) {
+  return str && str.replace(/[ \n\r\t]+/g, function(spaces) {
     return spaces === '\t' ? '\t' : spaces.replace(/(^|\xA0+)[^\xA0]+/g, '$1 ');
   });
 }
@@ -30,17 +30,18 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   var lineBreakBefore = '', lineBreakAfter = '';
 
   if (options.preserveLineBreaks) {
-    str = str.replace(/^\s*?[\n\r]\s*/, function() {
+    str = str.replace(/^[ \n\r\t]*?[\n\r][ \n\r\t]*/, function() {
       lineBreakBefore = '\n';
       return '';
-    }).replace(/\s*?[\n\r]\s*$/, function() {
+    }).replace(/[ \n\r\t]*?[\n\r][ \n\r\t]*$/, function() {
       lineBreakAfter = '\n';
       return '';
     });
   }
 
   if (trimLeft) {
-    str = str.replace(/^\s+/, function(spaces) {
+    // Non-breaking space is specifically handled inside the replacer function here:
+    str = str.replace(/^[ \n\r\t\xA0]+/, function(spaces) {
       var conservative = !lineBreakBefore && options.conservativeCollapse;
       if (conservative && spaces === '\t') {
         return '\t';
@@ -50,7 +51,8 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   }
 
   if (trimRight) {
-    str = str.replace(/\s+$/, function(spaces) {
+    // Non-breaking space is specifically handled inside the replacer function here:
+    str = str.replace(/[ \n\r\t\xA0]+$/, function(spaces) {
       var conservative = !lineBreakAfter && options.conservativeCollapse;
       if (conservative && spaces === '\t') {
         return '\t';
@@ -1122,7 +1124,7 @@ function minify(value, options, partialMarkup) {
               }
               if (buffer.length > 1 && (!prevComment || !options.conservativeCollapse && / $/.test(currentChars))) {
                 var charsIndex = buffer.length - 2;
-                buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
+                buffer[charsIndex] = buffer[charsIndex].replace(/[ \n\r\t]+$/, function(trailingSpaces) {
                   text = trailingSpaces + text;
                   return '';
                 });
@@ -1140,7 +1142,7 @@ function minify(value, options, partialMarkup) {
               }
             }
             else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
-              text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
+              text = collapseWhitespace(text, options, /(?:^|[ \n\r\t])$/.test(currentChars));
             }
           }
           if (prevTag || nextTag) {
@@ -1149,7 +1151,7 @@ function minify(value, options, partialMarkup) {
           else {
             text = collapseWhitespace(text, options, true, true);
           }
-          if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
+          if (!text && /[ \n\r\t]$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
             trimTrailingWhitespace(buffer.length - 1, nextTag);
           }
         }
@@ -1169,18 +1171,18 @@ function minify(value, options, partialMarkup) {
       if (options.removeOptionalTags && text) {
         // <html> may be omitted if first thing inside is not comment
         // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-        if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
+        if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^[ \n\r\t]/.test(text)) {
           removeStartTag();
         }
         optionalStartTag = '';
         // </html> or </body> may be omitted if not followed by comment
         // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
-        if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
+        if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^[ \n\r\t]/.test(text)) {
           removeEndTag();
         }
         optionalEndTag = '';
       }
-      charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
+      charsPrevTag = /^[ \n\r\t]*$/.test(text) ? prevTag : 'comment';
       if (options.decodeEntities && text && !specialContentTags(currentTag)) {
         // semi-colon can be omitted
         // https://mathiasbynens.be/notes/ambiguous-ampersands
@@ -1253,7 +1255,7 @@ function minify(value, options, partialMarkup) {
         return collapseWhitespace(chunk, {
           preserveLineBreaks: options.preserveLineBreaks,
           conservativeCollapse: !options.trimCustomFragments
-        }, /^\s/.test(chunk), /\s$/.test(chunk));
+        }, /^[ \n\r\t]/.test(chunk), /[ \n\r\t]$/.test(chunk));
       }
       return chunk;
     });
