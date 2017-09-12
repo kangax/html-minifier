@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.5.4 (http://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.5.5 (http://kangax.github.io/html-minifier/)
  * Copyright 2010-2017 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
@@ -23698,20 +23698,16 @@ var TokenChain = require('./tokenchain');
 var UglifyJS = require('uglify-js');
 var utils = require('./utils');
 
-var trimWhitespace = String.prototype.trim ? function(str) {
+function trimWhitespace(str) {
   if (typeof str !== 'string') {
     return str;
   }
-  return str.trim();
-} : function(str) {
-  if (typeof str !== 'string') {
-    return str;
-  }
-  return str.replace(/^\s+/, '').replace(/\s+$/, '');
-};
+  return str.replace(/^[ \n\r\t\f]+/, '').replace(/[ \n\r\t\f]+$/, '');
+}
 
 function collapseWhitespaceAll(str) {
-  return str && str.replace(/\s+/g, function(spaces) {
+  // Non-breaking space is specifically handled inside the replacer function here:
+  return str && str.replace(/[ \n\r\t\f\xA0]+/g, function(spaces) {
     return spaces === '\t' ? '\t' : spaces.replace(/(^|\xA0+)[^\xA0]+/g, '$1 ');
   });
 }
@@ -23720,17 +23716,18 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   var lineBreakBefore = '', lineBreakAfter = '';
 
   if (options.preserveLineBreaks) {
-    str = str.replace(/^\s*?[\n\r]\s*/, function() {
+    str = str.replace(/^[ \n\r\t\f]*?[\n\r][ \n\r\t\f]*/, function() {
       lineBreakBefore = '\n';
       return '';
-    }).replace(/\s*?[\n\r]\s*$/, function() {
+    }).replace(/[ \n\r\t\f]*?[\n\r][ \n\r\t\f]*$/, function() {
       lineBreakAfter = '\n';
       return '';
     });
   }
 
   if (trimLeft) {
-    str = str.replace(/^\s+/, function(spaces) {
+    // Non-breaking space is specifically handled inside the replacer function here:
+    str = str.replace(/^[ \n\r\t\f\xA0]+/, function(spaces) {
       var conservative = !lineBreakBefore && options.conservativeCollapse;
       if (conservative && spaces === '\t') {
         return '\t';
@@ -23740,7 +23737,8 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   }
 
   if (trimRight) {
-    str = str.replace(/\s+$/, function(spaces) {
+    // Non-breaking space is specifically handled inside the replacer function here:
+    str = str.replace(/[ \n\r\t\f\xA0]+$/, function(spaces) {
       var conservative = !lineBreakAfter && options.conservativeCollapse;
       if (conservative && spaces === '\t') {
         return '\t';
@@ -24943,7 +24941,7 @@ function minify(value, options, partialMarkup) {
         return collapseWhitespace(chunk, {
           preserveLineBreaks: options.preserveLineBreaks,
           conservativeCollapse: !options.trimCustomFragments
-        }, /^\s/.test(chunk), /\s$/.test(chunk));
+        }, /^[ \n\r\t\f]/.test(chunk), /[ \n\r\t\f]$/.test(chunk));
       }
       return chunk;
     });
