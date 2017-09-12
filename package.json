@@ -66,7 +66,7 @@
   "devDependencies": {
     "grunt": "1.0.x",
     "grunt-browserify": "5.2.x",
-    "grunt-contrib-uglify": "3.0.x",
+    "grunt-contrib-uglify": "3.1.x",
     "gruntify-eslint": "4.0.x",
     "phantomjs-prebuilt": "2.1.x",
     "qunitjs": "2.x"
