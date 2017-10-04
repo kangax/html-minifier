@@ -880,7 +880,9 @@ function minify(value, options, partialMarkup) {
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
       ignoredCustomMarkupChunks.push(/^(\s*)[\s\S]*?(\s*)$/.exec(match));
-      return '\t' + token + '\t';
+      // return '\t' + token + '\t';
+      // remove \t in token
+      return token;
     });
   }
 
