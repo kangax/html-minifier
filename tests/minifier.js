@@ -1635,6 +1635,16 @@ QUnit.test('custom components', function(assert) {
   assert.equal(minify(input), output);
 });
 
+QUnit.test('HTML4: anchor with inline elements', function(assert) {
+  var input = '<a href="#"><span>Well, look at me! I\'m a span!</span></a>';
+  assert.equal(minify(input, { html5: false }), input);
+});
+
+QUnit.test('HTML5: anchor with inline elements', function(assert) {
+  var input = '<a href="#"><span>Well, look at me! I\'m a span!</span></a>';
+  assert.equal(minify(input, { html5: true }), input);
+});
+
 QUnit.test('HTML4: anchor with block elements', function(assert) {
   var input = '<a href="#"><div>Well, look at me! I\'m a div!</div></a>';
   var output = '<a href="#"></a><div>Well, look at me! I\'m a div!</div>';
