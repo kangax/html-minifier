@@ -270,7 +270,7 @@ function HTMLParser(html, handler) {
       parseEndTag('', lastTag);
     }
 
-    if (!handler.html5) {
+    if (!handler.html5 && !inline(tagName)) {
       while (lastTag && inline(lastTag)) {
         parseEndTag('', lastTag);
       }
