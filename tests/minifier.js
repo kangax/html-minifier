@@ -2142,6 +2142,13 @@ QUnit.test('minification of scripts with custom fragments', function(assert) {
   output = '<script>function f(){return"<?php ?>"}</script>';
   assert.equal(minify(input, { minifyJS: true }), output);
   assert.equal(minify(input, { collapseWhitespace: true, minifyJS: true }), output);
+
+  input = '<script>function a() {\n    console.log( "<% ... %>" )\n}</script>';
+  output = '<script>function a(){console.log("<% ... %>")}</script>';
+  assert.equal(minify(input, { minifyJS: true, preserveCustomFragmentsInScripts: true }), output);
+
+  input = '<script>function a() { b() \n<% ... %>\n a()}</script>';
+  assert.equal(minify(input, { minifyJS: true, preserveCustomFragmentsInScripts: true }), input);
 });
 
 QUnit.test('event minification', function(assert) {
