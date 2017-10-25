@@ -877,11 +877,11 @@ QUnit.test('cleaning class/style attributes', function(assert) {
   assert.equal(minify(input), output);
 
   input = '<p style="    color: red; background-color: rgb(100, 75, 200);  "></p>';
-  output = '<p style="color: red; background-color: rgb(100, 75, 200)"></p>';
+  output = '<p style="color: red; background-color: rgb(100, 75, 200);"></p>';
   assert.equal(minify(input), output);
 
   input = '<p style="font-weight: bold  ; "></p>';
-  output = '<p style="font-weight: bold"></p>';
+  output = '<p style="font-weight: bold;"></p>';
   assert.equal(minify(input), output);
 });
 
@@ -1951,7 +1951,7 @@ QUnit.test('mixed html and svg', function(assert) {
   var output = '<html><body>' +
     '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="612px" height="502.174px" viewBox="0 65.326 612 502.174" enable-background="new 0 65.326 612 502.174" xml:space="preserve" class="logo">' +
     '<ellipse class="ground" cx="283.5" cy="487.5" rx="259" ry="80"/>' +
-    '<polygon points="100,10 40,198 190,78 10,78 160,198" style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd"/>' +
+    '<polygon points="100,10 40,198 190,78 10,78 160,198" style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd;"/>' +
     '<filter id="pictureFilter"><feGaussianBlur stdDeviation="15"/></filter>' +
     '</svg>' +
     '</body></html>';
@@ -2222,7 +2222,7 @@ QUnit.test('style minification', function(assert) {
   output = '<style>div>p.foo+span{border:10px solid #000}</style>';
   assert.equal(minify(input, { minifyCSS: true }), output);
 
-  input = '<div style="background: url(images/<% image %>)"></div>';
+  input = '<div style="background: url(images/<% image %>);"></div>';
   assert.equal(minify(input), input);
   output = '<div style="background:url(images/<% image %>)"></div>';
   assert.equal(minify(input, { minifyCSS: true }), output);
@@ -2817,7 +2817,7 @@ QUnit.test('custom attribute collapse', function(assert) {
             'color: red;' +
             'font-size: 100em;' +
           '">bar</div>';
-  output = '<div style="color: red;font-size: 100em">bar</div>';
+  output = '<div style="color: red;font-size: 100em;">bar</div>';
   assert.equal(minify(input, { customAttrCollapse: /style/ }), output);
 
   input = '<div ' +
