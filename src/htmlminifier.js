@@ -283,7 +283,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
     attrValue = trimWhitespace(attrValue);
     if (attrValue) {
       if (/;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
-        attrValue = attrValue.replace(/\s*;$/, '');
+        attrValue = attrValue.replace(/\s*;$/, ';');
       }
       attrValue = unwrapInlineCSS(options.minifyCSS(wrapInlineCSS(attrValue)));
     }
