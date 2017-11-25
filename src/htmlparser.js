@@ -70,7 +70,7 @@ var inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,co
 
 // Elements that you can, intentionally, leave open
 // (and which close themselves)
-var closeSelf = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source');
+var closeSelf = makeMap('colgroup,dd,dt,li,option,p,td,tfoot,th,thead,tr,source');
 
 // Attributes that have their values filled in disabled='disabled'
 var fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected');
