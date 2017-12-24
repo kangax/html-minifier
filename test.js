@@ -10,7 +10,7 @@ function load(path) {
 }
 
 var alert = console.log;
-var QUnit = load('qunitjs');
+var QUnit = load('qunit');
 
 function hook() {
   var failures = [];

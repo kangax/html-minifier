@@ -6,7 +6,7 @@ function qunitVersion() {
     return '';
   };
   try {
-    return require('qunitjs').version;
+    return require('qunit').version;
   }
   finally {
     Error.prepareStackTrace = prepareStackTrace;

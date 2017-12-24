@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "Highly configurable, well-tested, JavaScript-based HTML minifier.",
-  "version": "3.5.7",
+  "version": "3.5.8",
   "keywords": [
     "cli",
     "compress",
@@ -61,15 +61,15 @@
     "ncname": "1.0.x",
     "param-case": "2.1.x",
     "relateurl": "0.2.x",
-    "uglify-js": "3.2.x"
+    "uglify-js": "3.3.x"
   },
   "devDependencies": {
     "grunt": "1.0.x",
     "grunt-browserify": "5.2.x",
-    "grunt-contrib-uglify": "3.1.x",
+    "grunt-contrib-uglify": "3.3.x",
     "gruntify-eslint": "4.0.x",
     "phantomjs-prebuilt": "2.1.x",
-    "qunitjs": "2.x"
+    "qunit": "2.x"
   },
   "benchmarkDependencies": {
     "brotli": "1.3.x",
