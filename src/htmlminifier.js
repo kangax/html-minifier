@@ -67,7 +67,7 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
 
 var createMapFromString = utils.createMapFromString;
 // non-empty tags that will maintain whitespace around them
-var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,mark,math,nobr,q,rt,rp,s,samp,small,span,strike,strong,sub,sup,svg,time,tt,u,var');
+var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,label,mark,math,nobr,object,q,rt,rp,s,samp,select,small,span,strike,strong,sub,sup,svg,textarea,time,tt,u,var');
 // non-empty tags that will maintain whitespace within them
 var inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,nobr,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
 // self-closing tags that will maintain whitespace around them
@@ -996,11 +996,13 @@ function minify(value, options, partialMarkup) {
         if (!stackNoTrimWhitespace.length) {
           squashTrailingWhitespace(tag);
         }
-        if (!_canTrimWhitespace(tag, attrs) || stackNoTrimWhitespace.length) {
-          stackNoTrimWhitespace.push(tag);
-        }
-        if (!_canCollapseWhitespace(tag, attrs) || stackNoCollapseWhitespace.length) {
-          stackNoCollapseWhitespace.push(tag);
+        if (!unary) {
+          if (!_canTrimWhitespace(tag, attrs) || stackNoTrimWhitespace.length) {
+            stackNoTrimWhitespace.push(tag);
+          }
+          if (!_canCollapseWhitespace(tag, attrs) || stackNoCollapseWhitespace.length) {
+            stackNoCollapseWhitespace.push(tag);
+          }
         }
       }
 
