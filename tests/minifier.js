@@ -345,6 +345,21 @@ QUnit.test('space normalization around text', function(assert) {
   input = '<p> foo\u00A0bar\nbaz  \u00A0\nmoo\t</p>';
   output = '<p>foo\u00A0bar baz \u00A0 moo</p>';
   assert.equal(minify(input, { collapseWhitespace: true }), output);
+  input = '<label> foo </label>\n' +
+          '<input>\n' +
+          '<object> bar </object>\n' +
+          '<select> baz </select>\n' +
+          '<textarea> moo </textarea>\n';
+  output = '<label>foo</label> <input> <object>bar</object> <select>baz</select> <textarea> moo </textarea>';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
+  input = '<pre>\n' +
+          'foo\n' +
+          '<br>\n' +
+          'bar\n' +
+          '</pre>\n' +
+          'baz\n';
+  output = '<pre>\nfoo\n<br>\nbar\n</pre>baz';
+  assert.equal(minify(input, { collapseWhitespace: true }), output);
 });
 
 QUnit.test('types of whitespace that should always be preserved', function(assert) {
@@ -1250,7 +1265,7 @@ QUnit.test('collapsing whitespace', function(assert) {
            '<textarea disabled="disabled">     this is a textarea </textarea>' +
            '</div></div></div></div></div></div>' +
            '<pre>       \r\nxxxx</pre><span>x</span> <span>Hello</span> <b>billy</b> ' +
-           '<input type="text"><textarea></textarea><pre></pre>';
+           '<input type="text"> <textarea></textarea><pre></pre>';
   assert.equal(minify(input, { collapseWhitespace: true }), output);
 
   input = '<pre title="some title...">   hello     world </pre>';
@@ -2937,7 +2952,7 @@ QUnit.test('markups from Angular 2', function(assert) {
            '<form (ngSubmit)=onSubmit(theForm) #theForm=ngForm>' +
            '<div class=form-group>' +
            '<label for=name>Name</label>' +
-           '<input class=form-control required ngControl=firstName [(ngModel)]=currentHero.firstName>' +
+           ' <input class=form-control required ngControl=firstName [(ngModel)]=currentHero.firstName>' +
            '</div>' +
            '<button type=submit [disabled]=!theForm.form.valid>Submit</button>' +
            '</form>';
