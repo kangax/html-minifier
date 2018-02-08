@@ -22,19 +22,19 @@ How does HTMLMinifier compare to other solutions — [HTML Minifier from Will Pe
 
 | Site                                                                         | Original size *(KB)* | HTMLMinifier | minimize | Will Peavy | htmlcompressor.com |
 | ---------------------------------------------------------------------------- |:--------------------:| ------------:| --------:| ----------:| ------------------:|
-| [Google](https://www.google.com/)                                            | 46                   | **43**       | 46       | 48         | 46                 |
-| [HTMLMinifier](https://github.com/kangax/html-minifier)                      | 133                  | **104**      | 112      | 116        | 111                |
-| [New York Times](https://www.nytimes.com/)                                   | 214                  | **145**      | 163      | 162        | 152                |
-| [BBC](https://www.bbc.co.uk/)                                                | 237                  | **194**      | 229      | 235        | 222                |
-| [Stack Overflow](https://stackoverflow.com/)                                 | 248                  | **195**      | 204      | 212        | 201                |
+| [Google](https://www.google.com/)                                            | 46                   | **43**       | 46       | 47         | 46                 |
+| [Twitter](https://twitter.com/)                                              | 127                  | **94**       | 119      | 136        | 119                |
+| [HTMLMinifier](https://github.com/kangax/html-minifier)                      | 135                  | **105**      | 113      | 118        | 113                |
+| [New York Times](https://www.nytimes.com/)                                   | 232                  | **161**      | 181      | 178        | 166                |
+| [Stack Overflow](https://stackoverflow.com/)                                 | 250                  | **196**      | 205      | 214        | 203                |
+| [BBC](https://www.bbc.co.uk/)                                                | 270                  | **220**      | 262      | 268        | 252                |
 | [Bootstrap CSS](https://getbootstrap.com/docs/3.3/css/)                      | 272                  | **260**      | 269      | 229        | 269                |
-| [Twitter](https://twitter.com/)                                              | 348                  | **260**      | 313      | 345        | 313                |
-| [Amazon](https://www.amazon.co.uk/)                                          | 405                  | **349**      | 390      | 403        | n/a                |
-| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)    | 471                  | **440**      | 456      | 471        | 455                |
+| [Amazon](https://www.amazon.co.uk/)                                          | 392                  | **336**      | 377      | 390        | n/a                |
+| [Wikipedia](https://en.wikipedia.org/wiki/President_of_the_United_States)    | 473                  | **442**      | 458      | 473        | 457                |
 | [NBC](https://www.nbc.com/)                                                  | 646                  | **613**      | 642      | 646        | n/a                |
 | [Eloquent Javascript](https://eloquentjavascript.net/1st_edition/print.html) | 870                  | **815**      | 840      | 864        | n/a                |
-| [ES6 table](https://kangax.github.io/compat-table/es6/)                      | 4580                 | **3898**     | 4333     | n/a        | n/a                |
-| [ES6 draft](https://tc39.github.io/ecma262/)                                 | 5720                 | **5103**     | 5253     | n/a        | n/a                |
+| [ES6 table](https://kangax.github.io/compat-table/es6/)                      | 4579                 | **3898**     | 4333     | n/a        | n/a                |
+| [ES6 draft](https://tc39.github.io/ecma262/)                                 | 5871                 | **5225**     | 5382     | n/a        | n/a                |
 
 ## Options Quick Reference
 
