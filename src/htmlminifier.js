@@ -1153,6 +1153,11 @@ function minify(value, options, partialMarkup) {
             trimTrailingWhitespace(buffer.length - 1, nextTag);
           }
         }
+        else if (uidPattern) {
+          text = text.replace(uidPattern, function(match, prefix, index) {
+            return ignoredCustomMarkupChunks[+index][0];
+          });
+        }
         if (!stackNoCollapseWhitespace.length && nextTag !== 'html' && !(prevTag && nextTag)) {
           text = collapseWhitespace(text, options, false, false, true);
         }

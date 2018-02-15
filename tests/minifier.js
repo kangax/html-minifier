@@ -1918,6 +1918,10 @@ QUnit.test('Ignore custom fragments', function(assert) {
   input = '<link href="<?php echo \'http://foo/\' ?>">';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { removeAttributeQuotes: true }), input);
+
+  input = '<pre>\nfoo\n<? bar ?>\nbaz\n</pre>';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, { collapseWhitespace: true }), input);
 });
 
 QUnit.test('bootstrap\'s span > button > span', function(assert) {
