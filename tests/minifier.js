@@ -1690,6 +1690,31 @@ QUnit.test('phrasing content', function(assert) {
   assert.equal(minify(input, { html5: true }), input);
 });
 
+// https://github.com/kangax/html-minifier/issues/888
+QUnit.test('ul/ol should be phrasing content', function(assert) {
+  var input, output;
+
+  input = '<p>a<ul><li>item</li></ul>';
+  output = '<p>a</p><ul><li>item</li></ul>';
+  assert.equal(minify(input, { html5: true }), output);
+
+  output = '<p>a<ul><li>item</ul>';
+  assert.equal(minify(input, { html5: true, removeOptionalTags: true }), output);
+
+  output = '<p>a<ul><li>item</li></ul></p>';
+  assert.equal(minify(input, { html5: false }), output);
+
+  input = '<p>a<ol><li>item</li></ol></p>';
+  output = '<p>a</p><ol><li>item</li></ol><p></p>';
+  assert.equal(minify(input, { html5: true }), output);
+
+  output = '<p>a<ol><li>item</ol><p>';
+  assert.equal(minify(input, { html5: true, removeOptionalTags: true }), output);
+
+  output = '<p>a</p><ol><li>item</li></ol>';
+  assert.equal(minify(input, { html5: true, removeEmptyElements: true }), output);
+});
+
 QUnit.test('phrasing content with Web Components', function(assert) {
   var input = '<span><phrasing-element></phrasing-element></span>';
   var output = '<span><phrasing-element></phrasing-element></span>';
