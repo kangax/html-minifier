@@ -1153,11 +1153,6 @@ function minify(value, options, partialMarkup) {
             trimTrailingWhitespace(buffer.length - 1, nextTag);
           }
         }
-        else if (uidPattern) {
-          text = text.replace(uidPattern, function(match, prefix, index) {
-            return ignoredCustomMarkupChunks[+index][0];
-          });
-        }
         if (!stackNoCollapseWhitespace.length && nextTag !== 'html' && !(prevTag && nextTag)) {
           text = collapseWhitespace(text, options, false, false, true);
         }
@@ -1190,6 +1185,11 @@ function minify(value, options, partialMarkup) {
         // semi-colon can be omitted
         // https://mathiasbynens.be/notes/ambiguous-ampersands
         text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
+      }
+      if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
+        text = text.replace(uidPattern, function(match, prefix, index) {
+          return ignoredCustomMarkupChunks[+index][0];
+        });
       }
       currentChars += text;
       if (text) {
