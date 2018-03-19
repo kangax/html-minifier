@@ -3250,6 +3250,14 @@ QUnit.test('decode entity characters', function(assert) {
   assert.equal(minify(input, { decodeEntities: false }), input);
   output = '<a href="/?foo=1&bar=<2>">baz&lt;moo>\u00a9</a>';
   assert.equal(minify(input, { decodeEntities: true }), output);
+
+  input = '<? &amp; ?>&amp;<pre><? &amp; ?>&amp;</pre>';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, { collapseWhitespace: false, decodeEntities: false }), input);
+  assert.equal(minify(input, { collapseWhitespace: true, decodeEntities: false }), input);
+  output = '<? &amp; ?>&<pre><? &amp; ?>&</pre>';
+  assert.equal(minify(input, { collapseWhitespace: false, decodeEntities: true }), output);
+  assert.equal(minify(input, { collapseWhitespace: true, decodeEntities: true }), output);
 });
 
 QUnit.test('tests from PHPTAL', function(assert) {
