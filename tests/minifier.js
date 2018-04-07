@@ -207,8 +207,9 @@ QUnit.test('space normalization around text', function(assert) {
     assert.equal(minify('<div>foo <' + el + '> baz </' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz </' + el + '>bar</div>');
     assert.equal(minify('<div>foo<' + el + '> baz </' + el + '> bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '> baz </' + el + '>bar</div>');
   });
+  // Don't trim whitespace around element, but do trim within
   [
-    'bdi', 'bdo', 'button', 'cite', 'code', 'dfn', 'math', 'q', 'rt', 'rp', 'svg'
+    'bdi', 'bdo', 'button', 'cite', 'code', 'dfn', 'math', 'q', 'rt', 'rtc', 'ruby', 'svg'
   ].forEach(function(el) {
     assert.equal(minify('foo <' + el + '>baz</' + el + '> bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '> bar');
     assert.equal(minify('foo<' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '>bar');
