@@ -1177,8 +1177,7 @@ function minify(value, options, partialMarkup, cb) {
           var minifyJSResult = options.minifyJS(text, null, onTaskFinished);
 
           // If the result is defined then minifyJS completed synchronously.
-          // eslint-disable-next-line no-undefined
-          if (minifyJSResult !== undefined) {
+          if (typeof minifyJSResult !== 'undefined') {
             onTaskFinished(minifyJSResult);
           }
         }
@@ -1193,8 +1192,7 @@ function minify(value, options, partialMarkup, cb) {
           var minifyCSSResult = options.minifyCSS(text, onTaskFinished);
 
           // If the result is defined then minifyCSS completed synchronously.
-          // eslint-disable-next-line no-undefined
-          if (minifyCSSResult !== undefined) {
+          if (typeof minifyCSSResult !== 'undefined') {
             onTaskFinished(minifyCSSResult);
           }
         }
