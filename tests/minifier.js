@@ -3583,3 +3583,17 @@ QUnit.test('multiple async minifications', function(assert) {
     }
   ));
 });
+
+QUnit.test('sync minify with callback', function(assert) {
+  var input = '<html><head><title>Test</title></head><body>Hello World</body></html>';
+  var output = input;
+  var done = assert.async();
+  assert.equal(minify(
+    input,
+    {},
+    function(result) {
+      assert.equal(result, output);
+      done();
+    }
+  ), output);
+});
