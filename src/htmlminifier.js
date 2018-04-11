@@ -1107,7 +1107,7 @@ function minify(value, options, partialMarkup, cb) {
         }
       }
     },
-    chars: function(text, prevTag, nextTag) {
+    chars: function(text, prevTag, nextTag, cb) {
       prevTag = prevTag === '' ? 'comment' : prevTag;
       nextTag = nextTag === '' ? 'comment' : nextTag;
       if (options.decodeEntities && text && !specialContentTags(currentTag)) {
@@ -1161,42 +1161,75 @@ function minify(value, options, partialMarkup, cb) {
       if (options.processScripts && specialContentTags(currentTag)) {
         text = processScript(text, options, currentAttrs);
       }
+
+      var tasksWaitingFor = 0, tasksComplete = 0;
+
+      function onTaskFinished(result) {
+        text = result;
+        if (tasksWaitingFor === ++tasksComplete) {
+          afterTasksFinish();
+        }
+      }
+
       if (isExecutableScript(currentTag, currentAttrs)) {
-        text = options.minifyJS(text);
+        tasksWaitingFor++;
+        var minifyJSResult = options.minifyJS(text, null, onTaskFinished);
+
+        // If the result is defined then minifyJSResult completed synchronously.
+        // eslint-disable-next-line no-undefined
+        if (minifyJSResult !== undefined) {
+          onTaskFinished(minifyJSResult);
+        }
       }
+
       if (isStyleSheet(currentTag, currentAttrs)) {
-        text = options.minifyCSS(text);
-      }
-      if (options.removeOptionalTags && text) {
-        // <html> may be omitted if first thing inside is not comment
-        // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-        if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
-          removeStartTag();
+        tasksWaitingFor++;
+        var minifyCSSResult = options.minifyCSS(text, onTaskFinished);
+
+        // If the result is defined then minifyCSS completed synchronously.
+        // eslint-disable-next-line no-undefined
+        if (minifyCSSResult !== undefined) {
+          onTaskFinished(minifyCSSResult);
         }
-        optionalStartTag = '';
-        // </html> or </body> may be omitted if not followed by comment
-        // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
-        if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
-          removeEndTag();
+      }
+
+      if (tasksWaitingFor === 0) {
+        afterTasksFinish();
+      }
+
+      function afterTasksFinish() {
+        if (options.removeOptionalTags && text) {
+          // <html> may be omitted if first thing inside is not comment
+          // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+          if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
+            removeStartTag();
+          }
+          optionalStartTag = '';
+          // </html> or </body> may be omitted if not followed by comment
+          // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
+          if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
+            removeEndTag();
+          }
+          optionalEndTag = '';
         }
-        optionalEndTag = '';
+        charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
+        if (options.decodeEntities && text && !specialContentTags(currentTag)) {
+          // semi-colon can be omitted
+          // https://mathiasbynens.be/notes/ambiguous-ampersands
+          text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
+        }
+        if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
+          text = text.replace(uidPattern, function(match, prefix, index) {
+            return ignoredCustomMarkupChunks[+index][0];
+          });
+        }
+        currentChars += text;
+        if (text) {
+          hasChars = true;
+        }
+        buffer.push(text);
+        cb();
       }
-      charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
-      if (options.decodeEntities && text && !specialContentTags(currentTag)) {
-        // semi-colon can be omitted
-        // https://mathiasbynens.be/notes/ambiguous-ampersands
-        text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
-      }
-      if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
-        text = text.replace(uidPattern, function(match, prefix, index) {
-          return ignoredCustomMarkupChunks[+index][0];
-        });
-      }
-      currentChars += text;
-      if (text) {
-        hasChars = true;
-      }
-      buffer.push(text);
     },
     comment: function(text, nonStandard) {
       var prefix = nonStandard ? '<!' : '<!--';
