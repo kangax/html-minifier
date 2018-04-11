@@ -1176,7 +1176,7 @@ function minify(value, options, partialMarkup, cb) {
           tasksWaitingFor++;
           var minifyJSResult = options.minifyJS(text, null, onTaskFinished);
 
-          // If the result is defined then minifyJSResult completed synchronously.
+          // If the result is defined then minifyJS completed synchronously.
           // eslint-disable-next-line no-undefined
           if (minifyJSResult !== undefined) {
             onTaskFinished(minifyJSResult);
