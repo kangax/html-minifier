@@ -122,6 +122,8 @@ function HTMLParser(html, handler) {
   var attribute = attrForHandler(handler);
   var last, prevTag, nextTag;
 
+  parse();
+
   function parse() {
     if (!html) {
       return parseComplete();
@@ -271,8 +273,6 @@ function HTMLParser(html, handler) {
       return parse();
     }
   }
-
-  parse();
 
   function parseComplete() {
     if (!handler.partialMarkup) {
