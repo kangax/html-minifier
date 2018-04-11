@@ -117,13 +117,14 @@ function joinSingleAttrAssigns(handler) {
 }
 
 function HTMLParser(html, handler) {
+  var $this = this;
   var stack = [], lastTag;
   var attribute = attrForHandler(handler);
   var last, prevTag, nextTag;
 
-  (function iterate(cb) {
+  function parse() {
     if (!html) {
-      return cb();
+      return parseComplete();
     }
 
     var waitingForCallback = false;
@@ -143,7 +144,7 @@ function HTMLParser(html, handler) {
             }
             html = html.substring(commentEnd + 3);
             prevTag = '';
-            return iterate(cb);
+            return parse();
           }
         }
 
@@ -157,7 +158,7 @@ function HTMLParser(html, handler) {
             }
             html = html.substring(conditionalEnd + 2);
             prevTag = '';
-            return iterate(cb);
+            return parse();
           }
         }
 
@@ -169,7 +170,7 @@ function HTMLParser(html, handler) {
           }
           html = html.substring(doctypeMatch[0].length);
           prevTag = '';
-          return iterate(cb);
+          return parse();
         }
 
         // End tag:
@@ -178,7 +179,7 @@ function HTMLParser(html, handler) {
           html = html.substring(endTagMatch[0].length);
           endTagMatch[0].replace(endTag, parseEndTag);
           prevTag = '/' + endTagMatch[1].toLowerCase();
-          return iterate(cb);
+          return parse();
         }
 
         // Start tag:
@@ -187,7 +188,7 @@ function HTMLParser(html, handler) {
           html = startTagMatch.rest;
           handleStartTag(startTagMatch);
           prevTag = startTagMatch.tagName.toLowerCase();
-          return iterate(cb);
+          return parse();
         }
       }
 
@@ -243,27 +244,31 @@ function HTMLParser(html, handler) {
       parseEndTag('</' + stackedTag + '>', stackedTag);
 
     if (!waitingForCallback) {
-      return checkForParseError(cb);
+      return checkForParseError();
     }
 
-    function checkForParseError(cb) {
+    function checkForParseError() {
       if (html === last) {
         throw new Error('Parse Error: ' + html);
       }
 
-      return iterate(cb);
+      return parse();
     }
-  })(function() {
+  }
+
+  parse();
+
+  function parseComplete() {
     if (!handler.partialMarkup) {
       // Clean up any remaining tags
       parseEndTag();
     }
 
-    this.finished = true;
-    if (this.onCompleteCallback) {
-      this.onCompleteCallback();
+    $this.finished = true;
+    if ($this.onCompleteCallback) {
+      $this.onCompleteCallback();
     }
-  }.bind(this));
+  }
 
   function parseStartTag(input) {
     var start = input.match(startTagOpen);
