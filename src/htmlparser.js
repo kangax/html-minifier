@@ -117,10 +117,20 @@ function joinSingleAttrAssigns(handler) {
 }
 
 function HTMLParser(html, handler) {
+  var $this = this;
   var stack = [], lastTag;
   var attribute = attrForHandler(handler);
   var last, prevTag, nextTag;
-  while (html) {
+
+  parse();
+
+  function parse() {
+    if (!html) {
+      return parseComplete();
+    }
+
+    var waitingForCallback = false;
+
     last = html;
     // Make sure we're not in a script or style element
     if (!lastTag || !special(lastTag)) {
@@ -136,7 +146,7 @@ function HTMLParser(html, handler) {
             }
             html = html.substring(commentEnd + 3);
             prevTag = '';
-            continue;
+            return parse();
           }
         }
 
@@ -150,7 +160,7 @@ function HTMLParser(html, handler) {
             }
             html = html.substring(conditionalEnd + 2);
             prevTag = '';
-            continue;
+            return parse();
           }
         }
 
@@ -162,7 +172,7 @@ function HTMLParser(html, handler) {
           }
           html = html.substring(doctypeMatch[0].length);
           prevTag = '';
-          continue;
+          return parse();
         }
 
         // End tag:
@@ -171,7 +181,7 @@ function HTMLParser(html, handler) {
           html = html.substring(endTagMatch[0].length);
           endTagMatch[0].replace(endTag, parseEndTag);
           prevTag = '/' + endTagMatch[1].toLowerCase();
-          continue;
+          return parse();
         }
 
         // Start tag:
@@ -180,7 +190,7 @@ function HTMLParser(html, handler) {
           html = startTagMatch.rest;
           handleStartTag(startTagMatch);
           prevTag = startTagMatch.tagName.toLowerCase();
-          continue;
+          return parse();
         }
       }
 
@@ -210,40 +220,85 @@ function HTMLParser(html, handler) {
       }
 
       if (handler.chars) {
-        handler.chars(text, prevTag, nextTag);
+        waitingForCallback = true;
+        handler.chars(
+          text,
+          prevTag,
+          nextTag,
+          function(error) {
+            if (error) {
+              return handleError(error);
+            }
+
+            prevTag = '';
+            checkForParseError();
+          }
+        );
       }
-      prevTag = '';
 
     }
     else {
       var stackedTag = lastTag.toLowerCase();
       var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'));
 
-      html = html.replace(reStackedTag, function(all, text) {
-        if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
-          text = text
-            .replace(/<!--([\s\S]*?)-->/g, '$1')
-            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
-        }
+      var replaceDetails = html.match(reStackedTag);
 
-        if (handler.chars) {
-          handler.chars(text);
-        }
+      var charsText = replaceDetails[1];
+      if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
+        charsText = charsText
+          .replace(/<!--([\s\S]*?)-->/g, '$1')
+          .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
+      }
 
-        return '';
-      });
+      if (handler.chars) {
+        waitingForCallback = true;
+        handler.chars(
+          charsText,
+          null,
+          null,
+          function(error) {
+            if (error) {
+              return handleError(error);
+            }
 
-      parseEndTag('</' + stackedTag + '>', stackedTag);
+            html = html.substring(0, replaceDetails.index) + html.substring(replaceDetails.index + replaceDetails[0].length);
+            parseEndTag('</' + stackedTag + '>', stackedTag);
+            checkForParseError();
+          }
+        );
+      }
     }
 
-    if (html === last) {
-      throw new Error('Parse Error: ' + html);
+    if (!waitingForCallback) {
+      return checkForParseError();
+    }
+
+    function checkForParseError() {
+      if (html === last) {
+        return handleError(new Error('Parse Error: ' + html));
+      }
+
+      return parse();
     }
   }
 
-  if (!handler.partialMarkup) {
-    // Clean up any remaining tags
-    parseEndTag();
+  function parseComplete() {
+    if (!handler.partialMarkup) {
+      // Clean up any remaining tags
+      parseEndTag();
+    }
+
+    $this.finished = true;
+    if ($this.onCompleteCallback) {
+      $this.onCompleteCallback();
+    }
+  }
+
+  function handleError(error) {
+    $this.error = error;
+    if ($this.onErrorCallback) {
+      $this.onErrorCallback(error);
+    }
   }
 
   function parseStartTag(input) {
@@ -397,6 +452,34 @@ function HTMLParser(html, handler) {
     }
   }
 }
+
+/**
+ * Called when the HTMLParser has finished.
+ *
+ * @param {Function} cb - Callback function.
+ */
+HTMLParser.prototype.onComplete = function(cb) {
+  if (this.finished) {
+    cb();
+  }
+  else {
+    this.onCompleteCallback = cb;
+  }
+};
+
+/**
+ * Called when the HTMLParser encounters an error.
+ *
+ * @param {Function} cb - Callback function.
+ */
+HTMLParser.prototype.onError = function(cb) {
+  if (this.error) {
+    cb(this.error);
+  }
+  else {
+    this.onErrorCallback = cb;
+  }
+};
 
 exports.HTMLParser = HTMLParser;
 exports.HTMLtoXML = function(html) {

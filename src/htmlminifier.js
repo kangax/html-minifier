@@ -803,7 +803,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   }
 }
 
-function minify(value, options, partialMarkup) {
+function minify(value, options, partialMarkup, cb) {
   options = options || {};
   var optionsStack = [];
   processOptions(options);
@@ -867,14 +867,14 @@ function minify(value, options, partialMarkup) {
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
         var minifyCSS = options.minifyCSS;
         if (minifyCSS) {
-          options.minifyCSS = function(text) {
-            return minifyCSS(escapeFragments(text));
+          options.minifyCSS = function(text, cb) {
+            return minifyCSS(escapeFragments(text), cb);
           };
         }
         var minifyJS = options.minifyJS;
         if (minifyJS) {
-          options.minifyJS = function(text, inline) {
-            return minifyJS(escapeFragments(text), inline);
+          options.minifyJS = function(text, inline, cb) {
+            return minifyJS(escapeFragments(text), inline, cb);
           };
         }
       }
@@ -941,7 +941,8 @@ function minify(value, options, partialMarkup) {
     trimTrailingWhitespace(charsIndex, nextTag);
   }
 
-  new HTMLParser(value, {
+  var str;
+  var parser = new HTMLParser(value, {
     partialMarkup: partialMarkup,
     html5: options.html5,
 
@@ -1106,7 +1107,7 @@ function minify(value, options, partialMarkup) {
         }
       }
     },
-    chars: function(text, prevTag, nextTag) {
+    chars: function(text, prevTag, nextTag, cb) {
       prevTag = prevTag === '' ? 'comment' : prevTag;
       nextTag = nextTag === '' ? 'comment' : nextTag;
       if (options.decodeEntities && text && !specialContentTags(currentTag)) {
@@ -1160,42 +1161,83 @@ function minify(value, options, partialMarkup) {
       if (options.processScripts && specialContentTags(currentTag)) {
         text = processScript(text, options, currentAttrs);
       }
+
+      var tasksWaitingFor = 0, tasksComplete = 0;
+
+      function onTaskFinished(result) {
+        text = result;
+        if (tasksWaitingFor === ++tasksComplete) {
+          afterTasksFinish();
+        }
+      }
+
       if (isExecutableScript(currentTag, currentAttrs)) {
-        text = options.minifyJS(text);
+        try {
+          tasksWaitingFor++;
+          var minifyJSResult = options.minifyJS(text, null, onTaskFinished);
+
+          // If the result is defined then minifyJS completed synchronously.
+          if (typeof minifyJSResult !== 'undefined') {
+            onTaskFinished(minifyJSResult);
+          }
+        }
+        catch (error) {
+          cb(error);
+        }
       }
+
       if (isStyleSheet(currentTag, currentAttrs)) {
-        text = options.minifyCSS(text);
-      }
-      if (options.removeOptionalTags && text) {
-        // <html> may be omitted if first thing inside is not comment
-        // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-        if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
-          removeStartTag();
+        try {
+          tasksWaitingFor++;
+          var minifyCSSResult = options.minifyCSS(text, onTaskFinished);
+
+          // If the result is defined then minifyCSS completed synchronously.
+          if (typeof minifyCSSResult !== 'undefined') {
+            onTaskFinished(minifyCSSResult);
+          }
         }
-        optionalStartTag = '';
-        // </html> or </body> may be omitted if not followed by comment
-        // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
-        if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
-          removeEndTag();
+        catch (error) {
+          cb(error);
         }
-        optionalEndTag = '';
       }
-      charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
-      if (options.decodeEntities && text && !specialContentTags(currentTag)) {
-        // semi-colon can be omitted
-        // https://mathiasbynens.be/notes/ambiguous-ampersands
-        text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
+
+      if (tasksWaitingFor === 0) {
+        afterTasksFinish();
       }
-      if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
-        text = text.replace(uidPattern, function(match, prefix, index) {
-          return ignoredCustomMarkupChunks[+index][0];
-        });
+
+      function afterTasksFinish() {
+        if (options.removeOptionalTags && text) {
+          // <html> may be omitted if first thing inside is not comment
+          // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+          if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
+            removeStartTag();
+          }
+          optionalStartTag = '';
+          // </html> or </body> may be omitted if not followed by comment
+          // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
+          if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
+            removeEndTag();
+          }
+          optionalEndTag = '';
+        }
+        charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
+        if (options.decodeEntities && text && !specialContentTags(currentTag)) {
+          // semi-colon can be omitted
+          // https://mathiasbynens.be/notes/ambiguous-ampersands
+          text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
+        }
+        if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
+          text = text.replace(uidPattern, function(match, prefix, index) {
+            return ignoredCustomMarkupChunks[+index][0];
+          });
+        }
+        currentChars += text;
+        if (text) {
+          hasChars = true;
+        }
+        buffer.push(text);
+        cb();
       }
-      currentChars += text;
-      if (text) {
-        hasChars = true;
-      }
-      buffer.push(text);
     },
     comment: function(text, nonStandard) {
       var prefix = nonStandard ? '<!' : '<!--';
@@ -1228,48 +1270,64 @@ function minify(value, options, partialMarkup) {
     customAttrSurround: options.customAttrSurround
   });
 
-  if (options.removeOptionalTags) {
-    // <html> may be omitted if first thing inside is not comment
-    // <head> or <body> may be omitted if empty
-    if (topLevelTags(optionalStartTag)) {
-      removeStartTag();
-    }
-    // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-    if (optionalEndTag && !trailingTags(optionalEndTag)) {
-      removeEndTag();
-    }
-  }
-  if (options.collapseWhitespace) {
-    squashTrailingWhitespace('br');
-  }
-
-  var str = joinResultSegments(buffer, options);
-
-  if (uidPattern) {
-    str = str.replace(uidPattern, function(match, prefix, index, suffix) {
-      var chunk = ignoredCustomMarkupChunks[+index][0];
-      if (options.collapseWhitespace) {
-        if (prefix !== '\t') {
-          chunk = prefix + chunk;
-        }
-        if (suffix !== '\t') {
-          chunk += suffix;
-        }
-        return collapseWhitespace(chunk, {
-          preserveLineBreaks: options.preserveLineBreaks,
-          conservativeCollapse: !options.trimCustomFragments
-        }, /^[ \n\r\t\f]/.test(chunk), /[ \n\r\t\f]$/.test(chunk));
+  parser.onComplete(function() {
+    if (options.removeOptionalTags) {
+      // <html> may be omitted if first thing inside is not comment
+      // <head> or <body> may be omitted if empty
+      if (topLevelTags(optionalStartTag)) {
+        removeStartTag();
       }
-      return chunk;
-    });
-  }
-  if (uidIgnore) {
-    str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
-      return ignoredMarkupChunks[+index];
-    });
-  }
+      // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
+      if (optionalEndTag && !trailingTags(optionalEndTag)) {
+        removeEndTag();
+      }
+    }
+    if (options.collapseWhitespace) {
+      squashTrailingWhitespace('br');
+    }
 
-  options.log('minified in: ' + (Date.now() - t) + 'ms');
+    str = joinResultSegments(buffer, options);
+
+    if (uidPattern) {
+      str = str.replace(uidPattern, function(match, prefix, index, suffix) {
+        var chunk = ignoredCustomMarkupChunks[+index][0];
+        if (options.collapseWhitespace) {
+          if (prefix !== '\t') {
+            chunk = prefix + chunk;
+          }
+          if (suffix !== '\t') {
+            chunk += suffix;
+          }
+          return collapseWhitespace(chunk, {
+            preserveLineBreaks: options.preserveLineBreaks,
+            conservativeCollapse: !options.trimCustomFragments
+          }, /^[ \n\r\t\f]/.test(chunk), /[ \n\r\t\f]$/.test(chunk));
+        }
+        return chunk;
+      });
+    }
+    if (uidIgnore) {
+      str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
+        return ignoredMarkupChunks[+index];
+      });
+    }
+
+    options.log('minified in: ' + (Date.now() - t) + 'ms');
+
+    if (typeof cb === 'function') {
+      return cb(null, str);
+    }
+  });
+
+  parser.onError(function(error) {
+    if (typeof cb === 'function') {
+      return cb(error);
+    }
+
+    // No callback to handle the error?
+    throw error;
+  });
+
   return str;
 }
 
@@ -1300,6 +1358,6 @@ function joinResultSegments(results, options) {
   return options.collapseWhitespace ? collapseWhitespace(str, options, true, true) : str;
 }
 
-exports.minify = function(value, options) {
-  return minify(value, options);
+exports.minify = function(value, options, cb) {
+  return minify(value, options, null, cb);
 };
