@@ -398,6 +398,20 @@ function HTMLParser(html, handler) {
   }
 }
 
+/**
+ * Called when the HTMLParser has finished.
+ *
+ * @param {Function} cb - Callback function.
+ */
+HTMLParser.prototype.onComplete = function(cb) {
+  if (this.finished) {
+    cb();
+  }
+  else {
+    this.onCompleteCallback = cb;
+  }
+};
+
 exports.HTMLParser = HTMLParser;
 exports.HTMLtoXML = function(html) {
   var results = '';
