@@ -942,7 +942,7 @@ function minify(value, options, partialMarkup, cb) {
   }
 
   var str;
-  new HTMLParser(value, {
+  var parser = new HTMLParser(value, {
     partialMarkup: partialMarkup,
     html5: options.html5,
 
@@ -1172,24 +1172,34 @@ function minify(value, options, partialMarkup, cb) {
       }
 
       if (isExecutableScript(currentTag, currentAttrs)) {
-        tasksWaitingFor++;
-        var minifyJSResult = options.minifyJS(text, null, onTaskFinished);
+        try {
+          tasksWaitingFor++;
+          var minifyJSResult = options.minifyJS(text, null, onTaskFinished);
 
-        // If the result is defined then minifyJSResult completed synchronously.
-        // eslint-disable-next-line no-undefined
-        if (minifyJSResult !== undefined) {
-          onTaskFinished(minifyJSResult);
+          // If the result is defined then minifyJSResult completed synchronously.
+          // eslint-disable-next-line no-undefined
+          if (minifyJSResult !== undefined) {
+            onTaskFinished(minifyJSResult);
+          }
+        }
+        catch (error) {
+          cb(error);
         }
       }
 
       if (isStyleSheet(currentTag, currentAttrs)) {
-        tasksWaitingFor++;
-        var minifyCSSResult = options.minifyCSS(text, onTaskFinished);
+        try {
+          tasksWaitingFor++;
+          var minifyCSSResult = options.minifyCSS(text, onTaskFinished);
 
-        // If the result is defined then minifyCSS completed synchronously.
-        // eslint-disable-next-line no-undefined
-        if (minifyCSSResult !== undefined) {
-          onTaskFinished(minifyCSSResult);
+          // If the result is defined then minifyCSS completed synchronously.
+          // eslint-disable-next-line no-undefined
+          if (minifyCSSResult !== undefined) {
+            onTaskFinished(minifyCSSResult);
+          }
+        }
+        catch (error) {
+          cb(error);
         }
       }
 
@@ -1260,7 +1270,9 @@ function minify(value, options, partialMarkup, cb) {
     },
     customAttrAssign: options.customAttrAssign,
     customAttrSurround: options.customAttrSurround
-  }).onComplete(function() {
+  });
+
+  parser.onComplete(function() {
     if (options.removeOptionalTags) {
       // <html> may be omitted if first thing inside is not comment
       // <head> or <body> may be omitted if empty
@@ -1305,8 +1317,17 @@ function minify(value, options, partialMarkup, cb) {
     options.log('minified in: ' + (Date.now() - t) + 'ms');
 
     if (typeof cb === 'function') {
-      cb(str);
+      return cb(null, str);
     }
+  });
+
+  parser.onError(function(error) {
+    if (typeof cb === 'function') {
+      return cb(error);
+    }
+
+    // No callback to handle the error?
+    throw error;
   });
 
   return str;

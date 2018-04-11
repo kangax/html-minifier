@@ -3411,7 +3411,8 @@ QUnit.test('style minification with callback', function(assert) {
         }, 0);
       }
     },
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, output);
       done();
     }
@@ -3431,7 +3432,8 @@ QUnit.test('script minification with callback', function(assert) {
         }, 0);
       }
     },
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, output);
       done();
     }
@@ -3452,7 +3454,8 @@ QUnit.test('style async minification with script sync minification', function(as
       },
       minifyJS: true
     },
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, output);
       done();
     }
@@ -3473,7 +3476,8 @@ QUnit.test('style sync minification with script async minification', function(as
         }, 0);
       }
     },
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, output);
       done();
     }
@@ -3498,7 +3502,8 @@ QUnit.test('style async minification with script async minification', function(a
         }, 0);
       }
     },
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, output);
       done();
     }
@@ -3526,7 +3531,8 @@ QUnit.test('async minification along side sync minification', function(assert) {
         }, 0);
       }
     },
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, asyncOutput);
       done();
     }
@@ -3557,7 +3563,8 @@ QUnit.test('multiple async minifications', function(assert) {
         }, 0);
       }
     },
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, output);
       done();
     }
@@ -3577,7 +3584,8 @@ QUnit.test('multiple async minifications', function(assert) {
         }, 0);
       }
     },
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, output);
       done();
     }
@@ -3591,9 +3599,44 @@ QUnit.test('sync minify with callback', function(assert) {
   assert.equal(minify(
     input,
     {},
-    function(result) {
+    function(error, result) {
+      assert.notOk(error);
       assert.equal(result, output);
       done();
     }
   ), output);
+});
+
+
+QUnit.test('minify error with callback', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><invalid html';
+  var done = assert.async();
+
+  minify(
+    input,
+    {},
+    function(error) {
+      assert.ok(error);
+      done();
+    }
+  );
+});
+
+QUnit.test('error in callback', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style>';
+  var error = new Error();
+  var done = assert.async();
+
+  minify(
+    input,
+    {
+      minifyCSS: function() {
+        throw error;
+      }
+    },
+    function(err) {
+      assert.strictEqual(err, error);
+      done();
+    }
+  );
 });

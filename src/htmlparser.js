@@ -225,7 +225,11 @@ function HTMLParser(html, handler) {
           text,
           prevTag,
           nextTag,
-          function() {
+          function(error) {
+            if (error) {
+              return handleError(error);
+            }
+
             prevTag = '';
             checkForParseError();
           }
@@ -252,7 +256,11 @@ function HTMLParser(html, handler) {
           charsText,
           null,
           null,
-          function() {
+          function(error) {
+            if (error) {
+              return handleError(error);
+            }
+
             html = html.substring(0, replaceDetails.index) + html.substring(replaceDetails.index + replaceDetails[0].length);
             parseEndTag('</' + stackedTag + '>', stackedTag);
             checkForParseError();
@@ -267,7 +275,7 @@ function HTMLParser(html, handler) {
 
     function checkForParseError() {
       if (html === last) {
-        throw new Error('Parse Error: ' + html);
+        return handleError(new Error('Parse Error: ' + html));
       }
 
       return parse();
@@ -283,6 +291,13 @@ function HTMLParser(html, handler) {
     $this.finished = true;
     if ($this.onCompleteCallback) {
       $this.onCompleteCallback();
+    }
+  }
+
+  function handleError(error) {
+    $this.error = error;
+    if ($this.onErrorCallback) {
+      $this.onErrorCallback(error);
     }
   }
 
@@ -449,6 +464,20 @@ HTMLParser.prototype.onComplete = function(cb) {
   }
   else {
     this.onCompleteCallback = cb;
+  }
+};
+
+/**
+ * Called when the HTMLParser encounters an error.
+ *
+ * @param {Function} cb - Callback function.
+ */
+HTMLParser.prototype.onError = function(cb) {
+  if (this.error) {
+    cb(this.error);
+  }
+  else {
+    this.onErrorCallback = cb;
   }
 };
 
