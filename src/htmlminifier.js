@@ -803,7 +803,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   }
 }
 
-function minify(value, options, partialMarkup) {
+function minify(value, options, partialMarkup, cb) {
   options = options || {};
   var optionsStack = [];
   processOptions(options);
@@ -1300,6 +1300,6 @@ function joinResultSegments(results, options) {
   return options.collapseWhitespace ? collapseWhitespace(str, options, true, true) : str;
 }
 
-exports.minify = function(value, options) {
-  return minify(value, options);
+exports.minify = function(value, options, cb) {
+  return minify(value, options, null, cb);
 };
