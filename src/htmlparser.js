@@ -126,6 +126,8 @@ function HTMLParser(html, handler) {
       return cb();
     }
 
+    var waitingForCallback = false;
+
     last = html;
     // Make sure we're not in a script or style element
     if (!lastTag || !special(lastTag)) {
@@ -239,14 +241,18 @@ function HTMLParser(html, handler) {
       });
 
       parseEndTag('</' + stackedTag + '>', stackedTag);
+
+    if (!waitingForCallback) {
+      return checkForParseError(cb);
     }
 
-    if (html === last) {
-      throw new Error('Parse Error: ' + html);
+    function checkForParseError(cb) {
+      if (html === last) {
+        throw new Error('Parse Error: ' + html);
+      }
+
+      return iterate(cb);
     }
-
-
-    return iterate(cb);
   })(function() {
     if (!handler.partialMarkup) {
       // Clean up any remaining tags
