@@ -218,30 +218,46 @@ function HTMLParser(html, handler) {
       }
 
       if (handler.chars) {
-        handler.chars(text, prevTag, nextTag);
+        waitingForCallback = true;
+        handler.chars(
+          text,
+          prevTag,
+          nextTag,
+          function() {
+            prevTag = '';
+            checkForParseError();
+          }
+        );
       }
-      prevTag = '';
 
     }
     else {
       var stackedTag = lastTag.toLowerCase();
       var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'));
 
-      html = html.replace(reStackedTag, function(all, text) {
-        if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
-          text = text
-            .replace(/<!--([\s\S]*?)-->/g, '$1')
-            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
-        }
+      var replaceDetails = html.match(reStackedTag);
 
-        if (handler.chars) {
-          handler.chars(text);
-        }
+      var charsText = replaceDetails[1];
+      if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
+        charsText = charsText
+          .replace(/<!--([\s\S]*?)-->/g, '$1')
+          .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
+      }
 
-        return '';
-      });
-
-      parseEndTag('</' + stackedTag + '>', stackedTag);
+      if (handler.chars) {
+        waitingForCallback = true;
+        handler.chars(
+          charsText,
+          null,
+          null,
+          function() {
+            html = html.substring(0, replaceDetails.index) + html.substring(replaceDetails.index + replaceDetails[0].length);
+            parseEndTag('</' + stackedTag + '>', stackedTag);
+            checkForParseError();
+          }
+        );
+      }
+    }
 
     if (!waitingForCallback) {
       return checkForParseError();
