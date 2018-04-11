@@ -3397,3 +3397,43 @@ QUnit.test('canCollapseWhitespace and canTrimWhitespace hooks', function(assert)
     canCollapseWhitespace: canCollapseAndTrimWhitespace
   }), output);
 });
+
+QUnit.test('style minification with callback', function(assert) {
+  var input = '<style>div#foo { background-color: red; color: white }</style>';
+  var output = '<style>div#foo { background-color: red; color: white } callback!</style>';
+  var done = assert.async();
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(css, cb) {
+        setTimeout(function() {
+          cb(css + ' callback!');
+        }, 0);
+      }
+    },
+    function(result) {
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+QUnit.test('script minification with callback', function(assert) {
+  var input = '<script>(function(){ console.log("Hello"); })()</script>';
+  var output = '<script>(function(){ console.log("Hello"); })()(function(){ console.log("World"); })()</script>';
+  var done = assert.async();
+  assert.notOk(minify(
+    input,
+    {
+      minifyJS: function(js, inline, cb) {
+        setTimeout(function() {
+          cb(js + '(function(){ console.log("World"); })()');
+        }, 0);
+      }
+    },
+    function(result) {
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
