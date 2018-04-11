@@ -120,7 +120,12 @@ function HTMLParser(html, handler) {
   var stack = [], lastTag;
   var attribute = attrForHandler(handler);
   var last, prevTag, nextTag;
-  while (html) {
+
+  (function iterate(cb) {
+    if (!html) {
+      return cb();
+    }
+
     last = html;
     // Make sure we're not in a script or style element
     if (!lastTag || !special(lastTag)) {
@@ -136,7 +141,7 @@ function HTMLParser(html, handler) {
             }
             html = html.substring(commentEnd + 3);
             prevTag = '';
-            continue;
+            return iterate(cb);
           }
         }
 
@@ -150,7 +155,7 @@ function HTMLParser(html, handler) {
             }
             html = html.substring(conditionalEnd + 2);
             prevTag = '';
-            continue;
+            return iterate(cb);
           }
         }
 
@@ -162,7 +167,7 @@ function HTMLParser(html, handler) {
           }
           html = html.substring(doctypeMatch[0].length);
           prevTag = '';
-          continue;
+          return iterate(cb);
         }
 
         // End tag:
@@ -171,7 +176,7 @@ function HTMLParser(html, handler) {
           html = html.substring(endTagMatch[0].length);
           endTagMatch[0].replace(endTag, parseEndTag);
           prevTag = '/' + endTagMatch[1].toLowerCase();
-          continue;
+          return iterate(cb);
         }
 
         // Start tag:
@@ -180,7 +185,7 @@ function HTMLParser(html, handler) {
           html = startTagMatch.rest;
           handleStartTag(startTagMatch);
           prevTag = startTagMatch.tagName.toLowerCase();
-          continue;
+          return iterate(cb);
         }
       }
 
@@ -239,12 +244,20 @@ function HTMLParser(html, handler) {
     if (html === last) {
       throw new Error('Parse Error: ' + html);
     }
-  }
 
-  if (!handler.partialMarkup) {
-    // Clean up any remaining tags
-    parseEndTag();
-  }
+
+    return iterate(cb);
+  })(function() {
+    if (!handler.partialMarkup) {
+      // Clean up any remaining tags
+      parseEndTag();
+    }
+
+    this.finished = true;
+    if (this.onCompleteCallback) {
+      this.onCompleteCallback();
+    }
+  }.bind(this));
 
   function parseStartTag(input) {
     var start = input.match(startTagOpen);
