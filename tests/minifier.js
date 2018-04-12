@@ -3615,6 +3615,7 @@ QUnit.test('minify error with callback', function(assert) {
     {},
     function(error) {
       assert.ok(error);
+      assert.equal(error.message, 'Parse Error: <invalid html');
       done();
     }
   );
