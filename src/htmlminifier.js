@@ -1304,7 +1304,7 @@ function joinResultSegments(results, options) {
     var lines = [];
     var line = '';
     for (var i = 0, len = results.length; i < len; i++) {
-      token = results[i];
+      token = String(results[i]);
       if (line.length + token.length < maxLineLength) {
         line += token;
       }
