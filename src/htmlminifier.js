@@ -1184,11 +1184,66 @@ function minify(value, options, partialMarkup, cb) {
       if (options.processScripts && specialContentTags(currentTag)) {
         text = processScript(text, options, currentAttrs);
       }
+
+      var runningAsyncTask = false;
+
+      /**
+       * To be called when running an async task.
+       *
+       * @param {AsyncTextPlaceholder} placeholder
+       */
+      function onAsyncTask(placeholder) {
+        buffer.push(placeholder);
+        runningAsyncTask = true;
+        asyncTasksWaitingFor++;
+      }
+
+      /**
+       * Returns the callback function for an async task.
+       *
+       * @param {AsyncTextPlaceholder} placeholder
+       * @returns {Function}
+       */
+      function getAsyncTaskCallback(placeholder) {
+        return function(result) {
+          if (!runningAsyncTask) {
+            throw new Error('Async completion has already occurred.');
+          }
+          runningAsyncTask = false;
+          placeholder.setValue(result);
+          if (--asyncTasksWaitingFor === 0) {
+            if (typeof cb === 'function') {
+              cb(null, finalize());
+            }
+          }
+        };
+      }
+
       if (isExecutableScript(currentTag, currentAttrs)) {
-        text = options.minifyJS(text);
+        var minifyJSPlaceholder = new AsyncTextPlaceholder();
+        var minifyJSResult = options.minifyJS(text, null, getAsyncTaskCallback(minifyJSPlaceholder));
+
+        // Running asynchronously?
+        if (typeof minifyJSResult === 'undefined') {
+          onAsyncTask(minifyJSPlaceholder);
+        }
+        // Finished synchronously?
+        else {
+          text = minifyJSResult;
+        }
       }
       if (isStyleSheet(currentTag, currentAttrs)) {
-        text = options.minifyCSS(text);
+        var minifyCSSPlaceholder = new AsyncTextPlaceholder();
+        var minifyCSSResult = options.minifyCSS(text, getAsyncTaskCallback(minifyCSSPlaceholder));
+
+        // Running asynchronously?
+        if (typeof minifyCSSResult === 'undefined') {
+          onAsyncTask(minifyCSSPlaceholder);
+        }
+        // Finished synchronously?
+        else {
+          text = minifyCSSResult;
+        }
       }
       if (options.removeOptionalTags && text) {
         // <html> may be omitted if first thing inside is not comment
@@ -1219,7 +1274,10 @@ function minify(value, options, partialMarkup, cb) {
       if (text) {
         hasChars = true;
       }
-      buffer.push(text);
+      // Not running an async task?
+      if (!runningAsyncTask) {
+        buffer.push(text);
+      }
     },
     comment: function(text, nonStandard) {
       var prefix = nonStandard ? '<!' : '<!--';
