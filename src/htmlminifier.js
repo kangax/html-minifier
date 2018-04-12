@@ -1216,7 +1216,12 @@ function minify(value, options, partialMarkup, cb) {
             placeholder.setValue(result);
             if (--asyncTasksWaitingFor === 0) {
               if (typeof cb === 'function') {
-                cb(null, finalize());
+                if (error) {
+                  cb(error, null);
+                }
+                else {
+                  cb(null, finalize());
+                }
               }
             }
           };
