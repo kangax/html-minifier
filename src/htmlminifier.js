@@ -803,6 +803,29 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   }
 }
 
+/**
+ * A placeholder for text that will be set later.
+ *
+ * @constructor
+ */
+function AsyncTextPlaceholder() {}
+
+/**
+ * Set the value this placeholder has.
+ *
+ * @param {string} value
+ */
+AsyncTextPlaceholder.prototype.setValue = function(value) {
+  this.value = value;
+};
+
+AsyncTextPlaceholder.prototype.toString = function() {
+  if (this.value) {
+    return this.value;
+  }
+  return '[[Placeholder]]';
+};
+
 function minify(value, options, partialMarkup, cb) {
   options = options || {};
   var optionsStack = [];
