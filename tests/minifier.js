@@ -3397,3 +3397,246 @@ QUnit.test('canCollapseWhitespace and canTrimWhitespace hooks', function(assert)
     canCollapseWhitespace: canCollapseAndTrimWhitespace
   }), output);
 });
+
+QUnit.test('style minification with callback', function(assert) {
+  var input = '<style>div#foo { background-color: red; color: white }</style>';
+  var output = '<style>div#foo { background-color: red; color: white } callback!</style>';
+  var done = assert.async();
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(css, cb) {
+        setTimeout(function() {
+          cb(css + ' callback!');
+        }, 0);
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+QUnit.test('script minification with callback', function(assert) {
+  var input = '<script>(function(){ console.log("Hello"); })()</script>';
+  var output = '<script>(function(){ console.log("Hello"); })()(function(){ console.log("World"); })()</script>';
+  var done = assert.async();
+  assert.notOk(minify(
+    input,
+    {
+      minifyJS: function(js, inline, cb) {
+        setTimeout(function() {
+          cb(js + '(function(){ console.log("World"); })()');
+        }, 0);
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+QUnit.test('style async minification with script sync minification', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><script>console . log("Hello World") ;</script>';
+  var output = '<style>div#foo { background-color: red; } callback!</style><script>console.log("Hello World")</script>';
+  var done = assert.async();
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(css, cb) {
+        setTimeout(function() {
+          cb(css + ' callback!');
+        }, 0);
+      },
+      minifyJS: true
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+QUnit.test('style sync minification with script async minification', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><script>console . log("Hello World") ;</script>';
+  var output = '<style>div#foo{background-color:red}</style><script>console . log("Hello World") ; callback!</script>';
+  var done = assert.async();
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: true,
+      minifyJS: function(js, inline, cb) {
+        setTimeout(function() {
+          cb(js + ' callback!');
+        }, 0);
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+QUnit.test('style async minification with script async minification', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><script>console . log("Hello World") ;</script>';
+  var output = '<style>div#foo { background-color: red; } callback!</style><script>console . log("Hello World") ; callback!</script>';
+  var done = assert.async();
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(css, cb) {
+        setTimeout(function() {
+          cb(css + ' callback!');
+        }, 0);
+      },
+      minifyJS: function(js, inline, cb) {
+        setTimeout(function() {
+          cb(js + ' callback!');
+        }, 0);
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+
+QUnit.test('async minification along side sync minification', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><script>console . log("Hello World") ;</script>';
+  var syncOutput = '<style>div#foo{background-color:red}</style><script>console.log("Hello World")</script>';
+  var asyncOutput = '<style>div#foo { background-color: red; } callback!</style><script>console . log("Hello World") ; callback!</script>';
+  var done = assert.async();
+
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(css, cb) {
+        setTimeout(function() {
+          cb(css + ' callback!');
+        }, 0);
+      },
+      minifyJS: function(js, inline, cb) {
+        setTimeout(function() {
+          cb(js + ' callback!');
+        }, 0);
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, asyncOutput);
+      done();
+    }
+  ));
+
+  assert.equal(minify(input, {
+    minifyCSS: true,
+    minifyJS: true
+  }), syncOutput);
+});
+
+QUnit.test('multiple async minifications', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><script>console . log("Hello World") ;</script>';
+  var output = '<style>div#foo { background-color: red; } callback!</style><script>console . log("Hello World") ; callback!</script>';
+  var done = assert.async(2);
+
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(css, cb) {
+        setTimeout(function() {
+          cb(css + ' callback!');
+        }, 0);
+      },
+      minifyJS: function(js, inline, cb) {
+        setTimeout(function() {
+          cb(js + ' callback!');
+        }, 0);
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(css, cb) {
+        setTimeout(function() {
+          cb(css + ' callback!');
+        }, 0);
+      },
+      minifyJS: function(js, inline, cb) {
+        setTimeout(function() {
+          cb(js + ' callback!');
+        }, 0);
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+QUnit.test('sync minify with callback', function(assert) {
+  var input = '<html><head><title>Test</title></head><body>Hello World</body></html>';
+  var output = input;
+  var done = assert.async();
+  assert.equal(minify(
+    input,
+    {},
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ), output);
+});
+
+
+QUnit.test('minify error with callback', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><invalid html';
+  var done = assert.async();
+
+  minify(
+    input,
+    {},
+    function(error) {
+      assert.ok(error);
+      done();
+    }
+  );
+});
+
+QUnit.test('error in callback', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style>';
+  var error = new Error();
+  var done = assert.async();
+
+  minify(
+    input,
+    {
+      minifyCSS: function() {
+        throw error;
+      }
+    },
+    function(err) {
+      assert.strictEqual(err, error);
+      done();
+    }
+  );
+});
