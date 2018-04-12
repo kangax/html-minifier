@@ -964,6 +964,7 @@ function minify(value, options, partialMarkup, cb) {
     trimTrailingWhitespace(charsIndex, nextTag);
   }
 
+  var asyncTasksWaitingFor = 0;
   new HTMLParser(value, {
     partialMarkup: partialMarkup,
     html5: options.html5,
@@ -1251,49 +1252,60 @@ function minify(value, options, partialMarkup, cb) {
     customAttrSurround: options.customAttrSurround
   });
 
-  if (options.removeOptionalTags) {
-    // <html> may be omitted if first thing inside is not comment
-    // <head> or <body> may be omitted if empty
-    if (topLevelTags(optionalStartTag)) {
-      removeStartTag();
-    }
-    // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-    if (optionalEndTag && !trailingTags(optionalEndTag)) {
-      removeEndTag();
-    }
-  }
-  if (options.collapseWhitespace) {
-    squashTrailingWhitespace('br');
-  }
-
-  var str = joinResultSegments(buffer, options);
-
-  if (uidPattern) {
-    str = str.replace(uidPattern, function(match, prefix, index, suffix) {
-      var chunk = ignoredCustomMarkupChunks[+index][0];
-      if (options.collapseWhitespace) {
-        if (prefix !== '\t') {
-          chunk = prefix + chunk;
-        }
-        if (suffix !== '\t') {
-          chunk += suffix;
-        }
-        return collapseWhitespace(chunk, {
-          preserveLineBreaks: options.preserveLineBreaks,
-          conservativeCollapse: !options.trimCustomFragments
-        }, /^[ \n\r\t\f]/.test(chunk), /[ \n\r\t\f]$/.test(chunk));
+  function finalize() {
+    if (options.removeOptionalTags) {
+      // <html> may be omitted if first thing inside is not comment
+      // <head> or <body> may be omitted if empty
+      if (topLevelTags(optionalStartTag)) {
+        removeStartTag();
       }
-      return chunk;
-    });
-  }
-  if (uidIgnore) {
-    str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
-      return ignoredMarkupChunks[+index];
-    });
+      // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
+      if (optionalEndTag && !trailingTags(optionalEndTag)) {
+        removeEndTag();
+      }
+    }
+    if (options.collapseWhitespace) {
+      squashTrailingWhitespace('br');
+    }
+
+    var str = joinResultSegments(buffer, options);
+
+    if (uidPattern) {
+      str = str.replace(uidPattern, function(match, prefix, index, suffix) {
+        var chunk = ignoredCustomMarkupChunks[+index][0];
+        if (options.collapseWhitespace) {
+          if (prefix !== '\t') {
+            chunk = prefix + chunk;
+          }
+          if (suffix !== '\t') {
+            chunk += suffix;
+          }
+          return collapseWhitespace(chunk, {
+            preserveLineBreaks: options.preserveLineBreaks,
+            conservativeCollapse: !options.trimCustomFragments
+          }, /^[ \n\r\t\f]/.test(chunk), /[ \n\r\t\f]$/.test(chunk));
+        }
+        return chunk;
+      });
+    }
+    if (uidIgnore) {
+      str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
+        return ignoredMarkupChunks[+index];
+      });
+    }
+
+    options.log('minified in: ' + (Date.now() - t) + 'ms');
+    return str;
   }
 
-  options.log('minified in: ' + (Date.now() - t) + 'ms');
-  return str;
+  // No async tasks running?
+  if (asyncTasksWaitingFor === 0) {
+    var result = finalize();
+    if (typeof cb === 'function') {
+      cb(null, result);
+    }
+    return result;
+  }
 }
 
 function joinResultSegments(results, options) {
