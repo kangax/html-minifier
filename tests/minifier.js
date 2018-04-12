@@ -3510,7 +3510,6 @@ QUnit.test('style async minification with script async minification', function(a
   ));
 });
 
-
 QUnit.test('async minification along side sync minification', function(assert) {
   var input = '<style>div#foo { background-color: red; }</style><script>console . log("Hello World") ;</script>';
   var syncOutput = '<style>div#foo{background-color:red}</style><script>console.log("Hello World")</script>';
@@ -3606,7 +3605,6 @@ QUnit.test('sync minify with callback', function(assert) {
     }
   ), output);
 });
-
 
 QUnit.test('minify error with callback', function(assert) {
   var input = '<style>div#foo { background-color: red; }</style><invalid html';
