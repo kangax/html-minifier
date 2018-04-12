@@ -820,7 +820,7 @@ AsyncTextPlaceholder.prototype.setValue = function(value) {
 };
 
 AsyncTextPlaceholder.prototype.toString = function() {
-  if (this.value) {
+  if (typeof this.value !== 'undefined') {
     return this.value;
   }
   return '[[Placeholder]]';
