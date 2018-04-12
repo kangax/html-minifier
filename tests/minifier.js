@@ -3595,7 +3595,7 @@ QUnit.test('sync minify with callback', function(assert) {
   var input = '<html><head><title>Test</title></head><body>Hello World</body></html>';
   var output = input;
   var done = assert.async();
-  assert.equal(minify(
+  assert.notOk(minify(
     input,
     {},
     function(error, result) {
@@ -3603,14 +3603,14 @@ QUnit.test('sync minify with callback', function(assert) {
       assert.equal(result, output);
       done();
     }
-  ), output);
+  ));
 });
 
 QUnit.test('minify error with callback', function(assert) {
   var input = '<style>div#foo { background-color: red; }</style><invalid html';
   var done = assert.async();
 
-  minify(
+  assert.notOk(minify(
     input,
     {},
     function(error) {
@@ -3618,7 +3618,7 @@ QUnit.test('minify error with callback', function(assert) {
       assert.equal(error.message, 'Parse Error: <invalid html');
       done();
     }
-  );
+  ));
 });
 
 QUnit.test('error in callback', function(assert) {
@@ -3626,7 +3626,7 @@ QUnit.test('error in callback', function(assert) {
   var error = new Error();
   var done = assert.async();
 
-  minify(
+  assert.notOk(minify(
     input,
     {
       minifyCSS: function() {
@@ -3637,7 +3637,7 @@ QUnit.test('error in callback', function(assert) {
       assert.strictEqual(err, error);
       done();
     }
-  );
+  ));
 });
 
 QUnit.test('call callback multiple times', function(assert) {
@@ -3645,7 +3645,7 @@ QUnit.test('call callback multiple times', function(assert) {
   var output = '<style>div#foo { background-color: red; } callback!</style><script>console . log("Hello World") ; callback!</script>';
   var done = assert.async(3);
 
-  minify(
+  assert.notOk(minify(
     input,
     {
       minifyCSS: function(css, cb) {
@@ -3684,5 +3684,5 @@ QUnit.test('call callback multiple times', function(assert) {
       assert.equal(result, output);
       done();
     }
-  );
+  ));
 });

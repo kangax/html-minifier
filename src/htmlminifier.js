@@ -803,29 +803,6 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   }
 }
 
-/**
- * A placeholder for text that will be set later.
- *
- * @constructor
- */
-function AsyncTextPlaceholder() {}
-
-/**
- * Set the value this placeholder has.
- *
- * @param {string} value
- */
-AsyncTextPlaceholder.prototype.setValue = function(value) {
-  this.value = value;
-};
-
-AsyncTextPlaceholder.prototype.toString = function() {
-  if (typeof this.value !== 'undefined') {
-    return this.value;
-  }
-  return '[[Placeholder]]';
-};
-
 function minify(value, options, partialMarkup, cb) {
   options = options || {};
   var optionsStack = [];
@@ -850,6 +827,8 @@ function minify(value, options, partialMarkup, cb) {
       uidIgnore,
       uidAttr,
       uidPattern;
+
+  var asyncExecution = typeof cb === 'function';
 
   // temporarily replace ignored chunks with comments,
   // so that we don't have to worry what's there.
@@ -964,8 +943,9 @@ function minify(value, options, partialMarkup, cb) {
     trimTrailingWhitespace(charsIndex, nextTag);
   }
 
-  var asyncTasksWaitingFor = 0;
-  var error;
+  // Number of tasks waiting to complete (includes current function).
+  var asyncTasksWaitingFor = 1;
+  var asyncError;
 
   try {
     new HTMLParser(value, {
@@ -1136,6 +1116,7 @@ function minify(value, options, partialMarkup, cb) {
       chars: function(text, prevTag, nextTag) {
         prevTag = prevTag === '' ? 'comment' : prevTag;
         nextTag = nextTag === '' ? 'comment' : nextTag;
+        var usingAsyncText = false;
         if (options.decodeEntities && text && !specialContentTags(currentTag)) {
           text = decode(text);
         }
@@ -1188,36 +1169,24 @@ function minify(value, options, partialMarkup, cb) {
           text = processScript(text, options, currentAttrs);
         }
 
-        var runningAsyncTask = false;
-
-        /**
-         * To be called when running an async task.
-         *
-         * @param {AsyncTextPlaceholder} placeholder
-         */
-        function onAsyncTask(placeholder) {
-          buffer.push(placeholder);
-          runningAsyncTask = true;
-          asyncTasksWaitingFor++;
-        }
-
         /**
          * Returns the callback function for an async task.
          *
-         * @param {AsyncTextPlaceholder} placeholder
+         * @param {number} index - The index in the buffer to insert the updated text into
          * @returns {Function}
          */
-        function getAsyncTaskCallback(placeholder) {
+        function getAsyncTaskCallback(index) {
+          var runningAsyncTask = true;
           return function(result) {
             if (!runningAsyncTask) {
               throw new Error('Async completion has already occurred.');
             }
             runningAsyncTask = false;
-            placeholder.setValue(result);
+            buffer[index] = result;
             if (--asyncTasksWaitingFor === 0) {
               if (typeof cb === 'function') {
-                if (error) {
-                  cb(error, null);
+                if (asyncError) {
+                  cb(asyncError, null);
                 }
                 else {
                   cb(null, finalize());
@@ -1228,62 +1197,72 @@ function minify(value, options, partialMarkup, cb) {
         }
 
         if (isExecutableScript(currentTag, currentAttrs)) {
-          var minifyJSPlaceholder = new AsyncTextPlaceholder();
-          var minifyJSResult = options.minifyJS(text, null, getAsyncTaskCallback(minifyJSPlaceholder));
+          if (asyncExecution) {
+            asyncTasksWaitingFor++;
+            usingAsyncText = true;
+            var minifyJS_cb = getAsyncTaskCallback(buffer.length);
+            var minifyJS_result = options.minifyJS(text, null, minifyJS_cb);
 
-          // Running asynchronously?
-          if (typeof minifyJSResult === 'undefined') {
-            onAsyncTask(minifyJSPlaceholder);
+            // Finished synchronously?
+            if (typeof minifyJS_result !== 'undefined') {
+              // Call the callback manually.
+              minifyJS_cb(minifyJS_result);
+            }
           }
-          // Finished synchronously?
           else {
-            text = minifyJSResult;
+            text = options.minifyJS(text);
           }
         }
         if (isStyleSheet(currentTag, currentAttrs)) {
-          var minifyCSSPlaceholder = new AsyncTextPlaceholder();
-          var minifyCSSResult = options.minifyCSS(text, getAsyncTaskCallback(minifyCSSPlaceholder));
+          if (asyncExecution) {
+            asyncTasksWaitingFor++;
+            usingAsyncText = true;
+            var minifyCSS_cb = getAsyncTaskCallback(buffer.length);
+            var minifyCSS_result = options.minifyCSS(text, minifyCSS_cb);
 
-          // Running asynchronously?
-          if (typeof minifyCSSResult === 'undefined') {
-            onAsyncTask(minifyCSSPlaceholder);
+            // Finished synchronously?
+            if (typeof minifyCSS_result !== 'undefined') {
+              // Call the callback manually.
+              minifyCSS_cb(minifyCSS_result);
+            }
           }
-          // Finished synchronously?
           else {
-            text = minifyCSSResult;
+            text = options.minifyCSS(text);
           }
         }
-        if (options.removeOptionalTags && text) {
-          // <html> may be omitted if first thing inside is not comment
-          // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-          if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
-            removeStartTag();
+        if (usingAsyncText) {
+          buffer.push(null);
+        }
+        else {
+          if (options.removeOptionalTags && text) {
+            // <html> may be omitted if first thing inside is not comment
+            // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+            if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
+              removeStartTag();
+            }
+            optionalStartTag = '';
+            // </html> or </body> may be omitted if not followed by comment
+            // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
+            if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
+              removeEndTag();
+            }
+            optionalEndTag = '';
           }
-          optionalStartTag = '';
-          // </html> or </body> may be omitted if not followed by comment
-          // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
-          if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
-            removeEndTag();
+          charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
+          if (options.decodeEntities && text && !specialContentTags(currentTag)) {
+            // semi-colon can be omitted
+            // https://mathiasbynens.be/notes/ambiguous-ampersands
+            text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
           }
-          optionalEndTag = '';
-        }
-        charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
-        if (options.decodeEntities && text && !specialContentTags(currentTag)) {
-          // semi-colon can be omitted
-          // https://mathiasbynens.be/notes/ambiguous-ampersands
-          text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
-        }
-        if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
-          text = text.replace(uidPattern, function(match, prefix, index) {
-            return ignoredCustomMarkupChunks[+index][0];
-          });
-        }
-        currentChars += text;
-        if (text) {
-          hasChars = true;
-        }
-        // Not running an async task?
-        if (!runningAsyncTask) {
+          if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
+            text = text.replace(uidPattern, function(match, prefix, index) {
+              return ignoredCustomMarkupChunks[+index][0];
+            });
+          }
+          currentChars += text;
+          if (text) {
+            hasChars = true;
+          }
           buffer.push(text);
         }
       },
@@ -1318,8 +1297,13 @@ function minify(value, options, partialMarkup, cb) {
       customAttrSurround: options.customAttrSurround
     });
   }
-  catch (err) {
-    error = err;
+  catch (error) {
+    if (asyncExecution) {
+      asyncError = error;
+    }
+    else {
+      throw error;
+    }
   }
 
   function finalize() {
@@ -1368,21 +1352,20 @@ function minify(value, options, partialMarkup, cb) {
     return str;
   }
 
-  // No async tasks running?
-  if (asyncTasksWaitingFor === 0) {
-    var result = finalize();
+  if (asyncExecution) {
+    // This task just finished.
+    asyncTasksWaitingFor--;
 
-    if (typeof cb === 'function') {
-      // Call the callback.
-      cb(error, result);
+    if (asyncError) {
+      cb(asyncError);
     }
-    else if (error) {
-      // No callback to handle the error?
-      throw error;
+    else if (asyncTasksWaitingFor === 0) {
+      // No async tasks running?
+      cb(asyncError, finalize());
     }
-
-    return result;
+    return;
   }
+  return finalize();
 }
 
 function joinResultSegments(results, options) {
@@ -1393,8 +1376,11 @@ function joinResultSegments(results, options) {
     var lines = [];
     var line = '';
     for (var i = 0, len = results.length; i < len; i++) {
-      token = String(results[i]);
-      if (line.length + token.length < maxLineLength) {
+      token = results[i];
+      if (token === null) {
+        line += '[[Placeholder]]';
+      }
+      else if (line.length + token.length < maxLineLength) {
         line += token;
       }
       else {
