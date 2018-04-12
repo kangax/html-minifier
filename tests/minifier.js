@@ -3510,7 +3510,7 @@ QUnit.test('style async minification with script async minification', function(a
   ));
 });
 
-QUnit.test('async minification along side sync minification', function(assert) {
+QUnit.test('async minification alongside sync minification', function(assert) {
   var input = '<style>div#foo { background-color: red; }</style><script>console . log("Hello World") ;</script>';
   var syncOutput = '<style>div#foo{background-color:red}</style><script>console.log("Hello World")</script>';
   var asyncOutput = '<style>div#foo { background-color: red; } callback!</style><script>console . log("Hello World") ; callback!</script>';
