@@ -867,14 +867,14 @@ function minify(value, options, partialMarkup, cb) {
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
         var minifyCSS = options.minifyCSS;
         if (minifyCSS) {
-          options.minifyCSS = function(text) {
-            return minifyCSS(escapeFragments(text));
+          options.minifyCSS = function(text, cb) {
+            return minifyCSS(escapeFragments(text), cb);
           };
         }
         var minifyJS = options.minifyJS;
         if (minifyJS) {
-          options.minifyJS = function(text, inline) {
-            return minifyJS(escapeFragments(text), inline);
+          options.minifyJS = function(text, inline, cb) {
+            return minifyJS(escapeFragments(text), inline, cb);
           };
         }
       }
