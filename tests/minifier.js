@@ -3639,3 +3639,50 @@ QUnit.test('error in callback', function(assert) {
     }
   );
 });
+
+QUnit.test('call callback multiple times', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><script>console . log("Hello World") ;</script>';
+  var output = '<style>div#foo { background-color: red; } callback!</style><script>console . log("Hello World") ; callback!</script>';
+  var done = assert.async(3);
+
+  minify(
+    input,
+    {
+      minifyCSS: function(css, cb) {
+        setTimeout(function() {
+          try {
+            cb(css + ' callback!');
+            cb(css + ' callback!');
+
+            assert.ok(false, 'An error should be thrown.');
+            done();
+          }
+          catch (error) {
+            assert.equal(error.message, 'Async completion has already occurred.');
+            done();
+          }
+        }, 0);
+      },
+      minifyJS: function(js, inline, cb) {
+        setTimeout(function() {
+          try {
+            cb(js + ' callback!');
+            cb(js + ' callback!');
+
+            assert.ok(false, 'An error should be thrown.');
+            done();
+          }
+          catch (error) {
+            assert.equal(error.message, 'Async completion has already occurred.');
+            done();
+          }
+        }, 0);
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  );
+});
