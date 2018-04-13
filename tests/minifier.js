@@ -3686,3 +3686,64 @@ QUnit.test('call callback multiple times', function(assert) {
     }
   ));
 });
+
+QUnit.test('inline script with callback', function(assert) {
+  var input = '<p onclick="alert(1 + 2);">';
+  var output = '<p onclick="JS"></p>';
+  var done = assert.async();
+
+  assert.notOk(minify(
+    input,
+    {
+      customEventAttributes: [/^on*/],
+      minifyJS: function(text, inline, cb) {
+        cb('JS');
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+QUnit.test('inline style with callback', function(assert) {
+  var input = '<p style="display: none;">';
+  var output = '<p style="CSS"></p>';
+  var done = assert.async();
+
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(text, cb) {
+        cb('CSS');
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});
+
+QUnit.test('inline style media with callback', function(assert) {
+  var input = '<style media="{max-width: 100px}"></style>';
+  var output = '<style media="CSS">CSS</style>';
+  var done = assert.async();
+
+  assert.notOk(minify(
+    input,
+    {
+      minifyCSS: function(text, cb) {
+        cb('CSS');
+      }
+    },
+    function(error, result) {
+      assert.notOk(error);
+      assert.equal(result, output);
+      done();
+    }
+  ));
+});

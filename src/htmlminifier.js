@@ -260,7 +260,7 @@ function isSrcset(attrName, tag) {
 function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   if (attrValue && isEventAttribute(attrName, options)) {
     attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '');
-    return options.minifyJS(attrValue, true);
+    return options.minifyJS(attrValue, true); // TODO: add callback.
   }
   else if (attrName === 'class') {
     attrValue = trimWhitespace(attrValue);
@@ -285,7 +285,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
       if (/;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
         attrValue = attrValue.replace(/\s*;$/, ';');
       }
-      attrValue = unwrapInlineCSS(options.minifyCSS(wrapInlineCSS(attrValue)));
+      attrValue = unwrapInlineCSS(options.minifyCSS(wrapInlineCSS(attrValue))); // TODO: Add callback.
     }
     return attrValue;
   }
@@ -322,7 +322,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (isMediaQuery(tag, attrs, attrName)) {
     attrValue = trimWhitespace(attrValue);
-    return unwrapMediaQuery(options.minifyCSS(wrapMediaQuery(attrValue)));
+    return unwrapMediaQuery(options.minifyCSS(wrapMediaQuery(attrValue))); // TODO: Add callback.
   }
   return attrValue;
 }
