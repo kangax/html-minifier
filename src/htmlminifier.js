@@ -828,7 +828,110 @@ function minify(value, options, partialMarkup, cb) {
       uidAttr,
       uidPattern;
 
+  /**
+   * Running using async exectution?
+   *
+   * @type {boolean}
+   */
   var asyncExecution = typeof cb === 'function';
+
+  /**
+   * Set of tasks to perform asynchronously.
+   *
+   * @type {AsyncTask[]}
+   */
+  var asyncTasks = [];
+
+  /**
+   * The number of async tasks that have completed.
+   *
+   * @type {number}
+   */
+  var asyncTasksComplete = 0;
+
+  /**
+   * A task that will be executed asynchronously after all the synchronous
+   * code has executed.
+   *
+   * @constructor
+   *
+   * @param {AsyncSubtask[]} tasks
+   * @param {string} content
+   * @param {Function<string>} cb
+   */
+  function AsyncTask(tasks, content, cb) {
+    this.tasks = tasks;
+    this.content = content;
+    this.cb = cb;
+  }
+
+  /**
+   * Run the subtasks at the given index, giving it a callback to run the next
+   * subtask the same way. This therefore asynchronously runs all subtasks from
+   * the given index in series.
+   *
+   * @private
+   * @param {string} content
+   * @param {number} index
+   */
+  AsyncTask.prototype.runSubtask = function(content, index) {
+    if (index < this.tasks.length) {
+      try {
+        this.tasks[index].exec(
+          content,
+          function(result) {
+            if (this.tasks[index].cbExecuted) {
+              throw new Error('Async completion has already occurred.');
+            }
+            this.tasks[index].cbExecuted = true;
+
+            this.runSubtask(result, index + 1);
+          }.bind(this)
+        );
+      }
+      catch (error) {
+        cb(error);
+      }
+    }
+    else {
+      this.cb(content);
+      if (++asyncTasksComplete === asyncTasks.length) {
+        cb(null, finalize());
+      }
+    }
+  };
+
+  /**
+   * Execute this task.
+   */
+  AsyncTask.prototype.exec = function() {
+    // Recursively run all subtasks.
+    this.runSubtask(this.content, 0);
+  };
+
+  /**
+   * A subtask in an AsyncTask.
+   *
+   * @constructor
+   *
+   * @param {Function<string, Function<string>>} task
+   */
+  function AsyncSubtask(task) {
+    this.task = task;
+  }
+
+  /**
+   * Execute this subtask.
+   */
+  AsyncSubtask.prototype.exec = function(content, cb) {
+    var result = this.task(content, cb);
+
+    // Finished synchronously?
+    if (typeof result !== 'undefined') {
+      // Call the callback manually.
+      cb(result);
+    }
+  };
 
   // temporarily replace ignored chunks with comments,
   // so that we don't have to worry what's there.
@@ -942,10 +1045,6 @@ function minify(value, options, partialMarkup, cb) {
     }
     trimTrailingWhitespace(charsIndex, nextTag);
   }
-
-  // Number of tasks waiting to complete (includes current function).
-  var asyncTasksWaitingFor = 1;
-  var asyncError;
 
   try {
     new HTMLParser(value, {
@@ -1116,7 +1215,7 @@ function minify(value, options, partialMarkup, cb) {
       chars: function(text, prevTag, nextTag) {
         prevTag = prevTag === '' ? 'comment' : prevTag;
         nextTag = nextTag === '' ? 'comment' : nextTag;
-        var usingAsyncText = false;
+        var asyncSubtasks = [];
         if (options.decodeEntities && text && !specialContentTags(currentTag)) {
           text = decode(text);
         }
@@ -1169,45 +1268,12 @@ function minify(value, options, partialMarkup, cb) {
           text = processScript(text, options, currentAttrs);
         }
 
-        /**
-         * Returns the callback function for an async task.
-         *
-         * @param {number} index - The index in the buffer to insert the updated text into
-         * @returns {Function}
-         */
-        function getAsyncTaskCallback(index) {
-          var runningAsyncTask = true;
-          return function(result) {
-            if (!runningAsyncTask) {
-              throw new Error('Async completion has already occurred.');
-            }
-            runningAsyncTask = false;
-            buffer[index] = result;
-            if (--asyncTasksWaitingFor === 0) {
-              if (typeof cb === 'function') {
-                if (asyncError) {
-                  cb(asyncError, null);
-                }
-                else {
-                  cb(null, finalize());
-                }
-              }
-            }
-          };
-        }
-
         if (isExecutableScript(currentTag, currentAttrs)) {
           if (asyncExecution) {
-            asyncTasksWaitingFor++;
-            usingAsyncText = true;
-            var minifyJS_cb = getAsyncTaskCallback(buffer.length);
-            var minifyJS_result = options.minifyJS(text, null, minifyJS_cb);
-
-            // Finished synchronously?
-            if (typeof minifyJS_result !== 'undefined') {
-              // Call the callback manually.
-              minifyJS_cb(minifyJS_result);
-            }
+            // Run minifyJS asynchronously after all synchronous code has finished.
+            asyncSubtasks.push(new AsyncSubtask(function(content, cb) {
+              return options.minifyJS(content, null, cb);
+            }));
           }
           else {
             text = options.minifyJS(text);
@@ -1215,56 +1281,64 @@ function minify(value, options, partialMarkup, cb) {
         }
         if (isStyleSheet(currentTag, currentAttrs)) {
           if (asyncExecution) {
-            asyncTasksWaitingFor++;
-            usingAsyncText = true;
-            var minifyCSS_cb = getAsyncTaskCallback(buffer.length);
-            var minifyCSS_result = options.minifyCSS(text, minifyCSS_cb);
-
-            // Finished synchronously?
-            if (typeof minifyCSS_result !== 'undefined') {
-              // Call the callback manually.
-              minifyCSS_cb(minifyCSS_result);
-            }
+            // Run minifyCSS asynchronously after all synchronous code has finished.
+            asyncSubtasks.push(new AsyncSubtask(function(content, cb) {
+              return options.minifyCSS(content, cb);
+            }));
           }
           else {
             text = options.minifyCSS(text);
           }
         }
-        if (usingAsyncText) {
-          buffer.push(null);
+        if (options.removeOptionalTags && text) {
+          // <html> may be omitted if first thing inside is not comment
+          // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+          if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
+            removeStartTag();
+          }
+          optionalStartTag = '';
+          // </html> or </body> may be omitted if not followed by comment
+          // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
+          if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
+            removeEndTag();
+          }
+          optionalEndTag = '';
         }
-        else {
-          if (options.removeOptionalTags && text) {
-            // <html> may be omitted if first thing inside is not comment
-            // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-            if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
-              removeStartTag();
-            }
-            optionalStartTag = '';
-            // </html> or </body> may be omitted if not followed by comment
-            // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
-            if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
-              removeEndTag();
-            }
-            optionalEndTag = '';
-          }
-          charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
-          if (options.decodeEntities && text && !specialContentTags(currentTag)) {
-            // semi-colon can be omitted
-            // https://mathiasbynens.be/notes/ambiguous-ampersands
-            text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
-          }
-          if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
-            text = text.replace(uidPattern, function(match, prefix, index) {
-              return ignoredCustomMarkupChunks[+index][0];
-            });
-          }
-          currentChars += text;
-          if (text) {
-            hasChars = true;
-          }
+        charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
+        if (options.decodeEntities && text && !specialContentTags(currentTag)) {
+          // semi-colon can be omitted
+          // https://mathiasbynens.be/notes/ambiguous-ampersands
+          text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
+        }
+        if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
+          text = text.replace(uidPattern, function(match, prefix, index) {
+            return ignoredCustomMarkupChunks[+index][0];
+          });
+        }
+        currentChars += text;
+        if (text) {
+          hasChars = true;
+        }
+
+        // Nothing to do asynchronously?
+        if (asyncSubtasks.length === 0) {
           buffer.push(text);
+          return;
         }
+
+        var insertIndex = buffer.length;
+        buffer.push(null);
+
+        // Create a new AsyncTask that will update the buffer once complete.
+        asyncTasks.push(
+          new AsyncTask(
+            asyncSubtasks,
+            text,
+            function(result) {
+              buffer[insertIndex] = result;
+            }
+          )
+        );
       },
       comment: function(text, nonStandard) {
         var prefix = nonStandard ? '<!' : '<!--';
@@ -1299,11 +1373,10 @@ function minify(value, options, partialMarkup, cb) {
   }
   catch (error) {
     if (asyncExecution) {
-      asyncError = error;
+      cb(error);
+      return;
     }
-    else {
-      throw error;
-    }
+    throw error;
   }
 
   function finalize() {
@@ -1352,20 +1425,22 @@ function minify(value, options, partialMarkup, cb) {
     return str;
   }
 
-  if (asyncExecution) {
-    // This task just finished.
-    asyncTasksWaitingFor--;
+  // Sync execution?
+  if (!asyncExecution) {
+    return finalize();
+  }
 
-    if (asyncError) {
-      cb(asyncError);
-    }
-    else if (asyncTasksWaitingFor === 0) {
-      // No async tasks running?
-      cb(asyncError, finalize());
-    }
+  // No async tasks?
+  if (asyncTasks.length === 0) {
+    cb(null, finalize());
     return;
   }
-  return finalize();
+
+  // Execute all the async tasks.
+  for (var i = 0; i < asyncTasks.length; i++) {
+    asyncTasks[i].exec();
+  }
+  return;
 }
 
 function joinResultSegments(results, options) {
