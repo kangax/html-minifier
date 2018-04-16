@@ -285,7 +285,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
       if (/;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
         attrValue = attrValue.replace(/\s*;$/, ';');
       }
-      attrValue = unwrapInlineCSS(options.minifyCSS(wrapInlineCSS(attrValue)));
+      attrValue = options.minifyCSS(attrValue, 'inline');
     }
     return attrValue;
   }
@@ -322,7 +322,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (isMediaQuery(tag, attrs, attrName)) {
     attrValue = trimWhitespace(attrValue);
-    return unwrapMediaQuery(options.minifyCSS(wrapMediaQuery(attrValue)));
+    return options.minifyCSS(attrValue, 'media');
   }
   return attrValue;
 }
@@ -694,12 +694,25 @@ function processOptions(options) {
     if (typeof minifyCSS !== 'object') {
       minifyCSS = {};
     }
-    options.minifyCSS = function(text) {
+    options.minifyCSS = function(text, type) {
       text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, function(match, prefix, quote, url, suffix) {
         return prefix + quote + options.minifyURLs(url) + quote + suffix;
       });
       try {
-        return new CleanCSS(minifyCSS).minify(text).styles;
+        if (type === 'inline') {
+          text = wrapInlineCSS(text);
+        }
+        else if (type === 'media') {
+          text = wrapMediaQuery(text);
+        }
+        text = new CleanCSS(minifyCSS).minify(text).styles;
+        if (type === 'inline') {
+          text = unwrapInlineCSS(text);
+        }
+        else if (type === 'media') {
+          text = unwrapMediaQuery(text);
+        }
+        return text;
       }
       catch (err) {
         options.log(err);
@@ -867,8 +880,8 @@ function minify(value, options, partialMarkup) {
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
         var minifyCSS = options.minifyCSS;
         if (minifyCSS) {
-          options.minifyCSS = function(text) {
-            return minifyCSS(escapeFragments(text));
+          options.minifyCSS = function(text, type) {
+            return minifyCSS(escapeFragments(text), type);
           };
         }
         var minifyJS = options.minifyJS;
