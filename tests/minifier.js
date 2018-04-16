@@ -776,36 +776,36 @@ QUnit.test('remove CDATA sections from scripts/styles', function(assert) {
 QUnit.test('custom processors', function(assert) {
   var input, output;
 
-  function css() {
-    return 'Some CSS';
+  function css(text, type) {
+    return (type || 'Normal') + ' CSS';
   }
 
   input = '<style>\n.foo { font: 12pt "bar" } </style>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: null }), input);
   assert.equal(minify(input, { minifyCSS: false }), input);
-  output = '<style>Some CSS</style>';
+  output = '<style>Normal CSS</style>';
   assert.equal(minify(input, { minifyCSS: css }), output);
 
   input = '<p style="font: 12pt \'bar\'"></p>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: null }), input);
   assert.equal(minify(input, { minifyCSS: false }), input);
-  output = '<p style="Some CSS"></p>';
+  output = '<p style="inline CSS"></p>';
   assert.equal(minify(input, { minifyCSS: css }), output);
 
   input = '<link rel="stylesheet" href="css/style-mobile.css" media="(max-width: 737px)">';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: null }), input);
   assert.equal(minify(input, { minifyCSS: false }), input);
-  output = '<link rel="stylesheet" href="css/style-mobile.css" media="Some CSS">';
+  output = '<link rel="stylesheet" href="css/style-mobile.css" media="media CSS">';
   assert.equal(minify(input, { minifyCSS: css }), output);
 
   input = '<style media="(max-width: 737px)"></style>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: null }), input);
   assert.equal(minify(input, { minifyCSS: false }), input);
-  output = '<style media="Some CSS">Some CSS</style>';
+  output = '<style media="media CSS">Normal CSS</style>';
   assert.equal(minify(input, { minifyCSS: css }), output);
 
   function js(text, inline) {
