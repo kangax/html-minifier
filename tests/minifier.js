@@ -1574,6 +1574,7 @@ QUnit.test('removing optional tags in tables', function(assert) {
              '<tfoot><tr><th>baz<th>qux<td>boo' +
            '</table>';
   assert.equal(minify(input, { collapseWhitespace: true, removeOptionalTags: true }), output);
+  assert.equal(minify(output, { collapseWhitespace: true, removeOptionalTags: true }), output);
 
   input = '<table>' +
             '<caption>foo</caption>' +
@@ -1592,6 +1593,7 @@ QUnit.test('removing optional tags in tables', function(assert) {
              '<tr><th>bar<td>baz<th>qux' +
            '</table>';
   assert.equal(minify(input, { removeOptionalTags: true }), output);
+  assert.equal(minify(output, { removeOptionalTags: true }), output);
 
   output = '<table>' +
              '<caption>foo' +
