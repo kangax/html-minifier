@@ -1506,19 +1506,17 @@ exports.minify = function(value, options, cb) {
     if (error) {
       if (hasCallback) {
         cb(error);
+        return;
       }
-      else {
-        throw error;
-      }
+      throw error;
     }
 
     options.log('minified in: ' + (Date.now() - start) + 'ms');
     if (hasCallback) {
       cb(null, result);
+      return;
     }
-    else {
-      minified = result;
-    }
+    minified = result;
   });
   return minified;
 };
