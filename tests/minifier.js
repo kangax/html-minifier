@@ -828,36 +828,36 @@ QUnit.test('remove CDATA sections from scripts/styles', function(assert) {
 QUnit.test('custom processors', function(assert) {
   var input, output;
 
-  function css() {
-    return 'Some CSS';
+  function css(text, type) {
+    return (type || 'Normal') + ' CSS';
   }
 
   input = '<style>\n.foo { font: 12pt "bar" } </style>';
   test_minify(assert, input, input);
   test_minify(assert, input, { minifyCSS: null }, input);
   test_minify(assert, input, { minifyCSS: false }, input);
-  output = '<style>Some CSS</style>';
+  output = '<style>Normal CSS</style>';
   test_minify(assert, input, { minifyCSS: css }, output);
 
   input = '<p style="font: 12pt \'bar\'"></p>';
   test_minify(assert, input, input);
   test_minify(assert, input, { minifyCSS: null }, input);
   test_minify(assert, input, { minifyCSS: false }, input);
-  output = '<p style="Some CSS"></p>';
+  output = '<p style="inline CSS"></p>';
   test_minify(assert, input, { minifyCSS: css }, output);
 
   input = '<link rel="stylesheet" href="css/style-mobile.css" media="(max-width: 737px)">';
   test_minify(assert, input, input);
   test_minify(assert, input, { minifyCSS: null }, input);
   test_minify(assert, input, { minifyCSS: false }, input);
-  output = '<link rel="stylesheet" href="css/style-mobile.css" media="Some CSS">';
+  output = '<link rel="stylesheet" href="css/style-mobile.css" media="media CSS">';
   test_minify(assert, input, { minifyCSS: css }, output);
 
   input = '<style media="(max-width: 737px)"></style>';
   test_minify(assert, input, input);
   test_minify(assert, input, { minifyCSS: null }, input);
   test_minify(assert, input, { minifyCSS: false }, input);
-  output = '<style media="Some CSS">Some CSS</style>';
+  output = '<style media="media CSS">Normal CSS</style>';
   test_minify(assert, input, { minifyCSS: css }, output);
 
   function js(text, inline) {
@@ -2095,8 +2095,8 @@ QUnit.test('script minification', function(assert) {
 
   test_minify(assert, input, { minifyJS: true }, output);
 
-  input = '<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({\'gtm.start\':new Date().getTime(,event:\'gtm.js\'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s,dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';j.async=true;j.src=\'//www.googletagmanager.com/gtm.js?id=\'+i+dl;f.parentNode.insertBefore(j,f);})(window,document,\'script\',\'dataLayer\',\'GTM-67NT\');</script>';
-  output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(,event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id=GTM-67NT",f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer")</script>';
+  input = '<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({\'gtm.start\':new Date().getTime(),event:\'gtm.js\'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';j.async=true;j.src=\'//www.googletagmanager.com/gtm.js?id=\'+i+dl;f.parentNode.insertBefore(j,f);})(window,document,\'script\',\'dataLayer\',\'GTM-67NT\');</script>';
+  output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id=GTM-67NT",f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer")</script>';
 
   test_minify(assert, input, { minifyJS: { mangle: false } }, output);
 
@@ -2253,7 +2253,7 @@ QUnit.test('event minification', function(assert) {
   test_minify(assert, input, { minifyJS: true }, output);
 
   input = '<a href="/" onclick="this.href = getUpdatedURL (this.href);return true;">test</a>';
-  output = '<a href="/" onclick="return this.href=getUpdatedURL(this.href,!0">test</a>';
+  output = '<a href="/" onclick="return this.href=getUpdatedURL(this.href),!0">test</a>';
   test_minify(assert, input, { minifyJS: true }, output);
 
   input = '<a onclick="try{ dcsMultiTrack(\'DCS.dcsuri\',\'USPS\',\'WT.ti\') }catch(e){}"> foobar</a>';
