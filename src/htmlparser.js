@@ -267,12 +267,36 @@ function HTMLParser(html, handler) {
     }
   }
 
+  function closeIfFound(tagName) {
+    if (findTag(tagName) >= 0) {
+      parseEndTag('', tagName);
+      return true;
+    }
+  }
+
   function handleStartTag(match) {
     var tagName = match.tagName;
     var unarySlash = match.unarySlash;
 
-    if (handler.html5 && lastTag === 'p' && nonPhrasing(tagName)) {
-      parseEndTag('', lastTag);
+    if (handler.html5) {
+      if (lastTag === 'p' && nonPhrasing(tagName)) {
+        parseEndTag('', lastTag);
+      }
+      else if (tagName === 'tbody') {
+        closeIfFound('thead');
+      }
+      else if (tagName === 'tfoot') {
+        if (!closeIfFound('tbody')) {
+          closeIfFound('thead');
+        }
+      }
+      if (tagName === 'col' && findTag('colgroup') < 0) {
+        lastTag = 'colgroup';
+        stack.push({ tag: lastTag, attrs: [] });
+        if (handler.start) {
+          handler.start(lastTag, [], false, '');
+        }
+      }
     }
 
     if (!handler.html5 && !inline(tagName)) {
@@ -353,17 +377,23 @@ function HTMLParser(html, handler) {
     }
   }
 
+  function findTag(tagName) {
+    var pos;
+    var needle = tagName.toLowerCase();
+    for (pos = stack.length - 1; pos >= 0; pos--) {
+      if (stack[pos].tag.toLowerCase() === needle) {
+        break;
+      }
+    }
+    return pos;
+  }
+
   function parseEndTag(tag, tagName) {
     var pos;
 
     // Find the closest opened tag of the same type
     if (tagName) {
-      var needle = tagName.toLowerCase();
-      for (pos = stack.length - 1; pos >= 0; pos--) {
-        if (stack[pos].tag.toLowerCase() === needle) {
-          break;
-        }
-      }
+      pos = findTag(tagName);
     }
     // If no tag name is provided, clean shop
     else {
