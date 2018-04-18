@@ -862,7 +862,7 @@ function minify(value, options, partialMarkup, cb) {
    *
    * @param {AsyncSubtask[]} tasks
    * @param {string} content
-   * @param {Function<string>} cb
+   * @param {Function<Error, string>} cb
    */
   function AsyncTask(tasks, content, cb) {
     this.tasks = tasks;
@@ -871,47 +871,59 @@ function minify(value, options, partialMarkup, cb) {
   }
 
   /**
-   * Run the subtasks at the given index, giving it a callback to run the next
-   * subtask the same way. This therefore asynchronously runs all subtasks from
-   * the given index in series.
+   * Asynchronously runs all subtasks in this task in series.
    *
    * @private
-   * @param {string} content
-   * @param {number} index
+   * @param {Function<Error, string>} cb
    */
-  AsyncTask.prototype.runSubtask = function(content, index) {
-    if (index < this.tasks.length) {
-      try {
-        this.tasks[index].exec(
-          content,
-          function(result) {
-            if (this.tasks[index].cbExecuted) {
-              throw new Error('Async completion has already occurred.');
-            }
-            this.tasks[index].cbExecuted = true;
+  AsyncTask.prototype.execSubtaskChain = function(cb) {
+    /**
+     * Run the subtask at the given index, giving it a callback to run the next
+     * subtask the same way.
+     *
+     * @param {string} content
+     * @param {number} index
+     */
+    (function implementation(content, index) {
+      if (index < this.tasks.length) {
+        try {
+          this.tasks[index].exec(
+            content,
+            function(result) {
+              if (this.tasks[index].cbExecuted) {
+                throw new Error('Async completion has already occurred.');
+              }
+              this.tasks[index].cbExecuted = true;
 
-            this.runSubtask(result, index + 1);
-          }.bind(this)
-        );
+              implementation.call(this, result, index + 1, cb);
+            }.bind(this)
+          );
+        }
+        catch (error) {
+          cb.call(this, error);
+        }
       }
-      catch (error) {
-        cb(error);
+      else {
+        cb.call(this, null, content);
       }
-    }
-    else {
-      this.cb(content);
-      if (++asyncTasksComplete === asyncTasks.length) {
-        cb(null, finalize());
-      }
-    }
+    }.bind(this))(this.content, 0);
   };
 
   /**
    * Execute this task.
+   *
+   * @param {Function<Error>} cb
    */
-  AsyncTask.prototype.exec = function() {
-    // Recursively run all subtasks.
-    this.runSubtask(this.content, 0);
+  AsyncTask.prototype.exec = function(cb) {
+    // Execute all subtasks.
+    this.execSubtaskChain(function(error, result) {
+      if (typeof this.cb === 'function') {
+        this.cb(error, result);
+      }
+      if (typeof cb === 'function') {
+        cb(error, result);
+      }
+    });
   };
 
   /**
@@ -1318,7 +1330,12 @@ function minify(value, options, partialMarkup, cb) {
           new AsyncTask(
             asyncSubtasks,
             text,
-            function(result) {
+            function(error, result) {
+              // Don't do anything if there is an error.
+              if (error) {
+                return;
+              }
+
               // The index of the placeholder may not be the same as where it
               // was originally inserted at; therefore we need to search for it.
               buffer[buffer.indexOf(placeholder)] = result;
@@ -1415,20 +1432,39 @@ function minify(value, options, partialMarkup, cb) {
     return finalize();
   }
 
-  // No async tasks?
-  if (asyncTasks.length === 0) {
+  function callCallBack() {
     try {
       cb(null, finalize());
     }
     catch (error) {
       cb(error);
     }
-    return;
+  }
+
+  // No async tasks?
+  if (asyncTasks.length === 0) {
+    return callCallBack();
+  }
+
+  var asyncTasksCallbackCalled = false;
+  function onAsyncTasksComplete(error) {
+    // If an error occurs immediately call the callback.
+    // If other tasks complete afterwards, ignore them.
+    if (!asyncTasksCallbackCalled) {
+      if (error) {
+        cb(error);
+        asyncTasksCallbackCalled = true;
+        return;
+      }
+      if (++asyncTasksComplete === asyncTasks.length) {
+        return callCallBack();
+      }
+    }
   }
 
   // Execute all the async tasks.
   for (var i = 0; i < asyncTasks.length; i++) {
-    asyncTasks[i].exec();
+    asyncTasks[i].exec(onAsyncTasksComplete);
   }
   return;
 }
