@@ -52,7 +52,15 @@ function test_minify(assert, input, options, output, description) {
 
   // Asynchronously test.
   assert.notOk(minify(input, options, function(error, result) {
-    assert.notOk(error);
+    // Error should be null
+    if (error !== null) {
+      if (error instanceof Error) {
+        assert.equal(error, null, 'An error occurred - stack trace:\n' + error.stack);
+      }
+      else {
+        assert.equal(error, null, 'Something that\'s not of type Error was returned as an error.');
+      }
+    }
     assert.equal(result, output, 'Asynchronous Test: ' + description);
     done();
   }));
