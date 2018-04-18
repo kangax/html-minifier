@@ -843,7 +843,7 @@ function minify(value, options, partialMarkup, cb) {
   /**
    * Set of tasks to perform asynchronously.
    *
-   * @type {AsyncTask[]}
+   * @type {Array<AsyncTask|AsyncTaskGroup>}
    */
   var asyncTasks = [];
 
@@ -855,40 +855,57 @@ function minify(value, options, partialMarkup, cb) {
   var asyncTasksComplete = 0;
 
   /**
-   * A task that will be executed asynchronously after all the synchronous
-   * code has executed.
+   * A placeholder that can be inserted into the buffer in place of a string.
+   *
+   * Placeholder objects in the buffer will be removed by async tasks before
+   * completion of the `minify` function.
+   *
+   * @constructor
+   */
+  function Placeholder() {}
+
+  /**
+   * A group of AsyncTasks to execute in series.
    *
    * @constructor
    *
-   * @param {AsyncSubtask[]} tasks
-   * @param {string} content
-   * @param {Function<Error, string>} cb
+   * @param {AsyncTask[]} tasks
+   * @param {*} data
+   * @param {Function<Error, *>} cb
    */
-  function AsyncTask(tasks, content, cb) {
+  function AsyncTaskGroup(tasks, data, cb) {
     this.tasks = tasks;
-    this.content = content;
+    this.data = data;
     this.cb = cb;
   }
 
   /**
-   * Asynchronously runs all subtasks in this task in series.
+   * Asynchronously runs all tasks in this group in series.
    *
-   * @private
-   * @param {Function<Error, string>} cb
+   * @param {Function<Error, *>} cb
    */
-  AsyncTask.prototype.execSubtaskChain = function(cb) {
+  AsyncTaskGroup.prototype.exec = function(cb) {
+    function multiCb(error, result) {
+      if (typeof this.cb === 'function') {
+        this.cb(error, result);
+      }
+      if (typeof cb === 'function') {
+        cb(error, result);
+      }
+    }
+
     /**
-     * Run the subtask at the given index, giving it a callback to run the next
-     * subtask the same way.
+     * Run the task at the given index, giving it a callback to run the next
+     * task the same way.
      *
-     * @param {string} content
+     * @param {string} data
      * @param {number} index
      */
-    (function implementation(content, index) {
+    (function implementation(data, index) {
       if (index < this.tasks.length) {
         try {
+          this.tasks[index].data = data;
           this.tasks[index].exec(
-            content,
             function(error, result) {
               if (error) {
                 throw error;
@@ -899,59 +916,40 @@ function minify(value, options, partialMarkup, cb) {
               }
               this.tasks[index].cbExecuted = true;
 
-              implementation.call(this, result, index + 1, cb);
+              implementation.call(this, result, index + 1);
             }.bind(this)
           );
         }
         catch (error) {
-          cb.call(this, error);
+          multiCb.call(this, error);
         }
       }
       else {
-        cb.call(this, null, content);
+        multiCb.call(this, null, data);
       }
-    }.bind(this))(this.content, 0);
+    }.bind(this))(this.data, 0);
   };
+
+  /**
+   * An async task.
+   *
+   * @constructor
+   *
+   * @param {Function<string, Function<Error, *>>} task
+   * @param {*} [data]
+   */
+  function AsyncTask(task, data) {
+    this.task = task;
+    this.data = data;
+  }
 
   /**
    * Execute this task.
    *
-   * @param {Function<Error>} cb
+   * @param {Function<Error, *>} cb
    */
   AsyncTask.prototype.exec = function(cb) {
-    // Execute all subtasks.
-    this.execSubtaskChain(function(error, result) {
-      if (typeof this.cb === 'function') {
-        this.cb(error, result);
-      }
-      if (typeof cb === 'function') {
-        cb(error, result);
-      }
-    });
-  };
-
-  /**
-   * A subtask in an AsyncTask.
-   *
-   * @constructor
-   *
-   * @param {Function<string, Function<string>>} task
-   */
-  function AsyncSubtask(task) {
-    this.task = task;
-  }
-
-  /**
-   * Execute this subtask.
-   */
-  AsyncSubtask.prototype.exec = function(content, cb) {
-    var result = this.task(content, cb);
-
-    // Finished synchronously?
-    if (typeof result !== 'undefined') {
-      // Call the callback manually.
-      cb(null, result);
-    }
+    this.task(this.data, cb);
   };
 
   // temporarily replace ignored chunks with comments,
@@ -1134,77 +1132,68 @@ function minify(value, options, partialMarkup, cb) {
           options.sortAttributes(tag, attrs);
         }
 
-        var placeholder = {}; // Some unique object.
+        var placeholder = new Placeholder(); // Some unique reference.
         buffer.push(placeholder);
 
-        // Create a new AsyncTask that will update the buffer once complete.
+        // Create a new AsyncTask that will update the buffer.
         asyncTasks.push(
-          new AsyncTask(
-            [new AsyncSubtask(function(content, cb) {
-              var parts = [];
-              var isLast = true;
+          new AsyncTask(function(data, cb) {
+            var parts = [];
+            var isLast = true;
 
-              // Loop through all the attributes and normalize them.
-              return (function normalizeAttrLoop(i) {
-                // Attributes to normalize?
-                if (--i >= 0) {
-                  var loopResult;
-                  // Normalize all the attributes in series.
-                  normalizeAttr(attrs[i], attrs, tag, options, function(error, normalized) {
-                    if (error) {
-                      cb(error);
-                      return;
-                    }
+            // Loop through all the attributes and normalize them.
+            (function normalizeAttrLoop(i) {
+              // Attributes to normalize?
+              if (--i >= 0) {
+                var innerLoopResult;
+                // Normalize all the attributes in series.
+                normalizeAttr(attrs[i], attrs, tag, options, function(error, normalized) {
+                  if (error) {
+                    cb(error);
+                    return;
+                  }
 
-                    if (normalized) {
-                      parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr));
-                      isLast = false;
-                    }
+                  if (normalized) {
+                    parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr));
+                    isLast = false;
+                  }
 
-                    loopResult = normalizeAttrLoop(i);
-                  });
-                  return loopResult;
-                }
-
-                // Attributes all normalize?
-                var bufferChanges = [];
-
-                if (parts.length > 0) {
-                  bufferChanges.push(' ');
-                  bufferChanges.push.apply(bufferChanges, parts);
-                }
-                // start tag must never be omitted if it has any attributes
-                else if (optional && optionalStartTags(tag)) {
-                  optionalStartTag = tag;
-                }
-
-                if (bufferChanges.length > 0) {
-                  bufferChanges.push(bufferChanges.pop() + (hasUnarySlash ? '/' : '') + '>');
-                }
-                else {
-                  bufferChanges.push((hasUnarySlash ? '/' : '') + '>');
-                }
-
-                if (autoGenerated && !options.includeAutoGeneratedTags) {
-                  removeStartTag();
-                  optionalStartTag = '';
-                }
-
-                return bufferChanges;
-              })(attrs.length);
-            })],
-            null,
-            function(error, result) {
-              // Don't do anything if there is an error.
-              if (error) {
-                return;
+                  innerLoopResult = normalizeAttrLoop(i);
+                });
+                return innerLoopResult;
               }
 
+              // Attributes all normalize?
+              var bufferChanges = [];
+
+              if (parts.length > 0) {
+                bufferChanges.push(' ');
+                bufferChanges.push.apply(bufferChanges, parts);
+              }
+              // start tag must never be omitted if it has any attributes
+              else if (optional && optionalStartTags(tag)) {
+                optionalStartTag = tag;
+              }
+
+              if (bufferChanges.length > 0) {
+                bufferChanges.push(bufferChanges.pop() + (hasUnarySlash ? '/' : '') + '>');
+              }
+              else {
+                bufferChanges.push((hasUnarySlash ? '/' : '') + '>');
+              }
+
+              if (autoGenerated && !options.includeAutoGeneratedTags) {
+                removeStartTag();
+                optionalStartTag = '';
+              }
+
+              // Update the buffer.
               // The index of the placeholder may not be the same as where it
               // was originally inserted at; therefore we need to search for it.
-              buffer.splice.apply(buffer, [buffer.indexOf(placeholder), 1].concat(result));
-            }
-          )
+              buffer.splice.apply(buffer, [buffer.indexOf(placeholder), 1].concat(bufferChanges));
+              return cb();
+            })(attrs.length);
+          })
         );
       },
       end: function(tag, attrs, autoGenerated) {
@@ -1330,13 +1319,19 @@ function minify(value, options, partialMarkup, cb) {
           text = processScript(text, options, currentAttrs);
         }
         if (isExecutableScript(currentTag, currentAttrs)) {
-          asyncSubtasks.push(new AsyncSubtask(function(content, cb) {
-            return options.minifyJS(content, null, cb);
+          asyncSubtasks.push(new AsyncTask(function(data, cb) {
+            var result = options.minifyJS(data, null, cb);
+            if (typeof result !== 'undefined') {
+              cb(null, result);
+            }
           }));
         }
         if (isStyleSheet(currentTag, currentAttrs)) {
-          asyncSubtasks.push(new AsyncSubtask(function(content, cb) {
-            return options.minifyCSS(content, null, cb);
+          asyncSubtasks.push(new AsyncTask(function(data, cb) {
+            var result = options.minifyCSS(data, null, cb);
+            if (typeof result !== 'undefined') {
+              cb(null, result);
+            }
           }));
         }
         if (options.removeOptionalTags && text) {
@@ -1375,12 +1370,12 @@ function minify(value, options, partialMarkup, cb) {
           return;
         }
 
-        var placeholder = {}; // Some unique object.
+        var placeholder = new Placeholder(); // Some unique reference.
         buffer.push(placeholder);
 
-        // Create a new AsyncTask that will update the buffer once complete.
+        // Create a new AsyncTaskGroup that will update the buffer once complete.
         asyncTasks.push(
-          new AsyncTask(
+          new AsyncTaskGroup(
             asyncSubtasks,
             text,
             function(error, result) {
