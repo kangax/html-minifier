@@ -1310,8 +1310,8 @@ function minify(value, options, partialMarkup, cb) {
           return;
         }
 
-        var insertIndex = buffer.length;
-        buffer.push(null);
+        var placeholder = {}; // Some unique object.
+        buffer.push(placeholder);
 
         // Create a new AsyncTask that will update the buffer once complete.
         asyncTasks.push(
@@ -1319,7 +1319,9 @@ function minify(value, options, partialMarkup, cb) {
             asyncSubtasks,
             text,
             function(result) {
-              buffer[insertIndex] = result;
+              // The index of the placeholder may not be the same as where it
+              // was originally inserted at; therefore we need to search for it.
+              buffer[buffer.indexOf(placeholder)] = result;
             }
           )
         );
