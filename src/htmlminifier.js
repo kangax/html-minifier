@@ -1271,20 +1271,29 @@ function joinResultSegments(results, options) {
   var str;
   var maxLineLength = options.maxLineLength;
   if (maxLineLength) {
-    var token;
-    var lines = [];
-    var line = '';
-    for (var i = 0, len = results.length; i < len; i++) {
-      token = results[i];
-      if (line.length + token.length < maxLineLength) {
-        line += token;
+    var line = '', lines = [];
+    while (results.length) {
+      var len = line.length;
+      var end = results[0].indexOf('\n');
+      if (end < 0) {
+        line += results.shift();
       }
       else {
-        lines.push(line.replace(/^\n/, ''));
-        line = token;
+        line += results[0].slice(0, end);
+        results[0] = results[0].slice(end + 1);
+      }
+      if (len > 0 && line.length >= maxLineLength) {
+        lines.push(line.slice(0, len));
+        line = line.slice(len);
+      }
+      else if (end >= 0) {
+        lines.push(line);
+        line = '';
       }
     }
-    lines.push(line);
+    if (line) {
+      lines.push(line);
+    }
 
     str = lines.join('\n');
   }

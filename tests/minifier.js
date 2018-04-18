@@ -2796,6 +2796,9 @@ QUnit.test('max line length', function(assert) {
   var input;
   var options = { maxLineLength: 25 };
 
+  input = '123456789012345678901234567890';
+  assert.equal(minify(input, options), input);
+
   input = '<div data-attr="foo"></div>';
   assert.equal(minify(input, options), '<div data-attr="foo">\n</div>');
 
@@ -2811,18 +2814,21 @@ QUnit.test('max line length', function(assert) {
   input = '<div><div><div><div><div><div><div><div><div><div>' +
             'i\'m 10 levels deep' +
           '</div></div></div></div></div></div></div></div></div></div>';
-
   assert.equal(minify(input), input);
 
   assert.equal(minify('<script>alert(\'<!--\')</script>', options), '<script>alert(\'<!--\')\n</script>');
-  assert.equal(minify('<script>alert(\'<!-- foo -->\')</script>', options), '<script>\nalert(\'<!-- foo -->\')\n</script>');
+  input = '<script>\nalert(\'<!-- foo -->\')\n</script>';
+  assert.equal(minify('<script>alert(\'<!-- foo -->\')</script>', options), input);
+  assert.equal(minify(input, options), input);
   assert.equal(minify('<script>alert(\'-->\')</script>', options), '<script>alert(\'-->\')\n</script>');
 
   assert.equal(minify('<a title="x"href=" ">foo</a>', options), '<a title="x" href="">foo\n</a>');
   assert.equal(minify('<p id=""class=""title="">x', options), '<p id="" class="" \ntitle="">x</p>');
   assert.equal(minify('<p x="x\'"">x</p>', options), '<p x="x\'">x</p>', 'trailing quote should be ignored');
   assert.equal(minify('<a href="#"><p>Click me</p></a>', options), '<a href="#"><p>Click me\n</p></a>');
-  assert.equal(minify('<span><button>Hit me</button></span>', options), '<span><button>Hit me\n</button></span>');
+  input = '<span><button>Hit me\n</button></span>';
+  assert.equal(minify('<span><button>Hit me</button></span>', options), input);
+  assert.equal(minify(input, options), input);
   assert.equal(minify('<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>', options),
     '<object \ntype="image/svg+xml" \ndata="image.svg"><div>\n[fallback image]</div>\n</object>'
   );
@@ -2838,6 +2844,8 @@ QUnit.test('max line length', function(assert) {
   assert.equal(minify('[\']["]', options), '[\']["]');
   assert.equal(minify('<a href="test.html"><div>hey</div></a>', options), '<a href="test.html">\n<div>hey</div></a>');
   assert.equal(minify(':) <a href="http://example.com">link</a>', options), ':) <a \nhref="http://example.com">\nlink</a>');
+  assert.equal(minify(':) <a href="http://example.com">\nlink</a>', options), ':) <a \nhref="http://example.com">\nlink</a>');
+  assert.equal(minify(':) <a href="http://example.com">\n\nlink</a>', options), ':) <a \nhref="http://example.com">\n\nlink</a>');
 
   assert.equal(minify('<a href>ok</a>', options), '<a href>ok</a>');
 });
