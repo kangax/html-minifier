@@ -37,14 +37,14 @@ function test_minify(assert, input, options, output, description) {
     if (typeof options.minifyJS === 'function') {
       var minifyJS = options.minifyJS;
       options.minifyJS = function(text, inline, callback) {
-        callback(minifyJS(text, inline));
+        callback(null, minifyJS(text, inline));
       };
     }
     // Convert `minifyCSS` to use a callback.
     if (typeof options.minifyCSS === 'function') {
       var minifyCSS = options.minifyCSS;
       options.minifyCSS = function(text, type, callback) {
-        callback(minifyCSS(text, type));
+        callback(null, minifyCSS(text, type));
       };
     }
   }
