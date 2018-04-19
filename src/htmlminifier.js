@@ -1065,10 +1065,14 @@ function minify(value, options, partialMarkup, cb) {
   // look for trailing whitespaces from previously processed text
   // which may not be trimmed due to a following comment or an empty
   // element which has now been removed
-  function squashTrailingWhitespace(nextTag) {
-    var charsIndex = buffer.length - 1;
-    if (buffer.length > 1) {
-      var item = buffer[buffer.length - 1];
+  function squashTrailingWhitespace(nextTag, indexBound) {
+    if (typeof indexBound === 'undefined') {
+      indexBound = buffer.length;
+    }
+
+    var charsIndex = indexBound - 1;
+    if (indexBound > 1) {
+      var item = buffer[indexBound - 1];
       if (/^(?:<!|$)/.test(item) && item.indexOf(uidIgnore) === -1) {
         charsIndex--;
       }
@@ -1138,7 +1142,7 @@ function minify(value, options, partialMarkup, cb) {
               // set whitespace flags for nested tags (eg. <code> within a <pre>)
               if (options.collapseWhitespace) {
                 if (!stackNoTrimWhitespace.length) {
-                  squashTrailingWhitespace(data.tag);
+                  squashTrailingWhitespace(data.tag, insertionIndex);
                 }
                 if (!data.unary) {
                   if (!_canTrimWhitespace(data.tag, data.attrs) || stackNoTrimWhitespace.length) {
@@ -1241,7 +1245,7 @@ function minify(value, options, partialMarkup, cb) {
                   }
                 }
                 else {
-                  squashTrailingWhitespace('/' + data.tag);
+                  squashTrailingWhitespace('/' + data.tag, insertionIndex);
                 }
                 if (stackNoCollapseWhitespace.length &&
                   data.tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
