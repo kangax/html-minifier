@@ -1677,6 +1677,7 @@ QUnit.test('removing optional tags in tables', function(assert) {
              '<tfoot><tr><th>baz<th>qux<td>boo' +
            '</table>';
   test_minify(assert, input, { collapseWhitespace: true, removeOptionalTags: true }, output);
+  test_minify(assert, output, { collapseWhitespace: true, removeOptionalTags: true }, output);
 
   input = '<table>' +
             '<caption>foo</caption>' +
@@ -1695,6 +1696,7 @@ QUnit.test('removing optional tags in tables', function(assert) {
              '<tr><th>bar<td>baz<th>qux' +
            '</table>';
   test_minify(assert, input, { removeOptionalTags: true }, output);
+  test_minify(assert, output, { removeOptionalTags: true }, output);
 
   output = '<table>' +
              '<caption>foo' +
@@ -2899,6 +2901,9 @@ QUnit.test('max line length', function(assert) {
   var input;
   var options = { maxLineLength: 25 };
 
+  input = '123456789012345678901234567890';
+  test_minify(assert, input, options, input);
+
   input = '<div data-attr="foo"></div>';
   test_minify(assert, input, options, '<div data-attr="foo">\n</div>');
 
@@ -2914,18 +2919,21 @@ QUnit.test('max line length', function(assert) {
   input = '<div><div><div><div><div><div><div><div><div><div>' +
             'i\'m 10 levels deep' +
           '</div></div></div></div></div></div></div></div></div></div>';
-
   test_minify(assert, input, input);
 
   test_minify(assert, '<script>alert(\'<!--\')</script>', options, '<script>alert(\'<!--\')\n</script>');
-  test_minify(assert, '<script>alert(\'<!-- foo -->\')</script>', options, '<script>\nalert(\'<!-- foo -->\')\n</script>');
+  input = '<script>\nalert(\'<!-- foo -->\')\n</script>';
+  test_minify(assert, '<script>alert(\'<!-- foo -->\')</script>', options, input);
+  test_minify(assert, input, options, input);
   test_minify(assert, '<script>alert(\'-->\')</script>', options, '<script>alert(\'-->\')\n</script>');
 
   test_minify(assert, '<a title="x"href=" ">foo</a>', options, '<a title="x" href="">foo\n</a>');
   test_minify(assert, '<p id=""class=""title="">x', options, '<p id="" class="" \ntitle="">x</p>');
   test_minify(assert, '<p x="x\'"">x</p>', options, '<p x="x\'">x</p>', 'trailing quote should be ignored');
   test_minify(assert, '<a href="#"><p>Click me</p></a>', options, '<a href="#"><p>Click me\n</p></a>');
-  test_minify(assert, '<span><button>Hit me</button></span>', options, '<span><button>Hit me\n</button></span>');
+  input = '<span><button>Hit me\n</button></span>';
+  test_minify(assert, '<span><button>Hit me</button></span>', options, input);
+  test_minify(assert, input, options, input);
   test_minify(assert, '<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>', options,
     '<object \ntype="image/svg+xml" \ndata="image.svg"><div>\n[fallback image]</div>\n</object>'
   );
@@ -2941,6 +2949,8 @@ QUnit.test('max line length', function(assert) {
   test_minify(assert, '[\']["]', options, '[\']["]');
   test_minify(assert, '<a href="test.html"><div>hey</div></a>', options, '<a href="test.html">\n<div>hey</div></a>');
   test_minify(assert, ':) <a href="http://example.com">link</a>', options, ':) <a \nhref="http://example.com">\nlink</a>');
+  test_minify(assert, ':) <a href="http://example.com">\nlink</a>', options, ':) <a \nhref="http://example.com">\nlink</a>');
+  test_minify(assert, ':) <a href="http://example.com">\n\nlink</a>', options, ':) <a \nhref="http://example.com">\n\nlink</a>');
 
   test_minify(assert, '<a href>ok</a>', options, '<a href>ok</a>');
 });
