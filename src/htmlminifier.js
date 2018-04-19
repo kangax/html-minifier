@@ -358,20 +358,22 @@ function unwrapMediaQuery(text) {
   return matches ? matches[1] : text;
 }
 
-function cleanConditionalComment(comment, options) {
+function cleanConditionalComment(comment, options, cb) {
   return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/, function(match, prefix, text, suffix) {
-    return prefix + minify(text, options, true) + suffix;
-  }) : comment;
+    return minify(text, options, true, function(error, result) {
+      return cb(error, prefix + result + suffix);
+    });
+  }) : cb(null, comment);
 }
 
-function processScript(text, options, currentAttrs) {
+function processScript(text, options, currentAttrs, cb) {
   for (var i = 0, len = currentAttrs.length; i < len; i++) {
     if (currentAttrs[i].name.toLowerCase() === 'type' &&
         options.processScripts.indexOf(currentAttrs[i].value) > -1) {
-      return minify(text, options);
+      return minify(text, options, false, cb);
     }
   }
-  return text;
+  return cb(text);
 }
 
 // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -726,7 +728,7 @@ function uniqueId(value) {
 
 var specialContentTags = createMapFromString('script,style');
 
-function createSortFns(value, options, uidIgnore, uidAttr) {
+function createSortFns(value, options, uidIgnore, uidAttr, cb) {
   var attrChains = options.sortAttributes && Object.create(null);
   var classChain = options.sortClassName && new TokenChain();
 
@@ -781,33 +783,41 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   options.log = identity;
   options.sortAttributes = false;
   options.sortClassName = false;
-  scan(minify(value, options));
-  options.log = log;
-  if (attrChains) {
-    var attrSorters = Object.create(null);
-    for (var tag in attrChains) {
-      attrSorters[tag] = attrChains[tag].createSorter();
+  minify(value, options, false, function(error, result) {
+    if (error) {
+      return cb(error);
     }
-    options.sortAttributes = function(tag, attrs) {
-      var sorter = attrSorters[tag];
-      if (sorter) {
-        var attrMap = Object.create(null);
-        var names = attrNames(attrs);
-        names.forEach(function(name, index) {
-          (attrMap[name] || (attrMap[name] = [])).push(attrs[index]);
-        });
-        sorter.sort(names).forEach(function(name, index) {
-          attrs[index] = attrMap[name].shift();
-        });
+
+    scan(result);
+    options.log = log;
+    if (attrChains) {
+      var attrSorters = Object.create(null);
+      for (var tag in attrChains) {
+        attrSorters[tag] = attrChains[tag].createSorter();
       }
-    };
-  }
-  if (classChain) {
-    var sorter = classChain.createSorter();
-    options.sortClassName = function(value) {
-      return sorter.sort(value.split(/[ \n\f\r]+/)).join(' ');
-    };
-  }
+      options.sortAttributes = function(tag, attrs) {
+        var sorter = attrSorters[tag];
+        if (sorter) {
+          var attrMap = Object.create(null);
+          var names = attrNames(attrs);
+          names.forEach(function(name, index) {
+            (attrMap[name] || (attrMap[name] = [])).push(attrs[index]);
+          });
+          sorter.sort(names).forEach(function(name, index) {
+            attrs[index] = attrMap[name].shift();
+          });
+        }
+      };
+    }
+    if (classChain) {
+      var sorter = classChain.createSorter();
+      options.sortClassName = function(value) {
+        return sorter.sort(value.split(/[ \n\f\r]+/)).join(' ');
+      };
+    }
+
+    return cb();
+  });
 }
 
 /**
@@ -815,8 +825,8 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
  *
  * @param {string} value
  * @param {Object} options
- * @param {boolean} [partialMarkup=false]
- * @param {Function<Error, string>} [cb]
+ * @param {boolean} partialMarkup
+ * @param {Function<Error, string>} cb
  */
 function minify(value, options, partialMarkup, cb) {
   if (options.collapseWhitespace) {
@@ -826,7 +836,6 @@ function minify(value, options, partialMarkup, cb) {
   var buffer = [],
       charsPrevTag,
       currentChars = '',
-      hasCallback = typeof cb === 'function',
       hasChars,
       currentTag = '',
       currentAttrs = [],
@@ -848,13 +857,6 @@ function minify(value, options, partialMarkup, cb) {
   var asyncTasks = [];
 
   /**
-   * The number of async tasks that have completed.
-   *
-   * @type {number}
-   */
-  var asyncTasksComplete = 0;
-
-  /**
    * A placeholder that can be inserted into the buffer in place of a string.
    *
    * Placeholder objects in the buffer will be removed by async tasks before
@@ -869,12 +871,12 @@ function minify(value, options, partialMarkup, cb) {
    *
    * @constructor
    *
-   * @param {AsyncTask[]} tasks
-   * @param {*} data
-   * @param {Function<Error, *>} cb
+   * @param {AsyncTask[]} [tasks]
+   * @param {*} [data]
+   * @param {Function<Error, *>} [cb]
    */
   function AsyncTaskGroup(tasks, data, cb) {
-    this.tasks = tasks;
+    this.tasks = tasks ? tasks : [];
     this.data = data;
     this.cb = cb;
   }
@@ -904,7 +906,9 @@ function minify(value, options, partialMarkup, cb) {
     (function implementation(data, index) {
       if (index < this.tasks.length) {
         try {
-          this.tasks[index].data = data;
+          if (typeof this.tasks[index].data === 'undefined') {
+            this.tasks[index].data = data;
+          }
           this.tasks[index].exec(
             function(error, result) {
               if (error) {
@@ -1007,7 +1011,9 @@ function minify(value, options, partialMarkup, cb) {
 
   if (options.sortAttributes && typeof options.sortAttributes !== 'function' ||
       options.sortClassName && typeof options.sortClassName !== 'function') {
-    createSortFns(value, options, uidIgnore, uidAttr);
+    asyncTasks.push(new AsyncTask(function(data, cb) {
+      createSortFns(value, options, uidIgnore, uidAttr, cb);
+    }));
   }
 
   function _canCollapseWhitespace(tag, attrs) {
@@ -1070,109 +1076,18 @@ function minify(value, options, partialMarkup, cb) {
     trimTrailingWhitespace(charsIndex, nextTag);
   }
 
-  try {
-    new HTMLParser(value, {
-      partialMarkup: partialMarkup,
-      html5: options.html5,
+  asyncTasks.push(new AsyncTask(function(data, cb) {
+    try {
+      new HTMLParser(value, {
+        partialMarkup: partialMarkup,
+        html5: options.html5,
 
-      start: function(tag, attrs, unary, unarySlash, autoGenerated) {
-        var lowerTag = tag.toLowerCase();
+        start: function(tag, attrs, unary, unarySlash, autoGenerated) {
+          var placeholder = new Placeholder(); // Some unique reference.
+          buffer.push(placeholder);
 
-        if (lowerTag === 'svg') {
-          options = Object.create(options);
-          options.keepClosingSlash = true;
-          options.caseSensitive = true;
-        }
-
-        tag = options.caseSensitive ? tag : lowerTag;
-
-        currentTag = tag;
-        charsPrevTag = tag;
-        if (!inlineTextTags(tag)) {
-          currentChars = '';
-        }
-        hasChars = false;
-        currentAttrs = attrs;
-
-        var optional = options.removeOptionalTags;
-        if (optional) {
-          var htmlTag = htmlTags(tag);
-          // <html> may be omitted if first thing inside is not comment
-          // <head> may be omitted if first thing inside is an element
-          // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-          // <colgroup> may be omitted if first thing inside is <col>
-          // <tbody> may be omitted if first thing inside is <tr>
-          if (htmlTag && canRemoveParentTag(optionalStartTag, tag)) {
-            removeStartTag();
-          }
-          optionalStartTag = '';
-          // end-tag-followed-by-start-tag omission rules
-          if (htmlTag && canRemovePrecedingTag(optionalEndTag, tag)) {
-            removeEndTag();
-            // <colgroup> cannot be omitted if preceding </colgroup> is omitted
-            // <tbody> cannot be omitted if preceding </tbody>, </thead> or </tfoot> is omitted
-            optional = !isStartTagMandatory(optionalEndTag, tag);
-          }
-          optionalEndTag = '';
-        }
-
-        // set whitespace flags for nested tags (eg. <code> within a <pre>)
-        if (options.collapseWhitespace) {
-          if (!stackNoTrimWhitespace.length) {
-            squashTrailingWhitespace(tag);
-          }
-          if (!unary) {
-            if (!_canTrimWhitespace(tag, attrs) || stackNoTrimWhitespace.length) {
-              stackNoTrimWhitespace.push(tag);
-            }
-            if (!_canCollapseWhitespace(tag, attrs) || stackNoCollapseWhitespace.length) {
-              stackNoCollapseWhitespace.push(tag);
-            }
-          }
-        }
-
-        var openTag = '<' + tag;
-        var hasUnarySlash = unarySlash && options.keepClosingSlash;
-
-        buffer.push(openTag);
-
-        if (options.sortAttributes) {
-          options.sortAttributes(tag, attrs);
-        }
-
-        var placeholder = new Placeholder(); // Some unique reference.
-        buffer.push(placeholder);
-
-        // Create a new AsyncTask that will update the buffer.
-        asyncTasks.push(
-          new AsyncTask(function(data, cb) {
-            var parts = [];
-            var isLast = true;
-
-            // Loop through all the attributes and normalize them.
-            (function normalizeAttrLoop(i) {
-              // Attributes to normalize?
-              if (--i >= 0) {
-                var innerLoopResult;
-                // Normalize all the attributes in series.
-                normalizeAttr(attrs[i], attrs, tag, options, function(error, normalized) {
-                  if (error) {
-                    cb(error);
-                    return;
-                  }
-
-                  if (normalized) {
-                    parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr));
-                    isLast = false;
-                  }
-
-                  innerLoopResult = normalizeAttrLoop(i);
-                });
-                return innerLoopResult;
-              }
-
-              // All attributes are now normalize.
-
+          asyncTasks.push(
+            new AsyncTask(function(data, cb) {
               // The index of the placeholder may not be the same as where it
               // was originally inserted at; therefore we need to search for it.
               var insertionIndex = buffer.indexOf(placeholder);
@@ -1180,262 +1095,448 @@ function minify(value, options, partialMarkup, cb) {
               // Remove the placeholder.
               buffer.splice(insertionIndex, 1);
 
-              if (parts.length > 0) {
-                buffer.splice.apply(buffer, [insertionIndex, 0, ' '].concat(parts));
-                insertionIndex += 1 + parts.length;
-              }
-              // start tag must never be omitted if it has any attributes
-              else if (optional && optionalStartTags(tag)) {
-                optionalStartTag = tag;
+              var lowerTag = data.tag.toLowerCase();
+
+              if (lowerTag === 'svg') {
+                options = Object.create(options);
+                options.keepClosingSlash = true;
+                options.caseSensitive = true;
               }
 
-              // Remove the last inserted element, modify it and put it back.
-              var lastElem = buffer.splice(--insertionIndex, 1)[0];
-              buffer.splice(insertionIndex++, 0, lastElem + (hasUnarySlash ? '/' : '') + '>');
+              data.tag = options.caseSensitive ? data.tag : lowerTag;
 
-              if (autoGenerated && !options.includeAutoGeneratedTags) {
-                insertionIndex -= removeStartTag(insertionIndex);
+              currentTag = data.tag;
+              charsPrevTag = data.tag;
+              if (!inlineTextTags(data.tag)) {
+                currentChars = '';
+              }
+              hasChars = false;
+              currentAttrs = data.attrs;
+
+              var optional = options.removeOptionalTags;
+              if (optional) {
+                var htmlTag = htmlTags(data.tag);
+                // <html> may be omitted if first thing inside is not comment
+                // <head> may be omitted if first thing inside is an element
+                // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+                // <colgroup> may be omitted if first thing inside is <col>
+                // <tbody> may be omitted if first thing inside is <tr>
+                if (htmlTag && canRemoveParentTag(optionalStartTag, data.tag)) {
+                  insertionIndex -= removeStartTag(insertionIndex);
+                }
                 optionalStartTag = '';
+                // end-data.tag-followed-by-start-data.tag omission rules
+                if (htmlTag && canRemovePrecedingTag(optionalEndTag, data.tag)) {
+                  insertionIndex -= removeEndTag(insertionIndex);
+                  // <colgroup> cannot be omitted if preceding </colgroup> is omitted
+                  // <tbody> cannot be omitted if preceding </tbody>, </thead> or </tfoot> is omitted
+                  optional = !isStartTagMandatory(optionalEndTag, data.tag);
+                }
+                optionalEndTag = '';
               }
 
-              return cb();
-            })(attrs.length);
-          })
-        );
-      },
-      end: function(tag, attrs, autoGenerated) {
-        var lowerTag = tag.toLowerCase();
-        if (lowerTag === 'svg') {
-          options = Object.getPrototypeOf(options);
-        }
-        tag = options.caseSensitive ? tag : lowerTag;
-
-        // check if current tag is in a whitespace stack
-        if (options.collapseWhitespace) {
-          if (stackNoTrimWhitespace.length) {
-            if (tag === stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
-              stackNoTrimWhitespace.pop();
-            }
-          }
-          else {
-            squashTrailingWhitespace('/' + tag);
-          }
-          if (stackNoCollapseWhitespace.length &&
-            tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
-            stackNoCollapseWhitespace.pop();
-          }
-        }
-
-        var isElementEmpty = false;
-        if (tag === currentTag) {
-          currentTag = '';
-          isElementEmpty = !hasChars;
-        }
-
-        if (options.removeOptionalTags) {
-          // <html>, <head> or <body> may be omitted if the element is empty
-          if (isElementEmpty && topLevelTags(optionalStartTag)) {
-            removeStartTag();
-          }
-          optionalStartTag = '';
-          // </html> or </body> may be omitted if not followed by comment
-          // </head> may be omitted if not followed by space or comment
-          // </p> may be omitted if no more content in non-</a> parent
-          // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-          if (htmlTags(tag) && optionalEndTag && !trailingTags(optionalEndTag) && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
-            removeEndTag();
-          }
-          optionalEndTag = optionalEndTags(tag) ? tag : '';
-        }
-
-        if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
-          // remove last "element" from buffer
-          removeStartTag();
-          optionalStartTag = '';
-          optionalEndTag = '';
-        }
-        else {
-          if (autoGenerated && !options.includeAutoGeneratedTags) {
-            optionalEndTag = '';
-          }
-          else {
-            buffer.push('</' + tag + '>');
-          }
-          charsPrevTag = '/' + tag;
-          if (!inlineTags(tag)) {
-            currentChars = '';
-          }
-          else if (isElementEmpty) {
-            currentChars += '|';
-          }
-        }
-      },
-      chars: function(text, prevTag, nextTag) {
-        prevTag = prevTag === '' ? 'comment' : prevTag;
-        nextTag = nextTag === '' ? 'comment' : nextTag;
-        var asyncSubtasks = [];
-        if (options.decodeEntities && text && !specialContentTags(currentTag)) {
-          text = decode(text);
-        }
-        if (options.collapseWhitespace) {
-          if (!stackNoTrimWhitespace.length) {
-            if (prevTag === 'comment') {
-              var prevComment = buffer[buffer.length - 1];
-              if (prevComment.indexOf(uidIgnore) === -1) {
-                if (!prevComment) {
-                  prevTag = charsPrevTag;
+              // set whitespace flags for nested tags (eg. <code> within a <pre>)
+              if (options.collapseWhitespace) {
+                if (!stackNoTrimWhitespace.length) {
+                  squashTrailingWhitespace(data.tag);
                 }
-                if (buffer.length > 1 && (!prevComment || !options.conservativeCollapse && / $/.test(currentChars))) {
-                  var charsIndex = buffer.length - 2;
-                  buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
-                    text = trailingSpaces + text;
-                    return '';
-                  });
-                }
-              }
-            }
-            if (prevTag) {
-              if (prevTag === '/nobr' || prevTag === 'wbr') {
-                if (/^\s/.test(text)) {
-                  var tagIndex = buffer.length - 1;
-                  while (tagIndex > 0 && buffer[tagIndex].lastIndexOf('<' + prevTag) !== 0) {
-                    tagIndex--;
+                if (!data.unary) {
+                  if (!_canTrimWhitespace(data.tag, data.attrs) || stackNoTrimWhitespace.length) {
+                    stackNoTrimWhitespace.push(data.tag);
                   }
-                  trimTrailingWhitespace(tagIndex - 1, 'br');
+                  if (!_canCollapseWhitespace(data.tag, data.attrs) || stackNoCollapseWhitespace.length) {
+                    stackNoCollapseWhitespace.push(data.tag);
+                  }
                 }
               }
-              else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
-                text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
-              }
-            }
-            if (prevTag || nextTag) {
-              text = collapseWhitespaceSmart(text, prevTag, nextTag, options);
-            }
-            else {
-              text = collapseWhitespace(text, options, true, true);
-            }
-            if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
-              trimTrailingWhitespace(buffer.length - 1, nextTag);
-            }
-          }
-          if (!stackNoCollapseWhitespace.length && nextTag !== 'html' && !(prevTag && nextTag)) {
-            text = collapseWhitespace(text, options, false, false, true);
-          }
-        }
-        if (options.processScripts && specialContentTags(currentTag)) {
-          text = processScript(text, options, currentAttrs);
-        }
-        if (isExecutableScript(currentTag, currentAttrs)) {
-          asyncSubtasks.push(new AsyncTask(function(data, cb) {
-            var result = options.minifyJS(data, null, cb);
-            if (typeof result !== 'undefined') {
-              cb(null, result);
-            }
-          }));
-        }
-        if (isStyleSheet(currentTag, currentAttrs)) {
-          asyncSubtasks.push(new AsyncTask(function(data, cb) {
-            var result = options.minifyCSS(data, null, cb);
-            if (typeof result !== 'undefined') {
-              cb(null, result);
-            }
-          }));
-        }
-        if (options.removeOptionalTags && text) {
-          // <html> may be omitted if first thing inside is not comment
-          // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-          if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
-            removeStartTag();
-          }
-          optionalStartTag = '';
-          // </html> or </body> may be omitted if not followed by comment
-          // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
-          if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
-            removeEndTag();
-          }
-          optionalEndTag = '';
-        }
-        charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
-        if (options.decodeEntities && text && !specialContentTags(currentTag)) {
-          // semi-colon can be omitted
-          // https://mathiasbynens.be/notes/ambiguous-ampersands
-          text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
-        }
-        if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
-          text = text.replace(uidPattern, function(match, prefix, index) {
-            return ignoredCustomMarkupChunks[+index][0];
-          });
-        }
-        currentChars += text;
-        if (text) {
-          hasChars = true;
-        }
 
-        // Nothing to do asynchronously?
-        if (asyncSubtasks.length === 0) {
-          buffer.push(text);
-          return;
-        }
+              var openTag = '<' + data.tag;
+              var hasUnarySlash = data.unarySlash && options.keepClosingSlash;
 
-        var placeholder = new Placeholder(); // Some unique reference.
-        buffer.push(placeholder);
+              buffer.splice(insertionIndex++, 0, openTag);
 
-        // Create a new AsyncTaskGroup that will update the buffer once complete.
-        asyncTasks.push(
-          new AsyncTaskGroup(
-            asyncSubtasks,
-            text,
-            function(error, result) {
-              // Don't do anything if there is an error.
-              if (error) {
-                return;
+              if (options.sortAttributes) {
+                options.sortAttributes(data.tag, data.attrs);
               }
 
+              var parts = [];
+              var isLast = true;
+
+              // Loop through all the attributes and normalize them.
+              (function normalizeAttrLoop(i) {
+                // Attributes to normalize?
+                if (--i >= 0) {
+                  var innerLoopResult;
+                  // Normalize all the attributes in series.
+                  normalizeAttr(data.attrs[i], data.attrs, data.tag, options, function(error, normalized) {
+                    if (error) {
+                      return cb(error);
+                    }
+
+                    if (normalized) {
+                      parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr));
+                      isLast = false;
+                    }
+
+                    innerLoopResult = normalizeAttrLoop(i);
+                  });
+                  return innerLoopResult;
+                }
+
+                // All attributes are now normalize.
+
+                if (parts.length > 0) {
+                  buffer.splice.apply(buffer, [insertionIndex, 0, ' '].concat(parts));
+                  insertionIndex += 1 + parts.length;
+                }
+                // start tag must never be omitted if it has any attributes
+                else if (optional && optionalStartTags(data.tag)) {
+                  optionalStartTag = data.tag;
+                }
+
+                // Remove the last inserted element, modify it and put it back.
+                var lastElem = buffer.splice(--insertionIndex, 1)[0];
+                buffer.splice(insertionIndex++, 0, lastElem + (hasUnarySlash ? '/' : '') + '>');
+
+                if (data.autoGenerated && !options.includeAutoGeneratedTags) {
+                  insertionIndex -= removeStartTag(insertionIndex);
+                  optionalStartTag = '';
+                }
+
+                return cb(null, data);
+              })(data.attrs.length);
+            }, {
+              tag: tag,
+              attrs: attrs,
+              unary: unary,
+              unarySlash: unarySlash,
+              autoGenerated: autoGenerated
+            })
+          );
+        },
+        end: function(tag, attrs, autoGenerated) {
+          var placeholder = new Placeholder(); // Some unique reference.
+          buffer.push(placeholder);
+
+          asyncTasks.push(
+            new AsyncTask(function(data, cb) {
               // The index of the placeholder may not be the same as where it
               // was originally inserted at; therefore we need to search for it.
-              buffer[buffer.indexOf(placeholder)] = result;
-            }
-          )
-        );
-      },
-      comment: function(text, nonStandard) {
-        var prefix = nonStandard ? '<!' : '<!--';
-        var suffix = nonStandard ? '>' : '-->';
-        if (isConditionalComment(text)) {
-          text = prefix + cleanConditionalComment(text, options) + suffix;
-        }
-        else if (options.removeComments) {
-          if (isIgnoredComment(text, options)) {
-            text = '<!--' + text + '-->';
-          }
-          else {
-            text = '';
-          }
-        }
-        else {
-          text = prefix + text + suffix;
-        }
-        if (options.removeOptionalTags && text) {
-          // preceding comments suppress tag omissions
-          optionalStartTag = '';
-          optionalEndTag = '';
-        }
-        buffer.push(text);
-      },
-      doctype: function(doctype) {
-        buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(doctype));
-      },
-      customAttrAssign: options.customAttrAssign,
-      customAttrSurround: options.customAttrSurround
-    });
-  }
-  catch (error) {
-    if (hasCallback) {
-      cb(error);
-      return;
+              var insertionIndex = buffer.indexOf(placeholder);
+
+              // Remove the placeholder.
+              buffer.splice(insertionIndex, 1);
+
+              var lowerTag = data.tag.toLowerCase();
+              if (lowerTag === 'svg') {
+                options = Object.getPrototypeOf(options);
+              }
+              data.tag = options.caseSensitive ? data.tag : lowerTag;
+
+              // check if current tag is in a whitespace stack
+              if (options.collapseWhitespace) {
+                if (stackNoTrimWhitespace.length) {
+                  if (data.tag === stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
+                    stackNoTrimWhitespace.pop();
+                  }
+                }
+                else {
+                  squashTrailingWhitespace('/' + data.tag);
+                }
+                if (stackNoCollapseWhitespace.length &&
+                  data.tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
+                  stackNoCollapseWhitespace.pop();
+                }
+              }
+
+              var isElementEmpty = false;
+              if (data.tag === currentTag) {
+                currentTag = '';
+                isElementEmpty = !hasChars;
+              }
+
+              if (options.removeOptionalTags) {
+                // <html>, <head> or <body> may be omitted if the element is empty
+                if (isElementEmpty && topLevelTags(optionalStartTag)) {
+                  insertionIndex -= removeStartTag(insertionIndex);
+                }
+                optionalStartTag = '';
+                // </html> or </body> may be omitted if not followed by comment
+                // </head> may be omitted if not followed by space or comment
+                // </p> may be omitted if no more content in non-</a> parent
+                // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
+                if (htmlTags(data.tag) && optionalEndTag && !trailingTags(optionalEndTag) && (optionalEndTag !== 'p' || !pInlineTags(data.tag))) {
+                  insertionIndex -= removeEndTag(insertionIndex);
+                }
+                optionalEndTag = optionalEndTags(data.tag) ? data.tag : '';
+              }
+
+              if (options.removeEmptyElements && isElementEmpty && canRemoveElement(data.tag, data.attrs)) {
+                // remove last "element" from buffer
+                insertionIndex -= removeStartTag(insertionIndex);
+                optionalStartTag = '';
+                optionalEndTag = '';
+              }
+              else {
+                if (data.autoGenerated && !options.includeAutoGeneratedTags) {
+                  optionalEndTag = '';
+                }
+                else {
+                  buffer.splice(insertionIndex, 0, '</' + data.tag + '>');
+                }
+                charsPrevTag = '/' + data.tag;
+                if (!inlineTags(data.tag)) {
+                  currentChars = '';
+                }
+                else if (isElementEmpty) {
+                  currentChars += '|';
+                }
+              }
+
+              return cb(null, data);
+            }, {
+              tag: tag,
+              attrs: attrs,
+              autoGenerated: autoGenerated
+            })
+          );
+        },
+        chars: function(text, prevTag, nextTag) {
+          var placeholder = new Placeholder(); // Some unique reference.
+          buffer.push(placeholder);
+
+          asyncTasks.push(
+            new AsyncTask(function(data, cb) {
+              // The index of the placeholder may not be the same as where it
+              // was originally inserted at; therefore we need to search for it.
+              var insertionIndex = buffer.indexOf(placeholder);
+
+              // Remove the placeholder.
+              buffer.splice(insertionIndex, 1);
+
+              var subtasks = [];
+              data.prevTag = data.prevTag === '' ? 'comment' : data.prevTag;
+              data.nextTag = data.nextTag === '' ? 'comment' : data.nextTag;
+              if (options.decodeEntities && data.text && !specialContentTags(currentTag)) {
+                data.text = decode(data.text);
+              }
+              if (options.collapseWhitespace) {
+                if (!stackNoTrimWhitespace.length) {
+                  if (data.prevTag === 'comment') {
+                    var prevComment = buffer[insertionIndex - 1];
+                    if (prevComment.indexOf(uidIgnore) === -1) {
+                      if (!prevComment) {
+                        data.prevTag = charsPrevTag;
+                      }
+                      if (insertionIndex > 1 && (!prevComment || !options.conservativeCollapse && / $/.test(currentChars))) {
+                        var charsIndex = insertionIndex - 2;
+                        buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
+                          data.text = trailingSpaces + data.text;
+                          return '';
+                        });
+                      }
+                    }
+                  }
+                  if (data.prevTag) {
+                    if (data.prevTag === '/nobr' || data.prevTag === 'wbr') {
+                      if (/^\s/.test(data.text)) {
+                        var tagIndex = insertionIndex - 1;
+                        while (tagIndex > 0 && buffer[tagIndex].lastIndexOf('<' + data.prevTag) !== 0) {
+                          tagIndex--;
+                        }
+                        trimTrailingWhitespace(tagIndex - 1, 'br');
+                      }
+                    }
+                    else if (inlineTextTags(data.prevTag.charAt(0) === '/' ? data.prevTag.slice(1) : data.prevTag)) {
+                      data.text = collapseWhitespace(data.text, options, /(?:^|\s)$/.test(currentChars));
+                    }
+                  }
+                  if (data.prevTag || data.nextTag) {
+                    data.text = collapseWhitespaceSmart(data.text, data.prevTag, data.nextTag, options);
+                  }
+                  else {
+                    data.text = collapseWhitespace(data.text, options, true, true);
+                  }
+                  if (!data.text && /\s$/.test(currentChars) && data.prevTag && data.prevTag.charAt(0) === '/') {
+                    trimTrailingWhitespace(insertionIndex - 1, data.nextTag);
+                  }
+                }
+                if (!stackNoCollapseWhitespace.length && data.nextTag !== 'html' && !(data.prevTag && data.nextTag)) {
+                  data.text = collapseWhitespace(data.text, options, false, false, true);
+                }
+              }
+              if (options.processScripts && specialContentTags(currentTag)) {
+                subtasks.push(new AsyncTask(function(data, cb) {
+                  processScript(data.text, options, currentAttrs, function(error, result) {
+                    data.text = result;
+                    return cb(error, data);
+                  });
+                }));
+              }
+              if (isExecutableScript(currentTag, currentAttrs)) {
+                subtasks.push(new AsyncTask(function(data, cb) {
+                  var result = options.minifyJS(data.text, null, minifyJS_cb);
+                  if (typeof result !== 'undefined') {
+                    return minifyJS_cb(null, result);
+                  }
+
+                  var callbackCalled = false;
+                  function minifyJS_cb(error, result) {
+                    if (!callbackCalled) {
+                      callbackCalled = true;
+                      data.text = result;
+                      return cb(error, data);
+                    }
+                  }
+                }));
+              }
+              if (isStyleSheet(currentTag, currentAttrs)) {
+                subtasks.push(new AsyncTask(function(data, cb) {
+                  var result = options.minifyCSS(data.text, null, minifyCSS_cb);
+                  if (typeof result !== 'undefined') {
+                    return minifyCSS_cb(null, result);
+                  }
+
+                  var callbackCalled = false;
+                  function minifyCSS_cb(error, result) {
+                    if (!callbackCalled) {
+                      callbackCalled = true;
+                      data.text = result;
+                      return cb(error, data);
+                    }
+                  }
+                }));
+              }
+              subtasks.push(
+                new AsyncTask(function(data, cb) {
+                  if (options.removeOptionalTags && data.text) {
+                    // <html> may be omitted if first thing inside is not comment
+                    // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+                    if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(data.text)) {
+                      insertionIndex -= removeStartTag(insertionIndex);
+                    }
+                    optionalStartTag = '';
+                    // </html> or </body> may be omitted if not followed by comment
+                    // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
+                    if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(data.text)) {
+                      insertionIndex -= removeEndTag(insertionIndex);
+                    }
+                    optionalEndTag = '';
+                  }
+                  charsPrevTag = /^\s*$/.test(data.text) ? data.prevTag : 'comment';
+                  if (options.decodeEntities && data.text && !specialContentTags(currentTag)) {
+                    // semi-colon can be omitted
+                    // https://mathiasbynens.be/notes/ambiguous-ampersands
+                    data.text = data.text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
+                  }
+                  if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
+                    data.text = data.text.replace(uidPattern, function(match, prefix, index) {
+                      return ignoredCustomMarkupChunks[+index][0];
+                    });
+                  }
+                  currentChars += data.text;
+                  if (data.text) {
+                    hasChars = true;
+                  }
+
+                  buffer.splice(insertionIndex++, 0, data.text);
+                  return cb(null, data);
+                })
+              );
+
+              // Run the subtasks.
+              new AsyncTaskGroup(subtasks, data).exec(cb);
+            }, {
+              text: text,
+              prevTag: prevTag,
+              nextTag: nextTag
+            })
+          );
+        },
+        comment: function(text, nonStandard) {
+          var placeholder = new Placeholder(); // Some unique reference.
+          buffer.push(placeholder);
+
+          asyncTasks.push(
+            new AsyncTask(function(data, cb) {
+              // The index of the placeholder may not be the same as where it
+              // was originally inserted at; therefore we need to search for it.
+              var insertionIndex = buffer.indexOf(placeholder);
+
+              // Remove the placeholder.
+              buffer.splice(insertionIndex, 1);
+
+              var subtasks = [];
+              var prefix = data.nonStandard ? '<!' : '<!--';
+              var suffix = data.nonStandard ? '>' : '-->';
+              if (isConditionalComment(data.text)) {
+                subtasks.push(new AsyncTask(function(data, cb) {
+                  cleanConditionalComment(data.text, options, function(error, result) {
+                    data.text = prefix + result + suffix;
+                    return cb(error, data);
+                  });
+                }));
+              }
+              else if (options.removeComments) {
+                if (isIgnoredComment(data.text, options)) {
+                  data.text = '<!--' + data.text + '-->';
+                }
+                else {
+                  data.text = '';
+                }
+              }
+              else {
+                data.text = prefix + data.text + suffix;
+              }
+
+              subtasks.push(new AsyncTask(function(data, cb) {
+                if (options.removeOptionalTags && data.text) {
+                  // preceding comments suppress tag omissions
+                  optionalStartTag = '';
+                  optionalEndTag = '';
+                }
+                buffer.splice(insertionIndex++, 0, data.text);
+                cb(null, data);
+              }));
+
+              // Run the subtasks.
+              new AsyncTaskGroup(subtasks, data).exec(cb);
+            }, {
+              text: text,
+              nonStandard: nonStandard
+            })
+          );
+        },
+        doctype: function(doctype) {
+          var placeholder = new Placeholder(); // Some unique reference.
+          buffer.push(placeholder);
+
+          asyncTasks.push(
+            new AsyncTask(function(data, cb) {
+              // The index of the placeholder may not be the same as where it
+              // was originally inserted at; therefore we need to search for it.
+              var insertionIndex = buffer.indexOf(placeholder);
+
+              // Remove the placeholder.
+              buffer.splice(insertionIndex, 1);
+
+              buffer.splice(insertionIndex++, 0, options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(data.doctype));
+              return cb(null, data);
+            }, {
+              doctype: doctype
+            })
+          );
+        },
+        customAttrAssign: options.customAttrAssign,
+        customAttrSurround: options.customAttrSurround
+      });
+
+      return cb();
     }
-    throw error;
-  }
+    catch (error) {
+      return cb(error);
+    }
+  }));
 
   function finalize() {
     if (options.removeOptionalTags) {
@@ -1482,17 +1583,12 @@ function minify(value, options, partialMarkup, cb) {
     return str;
   }
 
-  // Sync execution?
-  if (!hasCallback) {
-    return finalize();
-  }
-
   function callCallBack() {
     try {
-      cb(null, finalize());
+      return cb(null, finalize());
     }
     catch (error) {
-      cb(error);
+      return cb(error);
     }
   }
 
@@ -1501,26 +1597,13 @@ function minify(value, options, partialMarkup, cb) {
     return callCallBack();
   }
 
-  var asyncTasksCallbackCalled = false;
-  function onAsyncTasksComplete(error) {
-    // If an error occurs immediately call the callback.
-    // If other tasks complete afterwards, ignore them.
-    if (!asyncTasksCallbackCalled) {
+  new AsyncTaskGroup(asyncTasks)
+    .exec(function(error) {
       if (error) {
-        cb(error);
-        asyncTasksCallbackCalled = true;
-        return;
+        return cb(error);
       }
-      if (++asyncTasksComplete === asyncTasks.length) {
-        return callCallBack();
-      }
-    }
-  }
-
-  // Execute all the async tasks.
-  for (var i = 0; i < asyncTasks.length; i++) {
-    asyncTasks[i].exec(onAsyncTasksComplete);
-  }
+      return callCallBack();
+    });
   return;
 }
 
@@ -1569,16 +1652,14 @@ exports.minify = function(value, options, cb) {
   minify(value, options, false, function(error, result) {
     if (error) {
       if (hasCallback) {
-        cb(error);
-        return;
+        return cb(error);
       }
       throw error;
     }
 
     options.log('minified in: ' + (Date.now() - start) + 'ms');
     if (hasCallback) {
-      cb(null, result);
-      return;
+      return cb(null, result);
     }
     minified = result;
   });
