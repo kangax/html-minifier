@@ -1478,19 +1478,17 @@ function minify(value, options, partialMarkup, cb) {
   }
 
   function invokeCallBack() {
+    var result;
     try {
-      return cb(null, finalize());
+      result = finalize();
     }
     catch (error) {
       return cb(error);
     }
+    return cb(null, result);
   }
 
-  // No tasks?
-  if (tasks.length === 0) {
-    return invokeCallBack();
-  }
-
+  // Run the tasks.
   new TaskGroup(tasks)
     .exec(function(error) {
       if (error) {
