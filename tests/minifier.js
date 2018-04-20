@@ -597,7 +597,7 @@ QUnit.test('ignoring comments', function(assert) {
   input = '<p rel="<!-- comment in attribute -->" title="<!--! ignored comment in attribute -->">foo</p>';
   test_minify_sync(assert, input, { removeComments: true }, input);
 });
-// FIXME:
+
 QUnit.test('conditional comments', function(assert) {
   var input, output;
 
