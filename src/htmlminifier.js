@@ -1115,10 +1115,9 @@ function minify(value, options, partialMarkup, cb) {
               }
 
               var parts = [];
-              var isLast = true;
 
               // Loop through all the attributes and normalize them.
-              (function normalizeAttrLoop(i) {
+              (function normalizeAttrLoop(i, isLast) {
                 // Attributes to normalize?
                 if (--i >= 0) {
                   var innerLoopResult;
@@ -1133,7 +1132,7 @@ function minify(value, options, partialMarkup, cb) {
                       isLast = false;
                     }
 
-                    innerLoopResult = normalizeAttrLoop(i);
+                    innerLoopResult = normalizeAttrLoop(i, isLast);
                   });
                   return innerLoopResult;
                 }
@@ -1157,7 +1156,7 @@ function minify(value, options, partialMarkup, cb) {
                 }
 
                 return cb();
-              })(attrs.length);
+              })(attrs.length, true);
             })
           );
         },
