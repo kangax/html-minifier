@@ -262,7 +262,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
     attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '');
     attrValue = options.minifyJS(attrValue, true, cb);
     if (typeof attrValue !== 'undefined') {
-      return cb(null, attrValue);
+      return cb(attrValue);
     }
     return;
   }
@@ -274,14 +274,14 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
     else {
       attrValue = collapseWhitespaceAll(attrValue);
     }
-    return cb(null, attrValue);
+    return cb(attrValue);
   }
   else if (isUriTypeAttribute(attrName, tag)) {
     attrValue = trimWhitespace(attrValue);
-    return cb(null, isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue));
+    return cb(isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue));
   }
   else if (isNumberTypeAttribute(attrName, tag)) {
-    return cb(null, trimWhitespace(attrValue));
+    return cb(trimWhitespace(attrValue));
   }
   else if (attrName === 'style') {
     attrValue = trimWhitespace(attrValue);
@@ -291,11 +291,11 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
       }
       attrValue = options.minifyCSS(attrValue, 'inline', cb);
       if (typeof attrValue !== 'undefined') {
-        return cb(null, attrValue);
+        return cb(attrValue);
       }
       return;
     }
-    return cb(null, attrValue);
+    return cb(attrValue);
   }
   else if (isSrcset(attrName, tag)) {
     // https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
@@ -332,11 +332,11 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
     attrValue = trimWhitespace(attrValue);
     attrValue = options.minifyCSS(attrValue, 'media', cb);
     if (typeof attrValue !== 'undefined') {
-      return cb(null, attrValue);
+      return cb(attrValue);
     }
     return;
   }
-  return cb(null, attrValue);
+  return cb(attrValue);
 }
 
 function isMetaViewport(tag, attrs) {
@@ -556,11 +556,7 @@ function normalizeAttr(attr, attrs, tag, options, cb) {
     return cb();
   }
 
-  cleanAttributeValue(tag, attrName, attrValue, options, attrs, function(error, attrValue) {
-    if (error) {
-      return cb(error);
-    }
-
+  cleanAttributeValue(tag, attrName, attrValue, options, attrs, function(attrValue) {
     if (options.removeEmptyAttributes &&
       canDeleteEmptyAttribute(tag, attrName, attrValue, options)) {
       return cb();
@@ -1319,15 +1315,15 @@ function minify(value, options, partialMarkup, cb) {
                 subtasks.push(new Task(function(cb) {
                   var result = options.minifyJS(text, null, minifyJS_cb);
                   if (typeof result !== 'undefined') {
-                    return minifyJS_cb(null, result);
+                    return minifyJS_cb(result);
                   }
 
                   var callbackCalled = false;
-                  function minifyJS_cb(error, result) {
+                  function minifyJS_cb(result) {
                     if (!callbackCalled) {
                       callbackCalled = true;
                       text = result;
-                      return cb(error);
+                      return cb();
                     }
                   }
                 }));
@@ -1336,15 +1332,15 @@ function minify(value, options, partialMarkup, cb) {
                 subtasks.push(new Task(function(cb) {
                   var result = options.minifyCSS(text, null, minifyCSS_cb);
                   if (typeof result !== 'undefined') {
-                    return minifyCSS_cb(null, result);
+                    return minifyCSS_cb(result);
                   }
 
                   var callbackCalled = false;
-                  function minifyCSS_cb(error, result) {
+                  function minifyCSS_cb(result) {
                     if (!callbackCalled) {
                       callbackCalled = true;
                       text = result;
-                      return cb(error);
+                      return cb();
                     }
                   }
                 }));
@@ -1382,7 +1378,7 @@ function minify(value, options, partialMarkup, cb) {
                   }
 
                   buffer.push(text);
-                  return cb(null);
+                  return cb();
                 })
               );
 

@@ -39,14 +39,14 @@ function test_minify_sync(assert, input, options, output, description) {
     if (typeof options.minifyJS === 'function') {
       var minifyJS = options.minifyJS;
       options.minifyJS = function(text, inline, callback) {
-        callback(null, minifyJS(text, inline));
+        callback(minifyJS(text, inline));
       };
     }
     // Convert `minifyCSS` to use a callback.
     if (typeof options.minifyCSS === 'function') {
       var minifyCSS = options.minifyCSS;
       options.minifyCSS = function(text, type, callback) {
-        callback(null, minifyCSS(text, type));
+        callback(minifyCSS(text, type));
       };
     }
   }
