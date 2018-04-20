@@ -6,6 +6,33 @@ if (typeof minify === 'undefined') {
   self.minify = require('html-minifier').minify;
 }
 
+QUnit.test('`minifiy` exists', function(assert) {
+  assert.ok(minify);
+});
+
+/**
+ * Converts the options in the given object to use sync callbacks where possible.
+ *
+ * @param {Object} options
+ */
+function convertOptionsSyncCallbacks(options) {
+  if (options) {
+    if (typeof options.minifyJS === 'function') {
+      var minifyJS = options.minifyJS;
+      options.minifyJS = function(text, inline, callback) {
+        callback(minifyJS(text, inline));
+      };
+    }
+    if (typeof options.minifyCSS === 'function') {
+      var minifyCSS = options.minifyCSS;
+      options.minifyCSS = function(text, type, callback) {
+        callback(minifyCSS(text, type));
+      };
+    }
+  }
+  return options;
+}
+
 /**
  * Test the minify function synchronously, both with a callback and without.
  *
@@ -33,40 +60,15 @@ function test_minify_sync(assert, input, options, output, description) {
   // Standard test.
   assert.equal(minify(input, options), output, descriptionPrefix + description);
 
-  // Callback setup.
-  if (options) {
-    // Convert `minifyJS` to use a callback.
-    if (typeof options.minifyJS === 'function') {
-      var minifyJS = options.minifyJS;
-      options.minifyJS = function(text, inline, callback) {
-        callback(minifyJS(text, inline));
-      };
-    }
-    // Convert `minifyCSS` to use a callback.
-    if (typeof options.minifyCSS === 'function') {
-      var minifyCSS = options.minifyCSS;
-      options.minifyCSS = function(text, type, callback) {
-        callback(minifyCSS(text, type));
-      };
-    }
-  }
-
   descriptionPrefix = 'Synchronous Callback Test: ';
   var done = assert.async();
   var callbackTestFinished = false;
 
   // Callback test.
-  assert.notOk(minify(input, options, function(error, result) {
+  assert.notOk(minify(input, convertOptionsSyncCallbacks(options), function(error, result) {
     if (!callbackTestFinished) {
-      // Error should be null
-      if (error !== null) {
-        if (error instanceof Error) {
-          assert.equal(error, null, descriptionPrefix + 'An error occurred - stack trace:\n' + error.stack);
-        }
-        else {
-          assert.ok(false, descriptionPrefix + '"' + error + '" was returned as an error.');
-        }
-      }
+      assert.notOk(error, descriptionPrefix + 'An error occurred - stack trace:\n' + error.stack);
+
       assert.equal(result, output, descriptionPrefix + description);
       callbackTestFinished = true;
       done();
@@ -86,11 +88,17 @@ function test_minify_sync(assert, input, options, output, description) {
  *
  * @param {QUnit.assert} assert
  * @param {string} input
- * @param {Object} options
+ * @param {Object} [options]
  * @param {Error|Class<Error>|RegExp|Function<boolean>} [errorMatcher]
  * @param {string} [description]
  */
 function test_minify_sync_error(assert, input, options, errorMatcher, description) {
+  // Remove optional options parameter if it is not given.
+  if (typeof options === 'string') {
+    description = errorMatcher;
+    errorMatcher = options;
+    options = null;
+  }
   // Remove optional errorMatcher parameter if it is not given.
   if (typeof errorMatcher === 'string') {
     description = errorMatcher;
@@ -105,24 +113,24 @@ function test_minify_sync_error(assert, input, options, errorMatcher, descriptio
   var descriptionPrefix = 'Synchronous Standard Test: ';
 
   // Standard test.
-  assert.throws(function() { minify(input, options); }, errorMatcher, descriptionPrefix + description);
+  assert.throws(
+    function() {
+      minify(input, options);
+    },
+    errorMatcher,
+    descriptionPrefix + description
+  );
 
   descriptionPrefix = 'Synchronous Callback Test: ';
   var done = assert.async();
   var callbackTestFinished = false;
 
   // Callback test.
-  assert.notOk(minify(input, options, function(error, result) {
+  assert.notOk(minify(input, convertOptionsSyncCallbacks(options), function(error, result) {
     if (!callbackTestFinished) {
-      if (error === null) {
-        assert.ok(false, descriptionPrefix + 'An error should have occurred.');
-      }
-      else if (error instanceof Error) {
-        assert.throws(function() { throw error; }, errorMatcher, descriptionPrefix + description);
-      }
-      else {
-        assert.ok(false, descriptionPrefix + '"' + error + '" was returned as an error.');
-      }
+      assert.ok(error, descriptionPrefix + 'An error should have occurred.');
+      assert.ok(error instanceof Error, descriptionPrefix + '"' + error + '" was returned as an error.');
+      assert.throws(function() { throw error; }, errorMatcher, descriptionPrefix + description);
       assert.notOk(result);
       callbackTestFinished = true;
       done();
@@ -159,7 +167,7 @@ function test_minify_async(assert, input, options, output, description) {
     description = input;
   }
 
-  assert.timeout(100);
+  assert.timeout(10);
   var descriptionPrefix = 'Asynchronous Test: ';
   var done = assert.async();
 
@@ -199,7 +207,7 @@ function test_minify_async_error(assert, input, options, errorMatcher, descripti
     description = input;
   }
 
-  assert.timeout(100);
+  assert.timeout(10);
   var descriptionPrefix = 'Asynchronous Test: ';
   var done = assert.async();
 
@@ -217,10 +225,6 @@ function test_minify_async_error(assert, input, options, errorMatcher, descripti
     done();
   }));
 }
-
-QUnit.test('`minifiy` exists', function(assert) {
-  assert.ok(minify);
-});
 
 QUnit.test('parsing non-trivial markup', function(assert) {
   var input, output;
@@ -273,7 +277,7 @@ QUnit.test('parsing non-trivial markup', function(assert) {
   test_minify_sync(assert, input, input);
 
   input = '<$unicorn>';
-  test_minify_sync_error(assert, input, {}, 'Invalid tag name');
+  test_minify_sync_error(assert, input, 'Invalid tag name');
 
   input = '<begriffs.pagination ng-init="perPage=20" collection="logs" url="\'/api/logs?user=-1\'" per-page="perPage" per-page-presets="[10,20,50,100]" template-url="/assets/paginate-anything.html"></begriffs.pagination>';
   test_minify_sync(assert, input, input);
@@ -303,12 +307,7 @@ QUnit.test('parsing non-trivial markup', function(assert) {
   // https://github.com/kangax/html-minifier/issues/507
   input = '<tag v-ref:vm_pv :imgs=" objpicsurl_ "></tag>';
   test_minify_sync(assert, input, input);
-  test_minify_sync_error(
-    assert,
-    '<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123></tag>',
-    {},
-    'invalid attribute name'
-  );
+  test_minify_sync_error(assert, '<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123></tag>', 'invalid attribute name');
 
   // https://github.com/kangax/html-minifier/issues/512
   input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
@@ -319,19 +318,15 @@ QUnit.test('parsing non-trivial markup', function(assert) {
           ' data-ng-pattern="vm.options.format"' +
           ' data-options="vm.datepickerOptions">';
   test_minify_sync(assert, input, input);
-  test_minify_sync_error(
-    assert,
-    '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
-      ' <!--FIXME hardcoded placeholder - dates may not be used for service required fields yet. -->' +
-      ' placeholder="YYYY-MM-DD"' +
-      ' date-range-picker' +
-      ' data-ng-model="vm.value"' +
-      ' data-ng-model-options="{ debounce: 1000 }"' +
-      ' data-ng-pattern="vm.options.format"' +
-      ' data-options="vm.datepickerOptions">',
-    {},
-    'HTML comment inside tag'
-  );
+  input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
+          ' <!--FIXME hardcoded placeholder - dates may not be used for service required fields yet. -->' +
+          ' placeholder="YYYY-MM-DD"' +
+          ' date-range-picker' +
+          ' data-ng-model="vm.value"' +
+          ' data-ng-model-options="{ debounce: 1000 }"' +
+          ' data-ng-pattern="vm.options.format"' +
+          ' data-options="vm.datepickerOptions">';
+  test_minify_sync_error(assert, input, 'HTML comment inside tag');
 
   input = '<br a=\u00A0 b="&nbsp;" c="\u00A0">';
   output = '<br a="\u00A0" b="&nbsp;" c="\u00A0">';
@@ -3071,14 +3066,14 @@ QUnit.test('custom attribute collapse', function(assert) {
 
   input = '<div data-bind="\n' +
             'css: {\n' +
-              'fadeIn: selected(,\n' +
+              'fadeIn: selected(),\n' +
               'fadeOut: !selected()\n' +
             '},\n' +
             'visible: function () {\n' +
               'return pageWeAreOn() == \'home\';\n' +
             '}\n' +
           '">foo</div>';
-  output = '<div data-bind="css: {fadeIn: selected(,fadeOut: !selected()},visible: function () {return pageWeAreOn() == \'home\';}">foo</div>';
+  output = '<div data-bind="css: {fadeIn: selected(),fadeOut: !selected()},visible: function () {return pageWeAreOn() == \'home\';}">foo</div>';
 
   test_minify_sync(assert, input, input);
   test_minify_sync(assert, input, { customAttrCollapse: /data-bind/ }, output);
@@ -3636,13 +3631,13 @@ QUnit.test('Async execution', function(assert) {
   function cssAsync(text, type, cb) {
     setTimeout(function() {
       cb(cssSync(text, type));
-    }, 0);
+    }, 1);
   }
 
   function jsAsync(text, inline, cb) {
     setTimeout(function() {
       cb(jsSync(text, inline));
-    }, 0);
+    }, 1);
   }
 
   var styleInput = '<style>div#foo { background-color: red; color: white }</style>';
@@ -3671,7 +3666,7 @@ QUnit.test('Async execution', function(assert) {
 QUnit.test('minify error with callback', function(assert) {
   var input = '<style>div#foo { background-color: red; }</style><$unicorn>';
 
-  test_minify_async_error(assert, input, {}, 'Invalid tag name');
+  test_minify_async_error(assert, input, 'Invalid tag name');
 });
 
 QUnit.test('error in callback', function(assert) {
