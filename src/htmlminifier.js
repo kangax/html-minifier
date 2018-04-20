@@ -257,10 +257,14 @@ function isSrcset(attrName, tag) {
   return attrName === 'srcset' && srcsetTags(tag);
 }
 
-function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
+function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
   if (attrValue && isEventAttribute(attrName, options)) {
     attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '');
-    return options.minifyJS(attrValue, true); // TODO: add callback
+    attrValue = options.minifyJS(attrValue, true, cb);
+    if (typeof attrValue !== 'undefined') {
+      return cb(null, attrValue);
+    }
+    return;
   }
   else if (attrName === 'class') {
     attrValue = trimWhitespace(attrValue);
@@ -270,14 +274,14 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
     else {
       attrValue = collapseWhitespaceAll(attrValue);
     }
-    return attrValue;
+    return cb(null, attrValue);
   }
   else if (isUriTypeAttribute(attrName, tag)) {
     attrValue = trimWhitespace(attrValue);
-    return isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue);
+    return cb(null, isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue));
   }
   else if (isNumberTypeAttribute(attrName, tag)) {
-    return trimWhitespace(attrValue);
+    return cb(null, trimWhitespace(attrValue));
   }
   else if (attrName === 'style') {
     attrValue = trimWhitespace(attrValue);
@@ -285,9 +289,13 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
       if (/;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
         attrValue = attrValue.replace(/\s*;$/, ';');
       }
-      attrValue = options.minifyCSS(attrValue, 'inline'); // TODO: add callback
+      attrValue = options.minifyCSS(attrValue, 'inline', cb);
+      if (typeof attrValue !== 'undefined') {
+        return cb(null, attrValue);
+      }
+      return;
     }
-    return attrValue;
+    return cb(null, attrValue);
   }
   else if (isSrcset(attrName, tag)) {
     // https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
@@ -322,9 +330,13 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (isMediaQuery(tag, attrs, attrName)) {
     attrValue = trimWhitespace(attrValue);
-    return options.minifyCSS(attrValue, 'media'); // TODO: add callback
+    attrValue = options.minifyCSS(attrValue, 'media', cb);
+    if (typeof attrValue !== 'undefined') {
+      return cb(null, attrValue);
+    }
+    return;
   }
-  return attrValue;
+  return cb(null, attrValue);
 }
 
 function isMetaViewport(tag, attrs) {
@@ -540,21 +552,25 @@ function normalizeAttr(attr, attrs, tag, options, cb) {
     return cb();
   }
 
-  attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
+  cleanAttributeValue(tag, attrName, attrValue, options, attrs, function(error, attrValue) {
+    if (error) {
+      return cb(error);
+    }
 
-  if (options.removeEmptyAttributes &&
+    if (options.removeEmptyAttributes &&
       canDeleteEmptyAttribute(tag, attrName, attrValue, options)) {
-    return cb();
-  }
+      return cb();
+    }
 
-  if (options.decodeEntities && attrValue) {
-    attrValue = attrValue.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp;$1');
-  }
+    if (options.decodeEntities && attrValue) {
+      attrValue = attrValue.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp;$1');
+    }
 
-  return cb(null, {
-    attr: attr,
-    name: attrName,
-    value: attrValue
+    return cb(null, {
+      attr: attr,
+      name: attrName,
+      value: attrValue
+    });
   });
 }
 
