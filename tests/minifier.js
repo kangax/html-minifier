@@ -137,6 +137,87 @@ function test_minify_sync_error(assert, input, options, errorMatcher, descriptio
   }
 }
 
+/**
+ * Test the minify function asynchronously.
+ *
+ * @param {QUnit.assert} assert
+ * @param {string} input
+ * @param {Object} [options]
+ * @param {string} output
+ * @param {string} [description]
+ */
+function test_minify_async(assert, input, options, output, description) {
+  // Remove optional options parameter if it is not given.
+  if (typeof options === 'string') {
+    description = output;
+    output = options;
+    options = null;
+  }
+
+  // Set default description as input.
+  if (typeof description === 'undefined') {
+    description = input;
+  }
+
+  assert.timeout(100);
+  var descriptionPrefix = 'Asynchronous Test: ';
+  var done = assert.async();
+
+  assert.notOk(minify(input, options, function(error, result) {
+    // Error should be null
+    if (error !== null) {
+      if (error instanceof Error) {
+        assert.equal(error, null, descriptionPrefix + 'An error occurred - stack trace:\n' + error.stack);
+      }
+      else {
+        assert.ok(false, descriptionPrefix + '"' + error + '" was returned as an error.');
+      }
+    }
+    assert.equal(result, output, descriptionPrefix + description);
+    done();
+  }));
+}
+
+/**
+ * Test the minify function asynchronously for an expected error.
+ *
+ * @param {QUnit.assert} assert
+ * @param {string} input
+ * @param {Object} options
+ * @param {Error|Class<Error>|RegExp|Function<boolean>} [errorMatcher]
+ * @param {string} [description]
+ */
+function test_minify_async_error(assert, input, options, errorMatcher, description) {
+  // Remove optional errorMatcher parameter if it is not given.
+  if (typeof errorMatcher === 'string') {
+    description = errorMatcher;
+    errorMatcher = null;
+  }
+
+  // Set default description as input.
+  if (typeof description === 'undefined') {
+    description = input;
+  }
+
+  assert.timeout(100);
+  var descriptionPrefix = 'Asynchronous Test: ';
+  var done = assert.async();
+
+  assert.notOk(minify(input, options, function(error, result) {
+    if (error === null) {
+      assert.ok(false, descriptionPrefix + 'An error should have occurred.');
+    }
+    else if (error instanceof Error) {
+      assert.throws(function() { throw error; }, errorMatcher, descriptionPrefix + description);
+    }
+    else {
+      assert.ok(false, descriptionPrefix + '"' + error + '" was returned as an error.');
+    }
+    assert.notOk(result);
+    done();
+  }));
+}
+
 QUnit.test('`minifiy` exists', function(assert) {
   assert.ok(minify);
 });
@@ -3539,4 +3620,67 @@ QUnit.test('canCollapseWhitespace and canTrimWhitespace hooks', function(assert)
     canTrimWhitespace: canCollapseAndTrimWhitespace,
     canCollapseWhitespace: canCollapseAndTrimWhitespace
   }, output);
+});
+
+QUnit.test('Async execution', function(assert) {
+  var input, output;
+
+  function cssSync(text, type) {
+    return (type || 'Normal') + ' CSS';
+  }
+
+  function jsSync(text, inline) {
+    return inline ? 'Inline JS' : 'Normal JS';
+  }
+
+  function cssAsync(text, type, cb) {
+    setTimeout(function() {
+      cb(cssSync(text, type));
+    }, 0);
+  }
+
+  function jsAsync(text, inline, cb) {
+    setTimeout(function() {
+      cb(jsSync(text, inline));
+    }, 0);
+  }
+
+  var styleInput = '<style>div#foo { background-color: red; color: white }</style>';
+  var scriptInput = '<script>(function(  ){  console.log("Hello" + " World"); })()</script>';
+  input = styleInput + scriptInput;
+
+  var styleOutput = '<style>Normal CSS</style>';
+  var scriptOutput = '<script>Normal JS</script>';
+
+  test_minify_async(assert, input, {}, input);
+
+  output = styleOutput + scriptInput;
+  test_minify_async(assert, input, { minifyCSS: cssAsync }, output);
+  test_minify_async(assert, input, { minifyCSS: cssAsync, minifyJS: false }, output);
+
+  output = styleInput + scriptOutput;
+  test_minify_async(assert, input, { minifyJS: jsAsync }, output);
+  test_minify_async(assert, input, { minifyCSS: false, minifyJS: jsAsync }, output);
+
+  output = styleOutput + scriptOutput;
+  test_minify_async(assert, input, { minifyCSS: cssAsync, minifyJS: jsAsync }, output);
+  test_minify_async(assert, input, { minifyCSS: cssAsync, minifyJS: jsSync }, output);
+  test_minify_async(assert, input, { minifyCSS: cssSync, minifyJS: jsAsync }, output);
+});
+
+QUnit.test('minify error with callback', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style><$unicorn>';
+
+  test_minify_async_error(assert, input, {}, 'Invalid tag name');
+});
+
+QUnit.test('error in callback', function(assert) {
+  var input = '<style>div#foo { background-color: red; }</style>';
+  var error = new Error();
+
+  function css() {
+    throw error;
+  }
+
+  test_minify_async_error(assert, input, { minifyCSS: css }, error);
 });
