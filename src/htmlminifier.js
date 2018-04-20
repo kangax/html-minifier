@@ -371,11 +371,15 @@ function unwrapMediaQuery(text) {
 }
 
 function cleanConditionalComment(comment, options, cb) {
-  return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/, function(match, prefix, text, suffix) {
-    return minify(text, options, true, function(error, result) {
-      return cb(error, prefix + result + suffix);
-    });
-  }) : cb(null, comment);
+  if (options.processConditionalComments) {
+    var replaceDetails = comment.match(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/);
+    if (replaceDetails) {
+      return minify(replaceDetails[2], options, true, function(error, result) {
+        return cb(error, replaceDetails[1] + result + replaceDetails[3]);
+      });
+    }
+  }
+  return cb(null, comment);
 }
 
 function processScript(text, options, currentAttrs, cb) {
