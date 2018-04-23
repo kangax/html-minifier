@@ -67,9 +67,14 @@ function test_minify_sync(assert, input, options, output, description) {
   // Callback test.
   assert.notOk(minify(input, convertOptionsSyncCallbacks(options), function(error, result) {
     if (!callbackTestFinished) {
-      assert.notOk(error, descriptionPrefix + 'An error occurred - stack trace:\n' + error.stack);
+      var stackTrace = '';
+      if (error && error instanceof Error) {
+        stackTrace = error.stack;
+      }
 
+      assert.notOk(error, descriptionPrefix + 'An error occurred - stack trace:\n' + stackTrace);
       assert.equal(result, output, descriptionPrefix + description);
+
       callbackTestFinished = true;
       done();
     }
