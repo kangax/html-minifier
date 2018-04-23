@@ -104,6 +104,7 @@ function test_minify_sync_error(assert, input, options, errorMatcher, descriptio
     errorMatcher = options;
     options = null;
   }
+
   // Remove optional errorMatcher parameter if it is not given.
   if (typeof errorMatcher === 'string') {
     description = errorMatcher;
@@ -194,11 +195,18 @@ function test_minify_async(assert, input, options, output, description) {
  *
  * @param {QUnit.assert} assert
  * @param {string} input
- * @param {Object} options
+ * @param {Object} [options]
  * @param {Error|Class<Error>|RegExp|Function<boolean>} [errorMatcher]
  * @param {string} [description]
  */
 function test_minify_async_error(assert, input, options, errorMatcher, description) {
+  // Remove optional options parameter if it is not given.
+  if (typeof options === 'string') {
+    description = errorMatcher;
+    errorMatcher = options;
+    options = null;
+  }
+
   // Remove optional errorMatcher parameter if it is not given.
   if (typeof errorMatcher === 'string') {
     description = errorMatcher;
