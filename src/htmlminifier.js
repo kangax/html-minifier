@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * A callback that tasks an error and a result.
+ * @typedef {function([?Error], [string]):void} Callback
+ */
+
 var CleanCSS = require('clean-css');
 var decode = require('he').decode;
 var HTMLParser = require('./htmlparser').HTMLParser;
@@ -842,7 +847,7 @@ function createSortFns(value, options, uidIgnore, uidAttr, cb) {
  * @param {string} value
  * @param {Object} options
  * @param {boolean} partialMarkup
- * @param {Function<Error, string>} cb
+ * @param {Callback} cb
  */
 function minify(value, options, partialMarkup, cb) {
   if (options.collapseWhitespace) {
@@ -877,7 +882,7 @@ function minify(value, options, partialMarkup, cb) {
    *
    * @constructor
    *
-   * @param {Function<Function<Error>>} task
+   * @param {function(Callback)} task
    */
   function Task(task) {
     this.task = task;
@@ -886,7 +891,7 @@ function minify(value, options, partialMarkup, cb) {
   /**
    * Execute this task.
    *
-   * @param {Function<Error>} cb
+   * @param {Callback} cb
    */
   Task.prototype.exec = function(cb) {
     this.task(cb);
@@ -906,7 +911,7 @@ function minify(value, options, partialMarkup, cb) {
   /**
    * Run all tasks in this group in series.
    *
-   * @param {Function<Error>} cb
+   * @param {Callback} cb
    */
   TaskGroup.prototype.exec = function(cb) {
     /**

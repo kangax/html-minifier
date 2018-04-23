@@ -36,7 +36,7 @@ function convertOptionsSyncCallbacks(options) {
 /**
  * Test the minify function synchronously, both with a callback and without.
  *
- * @param {QUnit.assert} assert
+ * @param {Assert} assert
  * @param {string} input
  * @param {Object} [options]
  * @param {string} output
@@ -91,10 +91,10 @@ function test_minify_sync(assert, input, options, output, description) {
 /**
  * Test the minify function synchronously for an expected error, both with a callback and without.
  *
- * @param {QUnit.assert} assert
+ * @param {Assert} assert
  * @param {string} input
  * @param {Object} [options]
- * @param {Error|Class<Error>|RegExp|Function<boolean>} [errorMatcher]
+ * @param {Error|function(new:Error)|RegExp|function(boolean)} [errorMatcher]
  * @param {string} [description]
  */
 function test_minify_sync_error(assert, input, options, errorMatcher, description) {
@@ -154,7 +154,7 @@ function test_minify_sync_error(assert, input, options, errorMatcher, descriptio
 /**
  * Test the minify function asynchronously.
  *
- * @param {QUnit.assert} assert
+ * @param {Assert} assert
  * @param {string} input
  * @param {Object} [options]
  * @param {string} output
@@ -193,10 +193,10 @@ function test_minify_async(assert, input, options, output, description) {
 /**
  * Test the minify function asynchronously for an expected error.
  *
- * @param {QUnit.assert} assert
+ * @param {Assert} assert
  * @param {string} input
  * @param {Object} [options]
- * @param {Error|Class<Error>|RegExp|Function<boolean>} [errorMatcher]
+ * @param {Error|function(new:Error)|RegExp|function(boolean)} [errorMatcher]
  * @param {string} [description]
  */
 function test_minify_async_error(assert, input, options, errorMatcher, description) {
