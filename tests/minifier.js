@@ -3683,7 +3683,7 @@ QUnit.test('error in callback', function(assert) {
 QUnit.test('callback called multiple times', function(assert) {
   var input, done;
 
-  function bad(cb) {
+  function bad(_, __, cb) {
     try {
       cb('');
       cb('');
@@ -3697,12 +3697,14 @@ QUnit.test('callback called multiple times', function(assert) {
     }
   }
 
-  done = assert.async();
-  test_minify_async_error(assert, input, { minifyCSS: bad });
+  input = '<style>div#foo { background-color: red; color: white }</style><script>(function(  ){  console.log("Hello" + " World"); })()</script>';
 
   done = assert.async();
-  test_minify_async_error(assert, input, { minifyJS: bad });
+  minify(input, { minifyCSS: bad });
 
   done = assert.async();
-  test_minify_async_error(assert, input, { minifyCSS: bad, minifyJS: bad });
+  minify(input, { minifyJS: bad });
+
+  done = assert.async(2);
+  minify(input, { minifyCSS: bad, minifyJS: bad });
 });

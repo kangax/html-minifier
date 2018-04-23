@@ -1320,7 +1320,10 @@ function minify(value, options, partialMarkup, cb) {
 
                   var callbackCalled = false;
                   function minifyJS_cb(result) {
-                    if (!callbackCalled) {
+                    if (callbackCalled) {
+                      throw new Error('Async completion has already occurred.');
+                    }
+                    else {
                       callbackCalled = true;
                       text = result;
                       return cb();
@@ -1337,7 +1340,10 @@ function minify(value, options, partialMarkup, cb) {
 
                   var callbackCalled = false;
                   function minifyCSS_cb(result) {
-                    if (!callbackCalled) {
+                    if (callbackCalled) {
+                      throw new Error('Async completion has already occurred.');
+                    }
+                    else {
                       callbackCalled = true;
                       text = result;
                       return cb();
