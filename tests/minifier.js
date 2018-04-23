@@ -172,7 +172,7 @@ function test_minify_async(assert, input, options, output, description) {
     description = input;
   }
 
-  assert.timeout(10);
+  assert.timeout(100);
   var descriptionPrefix = 'Asynchronous Test: ';
   var done = assert.async();
 
@@ -210,7 +210,7 @@ function test_minify_async_error(assert, input, options, errorMatcher, descripti
     description = input;
   }
 
-  assert.timeout(10);
+  assert.timeout(100);
   var descriptionPrefix = 'Asynchronous Test: ';
   var done = assert.async();
 
