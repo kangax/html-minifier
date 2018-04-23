@@ -72,7 +72,7 @@ function test_minify_sync(assert, input, options, output, description) {
         stackTrace = error.stack;
       }
 
-      assert.notOk(error, descriptionPrefix + 'An error occurred - stack trace:\n' + stackTrace);
+      assert.equal(error, null, descriptionPrefix + 'An error occurred - stack trace:\n' + stackTrace);
       assert.equal(result, output, descriptionPrefix + description);
 
       callbackTestFinished = true;
@@ -177,16 +177,14 @@ function test_minify_async(assert, input, options, output, description) {
   var done = assert.async();
 
   assert.notOk(minify(input, options, function(error, result) {
-    // Error should be null
-    if (error !== null) {
-      if (error instanceof Error) {
-        assert.equal(error, null, descriptionPrefix + 'An error occurred - stack trace:\n' + error.stack);
-      }
-      else {
-        assert.ok(false, descriptionPrefix + '"' + error + '" was returned as an error.');
-      }
+    var stackTrace = '';
+    if (error && error instanceof Error) {
+      stackTrace = error.stack;
     }
+
+    assert.equal(error, null, descriptionPrefix + 'An error occurred - stack trace:\n' + stackTrace);
     assert.equal(result, output, descriptionPrefix + description);
+
     done();
   }));
 }
@@ -217,15 +215,9 @@ function test_minify_async_error(assert, input, options, errorMatcher, descripti
   var done = assert.async();
 
   assert.notOk(minify(input, options, function(error, result) {
-    if (error === null) {
-      assert.ok(false, descriptionPrefix + 'An error should have occurred.');
-    }
-    else if (error instanceof Error) {
-      assert.throws(function() { throw error; }, errorMatcher, descriptionPrefix + description);
-    }
-    else {
-      assert.ok(false, descriptionPrefix + '"' + error + '" was returned as an error.');
-    }
+    assert.ok(error, descriptionPrefix + 'An error should have occurred.');
+    assert.ok(error instanceof Error, descriptionPrefix + '"' + error + '" was returned as an error.');
+    assert.throws(function() { throw error; }, errorMatcher, descriptionPrefix + description);
     assert.notOk(result);
     done();
   }));
