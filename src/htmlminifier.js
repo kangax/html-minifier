@@ -877,7 +877,7 @@ function minify(value, options, partialMarkup, cb) {
    *
    * @constructor
    *
-   * @param {Function<string, Function<Error>>} task
+   * @param {Function<Function<Error>>} task
    */
   function Task(task) {
     this.task = task;
