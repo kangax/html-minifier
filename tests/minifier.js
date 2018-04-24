@@ -1,6 +1,15 @@
 /* global minify */
 'use strict';
 
+QUnit.config.autostart = false;
+if (typeof minify === 'undefined') {
+  self.minify = require('html-minifier').minify;
+}
+
+QUnit.test('`minifiy` exists', function(assert) {
+  assert.ok(minify);
+});
+
 /**
  * Converts the options in the given object to use callbacks where possible.
  *
@@ -140,7 +149,7 @@ function test_minify(assert, input, output, inputOptions, description, asyncOnly
  *
  * @param {Assert} assert
  * @param {string} input
- * @param {Object} [options]
+ * @param {Object} [inputOptions]
  * @param {Error|function(new:Error)|RegExp|function(boolean)} [errorMatcher]
  * @param {string} [description=input]
  * @param {boolean} [asyncOnly=false]
@@ -222,15 +231,6 @@ function test_minify_error(assert, input, inputOptions, errorMatcher, descriptio
     }
   });
 }
-
-QUnit.config.autostart = false;
-if (typeof minify === 'undefined') {
-  self.minify = require('html-minifier').minify;
-}
-
-QUnit.test('`minifiy` exists', function(assert) {
-  assert.ok(minify);
-});
 
 QUnit.test('parsing non-trivial markup', function(assert) {
   var input, output;
