@@ -296,9 +296,7 @@ QUnit.test('parsing non-trivial markup', function(assert) {
   test_minify(assert, input, input);
 
   input = '<$unicorn>';
-  assert.throws(function() {
-    minify(input);
-  }, 'Invalid tag name');
+  test_minify_error(assert, input, null, null, 'Invalid tag name');
 
   input = '<begriffs.pagination ng-init="perPage=20" collection="logs" url="\'/api/logs?user=-1\'" per-page="perPage" per-page-presets="[10,20,50,100]" template-url="/assets/paginate-anything.html"></begriffs.pagination>';
   test_minify(assert, input, input);
@@ -326,9 +324,7 @@ QUnit.test('parsing non-trivial markup', function(assert) {
   // https://github.com/kangax/html-minifier/issues/507
   input = '<tag v-ref:vm_pv :imgs=" objpicsurl_ "></tag>';
   test_minify(assert, input, input);
-  assert.throws(function() {
-    minify('<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123></tag>');
-  }, 'invalid attribute name');
+  test_minify_error(assert, '<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123></tag>', null, null, 'invalid attribute name');
 
   // https://github.com/kangax/html-minifier/issues/512
   input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
@@ -339,18 +335,14 @@ QUnit.test('parsing non-trivial markup', function(assert) {
           ' data-ng-pattern="vm.options.format"' +
           ' data-options="vm.datepickerOptions">';
   test_minify(assert, input, input);
-  assert.throws(function() {
-    minify(
-      '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
+  test_minify_error(assert, '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
       ' <!--FIXME hardcoded placeholder - dates may not be used for service required fields yet. -->' +
       ' placeholder="YYYY-MM-DD"' +
       ' date-range-picker' +
       ' data-ng-model="vm.value"' +
       ' data-ng-model-options="{ debounce: 1000 }"' +
       ' data-ng-pattern="vm.options.format"' +
-      ' data-options="vm.datepickerOptions">'
-    );
-  }, 'HTML comment inside tag');
+      ' data-options="vm.datepickerOptions">', null, null, 'HTML comment inside tag');
 
   input = '<br a=\u00A0 b="&nbsp;" c="\u00A0">';
   output = '<br a="\u00A0" b="&nbsp;" c="\u00A0">';
