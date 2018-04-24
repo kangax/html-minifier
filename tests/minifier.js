@@ -89,6 +89,23 @@ function test_minify(assert, input, output, inputOptions, description, asyncOnly
     asyncOnly = false;
   }
 
+  // Safety Checks - ensure this function was called with the correct var types.
+  if (typeof input !== 'string') {
+    throw new Error('Bad input: ' + input);
+  }
+  if (typeof output !== 'string') {
+    throw new Error('Bad output: ' + output);
+  }
+  if (inputOptions !== null && typeof inputOptions !== 'undefined' && typeof inputOptions !== 'object') {
+    throw new Error('Bad inputOptions: ' + inputOptions);
+  }
+  if (typeof description !== 'string') {
+    throw new Error('Bad description: ' + description);
+  }
+  if (typeof asyncOnly !== 'boolean') {
+    throw new Error('Bad asyncOnly: ' + asyncOnly);
+  }
+
   // Standard test.
   if (!asyncOnly) {
     var descriptionPrefix = 'Standard Test: ';
@@ -258,7 +275,7 @@ QUnit.test('parsing non-trivial markup', function(assert) {
 
   test_minify(assert, '<a title="x"href=" ">foo</a>', '<a title="x" href="">foo</a>');
   test_minify(assert, '<p id=""class=""title="">x', '<p id="" class="" title="">x</p>');
-  test_minify(assert, '<p x="x\'"">x</p>', '<p x="x\'">x</p>', 'trailing quote should be ignored');
+  test_minify(assert, '<p x="x\'"">x</p>', '<p x="x\'">x</p>', null, 'trailing quote should be ignored');
   test_minify(assert, '<a href="#"><p>Click me</p></a>', '<a href="#"><p>Click me</p></a>');
   test_minify(assert, '<span><button>Hit me</button></span>', '<span><button>Hit me</button></span>');
   test_minify(assert, '<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>', '<object type="image/svg+xml" data="image.svg"><div>[fallback image]</div></object>');
