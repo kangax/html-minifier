@@ -879,7 +879,7 @@ var Task = (function() {
   Task.prototype.exec = function(cb) {
     // Callback?
     if (cb) {
-      // Make the callback async.
+      // Make the callback async to avoid a `Maximum call stack size exceeded` error.
       var origCb = cb;
       cb = function() {
         var args = arguments;
