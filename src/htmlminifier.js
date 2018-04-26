@@ -265,9 +265,11 @@ function isSrcset(attrName, tag) {
 function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
   if (attrValue && isEventAttribute(attrName, options)) {
     attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '');
-    attrValue = options.minifyJS(attrValue, true, cb);
+    attrValue = options.minifyJS(attrValue, true, function(result) {
+      cb(null, result);
+    });
     if (typeof attrValue !== 'undefined') {
-      return cb(attrValue);
+      return cb(null, attrValue);
     }
     return;
   }
@@ -279,14 +281,14 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
     else {
       attrValue = collapseWhitespaceAll(attrValue);
     }
-    return cb(attrValue);
+    return cb(null, attrValue);
   }
   else if (isUriTypeAttribute(attrName, tag)) {
     attrValue = trimWhitespace(attrValue);
-    return cb(isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue));
+    return cb(null, isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue));
   }
   else if (isNumberTypeAttribute(attrName, tag)) {
-    return cb(trimWhitespace(attrValue));
+    return cb(null, trimWhitespace(attrValue));
   }
   else if (attrName === 'style') {
     attrValue = trimWhitespace(attrValue);
@@ -294,13 +296,15 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
       if (/;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
         attrValue = attrValue.replace(/\s*;$/, ';');
       }
-      attrValue = options.minifyCSS(attrValue, 'inline', cb);
+      attrValue = options.minifyCSS(attrValue, 'inline', function(result) {
+        cb(null, result);
+      });
       if (typeof attrValue !== 'undefined') {
-        return cb(attrValue);
+        return cb(null, attrValue);
       }
       return;
     }
-    return cb(attrValue);
+    return cb(null, attrValue);
   }
   else if (isSrcset(attrName, tag)) {
     // https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
@@ -335,13 +339,15 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
   }
   else if (isMediaQuery(tag, attrs, attrName)) {
     attrValue = trimWhitespace(attrValue);
-    attrValue = options.minifyCSS(attrValue, 'media', cb);
+    attrValue = options.minifyCSS(attrValue, 'media', function(result) {
+      cb(null, result);
+    });
     if (typeof attrValue !== 'undefined') {
-      return cb(attrValue);
+      return cb(null, attrValue);
     }
     return;
   }
-  return cb(attrValue);
+  return cb(null, attrValue);
 }
 
 function isMetaViewport(tag, attrs) {
@@ -394,7 +400,7 @@ function processScript(text, options, currentAttrs, cb) {
       return minify(text, options, false, cb);
     }
   }
-  return cb(text);
+  return cb(null, text);
 }
 
 // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -561,7 +567,11 @@ function normalizeAttr(attr, attrs, tag, options, cb) {
     return cb();
   }
 
-  cleanAttributeValue(tag, attrName, attrValue, options, attrs, function(attrValue) {
+  cleanAttributeValue(tag, attrName, attrValue, options, attrs, function(error, attrValue) {
+    if (error) {
+      return cb(error);
+    }
+
     if (options.removeEmptyAttributes &&
       canDeleteEmptyAttribute(tag, attrName, attrValue, options)) {
       return cb();
