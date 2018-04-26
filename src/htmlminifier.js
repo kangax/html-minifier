@@ -871,41 +871,9 @@ var Task = (function() {
   /**
    * Execute this task.
    *
-   * If a callback is given, the task will complete asynchronously, otherwise
-   * synchronously.
-   *
-   * @param {Callback} [cb]
+   * @param {Callback} cb
    */
   Task.prototype.exec = function(cb) {
-    // Callback?
-    if (cb) {
-      // Make the callback async to avoid a `Maximum call stack size exceeded` error.
-      var origCb = cb;
-      cb = function() {
-        var args = arguments;
-        if (process && process.nextTick) {
-          process.nextTick(function() {
-            origCb.apply(null, args);
-          });
-        }
-        else {
-          setTimeout(function() {
-            origCb.apply(null, args);
-          }, 0);
-        }
-      };
-    }
-    // No callback?
-    else {
-      // Create simple callback to handle errors.
-      cb = function(error) {
-        if (error) {
-          Task.errorCb(error);
-        }
-      };
-    }
-
-    // Run the task.
     this.task(cb);
   };
 
@@ -950,15 +918,20 @@ var TaskGroup = (function() {
             if (error) {
               return cb(error);
             }
-            if (this.tasks[index].cbExecuted) {
-              return cb(new Error('Async completion has already occurred.'));
-            }
-            this.tasks[index].cbExecuted = true;
             implementation.call(this, index + 1);
           }.bind(this));
         }
         catch (error) {
-          cb(error);
+          // Recover from `Maximum call stack size exceeded`.
+          if (error.message === 'Maximum call stack size exceeded') {
+            // Wait for stack to clear, then try again.
+            setTimeout(function() {
+              implementation.call(this, index);
+            }.bind(this), 0);
+          }
+          else {
+            cb(error);
+          }
         }
       }
       else {
@@ -979,7 +952,13 @@ var TaskGroup = (function() {
  */
 function minify(value, options, partialMarkup, cb) {
   var topLevelCb = cb;
-  Task.errorCb = cb;
+
+  // Calls the `topLevelCb` if an error is passed in.
+  function errorCallback(error) {
+    if (error) {
+      topLevelCb(error);
+    }
+  }
 
   if (options.collapseWhitespace) {
     value = collapseWhitespace(value, options, true, true);
@@ -1074,7 +1053,7 @@ function minify(value, options, partialMarkup, cb) {
       createSortFns(value, options, uidIgnore, uidAttr, cb);
     });
     if (options.ensureSynchronicity) {
-      nextTask.exec();
+      nextTask.exec(errorCallback);
     }
     else {
       tasks.push(nextTask);
@@ -1252,7 +1231,7 @@ function minify(value, options, partialMarkup, cb) {
             })(attrs.length, true);
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec();
+            nextTask.exec(errorCallback);
           }
           else {
             subtasks.push(nextTask);
@@ -1329,7 +1308,7 @@ function minify(value, options, partialMarkup, cb) {
             return cb();
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec();
+            nextTask.exec(errorCallback);
           }
           else {
             subtasks.push(nextTask);
@@ -1396,7 +1375,7 @@ function minify(value, options, partialMarkup, cb) {
                 });
               });
               if (options.ensureSynchronicity) {
-                nextTask.exec();
+                nextTask.exec(errorCallback);
               }
               else {
                 subtasks.push(nextTask);
@@ -1422,7 +1401,7 @@ function minify(value, options, partialMarkup, cb) {
                 }
               });
               if (options.ensureSynchronicity) {
-                nextTask.exec();
+                nextTask.exec(errorCallback);
               }
               else {
                 subtasks.push(nextTask);
@@ -1448,7 +1427,7 @@ function minify(value, options, partialMarkup, cb) {
                 }
               });
               if (options.ensureSynchronicity) {
-                nextTask.exec();
+                nextTask.exec(errorCallback);
               }
               else {
                 subtasks.push(nextTask);
@@ -1489,7 +1468,7 @@ function minify(value, options, partialMarkup, cb) {
               return cb();
             });
             if (options.ensureSynchronicity) {
-              nextTask.exec();
+              nextTask.exec(errorCallback);
             }
             else {
               subtasks.push(nextTask);
@@ -1502,7 +1481,7 @@ function minify(value, options, partialMarkup, cb) {
             }
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec();
+            nextTask.exec(errorCallback);
           }
           else {
             subtasks.push(nextTask);
@@ -1521,7 +1500,7 @@ function minify(value, options, partialMarkup, cb) {
                 });
               });
               if (options.ensureSynchronicity) {
-                nextTask.exec();
+                nextTask.exec(errorCallback);
               }
               else {
                 subtasks.push(nextTask);
@@ -1549,7 +1528,7 @@ function minify(value, options, partialMarkup, cb) {
               cb();
             });
             if (options.ensureSynchronicity) {
-              nextTask.exec();
+              nextTask.exec(errorCallback);
             }
             else {
               subtasks.push(nextTask);
@@ -1561,7 +1540,7 @@ function minify(value, options, partialMarkup, cb) {
             }
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec();
+            nextTask.exec(errorCallback);
           }
           else {
             subtasks.push(nextTask);
@@ -1573,7 +1552,7 @@ function minify(value, options, partialMarkup, cb) {
             return cb();
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec();
+            nextTask.exec(errorCallback);
           }
           else {
             subtasks.push(nextTask);
@@ -1593,7 +1572,7 @@ function minify(value, options, partialMarkup, cb) {
     }
   });
   if (options.ensureSynchronicity) {
-    nextTask.exec();
+    nextTask.exec(errorCallback);
   }
   else {
     tasks.push(nextTask);
