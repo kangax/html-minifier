@@ -76,17 +76,11 @@ function convertOptionsCallbacks(options, async) {
  * @param {string} output
  * @param {Object} [inputOptions]
  * @param {string} [description=input]
- * @param {boolean} [asyncOnly=false]
  */
-function test_minify(assert, input, output, inputOptions, description, asyncOnly) {
+function test_minify(assert, input, output, inputOptions, description) {
   // Set default description.
   if (description === null || typeof description === 'undefined') {
     description = input;
-  }
-
-  // Set default asyncOnly.
-  if (asyncOnly === null || typeof asyncOnly === 'undefined') {
-    asyncOnly = false;
   }
 
   // Safety Checks - ensure this function was called with the correct var types.
@@ -102,43 +96,35 @@ function test_minify(assert, input, output, inputOptions, description, asyncOnly
   if (typeof description !== 'string') {
     throw new Error('Bad description: ' + description);
   }
-  if (typeof asyncOnly !== 'boolean') {
-    throw new Error('Bad asyncOnly: ' + asyncOnly);
-  }
 
   // Standard test.
-  if (!asyncOnly) {
-    var descriptionPrefix = 'Standard Test: ';
-    assert.equal(minify(input, inputOptions), output, descriptionPrefix + description);
-  }
+  assert.equal(minify(input, inputOptions), output, 'Standard Test: ' + description);
 
   // Callback tests.
-  var callbackTests = [];
-
-  if (!asyncOnly) {
+  var callbackTests = [
     // Sync callback test.
-    callbackTests.push({
+    {
       options: convertOptionsCallbacks(inputOptions, false),
       async: false,
       done: assert.async(),
       descriptionPrefix: 'Synchronous Callback Test: '
-    });
-  }
+    },
+    // Async callback test.
+    {
+      options: convertOptionsCallbacks(inputOptions, true),
+      async: true,
+      done: assert.async(),
+      descriptionPrefix: 'Asynchronous Callback Test: '
+    }
+  ];
 
-  // Async callback test.
-  callbackTests.push({
-    options: asyncOnly ? inputOptions : convertOptionsCallbacks(inputOptions, true),
-    async: true,
-    done: assert.async(),
-    descriptionPrefix: 'Asynchronous Callback Test: '
-  });
+  // Callbacks should take very long to complete.
+  assert.timeout(100);
 
   // Run callback tests.
-  assert.timeout(100);
   callbackTests.forEach(function(test) {
-    var callbackTestFinished = false;
     assert.notOk(minify(input, test.options, function(error, result) {
-      if (!callbackTestFinished) {
+      if (!test.finished) {
         var stackTrace = '';
         if (error && error instanceof Error) {
           stackTrace = error.stack;
@@ -147,15 +133,15 @@ function test_minify(assert, input, output, inputOptions, description, asyncOnly
         assert.equal(error, null, test.descriptionPrefix + 'An error occurred - stack trace:\n' + stackTrace);
         assert.equal(result, output, test.descriptionPrefix + description);
 
-        callbackTestFinished = true;
+        test.finished = true;
         test.done();
       }
     }));
 
-    // If callback test didn't finish synchronously.
-    if (!callbackTestFinished && !test.async) {
+    // If callback test didn't finish synchronously when it should have.
+    if (!(test.finished || test.async)) {
       assert.ok(false, test.descriptionPrefix + 'Didn\'t finish synchronously.');
-      callbackTestFinished = true;
+      test.finished = true;
       test.done();
     }
   });
@@ -169,76 +155,69 @@ function test_minify(assert, input, output, inputOptions, description, asyncOnly
  * @param {Object} [inputOptions]
  * @param {Error|function(new:Error)|RegExp|function(boolean)} [errorMatcher]
  * @param {string} [description=input]
- * @param {boolean} [asyncOnly=false]
  */
-function test_minify_error(assert, input, inputOptions, errorMatcher, description, asyncOnly) {
+function test_minify_error(assert, input, inputOptions, errorMatcher, description) {
   // Set default description.
   if (description === null || typeof description === 'undefined') {
     description = input;
   }
 
-  // Set default asyncOnly.
-  if (asyncOnly === null || typeof asyncOnly === 'undefined') {
-    asyncOnly = false;
-  }
-
   // Standard test.
-  var descriptionPrefix = 'Standard Test: ';
   assert.throws(
     function() {
       minify(input, inputOptions);
     },
     errorMatcher,
-    descriptionPrefix + description
+    'Standard Test: ' + description
   );
 
   // Callback tests.
-  var callbackTests = [];
-
-  if (!asyncOnly) {
+  var callbackTests = [
     // Sync callback test.
-    callbackTests.push({
+    {
       options: convertOptionsCallbacks(inputOptions, false),
       async: false,
       done: assert.async(),
       descriptionPrefix: 'Synchronous Callback Test: '
-    });
-  }
+    },
+    // Async callback test.
+    {
+      options: convertOptionsCallbacks(inputOptions, true),
+      async: true,
+      done: assert.async(),
+      descriptionPrefix: 'Asynchronous Callback Test: '
+    }
+  ];
 
-  // Async callback test.
-  callbackTests.push({
-    options: asyncOnly ? inputOptions : convertOptionsCallbacks(inputOptions, true),
-    async: true,
-    done: assert.async(),
-    descriptionPrefix: 'Asynchronous Callback Test: '
-  });
+  // Callbacks should take very long to complete.
+  assert.timeout(100);
 
   // Run callback tests.
   callbackTests.forEach(function(test) {
-    var callbackTestFinished = false;
     try {
-      assert.timeout(100);
       assert.notOk(minify(input, test.options, function(error, result) {
-        if (!callbackTestFinished) {
-          assert.ok(error, descriptionPrefix + 'An error should have occurred.');
-          assert.ok(error instanceof Error, descriptionPrefix + '"' + error + '" was returned as an error.');
-          assert.throws(function() { throw error; }, errorMatcher, descriptionPrefix + description);
+        if (!test.finished) {
+          assert.ok(error, test.descriptionPrefix + 'An error should have occurred.');
+          assert.ok(error instanceof Error, test.descriptionPrefix + '"' + error + '" was returned as an error.');
+          assert.throws(function() { throw error; }, errorMatcher, test.descriptionPrefix + description);
           assert.notOk(result);
 
-          callbackTestFinished = true;
+          test.finished = true;
           test.done();
         }
       }));
 
-      // If callback test didn't finish synchronously.
-      if (!callbackTestFinished && !test.async) {
+      // If callback test didn't finish synchronously when it should have.
+      if (!(test.finished || test.async)) {
         assert.ok(false, test.descriptionPrefix + 'Didn\'t finish synchronously.');
-        callbackTestFinished = true;
+        test.finished = true;
         test.done();
       }
     }
     catch (error) {
-      callbackTestFinished = true;
+      test.finished = true;
+
+      // An error shouldn't be thrown - fail the test.
       if (error && error instanceof Error) {
         assert.ok(false, test.descriptionPrefix + 'threw an error - stack trace:\n' + error.stack);
       }
@@ -3626,67 +3605,61 @@ QUnit.test('canCollapseWhitespace and canTrimWhitespace hooks', function(assert)
   });
 });
 
-QUnit.test('Async execution', function(assert) {
-  var input, output;
-
-  function cssSync(text, type) {
-    return (type || 'Normal') + ' CSS';
-  }
-
-  function jsSync(text, inline) {
-    return inline ? 'Inline JS' : 'Normal JS';
-  }
-
-  function cssAsync(text, type, cb) {
-    setTimeout(function() {
-      cb(cssSync(text, type));
-    }, 1);
-  }
-
-  function jsAsync(text, inline, cb) {
-    setTimeout(function() {
-      cb(jsSync(text, inline));
-    }, 1);
-  }
-
-  var styleInput = '<style>div#foo { background-color: red; color: white }</style>';
-  var scriptInput = '<script>(function(  ){  console.log("Hello" + " World"); })()</script>';
-  input = styleInput + scriptInput;
-
-  var styleOutput = '<style>Normal CSS</style>';
-  var scriptOutput = '<script>Normal JS</script>';
-
-  test_minify(assert, input, input, {}, null, true);
-
-  output = styleOutput + scriptInput;
-  test_minify(assert, input, output, { minifyCSS: cssAsync }, null, true);
-  test_minify(assert, input, output, { minifyCSS: cssAsync, minifyJS: false }, null, true);
-
-  output = styleInput + scriptOutput;
-  test_minify(assert, input, output, { minifyJS: jsAsync }, null, true);
-  test_minify(assert, input, output, { minifyCSS: false, minifyJS: jsAsync }, null, true);
-
-  output = styleOutput + scriptOutput;
-  test_minify(assert, input, output, { minifyCSS: cssAsync, minifyJS: jsAsync }, null, true);
-  test_minify(assert, input, output, { minifyCSS: cssAsync, minifyJS: jsSync }, null, true);
-  test_minify(assert, input, output, { minifyCSS: cssSync, minifyJS: jsAsync }, null, true);
-});
-
 QUnit.test('minify error with callback', function(assert) {
   var input = '<style>div#foo { background-color: red; }</style><$unicorn>';
 
-  test_minify_error(assert, input, null, null, 'Invalid tag name', true);
+  var done = assert.async();
+  assert.timeout(100);
+
+  try {
+    assert.notOk(minify(input, null, function(error, result) {
+      assert.ok(error, 'An error should have occurred.');
+      assert.ok(error instanceof Error, '"' + error + '" was returned as an error.');
+      assert.throws(function() { throw error; }, null, 'An error should have been thrown');
+      assert.notOk(result);
+      done();
+    }));
+  }
+  catch (error) {
+    // An error shouldn't be thrown - fail the test.
+    if (error && error instanceof Error) {
+      assert.ok(false, test.descriptionPrefix + 'threw an error - stack trace:\n' + error.stack);
+    }
+    else {
+      assert.ok(false, test.descriptionPrefix + 'threw an error - "' + error + '"');
+    }
+  }
 });
 
 QUnit.test('error in callback', function(assert) {
   var input = '<style>div#foo { background-color: red; }</style>';
-  var error = new Error();
+  var cssError = new Error();
 
   function css() {
-    throw error;
+    throw cssError;
   }
 
-  test_minify_error(assert, input, { minifyCSS: css }, error, null, true);
+  var done = assert.async();
+  assert.timeout(100);
+
+  try {
+    assert.notOk(minify(input, { minifyCSS: css }, function(error, result) {
+      assert.ok(error, 'An error should have occurred.');
+      assert.ok(error instanceof Error, '"' + error + '" was returned as an error.');
+      assert.throws(function() { throw error; }, cssError, cssError + ' should have been thrown');
+      assert.notOk(result);
+      done();
+    }));
+  }
+  catch (error) {
+    // An error shouldn't be thrown - fail the test.
+    if (error && error instanceof Error) {
+      assert.ok(false, test.descriptionPrefix + 'threw an error - stack trace:\n' + error.stack);
+    }
+    else {
+      assert.ok(false, test.descriptionPrefix + 'threw an error - "' + error + '"');
+    }
+  }
 });
 
 QUnit.test('callback called multiple times', function(assert) {
