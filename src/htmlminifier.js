@@ -871,12 +871,41 @@ var Task = (function() {
   /**
    * Execute this task.
    *
+   * If a callback is given, the task will complete asynchronously, otherwise
+   * synchronously.
+   *
    * @param {Callback} [cb]
    */
   Task.prototype.exec = function(cb) {
-    if (!cb) {
-      cb = function() {};
+    // Callback?
+    if (cb) {
+      // Make the callback async.
+      var origCb = cb;
+      cb = function() {
+        var args = arguments;
+        if (process && process.nextTick) {
+          process.nextTick(function() {
+            origCb.apply(null, args);
+          });
+        }
+        else {
+          setTimeout(function() {
+            origCb.apply(null, args);
+          }, 0);
+        }
+      };
     }
+    // No callback?
+    else {
+      // Create simple callback to handle errors.
+      cb = function(error) {
+        if (error) {
+          Task.errorCb(error);
+        }
+      };
+    }
+
+    // Run the task.
     this.task(cb);
   };
 
@@ -919,10 +948,10 @@ var TaskGroup = (function() {
         try {
           this.tasks[index].exec(function(error) {
             if (error) {
-              throw error;
+              return cb(error);
             }
             if (this.tasks[index].cbExecuted) {
-              throw new Error('Async completion has already occurred.');
+              return cb(new Error('Async completion has already occurred.'));
             }
             this.tasks[index].cbExecuted = true;
             implementation.call(this, index + 1);
@@ -950,6 +979,7 @@ var TaskGroup = (function() {
  */
 function minify(value, options, partialMarkup, cb) {
   var topLevelCb = cb;
+  Task.errorCb = cb;
 
   if (options.collapseWhitespace) {
     value = collapseWhitespace(value, options, true, true);
@@ -1559,7 +1589,7 @@ function minify(value, options, partialMarkup, cb) {
       }
     }
     catch (error) {
-      return topLevelCb(error);
+      return cb(error);
     }
   });
   if (options.ensureSynchronicity) {
