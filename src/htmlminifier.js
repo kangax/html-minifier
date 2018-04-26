@@ -1,10 +1,5 @@
 'use strict';
 
-/**
- * A callback that tasks an error and a result.
- * @typedef {function([?Error], [string]):void} Callback
- */
-
 var CleanCSS = require('clean-css');
 var decode = require('he').decode;
 var HTMLParser = require('./htmlparser').HTMLParser;
@@ -12,6 +7,11 @@ var RelateUrl = require('relateurl');
 var TokenChain = require('./tokenchain');
 var UglifyJS = require('uglify-js');
 var utils = require('./utils');
+
+/**
+ * A callback that takes an error and a result.
+ * @typedef {function([?Error], [string]):void} Callback
+ */
 
 function trimWhitespace(str) {
   if (typeof str !== 'string') {
