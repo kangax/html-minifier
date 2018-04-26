@@ -842,6 +842,91 @@ function createSortFns(value, options, uidIgnore, uidAttr, cb) {
 }
 
 /**
+ * A task that may finish either synchronously or asynchronously.
+ *
+ * The task will not be executed until explicitly told to.
+ *
+ * @class
+ */
+var Task = (function() {
+  /**
+   * @constructor
+   * @param {function(Callback)} task
+   */
+  function Task(task) {
+    this.task = task;
+  }
+
+  /**
+   * Execute this task.
+   *
+   * @param {Callback} cb
+   */
+  Task.prototype.exec = function(cb) {
+    this.task(cb);
+  };
+
+  return Task;
+})();
+
+
+/**
+ * A group of Tasks and or other TaskGroups to execute in series.
+ *
+ * The tasks will not be executed until explicitly told to.
+ * Additional tasks can be added to the group by pushing to the `tasks` array
+ * property. Do not modify this property once execution was begun.
+ *
+ * @class
+ */
+var TaskGroup = (function() {
+  /**
+   * @constructor
+   * @param {Array<Task|TaskGroup>} [tasks]
+   */
+  function TaskGroup(tasks) {
+    this.tasks = tasks ? tasks : [];
+  }
+
+  /**
+   * Run all tasks in this group in series.
+   *
+   * @param {Callback} cb
+   */
+  TaskGroup.prototype.exec = function(cb) {
+    /**
+     * Run the task at the given index, giving it a callback to run the next
+     * task the same way.
+     *
+     * @param {number} index
+     */
+    (function implementation(index) {
+      if (index < this.tasks.length) {
+        try {
+          this.tasks[index].exec(function(error) {
+            if (error) {
+              throw error;
+            }
+            if (this.tasks[index].cbExecuted) {
+              throw new Error('Async completion has already occurred.');
+            }
+            this.tasks[index].cbExecuted = true;
+            implementation.call(this, index + 1);
+          }.bind(this));
+        }
+        catch (error) {
+          cb(error);
+        }
+      }
+      else {
+        cb();
+      }
+    }.bind(this))(0);
+  };
+  return TaskGroup;
+})();
+
+/**
  * Minify HTML.
  *
  * @param {string} value
@@ -876,77 +961,6 @@ function minify(value, options, partialMarkup, cb) {
    * @type {Array<Task|TaskGroup>}
    */
   var tasks = [];
-
-  /**
-   * A task.
-   *
-   * @constructor
-   *
-   * @param {function(Callback)} task
-   */
-  function Task(task) {
-    this.task = task;
-  }
-
-  /**
-   * Execute this task.
-   *
-   * @param {Callback} cb
-   */
-  Task.prototype.exec = function(cb) {
-    this.task(cb);
-  };
-
-  /**
-   * A group of Tasks to execute in series.
-   *
-   * @constructor
-   *
-   * @param {Task[]} [tasks]
-   */
-  function TaskGroup(tasks) {
-    this.tasks = tasks ? tasks : [];
-  }
-
-  /**
-   * Run all tasks in this group in series.
-   *
-   * @param {Callback} cb
-   */
-  TaskGroup.prototype.exec = function(cb) {
-    /**
-     * Run the task at the given index, giving it a callback to run the next
-     * task the same way.
-     *
-     * @param {number} index
-     */
-    (function implementation(index) {
-      if (index < this.tasks.length) {
-        try {
-          this.tasks[index].exec(
-            function(error) {
-              if (error) {
-                throw error;
-              }
-
-              if (this.tasks[index].cbExecuted) {
-                throw new Error('Async completion has already occurred.');
-              }
-              this.tasks[index].cbExecuted = true;
-
-              implementation.call(this, index + 1);
-            }.bind(this)
-          );
-        }
-        catch (error) {
-          cb(error);
-        }
-      }
-      else {
-        cb();
-      }
-    }.bind(this))(0);
-  };
 
   // temporarily replace ignored chunks with comments,
   // so that we don't have to worry what's there.
