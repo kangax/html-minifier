@@ -9,8 +9,14 @@ var UglifyJS = require('uglify-js');
 var utils = require('./utils');
 
 /**
- * A callback that takes an error and a result.
- * @typedef {function([?Error], [string]):void} Callback
+ * A callback that takes an error and a string result.
+ * @typedef {function(?Error, string):void} ResultCallback
+ *
+ * A callback that takes an error and an update buffer.
+ * @typedef {function(?Error, Buffer):void} BufferCallback
+ *
+ * A buffer of strings.
+ * @typedef {string[]} Buffer
  */
 
 function trimWhitespace(str) {
@@ -853,7 +859,7 @@ function createSortFns(value, options, uidIgnore, uidAttr, cb) {
 }
 
 /**
- * A task that may finish either synchronously or asynchronously.
+ * A task that operates on the a buffer.
  *
  * The task will not be executed until explicitly told to.
  *
@@ -862,7 +868,7 @@ function createSortFns(value, options, uidIgnore, uidAttr, cb) {
 var Task = (function() {
   /**
    * @constructor
-   * @param {function([Callback])} task
+   * @param {function(Buffer, BufferCallback)} task
    */
   function Task(task) {
     this.task = task;
@@ -871,10 +877,11 @@ var Task = (function() {
   /**
    * Execute this task.
    *
-   * @param {Callback} cb
+   * @param {Buffer} buffer
+   * @param {BufferCallback} cb
    */
-  Task.prototype.exec = function(cb) {
-    this.task(cb);
+  Task.prototype.exec = function(buffer, cb) {
+    this.task(buffer, cb);
   };
 
   return Task;
@@ -901,23 +908,24 @@ var TaskGroup = (function() {
   /**
    * Run all tasks in this group in series.
    *
-   * @param {Callback} cb
+   * @param {Buffer} buffer
+   * @param {BufferCallback} cb
    */
-  TaskGroup.prototype.exec = function(cb) {
+  TaskGroup.prototype.exec = function(buffer, cb) {
     /**
      * Run the task at the given index, giving it a callback to run the next
      * task the same way.
      *
      * @param {number} index
      */
-    (function implementation(index) {
+    (function implementation(buffer, index) {
       if (index < this.tasks.length) {
         try {
-          this.tasks[index].exec(function(error) {
+          this.tasks[index].exec(buffer.slice(0), function(error, buffer) {
             if (error) {
               return cb(error);
             }
-            implementation.call(this, index + 1);
+            return implementation.call(this, buffer, index + 1);
           }.bind(this));
         }
         catch (error) {
@@ -925,7 +933,7 @@ var TaskGroup = (function() {
           if (error.message === 'Maximum call stack size exceeded') {
             // Wait for stack to clear, then try again.
             setTimeout(function() {
-              implementation.call(this, index);
+              implementation.call(this, buffer, index);
             }.bind(this), 0);
           }
           else {
@@ -934,9 +942,9 @@ var TaskGroup = (function() {
         }
       }
       else {
-        cb();
+        cb(null, buffer);
       }
-    }.bind(this))(0);
+    }.bind(this))(buffer, 0);
   };
   return TaskGroup;
 })();
@@ -947,7 +955,7 @@ var TaskGroup = (function() {
  * @param {string} value
  * @param {Object} options
  * @param {boolean} partialMarkup
- * @param {Callback} cb
+ * @param {ResultCallback} cb
  */
 function minify(value, options, partialMarkup, cb) {
   /**
@@ -965,8 +973,12 @@ function minify(value, options, partialMarkup, cb) {
     value = collapseWhitespace(value, options, true, true);
   }
 
-  var buffer = [],
-      charsPrevTag,
+  /**
+   * @type {Buffer}
+   */
+  var buffer = [];
+
+  var charsPrevTag,
       currentChars = '',
       hasChars,
       currentTag = '',
@@ -1050,11 +1062,13 @@ function minify(value, options, partialMarkup, cb) {
 
   if (options.sortAttributes && typeof options.sortAttributes !== 'function' ||
       options.sortClassName && typeof options.sortClassName !== 'function') {
-    nextTask = new Task(function(cb) {
-      createSortFns(value, options, uidIgnore, uidAttr, cb);
+    nextTask = new Task(function(buffer, cb) {
+      createSortFns(value, options, uidIgnore, uidAttr, function(error) {
+        cb(error, buffer);
+      });
     });
     if (options.ensureSynchronicity) {
-      nextTask.exec(errorCallback);
+      nextTask.exec(buffer, errorCallback);
     }
     else {
       tasks.push(nextTask);
@@ -1069,7 +1083,7 @@ function minify(value, options, partialMarkup, cb) {
     return options.canTrimWhitespace(tag, attrs, canTrimWhitespace);
   }
 
-  function removeStartTag() {
+  function removeStartTag(buffer) {
     var index = buffer.length - 1;
     while (index > 0 && !/^<[^/!]/.test(buffer[index])) {
       index--;
@@ -1077,7 +1091,7 @@ function minify(value, options, partialMarkup, cb) {
     buffer.length = Math.max(0, index);
   }
 
-  function removeEndTag() {
+  function removeEndTag(buffer) {
     var index = buffer.length - 1;
     while (index > 0 && !/^<\//.test(buffer[index])) {
       index--;
@@ -1086,7 +1100,7 @@ function minify(value, options, partialMarkup, cb) {
   }
 
   // look for trailing whitespaces, bypass any inline tags
-  function trimTrailingWhitespace(index, nextTag) {
+  function trimTrailingWhitespace(buffer, index, nextTag) {
     for (var endTag = null; index >= 0 && _canTrimWhitespace(endTag); index--) {
       var str = buffer[index];
       var match = str.match(/^<\/([\w:-]+)>$/);
@@ -1102,7 +1116,7 @@ function minify(value, options, partialMarkup, cb) {
   // look for trailing whitespaces from previously processed text
   // which may not be trimmed due to a following comment or an empty
   // element which has now been removed
-  function squashTrailingWhitespace(nextTag) {
+  function squashTrailingWhitespace(buffer, nextTag) {
     var charsIndex = buffer.length - 1;
     if (buffer.length > 1) {
       var item = buffer[buffer.length - 1];
@@ -1110,10 +1124,10 @@ function minify(value, options, partialMarkup, cb) {
         charsIndex--;
       }
     }
-    trimTrailingWhitespace(charsIndex, nextTag);
+    trimTrailingWhitespace(buffer, charsIndex, nextTag);
   }
 
-  nextTask = new Task(function(cb) {
+  nextTask = new Task(function(buffer, cb) {
     try {
       var subtasks = [];
 
@@ -1122,7 +1136,7 @@ function minify(value, options, partialMarkup, cb) {
         html5: options.html5,
 
         start: function(tag, attrs, unary, unarySlash, autoGenerated) {
-          nextTask = new Task(function(cb) {
+          nextTask = new Task(function(buffer, cb) {
             var lowerTag = tag.toLowerCase();
 
             if (lowerTag === 'svg') {
@@ -1150,12 +1164,12 @@ function minify(value, options, partialMarkup, cb) {
               // <colgroup> may be omitted if first thing inside is <col>
               // <tbody> may be omitted if first thing inside is <tr>
               if (htmlTag && canRemoveParentTag(optionalStartTag, tag)) {
-                removeStartTag();
+                removeStartTag(buffer);
               }
               optionalStartTag = '';
               // end-tag-followed-by-start-tag omission rules
               if (htmlTag && canRemovePrecedingTag(optionalEndTag, tag)) {
-                removeEndTag();
+                removeEndTag(buffer);
                 // <colgroup> cannot be omitted if preceding </colgroup> is omitted
                 // <tbody> cannot be omitted if preceding </tbody>, </thead> or </tfoot> is omitted
                 optional = !isStartTagMandatory(optionalEndTag, tag);
@@ -1166,7 +1180,7 @@ function minify(value, options, partialMarkup, cb) {
             // set whitespace flags for nested tags (eg. <code> within a <pre>)
             if (options.collapseWhitespace) {
               if (!stackNoTrimWhitespace.length) {
-                squashTrailingWhitespace(tag);
+                squashTrailingWhitespace(buffer, tag);
               }
               if (!unary) {
                 if (!_canTrimWhitespace(tag, attrs) || stackNoTrimWhitespace.length) {
@@ -1224,22 +1238,22 @@ function minify(value, options, partialMarkup, cb) {
               buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');
 
               if (autoGenerated && !options.includeAutoGeneratedTags) {
-                removeStartTag();
+                removeStartTag(buffer);
                 optionalStartTag = '';
               }
 
-              return cb();
+              return cb(null, buffer);
             })(attrs.length, true);
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec(errorCallback);
+            nextTask.exec(buffer, errorCallback);
           }
           else {
             subtasks.push(nextTask);
           }
         },
         end: function(tag, attrs, autoGenerated) {
-          nextTask = new Task(function(cb) {
+          nextTask = new Task(function(buffer, cb) {
             var lowerTag = tag.toLowerCase();
             if (lowerTag === 'svg') {
               options = Object.getPrototypeOf(options);
@@ -1254,7 +1268,7 @@ function minify(value, options, partialMarkup, cb) {
                 }
               }
               else {
-                squashTrailingWhitespace('/' + tag);
+                squashTrailingWhitespace(buffer, '/' + tag);
               }
               if (stackNoCollapseWhitespace.length &&
                 tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
@@ -1271,7 +1285,7 @@ function minify(value, options, partialMarkup, cb) {
             if (options.removeOptionalTags) {
               // <html>, <head> or <body> may be omitted if the element is empty
               if (isElementEmpty && topLevelTags(optionalStartTag)) {
-                removeStartTag();
+                removeStartTag(buffer);
               }
               optionalStartTag = '';
               // </html> or </body> may be omitted if not followed by comment
@@ -1279,14 +1293,14 @@ function minify(value, options, partialMarkup, cb) {
               // </p> may be omitted if no more content in non-</a> parent
               // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
               if (htmlTags(tag) && optionalEndTag && !trailingTags(optionalEndTag) && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
-                removeEndTag();
+                removeEndTag(buffer);
               }
               optionalEndTag = optionalEndTags(tag) ? tag : '';
             }
 
             if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
               // remove last "element" from buffer
-              removeStartTag();
+              removeStartTag(buffer);
               optionalStartTag = '';
               optionalEndTag = '';
             }
@@ -1306,17 +1320,17 @@ function minify(value, options, partialMarkup, cb) {
               }
             }
 
-            return cb();
+            return cb(null, buffer);
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec(errorCallback);
+            nextTask.exec(buffer, errorCallback);
           }
           else {
             subtasks.push(nextTask);
           }
         },
         chars: function(text, prevTag, nextTag) {
-          nextTask = new Task(function(cb) {
+          nextTask = new Task(function(buffer, cb) {
             var subtasks = [];
             prevTag = prevTag === '' ? 'comment' : prevTag;
             nextTag = nextTag === '' ? 'comment' : nextTag;
@@ -1347,7 +1361,7 @@ function minify(value, options, partialMarkup, cb) {
                       while (tagIndex > 0 && buffer[tagIndex].lastIndexOf('<' + prevTag) !== 0) {
                         tagIndex--;
                       }
-                      trimTrailingWhitespace(tagIndex - 1, 'br');
+                      trimTrailingWhitespace(buffer, tagIndex - 1, 'br');
                     }
                   }
                   else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
@@ -1361,7 +1375,7 @@ function minify(value, options, partialMarkup, cb) {
                   text = collapseWhitespace(text, options, true, true);
                 }
                 if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
-                  trimTrailingWhitespace(buffer.length - 1, nextTag);
+                  trimTrailingWhitespace(buffer, buffer.length - 1, nextTag);
                 }
               }
               if (!stackNoCollapseWhitespace.length && nextTag !== 'html' && !(prevTag && nextTag)) {
@@ -1369,27 +1383,28 @@ function minify(value, options, partialMarkup, cb) {
               }
             }
             if (options.processScripts && specialContentTags(currentTag)) {
-              nextTask = new Task(function(cb) {
+              nextTask = new Task(function(buffer, cb) {
                 processScript(text, options, currentAttrs, function(error, result) {
                   text = result;
-                  return cb(error);
+                  return cb(error, buffer);
                 });
               });
               if (options.ensureSynchronicity) {
-                nextTask.exec(errorCallback);
+                nextTask.exec(buffer, errorCallback);
               }
               else {
                 subtasks.push(nextTask);
               }
             }
             if (isExecutableScript(currentTag, currentAttrs)) {
-              nextTask = new Task(function(cb) {
+              nextTask = new Task(function(buffer, cb) {
+                var callbackCalled = false;
+
                 var result = options.minifyJS(text, null, minifyJS_cb);
                 if (typeof result !== 'undefined') {
                   return minifyJS_cb(result);
                 }
 
-                var callbackCalled = false;
                 function minifyJS_cb(result) {
                   if (callbackCalled) {
                     throw new Error('Async completion has already occurred.');
@@ -1397,25 +1412,26 @@ function minify(value, options, partialMarkup, cb) {
                   else {
                     callbackCalled = true;
                     text = result;
-                    return cb();
+                    return cb(null, buffer);
                   }
                 }
               });
               if (options.ensureSynchronicity) {
-                nextTask.exec(errorCallback);
+                nextTask.exec(buffer, errorCallback);
               }
               else {
                 subtasks.push(nextTask);
               }
             }
             if (isStyleSheet(currentTag, currentAttrs)) {
-              nextTask = new Task(function(cb) {
+              nextTask = new Task(function(buffer, cb) {
+                var callbackCalled = false;
+
                 var result = options.minifyCSS(text, null, minifyCSS_cb);
                 if (typeof result !== 'undefined') {
                   return minifyCSS_cb(result);
                 }
 
-                var callbackCalled = false;
                 function minifyCSS_cb(result) {
                   if (callbackCalled) {
                     throw new Error('Async completion has already occurred.');
@@ -1423,29 +1439,29 @@ function minify(value, options, partialMarkup, cb) {
                   else {
                     callbackCalled = true;
                     text = result;
-                    return cb();
+                    return cb(null, buffer);
                   }
                 }
               });
               if (options.ensureSynchronicity) {
-                nextTask.exec(errorCallback);
+                nextTask.exec(buffer, errorCallback);
               }
               else {
                 subtasks.push(nextTask);
               }
             }
-            nextTask = new Task(function(cb) {
+            nextTask = new Task(function(buffer, cb) {
               if (options.removeOptionalTags && text) {
                 // <html> may be omitted if first thing inside is not comment
                 // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
                 if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
-                  removeStartTag();
+                  removeStartTag(buffer);
                 }
                 optionalStartTag = '';
                 // </html> or </body> may be omitted if not followed by comment
                 // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
                 if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
-                  removeEndTag();
+                  removeEndTag(buffer);
                 }
                 optionalEndTag = '';
               }
@@ -1466,10 +1482,10 @@ function minify(value, options, partialMarkup, cb) {
               }
 
               buffer.push(text);
-              return cb();
+              return cb(null, buffer);
             });
             if (options.ensureSynchronicity) {
-              nextTask.exec(errorCallback);
+              nextTask.exec(buffer, errorCallback);
             }
             else {
               subtasks.push(nextTask);
@@ -1478,30 +1494,30 @@ function minify(value, options, partialMarkup, cb) {
 
             if (!options.ensureSynchronicity) {
               // Run this task's subtasks.
-              new TaskGroup(subtasks).exec(cb);
+              new TaskGroup(subtasks).exec(buffer, cb);
             }
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec(errorCallback);
+            nextTask.exec(buffer, errorCallback);
           }
           else {
             subtasks.push(nextTask);
           }
         },
         comment: function(text, nonStandard) {
-          nextTask = new Task(function(cb) {
+          nextTask = new Task(function(buffer, cb) {
             var subtasks = [];
             var prefix = nonStandard ? '<!' : '<!--';
             var suffix = nonStandard ? '>' : '-->';
             if (isConditionalComment(text)) {
-              nextTask = new Task(function(cb) {
+              nextTask = new Task(function(buffer, cb) {
                 cleanConditionalComment(text, options, function(error, result) {
                   text = prefix + result + suffix;
-                  return cb(error);
+                  return cb(error, buffer);
                 });
               });
               if (options.ensureSynchronicity) {
-                nextTask.exec(errorCallback);
+                nextTask.exec(buffer, errorCallback);
               }
               else {
                 subtasks.push(nextTask);
@@ -1519,17 +1535,17 @@ function minify(value, options, partialMarkup, cb) {
               text = prefix + text + suffix;
             }
 
-            nextTask = new Task(function(cb) {
+            nextTask = new Task(function(buffer, cb) {
               if (options.removeOptionalTags && text) {
                 // preceding comments suppress tag omissions
                 optionalStartTag = '';
                 optionalEndTag = '';
               }
               buffer.push(text);
-              cb();
+              cb(null, buffer);
             });
             if (options.ensureSynchronicity) {
-              nextTask.exec(errorCallback);
+              nextTask.exec(buffer, errorCallback);
             }
             else {
               subtasks.push(nextTask);
@@ -1537,23 +1553,23 @@ function minify(value, options, partialMarkup, cb) {
 
             if (!options.ensureSynchronicity) {
               // Run this task's subtasks.
-              new TaskGroup(subtasks).exec(cb);
+              new TaskGroup(subtasks).exec(buffer, cb);
             }
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec(errorCallback);
+            nextTask.exec(buffer, errorCallback);
           }
           else {
             subtasks.push(nextTask);
           }
         },
         doctype: function(doctype) {
-          nextTask = new Task(function(cb) {
+          nextTask = new Task(function(buffer, cb) {
             buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(doctype));
-            return cb();
+            return cb(null, buffer);
           });
           if (options.ensureSynchronicity) {
-            nextTask.exec(errorCallback);
+            nextTask.exec(buffer, errorCallback);
           }
           else {
             subtasks.push(nextTask);
@@ -1565,7 +1581,7 @@ function minify(value, options, partialMarkup, cb) {
 
       if (!options.ensureSynchronicity) {
         // Run this task's subtasks.
-        new TaskGroup(subtasks).exec(cb);
+        new TaskGroup(subtasks).exec(buffer, cb);
       }
     }
     catch (error) {
@@ -1573,26 +1589,26 @@ function minify(value, options, partialMarkup, cb) {
     }
   });
   if (options.ensureSynchronicity) {
-    nextTask.exec(errorCallback);
+    nextTask.exec(buffer, errorCallback);
   }
   else {
     tasks.push(nextTask);
   }
 
-  function finalizeResult() {
+  function finalizeResult(buffer) {
     if (options.removeOptionalTags) {
       // <html> may be omitted if first thing inside is not comment
       // <head> or <body> may be omitted if empty
       if (topLevelTags(optionalStartTag)) {
-        removeStartTag();
+        removeStartTag(buffer);
       }
       // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
       if (optionalEndTag && !trailingTags(optionalEndTag)) {
-        removeEndTag();
+        removeEndTag(buffer);
       }
     }
     if (options.collapseWhitespace) {
-      squashTrailingWhitespace('br');
+      squashTrailingWhitespace(buffer, 'br');
     }
 
     var str = joinResultSegments(buffer, options);
@@ -1624,10 +1640,10 @@ function minify(value, options, partialMarkup, cb) {
     return str;
   }
 
-  function finishUp() {
+  function finishUp(buffer) {
     var result;
     try {
-      result = finalizeResult();
+      result = finalizeResult(buffer);
     }
     catch (error) {
       return cb(error);
@@ -1636,16 +1652,16 @@ function minify(value, options, partialMarkup, cb) {
   }
 
   if (options.ensureSynchronicity) {
-    return finishUp();
+    return finishUp(buffer);
   }
 
   // Run the tasks.
   new TaskGroup(tasks)
-    .exec(function(error) {
+    .exec(buffer, function(error, buffer) {
       if (error) {
         return cb(error);
       }
-      return finishUp();
+      return finishUp(buffer);
     });
   return;
 }
