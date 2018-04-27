@@ -880,7 +880,6 @@ var Task = (function() {
   return Task;
 })();
 
-
 /**
  * A group of Tasks and or other TaskGroups to execute in series.
  *
@@ -951,12 +950,14 @@ var TaskGroup = (function() {
  * @param {Callback} cb
  */
 function minify(value, options, partialMarkup, cb) {
-  var topLevelCb = cb;
-
-  // Calls the `topLevelCb` if an error is passed in.
+  /**
+   * Calls the `topLevelCb` if there is an error; otherwise does nothing.
+   *
+   * @param {Error} [error]
+   */
   function errorCallback(error) {
     if (error) {
-      topLevelCb(error);
+      return cb(error);
     }
   }
 
@@ -1578,7 +1579,7 @@ function minify(value, options, partialMarkup, cb) {
     tasks.push(nextTask);
   }
 
-  function finalize() {
+  function finalizeResult() {
     if (options.removeOptionalTags) {
       // <html> may be omitted if first thing inside is not comment
       // <head> or <body> may be omitted if empty
@@ -1623,28 +1624,28 @@ function minify(value, options, partialMarkup, cb) {
     return str;
   }
 
-  function invokeCallBack() {
+  function finishUp() {
     var result;
     try {
-      result = finalize();
+      result = finalizeResult();
     }
     catch (error) {
-      return topLevelCb(error);
+      return cb(error);
     }
-    return topLevelCb(null, result);
+    return cb(null, result);
   }
 
   if (options.ensureSynchronicity) {
-    return invokeCallBack();
+    return finishUp();
   }
 
   // Run the tasks.
   new TaskGroup(tasks)
     .exec(function(error) {
       if (error) {
-        return topLevelCb(error);
+        return cb(error);
       }
-      return invokeCallBack();
+      return finishUp();
     });
   return;
 }
