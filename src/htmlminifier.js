@@ -8,6 +8,17 @@ var TokenChain = require('./tokenchain');
 var UglifyJS = require('uglify-js');
 var utils = require('./utils');
 
+/**
+ * A callback that takes an error and a string result.
+ * @typedef {function(?Error, string):void} ResultCallback
+ *
+ * A callback that takes an error and an update buffer.
+ * @typedef {function(?Error, Buffer):void} BufferCallback
+ *
+ * A buffer of strings.
+ * @typedef {string[]} Buffer
+ */
+
 function trimWhitespace(str) {
   if (typeof str !== 'string') {
     return str;
@@ -257,10 +268,16 @@ function isSrcset(attrName, tag) {
   return attrName === 'srcset' && srcsetTags(tag);
 }
 
-function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
+function cleanAttributeValue(tag, attrName, attrValue, options, attrs, cb) {
   if (attrValue && isEventAttribute(attrName, options)) {
     attrValue = trimWhitespace(attrValue).replace(/^javascript:\s*/i, '');
-    return options.minifyJS(attrValue, true);
+    attrValue = options.minifyJS(attrValue, true, function(result) {
+      cb(null, result);
+    });
+    if (typeof attrValue !== 'undefined') {
+      return cb(null, attrValue);
+    }
+    return;
   }
   else if (attrName === 'class') {
     attrValue = trimWhitespace(attrValue);
@@ -270,14 +287,14 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
     else {
       attrValue = collapseWhitespaceAll(attrValue);
     }
-    return attrValue;
+    return cb(null, attrValue);
   }
   else if (isUriTypeAttribute(attrName, tag)) {
     attrValue = trimWhitespace(attrValue);
-    return isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue);
+    return cb(null, isLinkType(tag, attrs, 'canonical') ? attrValue : options.minifyURLs(attrValue));
   }
   else if (isNumberTypeAttribute(attrName, tag)) {
-    return trimWhitespace(attrValue);
+    return cb(null, trimWhitespace(attrValue));
   }
   else if (attrName === 'style') {
     attrValue = trimWhitespace(attrValue);
@@ -285,9 +302,15 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
       if (/;$/.test(attrValue) && !/&#?[0-9a-zA-Z]+;$/.test(attrValue)) {
         attrValue = attrValue.replace(/\s*;$/, ';');
       }
-      attrValue = options.minifyCSS(attrValue, 'inline');
+      attrValue = options.minifyCSS(attrValue, 'inline', function(result) {
+        cb(null, result);
+      });
+      if (typeof attrValue !== 'undefined') {
+        return cb(null, attrValue);
+      }
+      return;
     }
-    return attrValue;
+    return cb(null, attrValue);
   }
   else if (isSrcset(attrName, tag)) {
     // https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
@@ -322,9 +345,15 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (isMediaQuery(tag, attrs, attrName)) {
     attrValue = trimWhitespace(attrValue);
-    return options.minifyCSS(attrValue, 'media');
+    attrValue = options.minifyCSS(attrValue, 'media', function(result) {
+      cb(null, result);
+    });
+    if (typeof attrValue !== 'undefined') {
+      return cb(null, attrValue);
+    }
+    return;
   }
-  return attrValue;
+  return cb(null, attrValue);
 }
 
 function isMetaViewport(tag, attrs) {
@@ -358,20 +387,26 @@ function unwrapMediaQuery(text) {
   return matches ? matches[1] : text;
 }
 
-function cleanConditionalComment(comment, options) {
-  return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/, function(match, prefix, text, suffix) {
-    return prefix + minify(text, options, true) + suffix;
-  }) : comment;
+function cleanConditionalComment(comment, options, cb) {
+  if (options.processConditionalComments) {
+    var replaceDetails = comment.match(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/);
+    if (replaceDetails) {
+      return minify(replaceDetails[2], options, true, function(error, result) {
+        return cb(error, replaceDetails[1] + result + replaceDetails[3]);
+      });
+    }
+  }
+  return cb(null, comment);
 }
 
-function processScript(text, options, currentAttrs) {
+function processScript(text, options, currentAttrs, cb) {
   for (var i = 0, len = currentAttrs.length; i < len; i++) {
     if (currentAttrs[i].name.toLowerCase() === 'type' &&
         options.processScripts.indexOf(currentAttrs[i].value) > -1) {
-      return minify(text, options);
+      return minify(text, options, false, cb);
     }
   }
-  return text;
+  return cb(null, text);
 }
 
 // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
@@ -521,7 +556,7 @@ function canTrimWhitespace(tag) {
   return !/^(?:pre|textarea)$/.test(tag);
 }
 
-function normalizeAttr(attr, attrs, tag, options) {
+function normalizeAttr(attr, attrs, tag, options, cb) {
   var attrName = options.caseSensitive ? attr.name : attr.name.toLowerCase(),
       attrValue = attr.value;
 
@@ -535,25 +570,29 @@ function normalizeAttr(attr, attrs, tag, options) {
     attrName === 'type' && isScriptTypeAttribute(attrValue) ||
     options.removeStyleLinkTypeAttributes && (tag === 'style' || tag === 'link') &&
     attrName === 'type' && isStyleLinkTypeAttribute(attrValue)) {
-    return;
+    return cb();
   }
 
-  attrValue = cleanAttributeValue(tag, attrName, attrValue, options, attrs);
+  cleanAttributeValue(tag, attrName, attrValue, options, attrs, function(error, attrValue) {
+    if (error) {
+      return cb(error);
+    }
 
-  if (options.removeEmptyAttributes &&
+    if (options.removeEmptyAttributes &&
       canDeleteEmptyAttribute(tag, attrName, attrValue, options)) {
-    return;
-  }
+      return cb();
+    }
 
-  if (options.decodeEntities && attrValue) {
-    attrValue = attrValue.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp;$1');
-  }
+    if (options.decodeEntities && attrValue) {
+      attrValue = attrValue.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp;$1');
+    }
 
-  return {
-    attr: attr,
-    name: attrName,
-    value: attrValue
-  };
+    return cb(null, {
+      attr: attr,
+      name: attrName,
+      value: attrValue
+    });
+  });
 }
 
 function buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr) {
@@ -613,10 +652,11 @@ function identity(value) {
   return value;
 }
 
-function processOptions(values) {
+function processOptions(values, ensureSynchronicity) {
   var options = {
     canCollapseWhitespace: canCollapseWhitespace,
     canTrimWhitespace: canTrimWhitespace,
+    ensureSynchronicity: ensureSynchronicity,
     html5: true,
     ignoreCustomComments: [/^!/],
     ignoreCustomFragments: [
@@ -726,7 +766,7 @@ function uniqueId(value) {
 
 var specialContentTags = createMapFromString('script,style');
 
-function createSortFns(value, options, uidIgnore, uidAttr) {
+function createSortFns(value, options, uidIgnore, uidAttr, cb) {
   var attrChains = options.sortAttributes && Object.create(null);
   var classChain = options.sortClassName && new TokenChain();
 
@@ -781,42 +821,164 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   options.log = identity;
   options.sortAttributes = false;
   options.sortClassName = false;
-  scan(minify(value, options));
-  options.log = log;
-  if (attrChains) {
-    var attrSorters = Object.create(null);
-    for (var tag in attrChains) {
-      attrSorters[tag] = attrChains[tag].createSorter();
+  minify(value, options, false, function(error, result) {
+    if (error) {
+      return cb(error);
     }
-    options.sortAttributes = function(tag, attrs) {
-      var sorter = attrSorters[tag];
-      if (sorter) {
-        var attrMap = Object.create(null);
-        var names = attrNames(attrs);
-        names.forEach(function(name, index) {
-          (attrMap[name] || (attrMap[name] = [])).push(attrs[index]);
-        });
-        sorter.sort(names).forEach(function(name, index) {
-          attrs[index] = attrMap[name].shift();
-        });
+
+    scan(result);
+    options.log = log;
+    if (attrChains) {
+      var attrSorters = Object.create(null);
+      for (var tag in attrChains) {
+        attrSorters[tag] = attrChains[tag].createSorter();
       }
-    };
-  }
-  if (classChain) {
-    var sorter = classChain.createSorter();
-    options.sortClassName = function(value) {
-      return sorter.sort(value.split(/[ \n\f\r]+/)).join(' ');
-    };
-  }
+      options.sortAttributes = function(tag, attrs) {
+        var sorter = attrSorters[tag];
+        if (sorter) {
+          var attrMap = Object.create(null);
+          var names = attrNames(attrs);
+          names.forEach(function(name, index) {
+            (attrMap[name] || (attrMap[name] = [])).push(attrs[index]);
+          });
+          sorter.sort(names).forEach(function(name, index) {
+            attrs[index] = attrMap[name].shift();
+          });
+        }
+      };
+    }
+    if (classChain) {
+      var sorter = classChain.createSorter();
+      options.sortClassName = function(value) {
+        return sorter.sort(value.split(/[ \n\f\r]+/)).join(' ');
+      };
+    }
+
+    return cb();
+  });
 }
 
-function minify(value, options, partialMarkup) {
+/**
+ * A task that operates on the a buffer.
+ *
+ * The task will not be executed until explicitly told to.
+ *
+ * @class
+ */
+var Task = (function() {
+  /**
+   * @constructor
+   * @param {function(Buffer, BufferCallback)} task
+   */
+  function Task(task) {
+    this.task = task;
+  }
+
+  /**
+   * Execute this task.
+   *
+   * @param {Buffer} buffer
+   * @param {BufferCallback} cb
+   */
+  Task.prototype.exec = function(buffer, cb) {
+    this.task(buffer, cb);
+  };
+
+  return Task;
+})();
+
+/**
+ * A group of Tasks and or other TaskGroups to execute in series.
+ *
+ * The tasks will not be executed until explicitly told to.
+ * Additional tasks can be added to the group by pushing to the `tasks` array
+ * property. Do not modify this property once execution was begun.
+ *
+ * @class
+ */
+var TaskGroup = (function() {
+  /**
+   * @constructor
+   * @param {Array<Task|TaskGroup>} [tasks]
+   */
+  function TaskGroup(tasks) {
+    this.tasks = tasks ? tasks : [];
+  }
+
+  /**
+   * Run all tasks in this group in series.
+   *
+   * @param {Buffer} buffer
+   * @param {BufferCallback} cb
+   */
+  TaskGroup.prototype.exec = function(buffer, cb) {
+    /**
+     * Run the task at the given index, giving it a callback to run the next
+     * task the same way.
+     *
+     * @param {number} index
+     */
+    (function implementation(buffer, index) {
+      if (index < this.tasks.length) {
+        try {
+          this.tasks[index].exec(buffer.slice(0), function(error, buffer) {
+            if (error) {
+              return cb(error);
+            }
+            return implementation.call(this, buffer, index + 1);
+          }.bind(this));
+        }
+        catch (error) {
+          // Recover from `Maximum call stack size exceeded`.
+          if (error.message === 'Maximum call stack size exceeded') {
+            // Wait for stack to clear, then try again.
+            setTimeout(function() {
+              implementation.call(this, buffer, index);
+            }.bind(this), 0);
+          }
+          else {
+            cb(error);
+          }
+        }
+      }
+      else {
+        cb(null, buffer);
+      }
+    }.bind(this))(buffer, 0);
+  };
+  return TaskGroup;
+})();
+
+/**
+ * Minify HTML.
+ *
+ * @param {string} value
+ * @param {Object} options
+ * @param {boolean} partialMarkup
+ * @param {ResultCallback} cb
+ */
+function minify(value, options, partialMarkup, cb) {
+  /**
+   * Calls the `topLevelCb` if there is an error; otherwise does nothing.
+   *
+   * @param {Error} [error]
+   */
+  function errorCallback(error) {
+    if (error) {
+      return cb(error);
+    }
+  }
+
   if (options.collapseWhitespace) {
     value = collapseWhitespace(value, options, true, true);
   }
 
-  var buffer = [],
-      charsPrevTag,
+  /**
+   * @type {Buffer}
+   */
+  var buffer = [];
+
+  var charsPrevTag,
       currentChars = '',
       hasChars,
       currentTag = '',
@@ -830,6 +992,20 @@ function minify(value, options, partialMarkup) {
       uidIgnore,
       uidAttr,
       uidPattern;
+
+  /**
+   * Set of tasks to perform.
+   *
+   * @type {Array<Task|TaskGroup>}
+   */
+  var tasks = [];
+
+  /**
+   * The next task to perform.
+   *
+   * @type {Task}
+   */
+  var nextTask;
 
   // temporarily replace ignored chunks with comments,
   // so that we don't have to worry what's there.
@@ -853,11 +1029,11 @@ function minify(value, options, partialMarkup) {
   });
 
   function escapeFragments(fn) {
-    return function(text, type) {
+    return function(text, type, cb) {
       return fn(text.replace(uidPattern, function(match, prefix, index) {
         var chunks = ignoredCustomMarkupChunks[+index];
         return chunks[1] + uidAttr + index + chunks[2];
-      }), type);
+      }), type, cb);
     };
   }
 
@@ -886,7 +1062,17 @@ function minify(value, options, partialMarkup) {
 
   if (options.sortAttributes && typeof options.sortAttributes !== 'function' ||
       options.sortClassName && typeof options.sortClassName !== 'function') {
-    createSortFns(value, options, uidIgnore, uidAttr);
+    nextTask = new Task(function(buffer, cb) {
+      createSortFns(value, options, uidIgnore, uidAttr, function(error) {
+        cb(error, buffer);
+      });
+    });
+    if (options.ensureSynchronicity) {
+      nextTask.exec(buffer, errorCallback);
+    }
+    else {
+      tasks.push(nextTask);
+    }
   }
 
   function _canCollapseWhitespace(tag, attrs) {
@@ -897,7 +1083,7 @@ function minify(value, options, partialMarkup) {
     return options.canTrimWhitespace(tag, attrs, canTrimWhitespace);
   }
 
-  function removeStartTag() {
+  function removeStartTag(buffer) {
     var index = buffer.length - 1;
     while (index > 0 && !/^<[^/!]/.test(buffer[index])) {
       index--;
@@ -905,7 +1091,7 @@ function minify(value, options, partialMarkup) {
     buffer.length = Math.max(0, index);
   }
 
-  function removeEndTag() {
+  function removeEndTag(buffer) {
     var index = buffer.length - 1;
     while (index > 0 && !/^<\//.test(buffer[index])) {
       index--;
@@ -914,7 +1100,7 @@ function minify(value, options, partialMarkup) {
   }
 
   // look for trailing whitespaces, bypass any inline tags
-  function trimTrailingWhitespace(index, nextTag) {
+  function trimTrailingWhitespace(buffer, index, nextTag) {
     for (var endTag = null; index >= 0 && _canTrimWhitespace(endTag); index--) {
       var str = buffer[index];
       var match = str.match(/^<\/([\w:-]+)>$/);
@@ -930,7 +1116,7 @@ function minify(value, options, partialMarkup) {
   // look for trailing whitespaces from previously processed text
   // which may not be trimmed due to a following comment or an empty
   // element which has now been removed
-  function squashTrailingWhitespace(nextTag) {
+  function squashTrailingWhitespace(buffer, nextTag) {
     var charsIndex = buffer.length - 1;
     if (buffer.length > 1) {
       var item = buffer[buffer.length - 1];
@@ -938,333 +1124,546 @@ function minify(value, options, partialMarkup) {
         charsIndex--;
       }
     }
-    trimTrailingWhitespace(charsIndex, nextTag);
+    trimTrailingWhitespace(buffer, charsIndex, nextTag);
   }
 
-  new HTMLParser(value, {
-    partialMarkup: partialMarkup,
-    html5: options.html5,
+  nextTask = new Task(function(buffer, cb) {
+    try {
+      var subtasks = [];
 
-    start: function(tag, attrs, unary, unarySlash, autoGenerated) {
-      var lowerTag = tag.toLowerCase();
+      new HTMLParser(value, {
+        partialMarkup: partialMarkup,
+        html5: options.html5,
 
-      if (lowerTag === 'svg') {
-        options = Object.create(options);
-        options.keepClosingSlash = true;
-        options.caseSensitive = true;
-      }
+        start: function(tag, attrs, unary, unarySlash, autoGenerated) {
+          nextTask = new Task(function(buffer, cb) {
+            var lowerTag = tag.toLowerCase();
 
-      tag = options.caseSensitive ? tag : lowerTag;
-
-      currentTag = tag;
-      charsPrevTag = tag;
-      if (!inlineTextTags(tag)) {
-        currentChars = '';
-      }
-      hasChars = false;
-      currentAttrs = attrs;
-
-      var optional = options.removeOptionalTags;
-      if (optional) {
-        var htmlTag = htmlTags(tag);
-        // <html> may be omitted if first thing inside is not comment
-        // <head> may be omitted if first thing inside is an element
-        // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-        // <colgroup> may be omitted if first thing inside is <col>
-        // <tbody> may be omitted if first thing inside is <tr>
-        if (htmlTag && canRemoveParentTag(optionalStartTag, tag)) {
-          removeStartTag();
-        }
-        optionalStartTag = '';
-        // end-tag-followed-by-start-tag omission rules
-        if (htmlTag && canRemovePrecedingTag(optionalEndTag, tag)) {
-          removeEndTag();
-          // <colgroup> cannot be omitted if preceding </colgroup> is omitted
-          // <tbody> cannot be omitted if preceding </tbody>, </thead> or </tfoot> is omitted
-          optional = !isStartTagMandatory(optionalEndTag, tag);
-        }
-        optionalEndTag = '';
-      }
-
-      // set whitespace flags for nested tags (eg. <code> within a <pre>)
-      if (options.collapseWhitespace) {
-        if (!stackNoTrimWhitespace.length) {
-          squashTrailingWhitespace(tag);
-        }
-        if (!unary) {
-          if (!_canTrimWhitespace(tag, attrs) || stackNoTrimWhitespace.length) {
-            stackNoTrimWhitespace.push(tag);
-          }
-          if (!_canCollapseWhitespace(tag, attrs) || stackNoCollapseWhitespace.length) {
-            stackNoCollapseWhitespace.push(tag);
-          }
-        }
-      }
-
-      var openTag = '<' + tag;
-      var hasUnarySlash = unarySlash && options.keepClosingSlash;
-
-      buffer.push(openTag);
-
-      if (options.sortAttributes) {
-        options.sortAttributes(tag, attrs);
-      }
-
-      var parts = [];
-      for (var i = attrs.length, isLast = true; --i >= 0;) {
-        var normalized = normalizeAttr(attrs[i], attrs, tag, options);
-        if (normalized) {
-          parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr));
-          isLast = false;
-        }
-      }
-      if (parts.length > 0) {
-        buffer.push(' ');
-        buffer.push.apply(buffer, parts);
-      }
-      // start tag must never be omitted if it has any attributes
-      else if (optional && optionalStartTags(tag)) {
-        optionalStartTag = tag;
-      }
-
-      buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');
-
-      if (autoGenerated && !options.includeAutoGeneratedTags) {
-        removeStartTag();
-        optionalStartTag = '';
-      }
-    },
-    end: function(tag, attrs, autoGenerated) {
-      var lowerTag = tag.toLowerCase();
-      if (lowerTag === 'svg') {
-        options = Object.getPrototypeOf(options);
-      }
-      tag = options.caseSensitive ? tag : lowerTag;
-
-      // check if current tag is in a whitespace stack
-      if (options.collapseWhitespace) {
-        if (stackNoTrimWhitespace.length) {
-          if (tag === stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
-            stackNoTrimWhitespace.pop();
-          }
-        }
-        else {
-          squashTrailingWhitespace('/' + tag);
-        }
-        if (stackNoCollapseWhitespace.length &&
-          tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
-          stackNoCollapseWhitespace.pop();
-        }
-      }
-
-      var isElementEmpty = false;
-      if (tag === currentTag) {
-        currentTag = '';
-        isElementEmpty = !hasChars;
-      }
-
-      if (options.removeOptionalTags) {
-        // <html>, <head> or <body> may be omitted if the element is empty
-        if (isElementEmpty && topLevelTags(optionalStartTag)) {
-          removeStartTag();
-        }
-        optionalStartTag = '';
-        // </html> or </body> may be omitted if not followed by comment
-        // </head> may be omitted if not followed by space or comment
-        // </p> may be omitted if no more content in non-</a> parent
-        // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-        if (htmlTags(tag) && optionalEndTag && !trailingTags(optionalEndTag) && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
-          removeEndTag();
-        }
-        optionalEndTag = optionalEndTags(tag) ? tag : '';
-      }
-
-      if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
-        // remove last "element" from buffer
-        removeStartTag();
-        optionalStartTag = '';
-        optionalEndTag = '';
-      }
-      else {
-        if (autoGenerated && !options.includeAutoGeneratedTags) {
-          optionalEndTag = '';
-        }
-        else {
-          buffer.push('</' + tag + '>');
-        }
-        charsPrevTag = '/' + tag;
-        if (!inlineTags(tag)) {
-          currentChars = '';
-        }
-        else if (isElementEmpty) {
-          currentChars += '|';
-        }
-      }
-    },
-    chars: function(text, prevTag, nextTag) {
-      prevTag = prevTag === '' ? 'comment' : prevTag;
-      nextTag = nextTag === '' ? 'comment' : nextTag;
-      if (options.decodeEntities && text && !specialContentTags(currentTag)) {
-        text = decode(text);
-      }
-      if (options.collapseWhitespace) {
-        if (!stackNoTrimWhitespace.length) {
-          if (prevTag === 'comment') {
-            var prevComment = buffer[buffer.length - 1];
-            if (prevComment.indexOf(uidIgnore) === -1) {
-              if (!prevComment) {
-                prevTag = charsPrevTag;
-              }
-              if (buffer.length > 1 && (!prevComment || !options.conservativeCollapse && / $/.test(currentChars))) {
-                var charsIndex = buffer.length - 2;
-                buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
-                  text = trailingSpaces + text;
-                  return '';
-                });
-              }
+            if (lowerTag === 'svg') {
+              options = Object.create(options);
+              options.keepClosingSlash = true;
+              options.caseSensitive = true;
             }
-          }
-          if (prevTag) {
-            if (prevTag === '/nobr' || prevTag === 'wbr') {
-              if (/^\s/.test(text)) {
-                var tagIndex = buffer.length - 1;
-                while (tagIndex > 0 && buffer[tagIndex].lastIndexOf('<' + prevTag) !== 0) {
-                  tagIndex--;
+
+            tag = options.caseSensitive ? tag : lowerTag;
+
+            currentTag = tag;
+            charsPrevTag = tag;
+            if (!inlineTextTags(tag)) {
+              currentChars = '';
+            }
+            hasChars = false;
+            currentAttrs = attrs;
+
+            var optional = options.removeOptionalTags;
+            if (optional) {
+              var htmlTag = htmlTags(tag);
+              // <html> may be omitted if first thing inside is not comment
+              // <head> may be omitted if first thing inside is an element
+              // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+              // <colgroup> may be omitted if first thing inside is <col>
+              // <tbody> may be omitted if first thing inside is <tr>
+              if (htmlTag && canRemoveParentTag(optionalStartTag, tag)) {
+                removeStartTag(buffer);
+              }
+              optionalStartTag = '';
+              // end-tag-followed-by-start-tag omission rules
+              if (htmlTag && canRemovePrecedingTag(optionalEndTag, tag)) {
+                removeEndTag(buffer);
+                // <colgroup> cannot be omitted if preceding </colgroup> is omitted
+                // <tbody> cannot be omitted if preceding </tbody>, </thead> or </tfoot> is omitted
+                optional = !isStartTagMandatory(optionalEndTag, tag);
+              }
+              optionalEndTag = '';
+            }
+
+            // set whitespace flags for nested tags (eg. <code> within a <pre>)
+            if (options.collapseWhitespace) {
+              if (!stackNoTrimWhitespace.length) {
+                squashTrailingWhitespace(buffer, tag);
+              }
+              if (!unary) {
+                if (!_canTrimWhitespace(tag, attrs) || stackNoTrimWhitespace.length) {
+                  stackNoTrimWhitespace.push(tag);
                 }
-                trimTrailingWhitespace(tagIndex - 1, 'br');
+                if (!_canCollapseWhitespace(tag, attrs) || stackNoCollapseWhitespace.length) {
+                  stackNoCollapseWhitespace.push(tag);
+                }
               }
             }
-            else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
-              text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
+
+            var openTag = '<' + tag;
+            var hasUnarySlash = unarySlash && options.keepClosingSlash;
+
+            buffer.push(openTag);
+
+            if (options.sortAttributes) {
+              options.sortAttributes(tag, attrs);
             }
-          }
-          if (prevTag || nextTag) {
-            text = collapseWhitespaceSmart(text, prevTag, nextTag, options);
+
+            var parts = [];
+
+            // Loop through all the attributes and normalize them.
+            (function normalizeAttrLoop(i, isLast) {
+              // Attributes to normalize?
+              if (--i >= 0) {
+                var innerLoopResult;
+                // Normalize all the attributes in series.
+                normalizeAttr(attrs[i], attrs, tag, options, function(error, normalized) {
+                  if (error) {
+                    return cb(error);
+                  }
+
+                  if (normalized) {
+                    parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr));
+                    isLast = false;
+                  }
+
+                  innerLoopResult = normalizeAttrLoop(i, isLast);
+                });
+                return innerLoopResult;
+              }
+
+              // All attributes are now normalize.
+
+              if (parts.length > 0) {
+                buffer.push(' ');
+                buffer.push.apply(buffer, parts);
+              }
+              // start tag must never be omitted if it has any attributes
+              else if (optional && optionalStartTags(tag)) {
+                optionalStartTag = tag;
+              }
+
+              buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');
+
+              if (autoGenerated && !options.includeAutoGeneratedTags) {
+                removeStartTag(buffer);
+                optionalStartTag = '';
+              }
+
+              return cb(null, buffer);
+            })(attrs.length, true);
+          });
+          if (options.ensureSynchronicity) {
+            nextTask.exec(buffer, errorCallback);
           }
           else {
-            text = collapseWhitespace(text, options, true, true);
+            subtasks.push(nextTask);
           }
-          if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
-            trimTrailingWhitespace(buffer.length - 1, nextTag);
+        },
+        end: function(tag, attrs, autoGenerated) {
+          nextTask = new Task(function(buffer, cb) {
+            var lowerTag = tag.toLowerCase();
+            if (lowerTag === 'svg') {
+              options = Object.getPrototypeOf(options);
+            }
+            tag = options.caseSensitive ? tag : lowerTag;
+
+            // check if current tag is in a whitespace stack
+            if (options.collapseWhitespace) {
+              if (stackNoTrimWhitespace.length) {
+                if (tag === stackNoTrimWhitespace[stackNoTrimWhitespace.length - 1]) {
+                  stackNoTrimWhitespace.pop();
+                }
+              }
+              else {
+                squashTrailingWhitespace(buffer, '/' + tag);
+              }
+              if (stackNoCollapseWhitespace.length &&
+                tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
+                stackNoCollapseWhitespace.pop();
+              }
+            }
+
+            var isElementEmpty = false;
+            if (tag === currentTag) {
+              currentTag = '';
+              isElementEmpty = !hasChars;
+            }
+
+            if (options.removeOptionalTags) {
+              // <html>, <head> or <body> may be omitted if the element is empty
+              if (isElementEmpty && topLevelTags(optionalStartTag)) {
+                removeStartTag(buffer);
+              }
+              optionalStartTag = '';
+              // </html> or </body> may be omitted if not followed by comment
+              // </head> may be omitted if not followed by space or comment
+              // </p> may be omitted if no more content in non-</a> parent
+              // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
+              if (htmlTags(tag) && optionalEndTag && !trailingTags(optionalEndTag) && (optionalEndTag !== 'p' || !pInlineTags(tag))) {
+                removeEndTag(buffer);
+              }
+              optionalEndTag = optionalEndTags(tag) ? tag : '';
+            }
+
+            if (options.removeEmptyElements && isElementEmpty && canRemoveElement(tag, attrs)) {
+              // remove last "element" from buffer
+              removeStartTag(buffer);
+              optionalStartTag = '';
+              optionalEndTag = '';
+            }
+            else {
+              if (autoGenerated && !options.includeAutoGeneratedTags) {
+                optionalEndTag = '';
+              }
+              else {
+                buffer.push('</' + tag + '>');
+              }
+              charsPrevTag = '/' + tag;
+              if (!inlineTags(tag)) {
+                currentChars = '';
+              }
+              else if (isElementEmpty) {
+                currentChars += '|';
+              }
+            }
+
+            return cb(null, buffer);
+          });
+          if (options.ensureSynchronicity) {
+            nextTask.exec(buffer, errorCallback);
           }
-        }
-        if (!stackNoCollapseWhitespace.length && nextTag !== 'html' && !(prevTag && nextTag)) {
-          text = collapseWhitespace(text, options, false, false, true);
-        }
+          else {
+            subtasks.push(nextTask);
+          }
+        },
+        chars: function(text, prevTag, nextTag) {
+          nextTask = new Task(function(buffer, cb) {
+            var subtasks = [];
+            prevTag = prevTag === '' ? 'comment' : prevTag;
+            nextTag = nextTag === '' ? 'comment' : nextTag;
+            if (options.decodeEntities && text && !specialContentTags(currentTag)) {
+              text = decode(text);
+            }
+            if (options.collapseWhitespace) {
+              if (!stackNoTrimWhitespace.length) {
+                if (prevTag === 'comment') {
+                  var prevComment = buffer[buffer.length - 1];
+                  if (prevComment.indexOf(uidIgnore) === -1) {
+                    if (!prevComment) {
+                      prevTag = charsPrevTag;
+                    }
+                    if (buffer.length > 1 && (!prevComment || !options.conservativeCollapse && / $/.test(currentChars))) {
+                      var charsIndex = buffer.length - 2;
+                      buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
+                        text = trailingSpaces + text;
+                        return '';
+                      });
+                    }
+                  }
+                }
+                if (prevTag) {
+                  if (prevTag === '/nobr' || prevTag === 'wbr') {
+                    if (/^\s/.test(text)) {
+                      var tagIndex = buffer.length - 1;
+                      while (tagIndex > 0 && buffer[tagIndex].lastIndexOf('<' + prevTag) !== 0) {
+                        tagIndex--;
+                      }
+                      trimTrailingWhitespace(buffer, tagIndex - 1, 'br');
+                    }
+                  }
+                  else if (inlineTextTags(prevTag.charAt(0) === '/' ? prevTag.slice(1) : prevTag)) {
+                    text = collapseWhitespace(text, options, /(?:^|\s)$/.test(currentChars));
+                  }
+                }
+                if (prevTag || nextTag) {
+                  text = collapseWhitespaceSmart(text, prevTag, nextTag, options);
+                }
+                else {
+                  text = collapseWhitespace(text, options, true, true);
+                }
+                if (!text && /\s$/.test(currentChars) && prevTag && prevTag.charAt(0) === '/') {
+                  trimTrailingWhitespace(buffer, buffer.length - 1, nextTag);
+                }
+              }
+              if (!stackNoCollapseWhitespace.length && nextTag !== 'html' && !(prevTag && nextTag)) {
+                text = collapseWhitespace(text, options, false, false, true);
+              }
+            }
+            if (options.processScripts && specialContentTags(currentTag)) {
+              nextTask = new Task(function(buffer, cb) {
+                processScript(text, options, currentAttrs, function(error, result) {
+                  text = result;
+                  return cb(error, buffer);
+                });
+              });
+              if (options.ensureSynchronicity) {
+                nextTask.exec(buffer, errorCallback);
+              }
+              else {
+                subtasks.push(nextTask);
+              }
+            }
+            if (isExecutableScript(currentTag, currentAttrs)) {
+              nextTask = new Task(function(buffer, cb) {
+                var callbackCalled = false;
+
+                var result = options.minifyJS(text, null, minifyJS_cb);
+                if (typeof result !== 'undefined') {
+                  return minifyJS_cb(result);
+                }
+
+                function minifyJS_cb(result) {
+                  if (callbackCalled) {
+                    throw new Error('Async completion has already occurred.');
+                  }
+                  else {
+                    callbackCalled = true;
+                    text = result;
+                    return cb(null, buffer);
+                  }
+                }
+              });
+              if (options.ensureSynchronicity) {
+                nextTask.exec(buffer, errorCallback);
+              }
+              else {
+                subtasks.push(nextTask);
+              }
+            }
+            if (isStyleSheet(currentTag, currentAttrs)) {
+              nextTask = new Task(function(buffer, cb) {
+                var callbackCalled = false;
+
+                var result = options.minifyCSS(text, null, minifyCSS_cb);
+                if (typeof result !== 'undefined') {
+                  return minifyCSS_cb(result);
+                }
+
+                function minifyCSS_cb(result) {
+                  if (callbackCalled) {
+                    throw new Error('Async completion has already occurred.');
+                  }
+                  else {
+                    callbackCalled = true;
+                    text = result;
+                    return cb(null, buffer);
+                  }
+                }
+              });
+              if (options.ensureSynchronicity) {
+                nextTask.exec(buffer, errorCallback);
+              }
+              else {
+                subtasks.push(nextTask);
+              }
+            }
+            nextTask = new Task(function(buffer, cb) {
+              if (options.removeOptionalTags && text) {
+                // <html> may be omitted if first thing inside is not comment
+                // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+                if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
+                  removeStartTag(buffer);
+                }
+                optionalStartTag = '';
+                // </html> or </body> may be omitted if not followed by comment
+                // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
+                if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
+                  removeEndTag(buffer);
+                }
+                optionalEndTag = '';
+              }
+              charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
+              if (options.decodeEntities && text && !specialContentTags(currentTag)) {
+                // semi-colon can be omitted
+                // https://mathiasbynens.be/notes/ambiguous-ampersands
+                text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
+              }
+              if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
+                text = text.replace(uidPattern, function(match, prefix, index) {
+                  return ignoredCustomMarkupChunks[+index][0];
+                });
+              }
+              currentChars += text;
+              if (text) {
+                hasChars = true;
+              }
+
+              buffer.push(text);
+              return cb(null, buffer);
+            });
+            if (options.ensureSynchronicity) {
+              nextTask.exec(buffer, errorCallback);
+            }
+            else {
+              subtasks.push(nextTask);
+            }
+
+
+            if (!options.ensureSynchronicity) {
+              // Run this task's subtasks.
+              new TaskGroup(subtasks).exec(buffer, cb);
+            }
+          });
+          if (options.ensureSynchronicity) {
+            nextTask.exec(buffer, errorCallback);
+          }
+          else {
+            subtasks.push(nextTask);
+          }
+        },
+        comment: function(text, nonStandard) {
+          nextTask = new Task(function(buffer, cb) {
+            var subtasks = [];
+            var prefix = nonStandard ? '<!' : '<!--';
+            var suffix = nonStandard ? '>' : '-->';
+            if (isConditionalComment(text)) {
+              nextTask = new Task(function(buffer, cb) {
+                cleanConditionalComment(text, options, function(error, result) {
+                  text = prefix + result + suffix;
+                  return cb(error, buffer);
+                });
+              });
+              if (options.ensureSynchronicity) {
+                nextTask.exec(buffer, errorCallback);
+              }
+              else {
+                subtasks.push(nextTask);
+              }
+            }
+            else if (options.removeComments) {
+              if (isIgnoredComment(text, options)) {
+                text = '<!--' + text + '-->';
+              }
+              else {
+                text = '';
+              }
+            }
+            else {
+              text = prefix + text + suffix;
+            }
+
+            nextTask = new Task(function(buffer, cb) {
+              if (options.removeOptionalTags && text) {
+                // preceding comments suppress tag omissions
+                optionalStartTag = '';
+                optionalEndTag = '';
+              }
+              buffer.push(text);
+              cb(null, buffer);
+            });
+            if (options.ensureSynchronicity) {
+              nextTask.exec(buffer, errorCallback);
+            }
+            else {
+              subtasks.push(nextTask);
+            }
+
+            if (!options.ensureSynchronicity) {
+              // Run this task's subtasks.
+              new TaskGroup(subtasks).exec(buffer, cb);
+            }
+          });
+          if (options.ensureSynchronicity) {
+            nextTask.exec(buffer, errorCallback);
+          }
+          else {
+            subtasks.push(nextTask);
+          }
+        },
+        doctype: function(doctype) {
+          nextTask = new Task(function(buffer, cb) {
+            buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(doctype));
+            return cb(null, buffer);
+          });
+          if (options.ensureSynchronicity) {
+            nextTask.exec(buffer, errorCallback);
+          }
+          else {
+            subtasks.push(nextTask);
+          }
+        },
+        customAttrAssign: options.customAttrAssign,
+        customAttrSurround: options.customAttrSurround
+      });
+
+      if (!options.ensureSynchronicity) {
+        // Run this task's subtasks.
+        new TaskGroup(subtasks).exec(buffer, cb);
       }
-      if (options.processScripts && specialContentTags(currentTag)) {
-        text = processScript(text, options, currentAttrs);
-      }
-      if (isExecutableScript(currentTag, currentAttrs)) {
-        text = options.minifyJS(text);
-      }
-      if (isStyleSheet(currentTag, currentAttrs)) {
-        text = options.minifyCSS(text);
-      }
-      if (options.removeOptionalTags && text) {
-        // <html> may be omitted if first thing inside is not comment
-        // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-        if (optionalStartTag === 'html' || optionalStartTag === 'body' && !/^\s/.test(text)) {
-          removeStartTag();
-        }
-        optionalStartTag = '';
-        // </html> or </body> may be omitted if not followed by comment
-        // </head>, </colgroup> or </caption> may be omitted if not followed by space or comment
-        if (compactTags(optionalEndTag) || looseTags(optionalEndTag) && !/^\s/.test(text)) {
-          removeEndTag();
-        }
-        optionalEndTag = '';
-      }
-      charsPrevTag = /^\s*$/.test(text) ? prevTag : 'comment';
-      if (options.decodeEntities && text && !specialContentTags(currentTag)) {
-        // semi-colon can be omitted
-        // https://mathiasbynens.be/notes/ambiguous-ampersands
-        text = text.replace(/&(#?[0-9a-zA-Z]+;)/g, '&amp$1').replace(/</g, '&lt;');
-      }
-      if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
-        text = text.replace(uidPattern, function(match, prefix, index) {
-          return ignoredCustomMarkupChunks[+index][0];
-        });
-      }
-      currentChars += text;
-      if (text) {
-        hasChars = true;
-      }
-      buffer.push(text);
-    },
-    comment: function(text, nonStandard) {
-      var prefix = nonStandard ? '<!' : '<!--';
-      var suffix = nonStandard ? '>' : '-->';
-      if (isConditionalComment(text)) {
-        text = prefix + cleanConditionalComment(text, options) + suffix;
-      }
-      else if (options.removeComments) {
-        if (isIgnoredComment(text, options)) {
-          text = '<!--' + text + '-->';
-        }
-        else {
-          text = '';
-        }
-      }
-      else {
-        text = prefix + text + suffix;
-      }
-      if (options.removeOptionalTags && text) {
-        // preceding comments suppress tag omissions
-        optionalStartTag = '';
-        optionalEndTag = '';
-      }
-      buffer.push(text);
-    },
-    doctype: function(doctype) {
-      buffer.push(options.useShortDoctype ? '<!DOCTYPE html>' : collapseWhitespaceAll(doctype));
-    },
-    customAttrAssign: options.customAttrAssign,
-    customAttrSurround: options.customAttrSurround
+    }
+    catch (error) {
+      return cb(error);
+    }
   });
-
-  if (options.removeOptionalTags) {
-    // <html> may be omitted if first thing inside is not comment
-    // <head> or <body> may be omitted if empty
-    if (topLevelTags(optionalStartTag)) {
-      removeStartTag();
-    }
-    // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
-    if (optionalEndTag && !trailingTags(optionalEndTag)) {
-      removeEndTag();
-    }
+  if (options.ensureSynchronicity) {
+    nextTask.exec(buffer, errorCallback);
   }
-  if (options.collapseWhitespace) {
-    squashTrailingWhitespace('br');
+  else {
+    tasks.push(nextTask);
   }
 
-  var str = joinResultSegments(buffer, options);
-
-  if (uidPattern) {
-    str = str.replace(uidPattern, function(match, prefix, index, suffix) {
-      var chunk = ignoredCustomMarkupChunks[+index][0];
-      if (options.collapseWhitespace) {
-        if (prefix !== '\t') {
-          chunk = prefix + chunk;
-        }
-        if (suffix !== '\t') {
-          chunk += suffix;
-        }
-        return collapseWhitespace(chunk, {
-          preserveLineBreaks: options.preserveLineBreaks,
-          conservativeCollapse: !options.trimCustomFragments
-        }, /^[ \n\r\t\f]/.test(chunk), /[ \n\r\t\f]$/.test(chunk));
+  function finalizeResult(buffer) {
+    if (options.removeOptionalTags) {
+      // <html> may be omitted if first thing inside is not comment
+      // <head> or <body> may be omitted if empty
+      if (topLevelTags(optionalStartTag)) {
+        removeStartTag(buffer);
       }
-      return chunk;
-    });
-  }
-  if (uidIgnore) {
-    str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
-      return ignoredMarkupChunks[+index];
-    });
+      // except for </dt> or </thead>, end tags may be omitted if no more content in parent element
+      if (optionalEndTag && !trailingTags(optionalEndTag)) {
+        removeEndTag(buffer);
+      }
+    }
+    if (options.collapseWhitespace) {
+      squashTrailingWhitespace(buffer, 'br');
+    }
+
+    var str = joinResultSegments(buffer, options);
+
+    if (uidPattern) {
+      str = str.replace(uidPattern, function(match, prefix, index, suffix) {
+        var chunk = ignoredCustomMarkupChunks[+index][0];
+        if (options.collapseWhitespace) {
+          if (prefix !== '\t') {
+            chunk = prefix + chunk;
+          }
+          if (suffix !== '\t') {
+            chunk += suffix;
+          }
+          return collapseWhitespace(chunk, {
+            preserveLineBreaks: options.preserveLineBreaks,
+            conservativeCollapse: !options.trimCustomFragments
+          }, /^[ \n\r\t\f]/.test(chunk), /[ \n\r\t\f]$/.test(chunk));
+        }
+        return chunk;
+      });
+    }
+    if (uidIgnore) {
+      str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
+        return ignoredMarkupChunks[+index];
+      });
+    }
+
+    return str;
   }
 
-  return str;
+  function finishUp(buffer) {
+    var result;
+    try {
+      result = finalizeResult(buffer);
+    }
+    catch (error) {
+      return cb(error);
+    }
+    return cb(null, result);
+  }
+
+  if (options.ensureSynchronicity) {
+    return finishUp(buffer);
+  }
+
+  // Run the tasks.
+  new TaskGroup(tasks)
+    .exec(buffer, function(error, buffer) {
+      if (error) {
+        return cb(error);
+      }
+      return finishUp(buffer);
+    });
+  return;
 }
 
 function joinResultSegments(results, options) {
@@ -1303,10 +1702,25 @@ function joinResultSegments(results, options) {
   return options.collapseWhitespace ? collapseWhitespace(str, options, true, true) : str;
 }
 
-exports.minify = function(value, options) {
+exports.minify = function(value, options, cb) {
   var start = Date.now();
-  options = processOptions(options || {});
-  var result = minify(value, options);
-  options.log('minified in: ' + (Date.now() - start) + 'ms');
-  return result;
+  var hasCallback = typeof cb === 'function';
+  options = processOptions(options || {}, !hasCallback);
+
+  var minified;
+  minify(value, options, false, function(error, result) {
+    if (error) {
+      if (hasCallback) {
+        return cb(error);
+      }
+      throw error;
+    }
+
+    options.log('minified in: ' + (Date.now() - start) + 'ms');
+    if (hasCallback) {
+      return cb(null, result);
+    }
+    minified = result;
+  });
+  return minified;
 };
