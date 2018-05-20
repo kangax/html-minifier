@@ -3229,6 +3229,10 @@ QUnit.test('sort style classes', function(assert) {
     removeAttributeQuotes: true,
     sortClassName: true
   }), output);
+
+  input = '<div class></div>';
+  assert.equal(minify(input, { sortClassName: false }), input);
+  assert.equal(minify(input, { sortClassName: true }), input);
 });
 
 QUnit.test('decode entity characters', function(assert) {
