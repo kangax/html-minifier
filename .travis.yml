@@ -30,3 +30,5 @@ install:
   - npm install --no-optional --no-save --no-update-notifier
 script:
   - npm test --no-update-notifier
+git:
+  depth: 5
