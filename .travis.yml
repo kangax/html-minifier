@@ -30,3 +30,6 @@ install:
   - npm install --no-optional --no-save --no-update-notifier
 script:
   - npm test --no-update-notifier
+cache:
+  directories:
+    - node_modules
