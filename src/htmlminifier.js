@@ -355,6 +355,15 @@ function unwrapMediaQuery(text) {
   return matches ? matches[1] : text;
 }
 
+// FIXME: Replace with https://github.com/jakubpawlowicz/clean-css#how-to-keep-a-css-fragment-intact when released
+function wrapIgnoredCSS(text) {
+  return '/*!htmlmin' + text + '*/';
+}
+
+function unwrapIgnoredCSS(text) {
+  return text.replace(/\/\*!htmlmin([\s\S]*?)\*\//, '$1');
+}
+
 function cleanConditionalComment(comment, options) {
   return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/, function(match, prefix, text, suffix) {
     return prefix + minify(text, options, true) + suffix;
@@ -652,7 +661,7 @@ function processOptions(values) {
       }
       options.minifyCSS = function(text, type) {
         text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, function(match, prefix, quote, url, suffix) {
-          return prefix + quote + options.minifyURLs(url) + quote + suffix;
+          return prefix + quote + options.minifyURLs(unwrapIgnoredCSS(url)) + quote + suffix;
         });
         try {
           if (type === 'inline') {
@@ -859,12 +868,14 @@ function minify(value, options, partialMarkup) {
     return token;
   });
 
-  function escapeFragments(fn) {
+  function escapeFragments(fn, wrapFn, unwrapFn) {
+    wrapFn = typeof wrapFn === 'undefined' ? identity : wrapFn;
+    unwrapFn = typeof unwrapFn === 'undefined' ? identity : unwrapFn;
     return function(text, type) {
-      return fn(text.replace(uidPattern, function(match, prefix, index) {
+      return unwrapFn(fn(text.replace(uidPattern, function(match, prefix, index) {
         var chunks = ignoredCustomMarkupChunks[+index];
-        return chunks[1] + uidAttr + index + chunks[2];
-      }), type);
+        return wrapFn(chunks[1] + uidAttr + index + chunks[2]);
+      }), type));
     };
   }
 
@@ -879,7 +890,7 @@ function minify(value, options, partialMarkup) {
         uidAttr = uniqueId(value);
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
         if (options.minifyCSS) {
-          options.minifyCSS = escapeFragments(options.minifyCSS);
+          options.minifyCSS = escapeFragments(options.minifyCSS, wrapIgnoredCSS, unwrapIgnoredCSS);
         }
         if (options.minifyJS) {
           options.minifyJS = escapeFragments(options.minifyJS);
