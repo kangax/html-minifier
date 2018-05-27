@@ -663,26 +663,38 @@ function processOptions(values) {
         text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, function(match, prefix, quote, url, suffix) {
           return prefix + quote + options.minifyURLs(unwrapIgnoredCSS(url)) + quote + suffix;
         });
+
+        if (type === 'inline') {
+          text = wrapInlineCSS(text);
+        }
+        else if (type === 'media') {
+          text = wrapMediaQuery(text);
+        }
+
         try {
-          if (type === 'inline') {
-            text = wrapInlineCSS(text);
+          var result = new CleanCSS(value).minify(text);
+          if (result.errors.length) {
+            console.error(result.errors.join('\n'));
           }
-          else if (type === 'media') {
-            text = wrapMediaQuery(text);
+          else if (result.warnings.length) {
+            console.warn(result.warnings.join('\n'));
           }
-          text = new CleanCSS(value).minify(text).styles;
-          if (type === 'inline') {
-            text = unwrapInlineCSS(text);
+          else {
+            text = result.styles;
           }
-          else if (type === 'media') {
-            text = unwrapMediaQuery(text);
-          }
-          return text;
         }
         catch (err) {
           options.log(err);
-          return text;
         }
+
+        if (type === 'inline') {
+          text = unwrapInlineCSS(text);
+        }
+        else if (type === 'media') {
+          text = unwrapMediaQuery(text);
+        }
+
+        return text;
       };
     }
     else if (key === 'minifyJS' && typeof value !== 'function') {
