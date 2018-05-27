@@ -2344,6 +2344,14 @@ QUnit.test('minification of style with custom fragments', function(assert) {
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: true }), input);
 
+  // input = '<style><?foo?>{color:red}</style>';
+  // assert.equal(minify(input), input);
+  // assert.equal(minify(input, { minifyCSS: true }), input);
+
+  // input = '<style>\t<?foo?>\t{color:red}</style>';
+  // assert.equal(minify(input), input);
+  // assert.equal(minify(input, { minifyCSS: true }), input);
+
   input = '<style>body{<?foo?>}</style>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: true }), input);
@@ -2375,6 +2383,14 @@ QUnit.test('minification of style with custom fragments', function(assert) {
   input = '<style>body{color:red\t<?foo?>\t}</style>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { minifyCSS: true }), input);
+
+  // input = '<style>body{color:red;<?foo?>}</style>';
+  // assert.equal(minify(input), input);
+  // assert.equal(minify(input, { minifyCSS: true }), input);
+
+  // input = '<style>body{color:red;\t<?foo?>\t}</style>';
+  // assert.equal(minify(input), input);
+  // assert.equal(minify(input, { minifyCSS: true }), input);
 
   input = '<style>body{color:red}<?foo?></style>';
   assert.equal(minify(input), input);
