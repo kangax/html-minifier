@@ -1432,6 +1432,13 @@ QUnit.test('collapsing boolean attributes', function(assert) {
     'Ismap Itemscope Loop Multiple Muted Nohref Noresize Noshade Novalidate Nowrap Open Pauseonexit Readonly ' +
     'Required Reversed Scoped Seamless Selected Sortable Truespeed Typemustmatch Visible></div>';
   assert.equal(minify(input, { collapseBooleanAttributes: true, caseSensitive: true }), output);
+
+  input = '<img src="test" readonly="readonly" disabled="${disabled}">';
+  assert.equal(minify(input, {
+    collapseBooleanAttributes: true,
+    removeAttributeQuotes: true,
+    ignoreCustomFragments: [/\$\{disabled\}/],
+  }), '<img src=test readonly disabled="${disabled}">');
 });
 
 QUnit.test('collapsing enumerated attributes', function(assert) {
