@@ -595,6 +595,7 @@ function buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr) {
   }
 
   if (typeof attrValue === 'undefined' || options.collapseBooleanAttributes &&
+      !~attrValue.indexOf(uidAttr) &&
       isBooleanAttribute(attrName.toLowerCase(), attrValue.toLowerCase())) {
     attrFragment = attrName;
     if (!isLast) {
