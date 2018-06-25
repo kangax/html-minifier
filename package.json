@@ -1,7 +1,7 @@
 {
   "name": "html-minifier",
   "description": "Highly configurable, well-tested, JavaScript-based HTML minifier.",
-  "version": "3.5.16",
+  "version": "3.5.17",
   "keywords": [
     "cli",
     "compress",
@@ -60,7 +60,7 @@
     "he": "1.1.x",
     "param-case": "2.1.x",
     "relateurl": "0.2.x",
-    "uglify-js": "3.3.x"
+    "uglify-js": "3.4.x"
   },
   "devDependencies": {
     "grunt": "1.0.x",
