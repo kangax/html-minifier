@@ -405,14 +405,21 @@ QUnit.test('types of whitespace that should always be preserved', function(asser
 QUnit.test('doctype normalization', function(assert) {
   var input;
 
-  input = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"\n    "http://www.w3.org/TR/html4/strict.dtd">';
-  assert.equal(minify(input, { useShortDoctype: true }), '<!DOCTYPE html>');
-
   input = '<!DOCTYPE html>';
+  assert.equal(minify(input, { useShortDoctype: false }), input);
   assert.equal(minify(input, { useShortDoctype: true }), input);
 
-  input = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
+  input = '<!DOCTYPE\nhtml>';
+  assert.equal(minify(input, { useShortDoctype: false }), '<!DOCTYPE html>');
+  assert.equal(minify(input, { useShortDoctype: true }), '<!DOCTYPE html>');
+
+  input = '<!DOCTYPE\thtml>';
   assert.equal(minify(input, { useShortDoctype: false }), input);
+  assert.equal(minify(input, { useShortDoctype: true }), '<!DOCTYPE html>');
+
+  input = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"\n    "http://www.w3.org/TR/html4/strict.dtd">';
+  assert.equal(minify(input, { useShortDoctype: false }), '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">');
+  assert.equal(minify(input, { useShortDoctype: true }), '<!DOCTYPE html>');
 });
 
 QUnit.test('removing comments', function(assert) {
