@@ -140,7 +140,7 @@ var mainOptionKeys = Object.keys(mainOptions);
 mainOptionKeys.forEach(function(key) {
   var option = mainOptions[key];
   if (Array.isArray(option)) {
-    key = '--' + paramCase(key);
+    key = key === 'minifyURLs' ? '--minify-urls' : '--' + paramCase(key);
     key += option[1] === parseJSON ? ' [value]' : ' <value>';
     program.option(key, option[0], option[1]);
   }
