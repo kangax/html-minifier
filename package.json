@@ -23,11 +23,11 @@
     "uglifier",
     "uglify"
   ],
-  "homepage": "http://kangax.github.io/html-minifier/",
+  "homepage": "https://kangax.github.io/html-minifier/",
   "author": "Juriy \"kangax\" Zaytsev",
   "maintainers": [
     "Alex Lam <alexlamsl@gmail.com>",
-    "Juriy Zaytsev <kangax@gmail.com> (http://perfectionkills.com)"
+    "Juriy Zaytsev <kangax@gmail.com> (http://perfectionkills.com/)"
   ],
   "contributors": [
     "Gilmore Davidson (https://github.com/gilmoreorless)",

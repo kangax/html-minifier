@@ -109,7 +109,7 @@ function isEventAttribute(attrName, options) {
 }
 
 function canRemoveAttributeQuotes(value) {
-  // http://mathiasbynens.be/notes/unquoted-attribute-values
+  // https://mathiasbynens.be/notes/unquoted-attribute-values
   return /^[^ \t\n\f\r"'`=<>]+$/.test(value);
 }
 
@@ -374,7 +374,7 @@ function processScript(text, options, currentAttrs) {
 // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
 // with the following deviations:
 // - retain <body> if followed by <noscript>
-// - </rb>, </rt>, </rtc>, </rp> & </tfoot> follow http://www.w3.org/TR/html5/syntax.html#optional-tags
+// - </rb>, </rt>, </rtc>, </rp> & </tfoot> follow https://www.w3.org/TR/html5/syntax.html#optional-tags
 // - retain all tags which are adjacent to non-standard HTML tags
 var optionalStartTags = createMapFromString('html,head,body,colgroup,tbody');
 var optionalEndTags = createMapFromString('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,caption,thead,tbody,tfoot,tr,td,th');
