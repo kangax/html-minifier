@@ -1241,10 +1241,8 @@ function minify(value, options, partialMarkup) {
     squashTrailingWhitespace('br');
   }
 
-  var str = joinResultSegments(buffer, options);
-
-  if (uidPattern) {
-    str = str.replace(uidPattern, function(match, prefix, index, suffix) {
+  return joinResultSegments(buffer, options, uidPattern ? function(str) {
+    return str.replace(uidPattern, function(match, prefix, index, suffix) {
       var chunk = ignoredCustomMarkupChunks[+index][0];
       if (options.collapseWhitespace) {
         if (prefix !== '\t') {
@@ -1260,17 +1258,14 @@ function minify(value, options, partialMarkup) {
       }
       return chunk;
     });
-  }
-  if (uidIgnore) {
-    str = str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
+  } : identity, uidIgnore ? function(str) {
+    return str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
       return ignoredMarkupChunks[+index];
     });
-  }
-
-  return str;
+  } : identity);
 }
 
-function joinResultSegments(results, options) {
+function joinResultSegments(results, options, restoreCustom, restoreIgnore) {
   var str;
   var maxLineLength = options.maxLineLength;
   if (maxLineLength) {
@@ -1279,13 +1274,13 @@ function joinResultSegments(results, options) {
       var len = line.length;
       var end = results[0].indexOf('\n');
       if (end < 0) {
-        line += results.shift();
+        line += restoreIgnore(restoreCustom(results.shift()));
       }
       else {
-        line += results[0].slice(0, end);
+        line += restoreIgnore(restoreCustom(results[0].slice(0, end)));
         results[0] = results[0].slice(end + 1);
       }
-      if (len > 0 && line.length >= maxLineLength) {
+      if (len > 0 && line.length > maxLineLength) {
         lines.push(line.slice(0, len));
         line = line.slice(len);
       }
@@ -1297,11 +1292,10 @@ function joinResultSegments(results, options) {
     if (line) {
       lines.push(line);
     }
-
     str = lines.join('\n');
   }
   else {
-    str = results.join('');
+    str = restoreIgnore(restoreCustom(results.join('')));
   }
   return options.collapseWhitespace ? collapseWhitespace(str, options, true, true) : str;
 }
