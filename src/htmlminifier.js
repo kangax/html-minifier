@@ -726,7 +726,9 @@ function processOptions(values) {
 function uniqueId(value) {
   var id;
   do {
-    id = Math.random().toString(36).replace(/^0\.[0-9]*/, '');
+    id = 'xxxxxxxxxxxx'.replace(/x/g, function () {
+      return (Math.random() * 16 | 0).toString(16);
+    });
   } while (~value.indexOf(id));
   return id;
 }
