@@ -1,25 +1,27 @@
 /* eslint-env phantomjs, qunit */
+
 'use strict';
 
 function load(path) {
-  var obj = require(path);
-  for (var key in obj) {
+  const obj = require(path);
+
+  for (const key in obj) {
     global[key] = obj[key];
   }
   return obj;
 }
 
-var alert = console.log;
-var QUnit = load('qunit');
+const alert = console.log;
+const QUnit = load('qunit');
 
 function hook() {
-  var failures = [];
-  QUnit.log(function(details) {
+  const failures = [];
+  QUnit.log(details => {
     if (!details.result) {
       failures.push(details);
     }
   });
-  QUnit.done(function(details) {
+  QUnit.done(details => {
     details.failures = failures;
     alert(JSON.stringify(details));
   });
@@ -32,17 +34,17 @@ if (typeof phantom === 'undefined') {
   hook();
 }
 else {
-  var system = require('system');
-  setTimeout(function() {
+  const system = require('system');
+  setTimeout(() => {
     system.stderr.write('timed out');
     phantom.exit(1);
   }, 15000);
-  var page = require('webpage').create();
-  page.onAlert = function(details) {
+  const page = require('webpage').create();
+  page.onAlert = details => {
     console.log(details);
     phantom.exit();
   };
-  page.open(system.args[1], function(status) {
+  page.open(system.args[1], status => {
     if (status !== 'success') {
       phantom.exit(1);
     }

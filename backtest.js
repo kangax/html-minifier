@@ -2,25 +2,25 @@
 
 'use strict';
 
-var child_process = require('child_process'),
-    fs = require('fs'),
-    os = require('os'),
-    path = require('path'),
-    Progress = require('progress');
+const childProcess = require('child_process');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const Progress = require('progress');
+const urls = require('./benchmarks');
 
-var urls = require('./benchmarks');
-var fileNames = Object.keys(urls);
+const fileNames = Object.keys(urls);
 
 function git() {
-  var args = [].concat.apply([], [].slice.call(arguments, 0, -1));
-  var callback = arguments[arguments.length - 1];
-  var task = child_process.spawn('git', args, { stdio: ['ignore', 'pipe', 'ignore'] });
-  var output = '';
+  const args = [].concat(...[].slice.call(arguments, 0, -1));
+  const callback = arguments[arguments.length - 1];
+  const task = childProcess.spawn('git', args, { stdio: ['ignore', 'pipe', 'ignore'] });
+  let output = '';
   task.stdout.setEncoding('utf8');
-  task.stdout.on('data', function(data) {
+  task.stdout.on('data', data => {
     output += data;
   });
-  task.on('exit', function(code) {
+  task.on('exit', code => {
     callback(code, output);
   });
 }
@@ -30,7 +30,7 @@ function readText(filePath, callback) {
 }
 
 function writeText(filePath, data) {
-  fs.writeFile(filePath, data, { encoding: 'utf8' }, function(err) {
+  fs.writeFile(filePath, data, { encoding: 'utf8' }, err => {
     if (err) {
       throw err;
     }
@@ -43,38 +43,39 @@ function loadModule() {
 }
 
 function getOptions(fileName, options) {
-  var result = {
+  const result = {
     minifyURLs: {
       site: urls[fileName]
     }
   };
-  for (var key in options) {
+  for (const key in options) {
     result[key] = options[key];
   }
   return result;
 }
 
 function minify(hash, options) {
-  var minify = loadModule();
+  const minify = loadModule();
   process.send('ready');
-  var count = fileNames.length;
-  fileNames.forEach(function(fileName) {
-    readText(path.join('benchmarks/', fileName + '.html'), function(err, data) {
+  let count = fileNames.length;
+  fileNames.forEach(fileName => {
+    readText(path.join('benchmarks/', `${fileName}.html`), (err, data) => {
       if (err) {
         throw err;
       }
       else {
         try {
-          var minified = minify(data, getOptions(fileName, options));
+          const minified = minify(data, getOptions(fileName, options));
           if (minified) {
-            process.send({ name: fileName, size: minified.length });
+            process.send({ name: fileName,
+              size: minified.length });
           }
           else {
-            throw new Error('unexpected result: ' + minified);
+            throw new Error(`unexpected result: ${minified}`);
           }
         }
         catch (e) {
-          console.error('[' + fileName + ']', e.stack || e);
+          console.error(`[${fileName}]`, e.stack || e);
         }
         finally {
           if (!--count) {
@@ -87,20 +88,20 @@ function minify(hash, options) {
 }
 
 function print(table) {
-  var output = [];
-  var errors = [];
-  var row = fileNames.slice(0);
+  const output = [];
+  const errors = [];
+  let row = fileNames.slice(0);
   row.unshift('hash', 'date');
   output.push(row.join(','));
-  for (var hash in table) {
-    var data = table[hash];
-    row = [hash, '"' + data.date + '"'];
-    fileNames.forEach(function(fileName) {
+  for (const hash in table) {
+    const data = table[hash];
+    row = [hash, `"${data.date}"`];
+    fileNames.forEach(fileName => {
       row.push(data[fileName]);
     });
     output.push(row.join(','));
     if (data.error) {
-      errors.push(hash + ' - ' + data.error);
+      errors.push(`${hash} - ${data.error}`);
     }
   }
   writeText('backtest.csv', output.join('\n'));
@@ -108,37 +109,37 @@ function print(table) {
 }
 
 if (process.argv.length > 2) {
-  var count = +process.argv[2];
+  const count = Number(process.argv[2]);
   if (count) {
-    git('log', '--date=iso', '--pretty=format:%h %cd', '-' + count, function(code, data) {
-      var table = {};
-      var commits = data.split(/\s*?\n/).map(function(line) {
-        var index = line.indexOf(' ');
-        var hash = line.substr(0, index);
+    git('log', '--date=iso', '--pretty=format:%h %cd', `-${count}`, (code, data) => {
+      const table = {};
+      const commits = data.split(/\s*?\n/).map(line => {
+        const index = line.indexOf(' ');
+        const hash = line.substr(0, index);
         table[hash] = {
           date: line.substr(index + 1).replace('+', '').replace(/ 0000$/, '')
         };
         return hash;
       });
-      var nThreads = os.cpus().length;
-      var running = 0;
-      var progress = new Progress('[:bar] :etas', {
+      const nThreads = os.cpus().length;
+      let running = 0;
+      const progress = new Progress('[:bar] :etas', {
         width: 50,
         total: commits.length * 2
       });
 
       function fork() {
         if (commits.length && running < nThreads) {
-          var hash = commits.shift();
-          var task = child_process.fork('./backtest', { silent: true });
-          var error = '';
-          var id = setTimeout(function() {
+          const hash = commits.shift();
+          const task = childProcess.fork('./backtest', { silent: true });
+          let error = '';
+          const id = setTimeout(() => {
             if (task.connected) {
               error += 'task timed out\n';
               task.kill();
             }
           }, 60000);
-          task.on('message', function(data) {
+          task.on('message', data => {
             if (data === 'ready') {
               progress.tick(1);
               fork();
@@ -146,7 +147,7 @@ if (process.argv.length > 2) {
             else {
               table[hash][data.name] = data.size;
             }
-          }).on('exit', function() {
+          }).on('exit', () => {
             progress.tick(1);
             clearTimeout(id);
             if (error) {
@@ -160,7 +161,7 @@ if (process.argv.length > 2) {
             }
           });
           task.stderr.setEncoding('utf8');
-          task.stderr.on('data', function(data) {
+          task.stderr.on('data', data => {
             error += data;
           });
           task.stdout.resume();
@@ -177,14 +178,14 @@ if (process.argv.length > 2) {
   }
 }
 else {
-  process.on('message', function(hash) {
-    var paths = ['src', 'benchmark.conf', 'sample-cli-config-file.conf'];
-    git('reset', 'HEAD', '--', paths, function() {
-      var conf = 'sample-cli-config-file.conf';
+  process.on('message', hash => {
+    const paths = ['src', 'benchmark.conf', 'sample-cli-config-file.conf'];
+    git('reset', 'HEAD', '--', paths, () => {
+      let conf = 'sample-cli-config-file.conf';
 
       function checkout() {
-        var path = paths.shift();
-        git('checkout', hash, '--', path, function(code) {
+        const path = paths.shift();
+        git('checkout', hash, '--', path, code => {
           if (code === 0 && path === 'benchmark.conf') {
             conf = path;
           }
@@ -192,7 +193,7 @@ else {
             checkout();
           }
           else {
-            readText(conf, function(err, data) {
+            readText(conf, (err, data) => {
               if (err) {
                 throw err;
               }

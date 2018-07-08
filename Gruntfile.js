@@ -1,10 +1,8 @@
 'use strict';
 
 function qunitVersion() {
-  var prepareStackTrace = Error.prepareStackTrace;
-  Error.prepareStackTrace = function() {
-    return '';
-  };
+  const prepareStackTrace = Error.prepareStackTrace;
+  Error.prepareStackTrace = () => '';
   try {
     return require('qunit').version;
   }
@@ -13,7 +11,7 @@ function qunitVersion() {
   }
 }
 
-module.exports = function(grunt) {
+module.exports = grunt => {
   // Force use of Unix newlines
   grunt.util.linefeed = '\n';
 
@@ -30,11 +28,11 @@ module.exports = function(grunt) {
       src: {
         options: {
           banner: '<%= banner %>',
-          preBundleCB: function() {
-            var fs = require('fs');
-            var UglifyJS = require('uglify-js');
-            var files = {};
-            UglifyJS.FILES.forEach(function(file) {
+          preBundleCB() {
+            const fs = require('fs');
+            const UglifyJS = require('uglify-js');
+            const files = {};
+            UglifyJS.FILES.forEach(file => {
               files[file] = fs.readFileSync(file, 'utf8');
             });
             fs.writeFileSync('./dist/uglify.js', UglifyJS.minify(files, {
@@ -43,7 +41,7 @@ module.exports = function(grunt) {
               wrap: 'exports'
             }).code);
           },
-          postBundleCB: function(err, src, next) {
+          postBundleCB(err, src, next) {
             require('fs').unlinkSync('./dist/uglify.js');
             next(err, src);
           },
@@ -111,38 +109,38 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-eslint');
 
   function report(type, details) {
-    grunt.log.writeln(type + ' completed in ' + details.runtime + 'ms');
-    details.failures.forEach(function(details) {
+    grunt.log.writeln(`${type} completed in ${details.runtime}ms`);
+    details.failures.forEach(detail => {
       grunt.log.error();
-      grunt.log.error(details.name + (details.message ? ' [' + details.message + ']' : ''));
-      grunt.log.error(details.source);
+      grunt.log.error(detail.name + (detail.message ? ` [${detail.message}]` : ''));
+      grunt.log.error(detail.source);
       grunt.log.error('Actual:');
-      grunt.log.error(details.actual);
+      grunt.log.error(detail.actual);
       grunt.log.error('Expected:');
-      grunt.log.error(details.expected);
+      grunt.log.error(detail.expected);
     });
-    grunt.log[details.failed ? 'error' : 'ok'](details.passed + ' of ' + details.total + ' passed, ' + details.failed + ' failed');
+    grunt.log[details.failed ? 'error' : 'ok'](`${details.passed} of ${details.total} passed, ${details.failed} failed`);
     return details.failed;
   }
 
-  var phantomjs = require('phantomjs-prebuilt').path;
+  const phantomjs = require('phantomjs-prebuilt').path;
   grunt.registerMultiTask('qunit', function() {
-    var done = this.async();
-    var errors = [];
+    const done = this.async();
+    const errors = [];
 
     function run(testType, binPath, testPath) {
       grunt.util.spawn({
         cmd: binPath,
         args: ['test.js', testPath]
-      }, function(error, result) {
+      }, (error, result) => {
         if (error) {
           grunt.log.error(result.stderr);
-          grunt.log.error(testType + ' test failed to load');
+          grunt.log.error(`${testType} test failed to load`);
           errors.push(-1);
         }
         else {
-          var output = result.stdout;
-          var index = output.lastIndexOf('\n');
+          let output = result.stdout;
+          const index = output.lastIndexOf('\n');
           if (index !== -1) {
             // There's something before the report JSON
             // Log it to the console -- it's probably some debug output:
@@ -162,9 +160,9 @@ module.exports = function(grunt) {
   });
 
   grunt.registerMultiTask('replace', function() {
-    var pattern = this.data[0];
-    var path = this.target;
-    var html = grunt.file.read(path);
+    const pattern = this.data[0];
+    const path = this.target;
+    let html = grunt.file.read(path);
     html = html.replace(pattern, this.data[1]);
     grunt.file.write(path, html);
   });

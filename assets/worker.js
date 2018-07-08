@@ -13,7 +13,7 @@
     }
     catch (err) {
       postMessage({
-        error: err + ''
+        error: String(err)
       });
     }
   });

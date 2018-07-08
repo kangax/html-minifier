@@ -24,11 +24,11 @@
         worker.onmessage = function(event) {
           var data = event.data;
           if (data.error) {
-            errorback(data.error);
+            return errorback(data.error);
           }
-          else {
-            callback(data);
-          }
+
+          return callback(data);
+
         };
         worker.postMessage({
           value: value,
@@ -43,7 +43,8 @@
   }
 
   function escapeHTML(str) {
-    return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   function forEachOption(fn) {
@@ -66,7 +67,7 @@
       }
       switch (key) {
         case 'maxLineLength':
-          value = parseInt(value);
+          value = parseInt(value, 10);
           break;
         case 'processScripts':
           value = value.split(/\s*,\s*/);
@@ -78,9 +79,12 @@
 
   function commify(str) {
     return String(str)
-      .split('').reverse().join('')
+      .split('').reverse()
+      .join('')
       .replace(/(...)(?!$)/g, '$1,')
-      .split('').reverse().join('');
+      .split('')
+      .reverse()
+      .join('');
   }
 
   byId('minify-btn').onclick = function() {

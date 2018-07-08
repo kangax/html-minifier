@@ -1,12 +1,12 @@
 'use strict';
 
-var CleanCSS = require('clean-css');
-var decode = require('he').decode;
-var HTMLParser = require('./htmlparser').HTMLParser;
-var RelateUrl = require('relateurl');
-var TokenChain = require('./tokenchain');
-var UglifyJS = require('uglify-js');
-var utils = require('./utils');
+const CleanCSS = require('clean-css');
+const decode = require('he').decode;
+const HTMLParser = require('./htmlparser').HTMLParser;
+const RelateUrl = require('relateurl');
+const TokenChain = require('./tokenchain');
+const UglifyJS = require('uglify-js');
+const utils = require('./utils');
 
 function trimWhitespace(str) {
   return str && str.replace(/^[ \n\r\t\f]+/, '').replace(/[ \n\r\t\f]+$/, '');
@@ -14,19 +14,18 @@ function trimWhitespace(str) {
 
 function collapseWhitespaceAll(str) {
   // Non-breaking space is specifically handled inside the replacer function here:
-  return str && str.replace(/[ \n\r\t\f\xA0]+/g, function(spaces) {
-    return spaces === '\t' ? '\t' : spaces.replace(/(^|\xA0+)[^\xA0]+/g, '$1 ');
-  });
+  return str && str.replace(/[ \n\r\t\f\xA0]+/g, spaces => spaces === '\t' ? '\t' : spaces.replace(/(^|\xA0+)[^\xA0]+/g, '$1 '));
 }
 
 function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
-  var lineBreakBefore = '', lineBreakAfter = '';
+  let lineBreakBefore = '';
+  let lineBreakAfter = '';
 
   if (options.preserveLineBreaks) {
-    str = str.replace(/^[ \n\r\t\f]*?[\n\r][ \n\r\t\f]*/, function() {
+    str = str.replace(/^[ \n\r\t\f]*?[\n\r][ \n\r\t\f]*/, () => {
       lineBreakBefore = '\n';
       return '';
-    }).replace(/[ \n\r\t\f]*?[\n\r][ \n\r\t\f]*$/, function() {
+    }).replace(/[ \n\r\t\f]*?[\n\r][ \n\r\t\f]*$/, () => {
       lineBreakAfter = '\n';
       return '';
     });
@@ -34,8 +33,8 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
 
   if (trimLeft) {
     // Non-breaking space is specifically handled inside the replacer function here:
-    str = str.replace(/^[ \n\r\t\f\xA0]+/, function(spaces) {
-      var conservative = !lineBreakBefore && options.conservativeCollapse;
+    str = str.replace(/^[ \n\r\t\f\xA0]+/, spaces => {
+      const conservative = !lineBreakBefore && options.conservativeCollapse;
       if (conservative && spaces === '\t') {
         return '\t';
       }
@@ -45,8 +44,8 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
 
   if (trimRight) {
     // Non-breaking space is specifically handled inside the replacer function here:
-    str = str.replace(/[ \n\r\t\f\xA0]+$/, function(spaces) {
-      var conservative = !lineBreakAfter && options.conservativeCollapse;
+    str = str.replace(/[ \n\r\t\f\xA0]+$/, spaces => {
+      const conservative = !lineBreakAfter && options.conservativeCollapse;
       if (conservative && spaces === '\t') {
         return '\t';
       }
@@ -62,20 +61,20 @@ function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   return lineBreakBefore + str + lineBreakAfter;
 }
 
-var createMapFromString = utils.createMapFromString;
+const createMapFromString = utils.createMapFromString;
 // non-empty tags that will maintain whitespace around them
-var inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,label,mark,math,nobr,object,q,rp,rt,rtc,ruby,s,samp,select,small,span,strike,strong,sub,sup,svg,textarea,time,tt,u,var');
+const inlineTags = createMapFromString('a,abbr,acronym,b,bdi,bdo,big,button,cite,code,del,dfn,em,font,i,ins,kbd,label,mark,math,nobr,object,q,rp,rt,rtc,ruby,s,samp,select,small,span,strike,strong,sub,sup,svg,textarea,time,tt,u,var');
 // non-empty tags that will maintain whitespace within them
-var inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,nobr,rp,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
+const inlineTextTags = createMapFromString('a,abbr,acronym,b,big,del,em,font,i,ins,kbd,mark,nobr,rp,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var');
 // self-closing tags that will maintain whitespace around them
-var selfClosingInlineTags = createMapFromString('comment,img,input,wbr');
+const selfClosingInlineTags = createMapFromString('comment,img,input,wbr');
 
 function collapseWhitespaceSmart(str, prevTag, nextTag, options) {
-  var trimLeft = prevTag && !selfClosingInlineTags(prevTag);
+  let trimLeft = prevTag && !selfClosingInlineTags(prevTag);
   if (trimLeft && !options.collapseInlineTagWhitespace) {
     trimLeft = prevTag.charAt(0) === '/' ? !inlineTags(prevTag.slice(1)) : !inlineTextTags(prevTag);
   }
-  var trimRight = nextTag && !selfClosingInlineTags(nextTag);
+  let trimRight = nextTag && !selfClosingInlineTags(nextTag);
   if (trimRight && !options.collapseInlineTagWhitespace) {
     trimRight = nextTag.charAt(0) === '/' ? !inlineTextTags(nextTag.slice(1)) : !inlineTags(nextTag);
   }
@@ -87,7 +86,7 @@ function isConditionalComment(text) {
 }
 
 function isIgnoredComment(text, options) {
-  for (var i = 0, len = options.ignoreCustomComments.length; i < len; i++) {
+  for (let i = 0, len = options.ignoreCustomComments.length; i < len; i++) {
     if (options.ignoreCustomComments[i].test(text)) {
       return true;
     }
@@ -96,9 +95,9 @@ function isIgnoredComment(text, options) {
 }
 
 function isEventAttribute(attrName, options) {
-  var patterns = options.customEventAttributes;
+  const patterns = options.customEventAttributes;
   if (patterns) {
-    for (var i = patterns.length; i--;) {
+    for (let i = patterns.length; i--;) {
       if (patterns[i].test(attrName)) {
         return true;
       }
@@ -114,7 +113,7 @@ function canRemoveAttributeQuotes(value) {
 }
 
 function attributesInclude(attributes, attribute) {
-  for (var i = attributes.length; i--;) {
+  for (let i = attributes.length; i--;) {
     if (attributes[i].name.toLowerCase() === attribute) {
       return true;
     }
@@ -154,7 +153,7 @@ function isAttributeRedundant(tag, attrName, attrValue, attrs) {
 
 // https://mathiasbynens.be/demo/javascript-mime-type
 // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
-var executableScriptsMimetypes = utils.createMap([
+const executableScriptsMimetypes = utils.createMap([
   'text/javascript',
   'text/ecmascript',
   'text/jscript',
@@ -172,8 +171,8 @@ function isExecutableScript(tag, attrs) {
   if (tag !== 'script') {
     return false;
   }
-  for (var i = 0, len = attrs.length; i < len; i++) {
-    var attrName = attrs[i].name.toLowerCase();
+  for (let i = 0, len = attrs.length; i < len; i++) {
+    const attrName = attrs[i].name.toLowerCase();
     if (attrName === 'type') {
       return isScriptTypeAttribute(attrs[i].value);
     }
@@ -190,8 +189,8 @@ function isStyleSheet(tag, attrs) {
   if (tag !== 'style') {
     return false;
   }
-  for (var i = 0, len = attrs.length; i < len; i++) {
-    var attrName = attrs[i].name.toLowerCase();
+  for (let i = 0, len = attrs.length; i < len; i++) {
+    const attrName = attrs[i].name.toLowerCase();
     if (attrName === 'type') {
       return isStyleLinkTypeAttribute(attrs[i].value);
     }
@@ -199,8 +198,8 @@ function isStyleSheet(tag, attrs) {
   return true;
 }
 
-var isSimpleBoolean = createMapFromString('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,default,defaultchecked,defaultmuted,defaultselected,defer,disabled,enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,required,reversed,scoped,seamless,selected,sortable,truespeed,typemustmatch,visible');
-var isBooleanValue = createMapFromString('true,false');
+const isSimpleBoolean = createMapFromString('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,default,defaultchecked,defaultmuted,defaultselected,defer,disabled,enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,required,reversed,scoped,seamless,selected,sortable,truespeed,typemustmatch,visible');
+const isBooleanValue = createMapFromString('true,false');
 
 function isBooleanAttribute(attrName, attrValue) {
   return isSimpleBoolean(attrName) || attrName === 'draggable' && !isBooleanValue(attrValue);
@@ -237,7 +236,7 @@ function isLinkType(tag, attrs, value) {
   if (tag !== 'link') {
     return false;
   }
-  for (var i = 0, len = attrs.length; i < len; i++) {
+  for (let i = 0, len = attrs.length; i < len; i++) {
     if (attrs[i].name === 'rel' && attrs[i].value === value) {
       return true;
     }
@@ -248,7 +247,7 @@ function isMediaQuery(tag, attrs, attrName) {
   return attrName === 'media' && (isLinkType(tag, attrs, 'stylesheet') || isStyleSheet(tag, attrs));
 }
 
-var srcsetTags = createMapFromString('img,source');
+const srcsetTags = createMapFromString('img,source');
 
 function isSrcset(attrName, tag) {
   return attrName === 'srcset' && srcsetTags(tag);
@@ -288,28 +287,27 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
   }
   else if (isSrcset(attrName, tag)) {
     // https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-srcset
-    attrValue = trimWhitespace(attrValue).split(/\s+,\s*|\s*,\s+/).map(function(candidate) {
-      var url = candidate;
-      var descriptor = '';
-      var match = candidate.match(/\s+([1-9][0-9]*w|[0-9]+(?:\.[0-9]+)?x)$/);
+    attrValue = trimWhitespace(attrValue).split(/\s+,\s*|\s*,\s+/).map(candidate => {
+      let url = candidate;
+      let descriptor = '';
+      const match = candidate.match(/\s+([1-9][0-9]*w|[0-9]+(?:\.[0-9]+)?x)$/);
       if (match) {
         url = url.slice(0, -match[0].length);
-        var num = +match[1].slice(0, -1);
-        var suffix = match[1].slice(-1);
+        const num = Number(match[1].slice(0, -1));
+        const suffix = match[1].slice(-1);
         if (num !== 1 || suffix !== 'x') {
-          descriptor = ' ' + num + suffix;
+          descriptor = ` ${num}${suffix}`;
         }
       }
       return options.minifyURLs(url) + descriptor;
-    }).join(', ');
+    })
+      .join(', ');
   }
   else if (isMetaViewport(tag, attrs) && attrName === 'content') {
-    attrValue = attrValue.replace(/\s+/g, '').replace(/[0-9]+\.[0-9]+/g, function(numString) {
-      // "0.90000" -> "0.9"
-      // "1.0" -> "1"
-      // "1.0001" -> "1.0001" (unchanged)
-      return (+numString).toString();
-    });
+    attrValue = attrValue.replace(/\s+/g, '').replace(/[0-9]+\.[0-9]+/g, numString => // "0.90000" -> "0.9"
+    // "1.0" -> "1"
+    // "1.0001" -> "1.0001" (unchanged)
+      Number(numString).toString());
   }
   else if (isContentSecurityPolicy(tag, attrs) && attrName.toLowerCase() === 'content') {
     return collapseWhitespaceAll(attrValue);
@@ -331,7 +329,7 @@ function isMetaViewport(tag, attrs) {
   if (tag !== 'meta') {
     return false;
   }
-  for (var i = 0, len = attrs.length; i < len; i++) {
+  for (let i = 0, len = attrs.length; i < len; i++) {
     if (attrs[i].name === 'name' && attrs[i].value === 'viewport') {
       return true;
     }
@@ -342,7 +340,7 @@ function isContentSecurityPolicy(tag, attrs) {
   if (tag !== 'meta') {
     return false;
   }
-  for (var i = 0, len = attrs.length; i < len; i++) {
+  for (let i = 0, len = attrs.length; i < len; i++) {
     if (attrs[i].name.toLowerCase() === 'http-equiv' && attrs[i].value.toLowerCase() === 'content-security-policy') {
       return true;
     }
@@ -350,7 +348,7 @@ function isContentSecurityPolicy(tag, attrs) {
 }
 
 function ignoreCSS(id) {
-  return '/* clean-css ignore:start */' + id + '/* clean-css ignore:end */';
+  return `/* clean-css ignore:start */${id}/* clean-css ignore:end */`;
 }
 
 // Wrap CSS declarations for CleanCSS > 3.x
@@ -358,16 +356,16 @@ function ignoreCSS(id) {
 function wrapCSS(text, type) {
   switch (type) {
     case 'inline':
-      return '*{' + text + '}';
+      return `*{${text}}`;
     case 'media':
-      return '@media ' + text + '{a{top:0}}';
+      return `@media ${text}{a{top:0}}`;
     default:
       return text;
   }
 }
 
 function unwrapCSS(text, type) {
-  var matches;
+  let matches;
   switch (type) {
     case 'inline':
       matches = text.match(/^\*\{([\s\S]*)\}$/);
@@ -380,15 +378,13 @@ function unwrapCSS(text, type) {
 }
 
 function cleanConditionalComment(comment, options) {
-  return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/, function(match, prefix, text, suffix) {
-    return prefix + minify(text, options, true) + suffix;
-  }) : comment;
+  return options.processConditionalComments ? comment.replace(/^(\[if\s[^\]]+]>)([\s\S]*?)(<!\[endif])$/, (match, prefix, text, suffix) => prefix + minify(text, options, true) + suffix) : comment;
 }
 
 function processScript(text, options, currentAttrs) {
-  for (var i = 0, len = currentAttrs.length; i < len; i++) {
+  for (let i = 0, len = currentAttrs.length; i < len; i++) {
     if (currentAttrs[i].name.toLowerCase() === 'type' &&
-        options.processScripts.indexOf(currentAttrs[i].value) > -1) {
+        options.processScripts.includes(currentAttrs[i].value)) {
       return minify(text, options);
     }
   }
@@ -400,23 +396,23 @@ function processScript(text, options, currentAttrs) {
 // - retain <body> if followed by <noscript>
 // - </rb>, </rt>, </rtc>, </rp> & </tfoot> follow https://www.w3.org/TR/html5/syntax.html#optional-tags
 // - retain all tags which are adjacent to non-standard HTML tags
-var optionalStartTags = createMapFromString('html,head,body,colgroup,tbody');
-var optionalEndTags = createMapFromString('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,caption,thead,tbody,tfoot,tr,td,th');
-var headerTags = createMapFromString('meta,link,script,style,template,noscript');
-var descriptionTags = createMapFromString('dt,dd');
-var pBlockTags = createMapFromString('address,article,aside,blockquote,details,div,dl,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,menu,nav,ol,p,pre,section,table,ul');
-var pInlineTags = createMapFromString('a,audio,del,ins,map,noscript,video');
-var rubyTags = createMapFromString('rb,rt,rtc,rp');
-var rtcTag = createMapFromString('rb,rtc,rp');
-var optionTag = createMapFromString('option,optgroup');
-var tableContentTags = createMapFromString('tbody,tfoot');
-var tableSectionTags = createMapFromString('thead,tbody,tfoot');
-var cellTags = createMapFromString('td,th');
-var topLevelTags = createMapFromString('html,head,body');
-var compactTags = createMapFromString('html,body');
-var looseTags = createMapFromString('head,colgroup,caption');
-var trailingTags = createMapFromString('dt,thead');
-var htmlTags = createMapFromString('a,abbr,acronym,address,applet,area,article,aside,audio,b,base,basefont,bdi,bdo,bgsound,big,blink,blockquote,body,br,button,canvas,caption,center,cite,code,col,colgroup,command,content,data,datalist,dd,del,details,dfn,dialog,dir,div,dl,dt,element,em,embed,fieldset,figcaption,figure,font,footer,form,frame,frameset,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,image,img,input,ins,isindex,kbd,keygen,label,legend,li,link,listing,main,map,mark,marquee,menu,menuitem,meta,meter,multicol,nav,nobr,noembed,noframes,noscript,object,ol,optgroup,option,output,p,param,picture,plaintext,pre,progress,q,rb,rp,rt,rtc,ruby,s,samp,script,section,select,shadow,small,source,spacer,span,strike,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,tt,u,ul,var,video,wbr,xmp');
+const optionalStartTags = createMapFromString('html,head,body,colgroup,tbody');
+const optionalEndTags = createMapFromString('html,head,body,li,dt,dd,p,rb,rt,rtc,rp,optgroup,option,colgroup,caption,thead,tbody,tfoot,tr,td,th');
+const headerTags = createMapFromString('meta,link,script,style,template,noscript');
+const descriptionTags = createMapFromString('dt,dd');
+const pBlockTags = createMapFromString('address,article,aside,blockquote,details,div,dl,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,main,menu,nav,ol,p,pre,section,table,ul');
+const pInlineTags = createMapFromString('a,audio,del,ins,map,noscript,video');
+const rubyTags = createMapFromString('rb,rt,rtc,rp');
+const rtcTag = createMapFromString('rb,rtc,rp');
+const optionTag = createMapFromString('option,optgroup');
+const tableContentTags = createMapFromString('tbody,tfoot');
+const tableSectionTags = createMapFromString('thead,tbody,tfoot');
+const cellTags = createMapFromString('td,th');
+const topLevelTags = createMapFromString('html,head,body');
+const compactTags = createMapFromString('html,body');
+const looseTags = createMapFromString('head,colgroup,caption');
+const trailingTags = createMapFromString('dt,thead');
+const htmlTags = createMapFromString('a,abbr,acronym,address,applet,area,article,aside,audio,b,base,basefont,bdi,bdo,bgsound,big,blink,blockquote,body,br,button,canvas,caption,center,cite,code,col,colgroup,command,content,data,datalist,dd,del,details,dfn,dialog,dir,div,dl,dt,element,em,embed,fieldset,figcaption,figure,font,footer,form,frame,frameset,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,image,img,input,ins,isindex,kbd,keygen,label,legend,li,link,listing,main,map,mark,marquee,menu,menuitem,meta,meter,multicol,nav,nobr,noembed,noframes,noscript,object,ol,optgroup,option,output,p,param,picture,plaintext,pre,progress,q,rb,rp,rt,rtc,ruby,s,samp,script,section,select,shadow,small,source,spacer,span,strike,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,tt,u,ul,var,video,wbr,xmp');
 
 function canRemoveParentTag(optionalStartTag, tag) {
   switch (optionalStartTag) {
@@ -480,12 +476,12 @@ function canRemovePrecedingTag(optionalEndTag, tag) {
   return false;
 }
 
-var reEmptyAttribute = new RegExp(
+const reEmptyAttribute = new RegExp(
   '^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(' +
     '?:down|up|over|move|out)|key(?:press|down|up)))$');
 
 function canDeleteEmptyAttribute(tag, attrName, attrValue, options) {
-  var isValueEmpty = !attrValue || /^\s*$/.test(attrValue);
+  const isValueEmpty = !attrValue || /^\s*$/.test(attrValue);
   if (!isValueEmpty) {
     return false;
   }
@@ -496,7 +492,7 @@ function canDeleteEmptyAttribute(tag, attrName, attrValue, options) {
 }
 
 function hasAttrName(name, attrs) {
-  for (var i = attrs.length - 1; i >= 0; i--) {
+  for (let i = attrs.length - 1; i >= 0; i--) {
     if (attrs[i].name === name) {
       return true;
     }
@@ -543,8 +539,8 @@ function canTrimWhitespace(tag) {
 }
 
 function normalizeAttr(attr, attrs, tag, options) {
-  var attrName = options.name(attr.name),
-      attrValue = attr.value;
+  const attrName = options.name(attr.name);
+  let attrValue = attr.value;
 
   if (options.decodeEntities && attrValue) {
     attrValue = decode(attrValue, { isAttributeValue: true });
@@ -573,26 +569,26 @@ function normalizeAttr(attr, attrs, tag, options) {
   }
 
   return {
-    attr: attr,
+    attr,
     name: attrName,
     value: attrValue
   };
 }
 
 function buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr) {
-  var attrName = normalized.name,
-      attrValue = normalized.value,
-      attr = normalized.attr,
-      attrQuote = attr.quote,
-      attrFragment,
-      emittedAttrValue;
+  const attrName = normalized.name;
+  let attrValue = normalized.value;
+  const attr = normalized.attr;
+  let attrQuote = attr.quote;
+  let attrFragment;
+  let emittedAttrValue;
 
   if (typeof attrValue !== 'undefined' && (!options.removeAttributeQuotes ||
-      ~attrValue.indexOf(uidAttr) || !canRemoveAttributeQuotes(attrValue))) {
+      attrValue.indexOf(uidAttr) !== -1 || !canRemoveAttributeQuotes(attrValue))) {
     if (!options.preventAttributesEscaping) {
       if (typeof options.quoteCharacter === 'undefined') {
-        var apos = (attrValue.match(/'/g) || []).length;
-        var quot = (attrValue.match(/"/g) || []).length;
+        const apos = (attrValue.match(/'/g) || []).length;
+        const quot = (attrValue.match(/"/g) || []).length;
         attrQuote = apos < quot ? '\'' : '"';
       }
       else {
@@ -615,7 +611,7 @@ function buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr) {
     emittedAttrValue = attrValue;
   }
   else {
-    emittedAttrValue = attrValue + ' ';
+    emittedAttrValue = `${attrValue} `;
   }
 
   if (typeof attrValue === 'undefined' || options.collapseBooleanAttributes &&
@@ -637,12 +633,12 @@ function identity(value) {
 }
 
 function processOptions(values) {
-  var options = {
-    name: function(name) {
+  const options = {
+    name(name) {
       return name.toLowerCase();
     },
-    canCollapseWhitespace: canCollapseWhitespace,
-    canTrimWhitespace: canTrimWhitespace,
+    canCollapseWhitespace,
+    canTrimWhitespace,
     html5: true,
     ignoreCustomComments: [/^!/],
     ignoreCustomFragments: [
@@ -655,8 +651,8 @@ function processOptions(values) {
     minifyJS: identity,
     minifyURLs: identity
   };
-  Object.keys(values).forEach(function(key) {
-    var value = values[key];
+  Object.keys(values).forEach(key => {
+    let value = values[key];
     if (key === 'caseSensitive') {
       if (value) {
         options.name = identity;
@@ -674,11 +670,9 @@ function processOptions(values) {
       if (typeof value !== 'object') {
         value = {};
       }
-      options.minifyCSS = function(text, type) {
-        text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, function(match, prefix, quote, url, suffix) {
-          return prefix + quote + options.minifyURLs(url) + quote + suffix;
-        });
-        var cleanCssOutput = new CleanCSS(value).minify(wrapCSS(text, type));
+      options.minifyCSS = (text, type) => {
+        text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, (match, prefix, quote, url, suffix) => prefix + quote + options.minifyURLs(url) + quote + suffix);
+        const cleanCssOutput = new CleanCSS(value).minify(wrapCSS(text, type));
         if (cleanCssOutput.errors.length > 0) {
           cleanCssOutput.errors.forEach(options.log);
           return text;
@@ -694,11 +688,11 @@ function processOptions(values) {
         value = {};
       }
       (value.parse || (value.parse = {})).bare_returns = false;
-      options.minifyJS = function(text, inline) {
-        var start = text.match(/^\s*<!--.*/);
-        var code = start ? text.slice(start[0].length).replace(/\n\s*-->\s*$/, '') : text;
+      options.minifyJS = (text, inline) => {
+        const start = text.match(/^\s*<!--.*/);
+        const code = start ? text.slice(start[0].length).replace(/\n\s*-->\s*$/, '') : text;
         value.parse.bare_returns = inline;
-        var result = UglifyJS.minify(code, value);
+        const result = UglifyJS.minify(code, value);
         if (result.error) {
           options.log(result.error);
           return text;
@@ -716,7 +710,7 @@ function processOptions(values) {
       else if (typeof value !== 'object') {
         value = {};
       }
-      options.minifyURLs = function(text) {
+      options.minifyURLs = text => {
         try {
           return RelateUrl.relate(text, value);
         }
@@ -734,27 +728,25 @@ function processOptions(values) {
 }
 
 function uniqueId(value) {
-  var id;
+  let id;
   do {
     id = Math.random().toString(36).replace(/^0\.[0-9]*/, '');
-  } while (~value.indexOf(id));
+  } while (value.indexOf(id) !== -1);
   return id;
 }
 
-var specialContentTags = createMapFromString('script,style');
+const specialContentTags = createMapFromString('script,style');
 
 function createSortFns(value, options, uidIgnore, uidAttr) {
-  var attrChains = options.sortAttributes && Object.create(null);
-  var classChain = options.sortClassName && new TokenChain();
+  const attrChains = options.sortAttributes && Object.create(null);
+  const classChain = options.sortClassName && new TokenChain();
 
   function attrNames(attrs) {
-    return attrs.map(function(attr) {
-      return options.name(attr.name);
-    });
+    return attrs.map(attr => options.name(attr.name));
   }
 
   function shouldSkipUID(token, uid) {
-    return !uid || token.indexOf(uid) === -1;
+    return !uid || !token.includes(uid);
   }
 
   function shouldSkipUIDs(token) {
@@ -762,17 +754,18 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
   }
 
   function scan(input) {
-    var currentTag, currentType;
+    let currentTag;
+    let currentType;
     new HTMLParser(input, {
-      start: function(tag, attrs) {
+      start(tag, attrs) {
         if (attrChains) {
           if (!attrChains[tag]) {
             attrChains[tag] = new TokenChain();
           }
           attrChains[tag].add(attrNames(attrs).filter(shouldSkipUIDs));
         }
-        for (var i = 0, len = attrs.length; i < len; i++) {
-          var attr = attrs[i];
+        for (let i = 0, len = attrs.length; i < len; i++) {
+          const attr = attrs[i];
           if (classChain && attr.value && options.name(attr.name) === 'class') {
             classChain.add(trimWhitespace(attr.value).split(/[ \t\n\f\r]+/).filter(shouldSkipUIDs));
           }
@@ -782,48 +775,46 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
           }
         }
       },
-      end: function() {
+      end() {
         currentTag = '';
       },
-      chars: function(text) {
+      chars(text) {
         if (options.processScripts && specialContentTags(currentTag) &&
-            options.processScripts.indexOf(currentType) > -1) {
+            options.processScripts.includes(currentType)) {
           scan(text);
         }
       }
     });
   }
 
-  var log = options.log;
+  const log = options.log;
   options.log = identity;
   options.sortAttributes = false;
   options.sortClassName = false;
   scan(minify(value, options));
   options.log = log;
   if (attrChains) {
-    var attrSorters = Object.create(null);
-    for (var tag in attrChains) {
+    const attrSorters = Object.create(null);
+    for (const tag in attrChains) {
       attrSorters[tag] = attrChains[tag].createSorter();
     }
-    options.sortAttributes = function(tag, attrs) {
-      var sorter = attrSorters[tag];
+    options.sortAttributes = (tag, attrs) => {
+      const sorter = attrSorters[tag];
       if (sorter) {
-        var attrMap = Object.create(null);
-        var names = attrNames(attrs);
-        names.forEach(function(name, index) {
+        const attrMap = Object.create(null);
+        const names = attrNames(attrs);
+        names.forEach((name, index) => {
           (attrMap[name] || (attrMap[name] = [])).push(attrs[index]);
         });
-        sorter.sort(names).forEach(function(name, index) {
+        sorter.sort(names).forEach((name, index) => {
           attrs[index] = attrMap[name].shift();
         });
       }
     };
   }
   if (classChain) {
-    var sorter = classChain.createSorter();
-    options.sortClassName = function(value) {
-      return sorter.sort(value.split(/[ \n\f\r]+/)).join(' ');
-    };
+    const sorter = classChain.createSorter();
+    options.sortClassName = value => sorter.sort(value.split(/[ \n\f\r]+/)).join(' ');
   }
 }
 
@@ -832,30 +823,30 @@ function minify(value, options, partialMarkup) {
     value = collapseWhitespace(value, options, true, true);
   }
 
-  var buffer = [],
-      charsPrevTag,
-      currentChars = '',
-      hasChars,
-      currentTag = '',
-      currentAttrs = [],
-      stackNoTrimWhitespace = [],
-      stackNoCollapseWhitespace = [],
-      optionalStartTag = '',
-      optionalEndTag = '',
-      ignoredMarkupChunks = [],
-      ignoredCustomMarkupChunks = [],
-      uidIgnore,
-      uidAttr,
-      uidPattern;
+  const buffer = [];
+  let charsPrevTag;
+  let currentChars = '';
+  let hasChars;
+  let currentTag = '';
+  let currentAttrs = [];
+  const stackNoTrimWhitespace = [];
+  const stackNoCollapseWhitespace = [];
+  let optionalStartTag = '';
+  let optionalEndTag = '';
+  const ignoredMarkupChunks = [];
+  const ignoredCustomMarkupChunks = [];
+  let uidIgnore;
+  let uidAttr;
+  let uidPattern;
 
   // temporarily replace ignored chunks with comments,
   // so that we don't have to worry what's there.
   // for all we care there might be
   // completely-horribly-broken-alien-non-html-emoj-cthulhu-filled content
-  value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, function(match, group1) {
+  value = value.replace(/<!-- htmlmin:ignore -->([\s\S]*?)<!-- htmlmin:ignore -->/g, (match, group1) => {
     if (!uidIgnore) {
       uidIgnore = uniqueId(value);
-      var pattern = new RegExp('^' + uidIgnore + '([0-9]+)$');
+      const pattern = new RegExp(`^${uidIgnore}([0-9]+)$`);
       if (options.ignoreCustomComments) {
         options.ignoreCustomComments = options.ignoreCustomComments.slice();
       }
@@ -864,59 +855,51 @@ function minify(value, options, partialMarkup) {
       }
       options.ignoreCustomComments.push(pattern);
     }
-    var token = '<!--' + uidIgnore + ignoredMarkupChunks.length + '-->';
+    const token = `<!--${uidIgnore}${ignoredMarkupChunks.length}-->`;
     ignoredMarkupChunks.push(group1);
     return token;
   });
 
-  var customFragments = options.ignoreCustomFragments.map(function(re) {
-    return re.source;
-  });
+  const customFragments = options.ignoreCustomFragments.map(re => re.source);
   if (customFragments.length) {
-    var reCustomIgnore = new RegExp('\\s*(?:' + customFragments.join('|') + ')+\\s*', 'g');
+    const reCustomIgnore = new RegExp(`\\s*(?:${customFragments.join('|')})+\\s*`, 'g');
     // temporarily replace custom ignored fragments with unique attributes
-    value = value.replace(reCustomIgnore, function(match) {
+    value = value.replace(reCustomIgnore, match => {
       if (!uidAttr) {
         uidAttr = uniqueId(value);
-        uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)' + uidAttr + '(\\s*)', 'g');
+        uidPattern = new RegExp(`(\\s*)${uidAttr}([0-9]+)${uidAttr}(\\s*)`, 'g');
         if (options.minifyCSS) {
-          options.minifyCSS = (function(fn) {
-            return function(text, type) {
-              text = text.replace(uidPattern, function(match, prefix, index) {
-                var chunks = ignoredCustomMarkupChunks[+index];
-                return chunks[1] + uidAttr + index + uidAttr + chunks[2];
-              });
-              var ids = [];
-              new CleanCSS().minify(wrapCSS(text, type)).warnings.forEach(function(warning) {
-                var match = uidPattern.exec(warning);
-                if (match) {
-                  var id = uidAttr + match[2] + uidAttr;
-                  text = text.replace(id, ignoreCSS(id));
-                  ids.push(id);
-                }
-              });
-              text = fn(text, type);
-              ids.forEach(function(id) {
-                text = text.replace(ignoreCSS(id), id);
-              });
-              return text;
-            };
+          options.minifyCSS = (fn => (text, type) => {
+            text = text.replace(uidPattern, (match, prefix, index) => {
+              const chunks = ignoredCustomMarkupChunks[Number(index)];
+              return chunks[1] + uidAttr + index + uidAttr + chunks[2];
+            });
+            const ids = [];
+            new CleanCSS().minify(wrapCSS(text, type)).warnings.forEach(warning => {
+              const match = uidPattern.exec(warning);
+              if (match) {
+                const id = uidAttr + match[2] + uidAttr;
+                text = text.replace(id, ignoreCSS(id));
+                ids.push(id);
+              }
+            });
+            text = fn(text, type);
+            ids.forEach(id => {
+              text = text.replace(ignoreCSS(id), id);
+            });
+            return text;
           })(options.minifyCSS);
         }
         if (options.minifyJS) {
-          options.minifyJS = (function(fn) {
-            return function(text, type) {
-              return fn(text.replace(uidPattern, function(match, prefix, index) {
-                var chunks = ignoredCustomMarkupChunks[+index];
-                return chunks[1] + uidAttr + index + uidAttr + chunks[2];
-              }), type);
-            };
-          })(options.minifyJS);
+          options.minifyJS = (fn => (text, type) => fn(text.replace(uidPattern, (match, prefix, index) => {
+            const chunks = ignoredCustomMarkupChunks[Number(index)];
+            return chunks[1] + uidAttr + index + uidAttr + chunks[2];
+          }), type))(options.minifyJS);
         }
       }
-      var token = uidAttr + ignoredCustomMarkupChunks.length + uidAttr;
+      const token = uidAttr + ignoredCustomMarkupChunks.length + uidAttr;
       ignoredCustomMarkupChunks.push(/^(\s*)[\s\S]*?(\s*)$/.exec(match));
-      return '\t' + token + '\t';
+      return `\t${token}\t`;
     });
   }
 
@@ -934,7 +917,7 @@ function minify(value, options, partialMarkup) {
   }
 
   function removeStartTag() {
-    var index = buffer.length - 1;
+    let index = buffer.length - 1;
     while (index > 0 && !/^<[^/!]/.test(buffer[index])) {
       index--;
     }
@@ -942,7 +925,7 @@ function minify(value, options, partialMarkup) {
   }
 
   function removeEndTag() {
-    var index = buffer.length - 1;
+    let index = buffer.length - 1;
     while (index > 0 && !/^<\//.test(buffer[index])) {
       index--;
     }
@@ -951,9 +934,9 @@ function minify(value, options, partialMarkup) {
 
   // look for trailing whitespaces, bypass any inline tags
   function trimTrailingWhitespace(index, nextTag) {
-    for (var endTag = null; index >= 0 && _canTrimWhitespace(endTag); index--) {
-      var str = buffer[index];
-      var match = str.match(/^<\/([\w:-]+)>$/);
+    for (let endTag = null; index >= 0 && _canTrimWhitespace(endTag); index--) {
+      const str = buffer[index];
+      const match = str.match(/^<\/([\w:-]+)>$/);
       if (match) {
         endTag = match[1];
       }
@@ -967,10 +950,10 @@ function minify(value, options, partialMarkup) {
   // which may not be trimmed due to a following comment or an empty
   // element which has now been removed
   function squashTrailingWhitespace(nextTag) {
-    var charsIndex = buffer.length - 1;
+    let charsIndex = buffer.length - 1;
     if (buffer.length > 1) {
-      var item = buffer[buffer.length - 1];
-      if (/^(?:<!|$)/.test(item) && item.indexOf(uidIgnore) === -1) {
+      const item = buffer[buffer.length - 1];
+      if (/^(?:<!|$)/.test(item) && !item.includes(uidIgnore)) {
         charsIndex--;
       }
     }
@@ -978,13 +961,13 @@ function minify(value, options, partialMarkup) {
   }
 
   new HTMLParser(value, {
-    partialMarkup: partialMarkup,
+    partialMarkup,
     continueOnParseError: options.continueOnParseError,
     customAttrAssign: options.customAttrAssign,
     customAttrSurround: options.customAttrSurround,
     html5: options.html5,
 
-    start: function(tag, attrs, unary, unarySlash, autoGenerated) {
+    start(tag, attrs, unary, unarySlash, autoGenerated) {
       if (tag.toLowerCase() === 'svg') {
         options = Object.create(options);
         options.caseSensitive = true;
@@ -1000,9 +983,9 @@ function minify(value, options, partialMarkup) {
       hasChars = false;
       currentAttrs = attrs;
 
-      var optional = options.removeOptionalTags;
+      let optional = options.removeOptionalTags;
       if (optional) {
-        var htmlTag = htmlTags(tag);
+        const htmlTag = htmlTags(tag);
         // <html> may be omitted if first thing inside is not comment
         // <head> may be omitted if first thing inside is an element
         // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
@@ -1037,8 +1020,8 @@ function minify(value, options, partialMarkup) {
         }
       }
 
-      var openTag = '<' + tag;
-      var hasUnarySlash = unarySlash && options.keepClosingSlash;
+      const openTag = `<${tag}`;
+      const hasUnarySlash = unarySlash && options.keepClosingSlash;
 
       buffer.push(openTag);
 
@@ -1046,9 +1029,9 @@ function minify(value, options, partialMarkup) {
         options.sortAttributes(tag, attrs);
       }
 
-      var parts = [];
-      for (var i = attrs.length, isLast = true; --i >= 0;) {
-        var normalized = normalizeAttr(attrs[i], attrs, tag, options);
+      const parts = [];
+      for (let i = attrs.length, isLast = true; --i >= 0;) {
+        const normalized = normalizeAttr(attrs[i], attrs, tag, options);
         if (normalized) {
           parts.unshift(buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr));
           isLast = false;
@@ -1056,21 +1039,21 @@ function minify(value, options, partialMarkup) {
       }
       if (parts.length > 0) {
         buffer.push(' ');
-        buffer.push.apply(buffer, parts);
+        buffer.push(...parts);
       }
       // start tag must never be omitted if it has any attributes
       else if (optional && optionalStartTags(tag)) {
         optionalStartTag = tag;
       }
 
-      buffer.push(buffer.pop() + (hasUnarySlash ? '/' : '') + '>');
+      buffer.push(`${buffer.pop() + (hasUnarySlash ? '/' : '')}>`);
 
       if (autoGenerated && !options.includeAutoGeneratedTags) {
         removeStartTag();
         optionalStartTag = '';
       }
     },
-    end: function(tag, attrs, autoGenerated) {
+    end(tag, attrs, autoGenerated) {
       if (tag.toLowerCase() === 'svg') {
         options = Object.getPrototypeOf(options);
       }
@@ -1084,7 +1067,7 @@ function minify(value, options, partialMarkup) {
           }
         }
         else {
-          squashTrailingWhitespace('/' + tag);
+          squashTrailingWhitespace(`/${tag}`);
         }
         if (stackNoCollapseWhitespace.length &&
           tag === stackNoCollapseWhitespace[stackNoCollapseWhitespace.length - 1]) {
@@ -1092,7 +1075,7 @@ function minify(value, options, partialMarkup) {
         }
       }
 
-      var isElementEmpty = false;
+      let isElementEmpty = false;
       if (tag === currentTag) {
         currentTag = '';
         isElementEmpty = !hasChars;
@@ -1125,9 +1108,9 @@ function minify(value, options, partialMarkup) {
           optionalEndTag = '';
         }
         else {
-          buffer.push('</' + tag + '>');
+          buffer.push(`</${tag}>`);
         }
-        charsPrevTag = '/' + tag;
+        charsPrevTag = `/${tag}`;
         if (!inlineTags(tag)) {
           currentChars = '';
         }
@@ -1136,7 +1119,7 @@ function minify(value, options, partialMarkup) {
         }
       }
     },
-    chars: function(text, prevTag, nextTag) {
+    chars(text, prevTag, nextTag) {
       prevTag = prevTag === '' ? 'comment' : prevTag;
       nextTag = nextTag === '' ? 'comment' : nextTag;
       if (options.decodeEntities && text && !specialContentTags(currentTag)) {
@@ -1145,14 +1128,14 @@ function minify(value, options, partialMarkup) {
       if (options.collapseWhitespace) {
         if (!stackNoTrimWhitespace.length) {
           if (prevTag === 'comment') {
-            var prevComment = buffer[buffer.length - 1];
-            if (prevComment.indexOf(uidIgnore) === -1) {
+            const prevComment = buffer[buffer.length - 1];
+            if (!prevComment.includes(uidIgnore)) {
               if (!prevComment) {
                 prevTag = charsPrevTag;
               }
               if (buffer.length > 1 && (!prevComment || !options.conservativeCollapse && / $/.test(currentChars))) {
-                var charsIndex = buffer.length - 2;
-                buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, function(trailingSpaces) {
+                const charsIndex = buffer.length - 2;
+                buffer[charsIndex] = buffer[charsIndex].replace(/\s+$/, trailingSpaces => {
                   text = trailingSpaces + text;
                   return '';
                 });
@@ -1162,8 +1145,8 @@ function minify(value, options, partialMarkup) {
           if (prevTag) {
             if (prevTag === '/nobr' || prevTag === 'wbr') {
               if (/^\s/.test(text)) {
-                var tagIndex = buffer.length - 1;
-                while (tagIndex > 0 && buffer[tagIndex].lastIndexOf('<' + prevTag) !== 0) {
+                let tagIndex = buffer.length - 1;
+                while (tagIndex > 0 && buffer[tagIndex].lastIndexOf(`<${prevTag}`) !== 0) {
                   tagIndex--;
                 }
                 trimTrailingWhitespace(tagIndex - 1, 'br');
@@ -1220,9 +1203,7 @@ function minify(value, options, partialMarkup) {
         text = text.replace(/&((?:Iacute|aacute|uacute|plusmn|Otilde|otilde|agrave|Agrave|Yacute|yacute|Oslash|oslash|atilde|Atilde|brvbar|ccedil|Ccedil|Ograve|curren|divide|eacute|Eacute|ograve|Oacute|egrave|Egrave|Ugrave|frac12|frac14|frac34|ugrave|oacute|iacute|Ntilde|ntilde|Uacute|middot|igrave|Igrave|iquest|Aacute|cedil|laquo|micro|iexcl|Icirc|icirc|acirc|Ucirc|Ecirc|ocirc|Ocirc|ecirc|ucirc|Aring|aring|AElig|aelig|acute|pound|raquo|Acirc|times|THORN|szlig|thorn|COPY|auml|ordf|ordm|Uuml|macr|uuml|Auml|ouml|Ouml|para|nbsp|euml|quot|QUOT|Euml|yuml|cent|sect|copy|sup1|sup2|sup3|iuml|Iuml|ETH|shy|reg|not|yen|amp|AMP|REG|uml|eth|deg|gt|GT|LT|lt)(?!;)|(?:#?[0-9a-zA-Z]+;))/g, '&amp$1').replace(/</g, '&lt;');
       }
       if (uidPattern && options.collapseWhitespace && stackNoTrimWhitespace.length) {
-        text = text.replace(uidPattern, function(match, prefix, index) {
-          return ignoredCustomMarkupChunks[+index][0];
-        });
+        text = text.replace(uidPattern, (match, prefix, index) => ignoredCustomMarkupChunks[Number(index)][0]);
       }
       currentChars += text;
       if (text) {
@@ -1230,15 +1211,15 @@ function minify(value, options, partialMarkup) {
       }
       buffer.push(text);
     },
-    comment: function(text, nonStandard) {
-      var prefix = nonStandard ? '<!' : '<!--';
-      var suffix = nonStandard ? '>' : '-->';
+    comment(text, nonStandard) {
+      const prefix = nonStandard ? '<!' : '<!--';
+      const suffix = nonStandard ? '>' : '-->';
       if (isConditionalComment(text)) {
         text = prefix + cleanConditionalComment(text, options) + suffix;
       }
       else if (options.removeComments) {
         if (isIgnoredComment(text, options)) {
-          text = '<!--' + text + '-->';
+          text = `<!--${text}-->`;
         }
         else {
           text = '';
@@ -1254,9 +1235,9 @@ function minify(value, options, partialMarkup) {
       }
       buffer.push(text);
     },
-    doctype: function(doctype) {
-      buffer.push(options.useShortDoctype ? '<!doctype' +
-        (options.removeTagWhitespace ? '' : ' ') + 'html>' :
+    doctype(doctype) {
+      buffer.push(options.useShortDoctype ?
+        `<!doctype${options.removeTagWhitespace ? '' : ' '}html>` :
         collapseWhitespaceAll(doctype));
     }
   });
@@ -1276,9 +1257,9 @@ function minify(value, options, partialMarkup) {
     squashTrailingWhitespace('br');
   }
 
-  return joinResultSegments(buffer, options, uidPattern ? function(str) {
-    return str.replace(uidPattern, function(match, prefix, index, suffix) {
-      var chunk = ignoredCustomMarkupChunks[+index][0];
+  return joinResultSegments(buffer, options, uidPattern ?
+    str => str.replace(uidPattern, (match, prefix, index, suffix) => {
+      let chunk = ignoredCustomMarkupChunks[Number(index)][0];
       if (options.collapseWhitespace) {
         if (prefix !== '\t') {
           chunk = prefix + chunk;
@@ -1292,22 +1273,19 @@ function minify(value, options, partialMarkup) {
         }, /^[ \n\r\t\f]/.test(chunk), /[ \n\r\t\f]$/.test(chunk));
       }
       return chunk;
-    });
-  } : identity, uidIgnore ? function(str) {
-    return str.replace(new RegExp('<!--' + uidIgnore + '([0-9]+)-->', 'g'), function(match, index) {
-      return ignoredMarkupChunks[+index];
-    });
-  } : identity);
+    }) :
+    identity, uidIgnore ? str => str.replace(new RegExp(`<!--${uidIgnore}([0-9]+)-->`, 'g'), (match, index) => ignoredMarkupChunks[Number(index)]) : identity);
 }
 
 function joinResultSegments(results, options, restoreCustom, restoreIgnore) {
-  var str;
-  var maxLineLength = options.maxLineLength;
+  let str;
+  const maxLineLength = options.maxLineLength;
   if (maxLineLength) {
-    var line = '', lines = [];
+    let line = '';
+    const lines = [];
     while (results.length) {
-      var len = line.length;
-      var end = results[0].indexOf('\n');
+      const len = line.length;
+      const end = results[0].indexOf('\n');
       if (end < 0) {
         line += restoreIgnore(restoreCustom(results.shift()));
       }
@@ -1335,10 +1313,10 @@ function joinResultSegments(results, options, restoreCustom, restoreIgnore) {
   return options.collapseWhitespace ? collapseWhitespace(str, options, true, true) : str;
 }
 
-exports.minify = function(value, options) {
-  var start = Date.now();
+exports.minify = (value, options) => {
+  const start = Date.now();
   options = processOptions(options || {});
-  var result = minify(value, options);
-  options.log('minified in: ' + (Date.now() - start) + 'ms');
+  const result = minify(value, options);
+  options.log(`minified in: ${Date.now() - start}ms`);
   return result;
 };

@@ -1,4 +1,5 @@
 {
+  "extends": "../.eslintrc.json",
   "env": {
     "browser": true,
     "qunit": true
