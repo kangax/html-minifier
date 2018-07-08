@@ -404,22 +404,23 @@ QUnit.test('types of whitespace that should always be preserved', function(asser
 
 QUnit.test('doctype normalization', function(assert) {
   var input;
+  var output = '<!doctype html>';
 
   input = '<!DOCTYPE html>';
   assert.equal(minify(input, { useShortDoctype: false }), input);
-  assert.equal(minify(input, { useShortDoctype: true }), input);
+  assert.equal(minify(input, { useShortDoctype: true }), output);
 
   input = '<!DOCTYPE\nhtml>';
   assert.equal(minify(input, { useShortDoctype: false }), '<!DOCTYPE html>');
-  assert.equal(minify(input, { useShortDoctype: true }), '<!DOCTYPE html>');
+  assert.equal(minify(input, { useShortDoctype: true }), output);
 
   input = '<!DOCTYPE\thtml>';
   assert.equal(minify(input, { useShortDoctype: false }), input);
-  assert.equal(minify(input, { useShortDoctype: true }), '<!DOCTYPE html>');
+  assert.equal(minify(input, { useShortDoctype: true }), output);
 
   input = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"\n    "http://www.w3.org/TR/html4/strict.dtd">';
   assert.equal(minify(input, { useShortDoctype: false }), '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">');
-  assert.equal(minify(input, { useShortDoctype: true }), '<!DOCTYPE html>');
+  assert.equal(minify(input, { useShortDoctype: true }), output);
 });
 
 QUnit.test('removing comments', function(assert) {
