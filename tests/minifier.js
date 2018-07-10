@@ -2812,8 +2812,17 @@ QUnit.test('max line length', function(assert) {
   input = '<div data-attr="foo"></div>';
   assert.equal(minify(input, options), '<div data-attr="foo">\n</div>');
 
-  input = '<code>    hello   world  \n    world   hello  </code>';
-  assert.equal(minify(input, options), '<code>\n    hello   world  \n    world   hello  \n</code>');
+  input = [
+    '<code>    hello   world   ',
+    '    world   hello  </code>'
+  ].join('\n');
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, options), [
+    '<code>',
+    '    hello   world   ',
+    '    world   hello  ',
+    '</code>'
+  ].join('\n'));
 
   assert.equal(minify('<p title="</p>">x</p>'), '<p title="</p>">x</p>');
   assert.equal(minify('<p title=" <!-- hello world --> ">x</p>'), '<p title=" <!-- hello world --> ">x</p>');
@@ -2821,10 +2830,28 @@ QUnit.test('max line length', function(assert) {
   assert.equal(minify('<p foo-bar=baz>xxx</p>'), '<p foo-bar="baz">xxx</p>');
   assert.equal(minify('<p foo:bar=baz>xxx</p>'), '<p foo:bar="baz">xxx</p>');
 
-  input = '<div><div><div><div><div><div><div><div><div><div>' +
-            'i\'m 10 levels deep' +
-          '</div></div></div></div></div></div></div></div></div></div>';
-  assert.equal(minify(input), input);
+  input = [
+    '<div><div><div><div><div>',
+    '<div><div><div><div><div>',
+    'i\'m 10 levels deep</div>',
+    '</div></div></div></div>',
+    '</div></div></div></div>',
+    '</div>'
+  ];
+  assert.equal(minify(input.join('')), input.join(''));
+  assert.equal(minify(input.join(''), options), input.join('\n'));
+
+  input = [
+    '<div><div><?foo?><div>',
+    '<div><div><?bar?><div>',
+    '<div><div>',
+    'i\'m 9 levels deep</div>',
+    '</div></div><%baz%></div>',
+    '</div></div><%moo%></div>',
+    '</div>'
+  ];
+  assert.equal(minify(input.join('')), input.join(''));
+  assert.equal(minify(input.join(''), options), input.join('\n'));
 
   assert.equal(minify('<script>alert(\'<!--\')</script>', options), '<script>alert(\'<!--\')\n</script>');
   input = '<script>\nalert(\'<!-- foo -->\')\n</script>';
@@ -2848,11 +2875,18 @@ QUnit.test('max line length', function(assert) {
   assert.equal(minify('<ng-include src="\'views/partial-notification.html\'"></ng-include><div ng-view=""></div>', options),
     '<ng-include \nsrc="\'views/partial-notification.html\'">\n</ng-include><div \nng-view=""></div>'
   );
-  assert.equal(minify('<some-tag-1></some-tag-1><some-tag-2></some-tag-2>', options),
-    '<some-tag-1>\n</some-tag-1>\n<some-tag-2>\n</some-tag-2>'
-  );
+
+  input = [
+    '<some-tag-1></some-tag-1>',
+    '<some-tag-2></some-tag-2>',
+    '<some-tag-3>4',
+    '</some-tag-3>'
+  ];
+  assert.equal(minify(input.join('')), input.join(''));
+  assert.equal(minify(input.join(''), options), input.join('\n'));
+
   assert.equal(minify('[\']["]', options), '[\']["]');
-  assert.equal(minify('<a href="test.html"><div>hey</div></a>', options), '<a href="test.html">\n<div>hey</div></a>');
+  assert.equal(minify('<a href="/test.html"><div>hey</div></a>', options), '<a href="/test.html">\n<div>hey</div></a>');
   assert.equal(minify(':) <a href="http://example.com">link</a>', options), ':) <a \nhref="http://example.com">\nlink</a>');
   assert.equal(minify(':) <a href="http://example.com">\nlink</a>', options), ':) <a \nhref="http://example.com">\nlink</a>');
   assert.equal(minify(':) <a href="http://example.com">\n\nlink</a>', options), ':) <a \nhref="http://example.com">\n\nlink</a>');
