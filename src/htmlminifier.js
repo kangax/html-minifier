@@ -335,23 +335,33 @@ function isMetaViewport(tag, attrs) {
   }
 }
 
+function ignoreCSS(id) {
+  return '/* clean-css ignore:start */' + id + '/* clean-css ignore:end */';
+}
+
 // Wrap CSS declarations for CleanCSS > 3.x
 // See https://github.com/jakubpawlowicz/clean-css/issues/418
-function wrapInlineCSS(text) {
-  return '*{' + text + '}';
+function wrapCSS(text, type) {
+  switch (type) {
+    case 'inline':
+      return '*{' + text + '}';
+    case 'media':
+      return '@media ' + text + '{a{top:0}}';
+    default:
+      return text;
+  }
 }
 
-function unwrapInlineCSS(text) {
-  var matches = text.match(/^\*\{([\s\S]*)\}$/);
-  return matches ? matches[1] : text;
-}
-
-function wrapMediaQuery(text) {
-  return '@media ' + text + '{a{top:0}}';
-}
-
-function unwrapMediaQuery(text) {
-  var matches = text.match(/^@media ([\s\S]*?)\s*{[\s\S]*}$/);
+function unwrapCSS(text, type) {
+  var matches;
+  switch (type) {
+    case 'inline':
+      matches = text.match(/^\*\{([\s\S]*)\}$/);
+      break;
+    case 'media':
+      matches = text.match(/^@media ([\s\S]*?)\s*{[\s\S]*}$/);
+      break;
+  }
   return matches ? matches[1] : text;
 }
 
@@ -655,20 +665,7 @@ function processOptions(values) {
           return prefix + quote + options.minifyURLs(url) + quote + suffix;
         });
         try {
-          if (type === 'inline') {
-            text = wrapInlineCSS(text);
-          }
-          else if (type === 'media') {
-            text = wrapMediaQuery(text);
-          }
-          text = new CleanCSS(value).minify(text).styles;
-          if (type === 'inline') {
-            text = unwrapInlineCSS(text);
-          }
-          else if (type === 'media') {
-            text = unwrapMediaQuery(text);
-          }
-          return text;
+          return unwrapCSS(new CleanCSS(value).minify(wrapCSS(text, type)).styles, type);
         }
         catch (err) {
           options.log(err);
@@ -859,15 +856,6 @@ function minify(value, options, partialMarkup) {
     return token;
   });
 
-  function escapeFragments(fn) {
-    return function(text, type) {
-      return fn(text.replace(uidPattern, function(match, prefix, index) {
-        var chunks = ignoredCustomMarkupChunks[+index];
-        return chunks[1] + uidAttr + index + chunks[2];
-      }), type);
-    };
-  }
-
   var customFragments = options.ignoreCustomFragments.map(function(re) {
     return re.source;
   });
@@ -879,10 +867,38 @@ function minify(value, options, partialMarkup) {
         uidAttr = uniqueId(value);
         uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
         if (options.minifyCSS) {
-          options.minifyCSS = escapeFragments(options.minifyCSS);
+          options.minifyCSS = (function(fn) {
+            return function(text, type) {
+              text = text.replace(uidPattern, function(match, prefix, index) {
+                var chunks = ignoredCustomMarkupChunks[+index];
+                return chunks[1] + uidAttr + index + chunks[2];
+              });
+              var ids = [];
+              new CleanCSS().minify(wrapCSS(text, type)).warnings.forEach(function(warning) {
+                var match = uidPattern.exec(warning);
+                if (match) {
+                  var id = uidAttr + match[2];
+                  text = text.replace(id, ignoreCSS(id));
+                  ids.push(id);
+                }
+              });
+              text = fn(text, type);
+              ids.forEach(function(id) {
+                text = text.replace(ignoreCSS(id), id);
+              });
+              return text;
+            };
+          })(options.minifyCSS);
         }
         if (options.minifyJS) {
-          options.minifyJS = escapeFragments(options.minifyJS);
+          options.minifyJS = (function(fn) {
+            return function(text, type) {
+              return fn(text.replace(uidPattern, function(match, prefix, index) {
+                var chunks = ignoredCustomMarkupChunks[+index];
+                return chunks[1] + uidAttr + index + chunks[2];
+              }), type);
+            };
+          })(options.minifyJS);
         }
       }
       var token = uidAttr + ignoredCustomMarkupChunks.length;
