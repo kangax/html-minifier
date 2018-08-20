@@ -136,7 +136,9 @@ npm link .
 
 ## Usage
 
-For command line usage please see `html-minifier --help`
+Note that almost all options are disabled by default. For command line usage please see `html-minifier --help` for a list of available options. Experiment and find what works best for you and your project.
+
+* **Sample command line:** ``html-minifier --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype --minify-css true --minify-js true``
 
 ### Node.js
 
