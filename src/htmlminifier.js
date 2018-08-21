@@ -665,7 +665,11 @@ function processOptions(values) {
           return prefix + quote + options.minifyURLs(url) + quote + suffix;
         });
         try {
-          return unwrapCSS(new CleanCSS(value).minify(wrapCSS(text, type)).styles, type);
+          var cleanCssOutput = new CleanCSS(value).minify(wrapCSS(text, type));
+          if (cleanCssOutput.errors.length > 0) {
+            throw new Error(cleanCssOutput.errors[0]);
+          }
+          return unwrapCSS(cleanCssOutput.styles, type);
         }
         catch (err) {
           options.log(err);
