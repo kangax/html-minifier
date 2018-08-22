@@ -197,7 +197,7 @@ program.arguments('[files...]').action(function(files) {
 function createOptions() {
   var options = {};
   mainOptionKeys.forEach(function(key) {
-    var param = program[camelCase(key)];
+    var param = program[key === 'minifyURLs' ? 'minifyUrls' : camelCase(key)];
     if (typeof param !== 'undefined') {
       options[key] = param;
     }
