@@ -297,7 +297,7 @@ if (inputDir || outputDir) {
   processDirectory(inputDir, outputDir, fileExt);
 }
 // Minifying one or more files specified on the CMD line
-else if (content || content.length > 0) {
+else if (content) {
   writeMinify();
 }
 // Minifying input coming from STDIN
