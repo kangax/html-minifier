@@ -664,17 +664,12 @@ function processOptions(values) {
         text = text.replace(/(url\s*\(\s*)("|'|)(.*?)\2(\s*\))/ig, function(match, prefix, quote, url, suffix) {
           return prefix + quote + options.minifyURLs(url) + quote + suffix;
         });
-        try {
-          var cleanCssOutput = new CleanCSS(value).minify(wrapCSS(text, type));
-          if (cleanCssOutput.errors.length > 0) {
-            throw new Error(cleanCssOutput.errors[0]);
-          }
-          return unwrapCSS(cleanCssOutput.styles, type);
-        }
-        catch (err) {
-          options.log(err);
+        var cleanCssOutput = new CleanCSS(value).minify(wrapCSS(text, type));
+        if (cleanCssOutput.errors.length > 0) {
+          cleanCssOutput.errors.forEach(options.log);
           return text;
         }
+        return unwrapCSS(cleanCssOutput.styles, type);
       };
     }
     else if (key === 'minifyJS' && typeof value !== 'function') {
