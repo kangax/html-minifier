@@ -153,7 +153,8 @@ mainOptionKeys.forEach(function(key) {
 });
 var inplace = false;
 program.option('--inplace', 'Specify that the files should be overwritten.', function(newInplace) {
-  inplace = true; });
+  inplace = newInplace;
+});
 program.option('-o --output <file>', 'Specify output file (if not specified STDOUT will be used for output)', function(outputPath) {
   return fs.createWriteStream(outputPath).on('error', function(e) {
     fatal('Cannot write ' + outputPath + '\n' + e.message);
@@ -296,8 +297,11 @@ var inputDir = program.inputDir;
 var outputDir = program.outputDir;
 var fileExt = program.fileExt;
 if (inplace) {
-  files.forEach(function (file) { processFile(file, file); });
-} else {
+  files.forEach(function(file) {
+    processFile(file, file);
+  });
+}
+else {
   if (files) {
     content = files.map(readFile).join('');
   }
