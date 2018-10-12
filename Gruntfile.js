@@ -125,7 +125,6 @@ module.exports = function(grunt) {
     return details.failed;
   }
 
-  var phantomjs = require('phantomjs-prebuilt').path;
   grunt.registerMultiTask('qunit', function() {
     var done = this.async();
     var errors = [];
@@ -158,7 +157,6 @@ module.exports = function(grunt) {
     }
 
     run('node', process.argv[0], this.data[0]);
-    run('web', phantomjs, this.data[1]);
   });
 
   grunt.registerMultiTask('replace', function() {
