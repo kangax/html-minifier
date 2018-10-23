@@ -3353,6 +3353,11 @@ QUnit.test('decode entity characters', function(assert) {
   assert.equal(minify(input, { decodeEntities: false }), input);
   assert.equal(minify(input, { decodeEntities: true }), input);
 
+  // https://github.com/kangax/html-minifier/issues/964
+  input = '&amp;xxx; &amp;xxx &ampthorn; &ampthorn &ampcurren;t &ampcurrent';
+  output = '&ampxxx; &xxx &ampthorn; &ampthorn &ampcurren;t &ampcurrent';
+  assert.equal(minify(input, { decodeEntities: true }), output);
+
   input = '<script type="text/html">&colon;</script>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { decodeEntities: false }), input);
