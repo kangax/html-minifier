@@ -60,7 +60,7 @@ var singleAttrIdentifier = /([^\s"'<>/=]+)/,
     startTagOpen = new RegExp('^<' + qnameCapture),
     startTagClose = /^\s*(\/?)>/,
     endTag = new RegExp('^<\\/' + qnameCapture + '[^>]*>'),
-    doctype = /^<!DOCTYPE\s[^>]+>/i;
+    doctype = /^<!DOCTYPE\s?[^>]+>/i;
 
 var IS_REGEX_CAPTURING_BROKEN = false;
 'x'.replace(/x(.)?/g, function(m, g) {
