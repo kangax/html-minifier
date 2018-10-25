@@ -1,5 +1,5 @@
 /*!
- * HTMLMinifier v3.5.20 (https://kangax.github.io/html-minifier/)
+ * HTMLMinifier v3.5.21 (https://kangax.github.io/html-minifier/)
  * Copyright 2010-2018 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
