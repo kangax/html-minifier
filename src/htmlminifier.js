@@ -5,7 +5,7 @@ var decode = require('he').decode;
 var HTMLParser = require('./htmlparser').HTMLParser;
 var RelateUrl = require('relateurl');
 var TokenChain = require('./tokenchain');
-var UglifyJS = require('uglify-js');
+var terser = require('terser');
 var utils = require('./utils');
 
 function trimWhitespace(str) {
@@ -684,7 +684,7 @@ function processOptions(values) {
         var start = text.match(/^\s*<!--.*/);
         var code = start ? text.slice(start[0].length).replace(/\n\s*-->\s*$/, '') : text;
         value.parse.bare_returns = inline;
-        var result = UglifyJS.minify(code, value);
+        var result = terser.minify(code, value);
         if (result.error) {
           options.log(result.error);
           return text;

@@ -115,7 +115,7 @@ var mainOptions = {
   keepClosingSlash: 'Keep the trailing slash on singleton elements',
   maxLineLength: ['Max line length', parseInt],
   minifyCSS: ['Minify CSS in style elements and style attributes (uses clean-css)', parseJSON],
-  minifyJS: ['Minify Javascript in script elements and on* attributes (uses uglify-js)', parseJSON],
+  minifyJS: ['Minify Javascript in script elements (inc ES6) and on* attributes (uses Terser)', parseJSON],
   minifyURLs: ['Minify URLs in various attributes (uses relateurl)', parseJSON],
   preserveLineBreaks: 'Always collapse to 1 line break (never remove it entirely) when whitespace between tags include a line break.',
   preventAttributesEscaping: 'Prevents the escaping of the values of attributes.',

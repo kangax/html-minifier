@@ -32,12 +32,18 @@ module.exports = function(grunt) {
           banner: '<%= banner %>',
           preBundleCB: function() {
             var fs = require('fs');
-            var UglifyJS = require('uglify-js');
+            var path = require('path');
+            var terser = require('terser');
             var files = {};
-            UglifyJS.FILES.forEach(function(file) {
+            var terserPath = path.resolve() + '/node_modules/terser/lib';
+            var FILES = fs.readdirSync(terserPath).map(function(file) {
+              return path.join(terserPath, file);
+            });
+
+            FILES.forEach(function(file) {
               files[file] = fs.readFileSync(file, 'utf8');
             });
-            fs.writeFileSync('./dist/uglify.js', UglifyJS.minify(files, {
+            fs.writeFileSync('./dist/uglify.js', terser.minify(files, {
               compress: false,
               mangle: false,
               wrap: 'exports'

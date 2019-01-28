@@ -60,6 +60,7 @@
     "he": "1.2.x",
     "param-case": "2.1.x",
     "relateurl": "0.2.x",
+    "terser": "3.14.x",
     "uglify-js": "3.4.x"
   },
   "devDependencies": {
