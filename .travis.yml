@@ -4,29 +4,38 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libstdc++-4.9-dev
+
 branches:
   only:
     - gh-pages
+
 language: generic
+
 matrix:
   fast_finish: true
-sudo: false
+
 env:
   matrix:
-    - NODEJS_VER=chakracore/latest
     - NODEJS_VER=node/4
     - NODEJS_VER=node/6
     - NODEJS_VER=node/8
+    - NODEJS_VER=node/10
     - NODEJS_VER=node/latest
+
 before_install:
   - git clone --branch v1.4.2 --depth 1 https://github.com/jasongin/nvs.git ~/.nvs
   - . ~/.nvs/nvs.sh
   - nvs --version
+
 install:
   - nvs add $NODEJS_VER
   - nvs use $NODEJS_VER
   - node --version
   - npm --version --no-update-notifier
   - npm install --no-optional --no-save --no-update-notifier
+
 script:
   - npm test --no-update-notifier
+
+notifications:
+  email: false
