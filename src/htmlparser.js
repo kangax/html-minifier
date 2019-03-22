@@ -182,6 +182,11 @@ function HTMLParser(html, handler) {
           prevTag = startTagMatch.tagName.toLowerCase();
           continue;
         }
+
+        // Treat `<` as text
+        if (handler.continueOnParseError) {
+          textEnd = html.indexOf('<', 1);
+        }
       }
 
       var text;
@@ -213,7 +218,6 @@ function HTMLParser(html, handler) {
         handler.chars(text, prevTag, nextTag);
       }
       prevTag = '';
-
     }
     else {
       var stackedTag = lastTag.toLowerCase();
