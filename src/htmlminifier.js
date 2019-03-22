@@ -312,7 +312,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
     });
   }
   else if (isContentSecurityPolicy(tag, attrs) && attrName === 'content') {
-	  return collapseWhitespaceAll(attrValue);
+    return collapseWhitespaceAll(attrValue);
   }
   else if (options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
     attrValue = attrValue.replace(/\n+|\r+|\s{2,}/g, '');
@@ -339,7 +339,7 @@ function isMetaViewport(tag, attrs) {
 }
 
 function isContentSecurityPolicy(tag, attrs) {
-	if (tag !== 'meta') {
+  if (tag !== 'meta') {
     return false;
   }
   for (var i = 0, len = attrs.length; i < len; i++) {
