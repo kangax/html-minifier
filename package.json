@@ -63,6 +63,9 @@
     "uglify-js": "^3.5.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "babelify": "^10.0.0",
     "grunt": "^1.0.4",
     "grunt-browserify": "^5.3.0",
     "grunt-contrib-uglify": "^4.0.1",

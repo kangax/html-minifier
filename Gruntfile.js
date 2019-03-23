@@ -1,5 +1,9 @@
 'use strict';
 
+const fs = require('fs');
+const UglifyJS = require('uglify-js');
+const { path: phantomjsPath } = require('phantomjs-prebuilt');
+
 function qunitVersion() {
   const prepareStackTrace = Error.prepareStackTrace;
   Error.prepareStackTrace = () => '';
@@ -28,9 +32,14 @@ module.exports = grunt => {
       src: {
         options: {
           banner: '<%= banner %>',
+          options: {
+            transform: {
+              babelify: {
+                presets: ['@babel/preset-env']
+              }
+            }
+          },
           preBundleCB() {
-            const fs = require('fs');
-            const UglifyJS = require('uglify-js');
             const files = {};
             UglifyJS.FILES.forEach(file => {
               files[file] = fs.readFileSync(file, 'utf8');
@@ -42,7 +51,7 @@ module.exports = grunt => {
             }).code);
           },
           postBundleCB(err, src, next) {
-            require('fs').unlinkSync('./dist/uglify.js');
+            fs.unlinkSync('./dist/uglify.js');
             next(err, src);
           },
           require: [
@@ -123,7 +132,6 @@ module.exports = grunt => {
     return details.failed;
   }
 
-  const phantomjs = require('phantomjs-prebuilt').path;
   grunt.registerMultiTask('qunit', function() {
     const done = this.async();
     const errors = [];
@@ -156,7 +164,7 @@ module.exports = grunt => {
     }
 
     run('node', process.argv[0], this.data[0]);
-    run('web', phantomjs, this.data[1]);
+    run('web', phantomjsPath, this.data[1]);
   });
 
   grunt.registerMultiTask('replace', function() {
