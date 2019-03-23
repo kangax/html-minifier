@@ -311,7 +311,7 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
       return (+numString).toString();
     });
   }
-  else if (isContentSecurityPolicy(tag, attrs) && attrName === 'content') {
+  else if (isContentSecurityPolicy(tag, attrs) && attrName.toLowerCase() === 'content') {
     return collapseWhitespaceAll(attrValue);
   }
   else if (options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
@@ -343,7 +343,7 @@ function isContentSecurityPolicy(tag, attrs) {
     return false;
   }
   for (var i = 0, len = attrs.length; i < len; i++) {
-    if (attrs[i].name === 'http-equiv' && attrs[i].value === 'Content-Security-Policy') {
+    if (attrs[i].name.toLowerCase() === 'http-equiv' && attrs[i].value.toLowerCase() === 'content-security-policy') {
       return true;
     }
   }

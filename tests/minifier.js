@@ -3549,3 +3549,19 @@ QUnit.test('canCollapseWhitespace and canTrimWhitespace hooks', function(assert)
     canCollapseWhitespace: canCollapseAndTrimWhitespace
   }), output);
 });
+
+QUnit.test('minify Content-Security-Policy', function(assert) {
+  var input, output;
+
+  input = '<meta Http-Equiv="Content-Security-Policy"\t\t\t\tContent="default-src \'self\';\n\n\t\timg-src https://*;">';
+  output = '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; img-src https://*;">';
+  assert.equal(minify(input), output);
+
+  input = '<meta http-equiv="content-security-policy"\t\t\t\tcontent="default-src \'self\';\n\n\t\timg-src https://*;">';
+  output = '<meta http-equiv="content-security-policy" content="default-src \'self\'; img-src https://*;">';
+  assert.equal(minify(input), output);
+
+  input = '<meta http-equiv="content-security-policy" content="default-src \'self\'; img-src https://*;">';
+  output = '<meta http-equiv="content-security-policy" content="default-src \'self\'; img-src https://*;">';
+  assert.equal(minify(input), output);
+});
