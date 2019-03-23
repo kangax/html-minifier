@@ -5,10 +5,6 @@ addons:
     packages:
       - libstdc++-4.9-dev
 
-branches:
-  only:
-    - gh-pages
-
 language: generic
 
 matrix:
