@@ -64,6 +64,9 @@ QUnit.test('parsing non-trivial markup', function(assert) {
   assert.throws(function() {
     minify(input);
   }, 'Invalid tag name');
+  assert.equal(minify(input, {
+    continueOnParseError: true,
+  }), input);
 
   input = '<begriffs.pagination ng-init="perPage=20" collection="logs" url="\'/api/logs?user=-1\'" per-page="perPage" per-page-presets="[10,20,50,100]" template-url="/assets/paginate-anything.html"></begriffs.pagination>';
   assert.equal(minify(input), input);
@@ -93,9 +96,13 @@ QUnit.test('parsing non-trivial markup', function(assert) {
   // https://github.com/kangax/html-minifier/issues/507
   input = '<tag v-ref:vm_pv :imgs=" objpicsurl_ "></tag>';
   assert.equal(minify(input), input);
+  input = '<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123>';
   assert.throws(function() {
-    minify('<tag v-ref:vm_pv :imgs=" objpicsurl_ " ss"123></tag>');
+    minify(input);
   }, 'invalid attribute name');
+  assert.equal(minify(input, {
+    continueOnParseError: true,
+  }), input);
 
   // https://github.com/kangax/html-minifier/issues/512
   input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
@@ -106,18 +113,29 @@ QUnit.test('parsing non-trivial markup', function(assert) {
           ' data-ng-pattern="vm.options.format"' +
           ' data-options="vm.datepickerOptions">';
   assert.equal(minify(input), input);
+  input = '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
+          ' <!--FIXME hardcoded placeholder - dates may not be used for service required fields yet. -->' +
+          ' placeholder="YYYY-MM-DD"' +
+          ' date-range-picker' +
+          ' data-ng-model="vm.value"' +
+          ' data-ng-model-options="{ debounce: 1000 }"' +
+          ' data-ng-pattern="vm.options.format"' +
+          ' data-options="vm.datepickerOptions">';
   assert.throws(function() {
-    minify(
-      '<input class="form-control" type="text" style="" id="{{vm.formInputName}}" name="{{vm.formInputName}}"' +
-      ' <!--FIXME hardcoded placeholder - dates may not be used for service required fields yet. -->' +
-      ' placeholder="YYYY-MM-DD"' +
-      ' date-range-picker' +
-      ' data-ng-model="vm.value"' +
-      ' data-ng-model-options="{ debounce: 1000 }"' +
-      ' data-ng-pattern="vm.options.format"' +
-      ' data-options="vm.datepickerOptions">'
-    );
+    minify(input);
   }, 'HTML comment inside tag');
+  assert.equal(minify(input, {
+    continueOnParseError: true,
+  }), input);
+
+  // https://github.com/kangax/html-minifier/issues/974
+  input = '<!–– Failing New York Times Comment -->';
+  assert.throws(function() {
+    minify(input);
+  }, 'invalid HTML comment');
+  assert.equal(minify(input, {
+    continueOnParseError: true,
+  }), input);
 
   input = '<br a=\u00A0 b="&nbsp;" c="\u00A0">';
   output = '<br a="\u00A0" b="&nbsp;" c="\u00A0">';

@@ -108,7 +108,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('gruntify-eslint');
+  grunt.loadNpmTasks('grunt-eslint');
 
   function report(type, details) {
     grunt.log.writeln(type + ' completed in ' + details.runtime + 'ms');
