@@ -878,19 +878,19 @@ function minify(value, options, partialMarkup) {
     value = value.replace(reCustomIgnore, function(match) {
       if (!uidAttr) {
         uidAttr = uniqueId(value);
-        uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)(\\s*)', 'g');
+        uidPattern = new RegExp('(\\s*)' + uidAttr + '([0-9]+)' + uidAttr + '(\\s*)', 'g');
         if (options.minifyCSS) {
           options.minifyCSS = (function(fn) {
             return function(text, type) {
               text = text.replace(uidPattern, function(match, prefix, index) {
                 var chunks = ignoredCustomMarkupChunks[+index];
-                return chunks[1] + uidAttr + index + chunks[2];
+                return chunks[1] + uidAttr + index + uidAttr + chunks[2];
               });
               var ids = [];
               new CleanCSS().minify(wrapCSS(text, type)).warnings.forEach(function(warning) {
                 var match = uidPattern.exec(warning);
                 if (match) {
-                  var id = uidAttr + match[2];
+                  var id = uidAttr + match[2] + uidAttr;
                   text = text.replace(id, ignoreCSS(id));
                   ids.push(id);
                 }
@@ -908,13 +908,13 @@ function minify(value, options, partialMarkup) {
             return function(text, type) {
               return fn(text.replace(uidPattern, function(match, prefix, index) {
                 var chunks = ignoredCustomMarkupChunks[+index];
-                return chunks[1] + uidAttr + index + chunks[2];
+                return chunks[1] + uidAttr + index + uidAttr + chunks[2];
               }), type);
             };
           })(options.minifyJS);
         }
       }
-      var token = uidAttr + ignoredCustomMarkupChunks.length;
+      var token = uidAttr + ignoredCustomMarkupChunks.length + uidAttr;
       ignoredCustomMarkupChunks.push(/^(\s*)[\s\S]*?(\s*)$/.exec(match));
       return '\t' + token + '\t';
     });

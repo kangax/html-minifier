@@ -1982,6 +1982,14 @@ QUnit.test('Ignore custom fragments', function(assert) {
   input = '<pre>\nfoo\n<? bar ?>\nbaz\n</pre>';
   assert.equal(minify(input), input);
   assert.equal(minify(input, { collapseWhitespace: true }), input);
+
+  input = '<script>var value="<?php ?>+<?php ?>0"</script>';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, { minifyJS: true }), input);
+
+  input = '<style>body{font-size:<%=1%>2pt}</style>';
+  assert.equal(minify(input), input);
+  assert.equal(minify(input, { minifyCSS: true }), input);
 });
 
 QUnit.test('bootstrap\'s span > button > span', function(assert) {
@@ -2853,6 +2861,9 @@ QUnit.test('ignore', function(assert) {
   input = '<p>foo <!-- htmlmin:ignore --><span>\n\tbar\n</span><!-- htmlmin:ignore -->.</p>';
   output = '<p>foo <span>\n\tbar\n</span>.</p>';
   assert.equal(minify(input, { collapseWhitespace: true }), output);
+
+  input = '<!-- htmlmin:ignore -->+<!-- htmlmin:ignore -->0';
+  assert.equal(minify(input), '+0');
 });
 
 QUnit.test('meta viewport', function(assert) {
