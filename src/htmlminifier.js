@@ -311,6 +311,9 @@ function cleanAttributeValue(tag, attrName, attrValue, options, attrs) {
       return (+numString).toString();
     });
   }
+  else if (isContentSecurityPolicy(tag, attrs) && attrName.toLowerCase() === 'content') {
+    return collapseWhitespaceAll(attrValue);
+  }
   else if (options.customAttrCollapse && options.customAttrCollapse.test(attrName)) {
     attrValue = attrValue.replace(/\n+|\r+|\s{2,}/g, '');
   }
@@ -330,6 +333,17 @@ function isMetaViewport(tag, attrs) {
   }
   for (var i = 0, len = attrs.length; i < len; i++) {
     if (attrs[i].name === 'name' && attrs[i].value === 'viewport') {
+      return true;
+    }
+  }
+}
+
+function isContentSecurityPolicy(tag, attrs) {
+  if (tag !== 'meta') {
+    return false;
+  }
+  for (var i = 0, len = attrs.length; i < len; i++) {
+    if (attrs[i].name.toLowerCase() === 'http-equiv' && attrs[i].value.toLowerCase() === 'content-security-policy') {
       return true;
     }
   }
