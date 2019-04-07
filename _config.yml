@@ -3,7 +3,6 @@ exclude:
   - "benchmarks"
   - "node_modules"
   - "src"
-  - "tests"
   - "backtest.js"
   - "benchmark.js"
   - "cli.js"
