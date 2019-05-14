@@ -189,7 +189,7 @@ program.option('-c --config-file <file>', 'Use config file', function(configPath
 });
 program.option('--input-dir <dir>', 'Specify an input directory');
 program.option('--output-dir <dir>', 'Specify an output directory');
-program.option('--file-ext <text>', 'Specify an extension to be read, ex: html');
+program.option('--file-ext <text>', 'Specify extensions to be read, separated by commas, ex: html,htm,xml');
 var content;
 program.arguments('[files...]').action(function(files) {
   content = files.map(readFile).join('');
@@ -262,7 +262,7 @@ function processDirectory(inputDir, outputDir, fileExt) {
         else if (stat.isDirectory()) {
           processDirectory(inputFile, outputFile, fileExt);
         }
-        else if (!fileExt || path.extname(file) === '.' + fileExt) {
+        else if (!fileExt || ~fileExt.indexOf(path.extname(file).slice(1))) {
           mkdir(outputDir, function() {
             processFile(inputFile, outputFile);
           });
@@ -294,6 +294,9 @@ if (inputDir || outputDir) {
   }
   else if (!outputDir) {
     fatal('You need to specify where to write the output files with the option --output-dir');
+  }
+  if (fileExt) {
+    fileExt = fileExt.split(',');
   }
   processDirectory(inputDir, outputDir, fileExt);
 }
