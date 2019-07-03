@@ -1,7 +1,7 @@
 {
-  "name": "html-minifier",
+  "name": "wobal-html-minifier",
   "description": "Highly configurable, well-tested, JavaScript-based HTML minifier.",
-  "version": "4.0.0",
+  "version": "4.0.0-beta.1",
   "keywords": [
     "cli",
     "compress",
@@ -38,7 +38,7 @@
   "bin": {
     "html-minifier": "./cli.js"
   },
-  "main": "src/htmlminifier.js",
+  "main": "dist/htmlminifier.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kangax/html-minifier.git"
