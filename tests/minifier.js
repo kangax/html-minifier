@@ -1,11 +1,10 @@
 /* global minify */
 'use strict';
 
-QUnit.config.autostart = false;
 if (typeof minify === 'undefined') {
   self.minify = require('html-minifier').minify;
 }
-
+QUnit.module('minifier');
 QUnit.test('`minifiy` exists', function(assert) {
   assert.ok(minify);
 });
