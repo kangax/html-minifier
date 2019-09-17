@@ -67,7 +67,7 @@
     "grunt-browserify": "^5.3.0",
     "grunt-contrib-uglify": "^4.0.1",
     "grunt-eslint": "^21.0.0",
-    "phantomjs-prebuilt": "^2.1.16",
+    "node-qunit-puppeteer": "^1.0.13",
     "qunit": "^2.9.2"
   },
   "benchmarkDependencies": {
