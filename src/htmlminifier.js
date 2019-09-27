@@ -158,6 +158,7 @@ var executableScriptsMimetypes = utils.createMap([
   'text/javascript',
   'text/ecmascript',
   'text/jscript',
+  'module',
   'application/javascript',
   'application/x-javascript',
   'application/ecmascript'
