@@ -183,11 +183,13 @@ function isExecutableScript(tag, attrs) {
 
 function isStyleLinkTypeAttribute(attrValue) {
   attrValue = trimWhitespace(attrValue);
-  if (!attrValue) {
-    return true;
+
+  if (typeof attrValue !== 'string') {
+    attrValue = '';
+  } else {
+    attrValue = attrValue.toLowerCase();
   }
   
-  attrValue = attrValue.toLowerCase();
   return attrValue === '' || attrValue === 'text/css';
 }
 
