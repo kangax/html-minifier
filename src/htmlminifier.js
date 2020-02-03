@@ -184,7 +184,7 @@ function isExecutableScript(tag, attrs) {
 function isStyleLinkTypeAttribute(attrValue) {
   attrValue = trimWhitespace(attrValue);
 
-  if (typeof attrValue !== 'string') {
+  if (typeof attrValue === 'undefined') {
     attrValue = '';
   } else {
     attrValue = attrValue.toLowerCase();
