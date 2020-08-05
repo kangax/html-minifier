@@ -21,6 +21,10 @@ function collapseWhitespaceAll(str) {
 
 function collapseWhitespace(str, options, trimLeft, trimRight, collapseAll) {
   var lineBreakBefore = '', lineBreakAfter = '';
+  
+  if(str == null){
+    return '';
+  }
 
   if (options.preserveLineBreaks) {
     str = str.replace(/^[ \n\r\t\f]*?[\n\r][ \n\r\t\f]*/, function() {
