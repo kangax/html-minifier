@@ -84,6 +84,7 @@
   }
 
   byId('minify-btn').onclick = function() {
+    byId('copy-btn').disabled = false;
     byId('minify-btn').disabled = true;
     var originalValue = byId('input').value;
     minify(originalValue, getOptions(), function(minifiedValue) {
@@ -104,6 +105,19 @@
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
       byId('minify-btn').disabled = false;
     });
+    byId('copy-btn').onclick = function() {
+      let bgColorButton = byId('copy-btn').style.backgroundColor;
+      let copyText = byId('output');
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      byId('copy-btn').innerHTML = 'Copied!'
+      byId('copy-btn').style.backgroundColor = 'green';
+      setTimeout(function() {
+        byId('copy-btn').innerHTML = 'Copy Result';
+        byId('copy-btn').style.backgroundColor = bgColorButton;
+      }, 5000)
+    }
   };
 
   byId('select-all').onclick = function() {
