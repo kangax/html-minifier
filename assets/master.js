@@ -106,17 +106,21 @@
       byId('minify-btn').disabled = false;
     });
     byId('copy-btn').onclick = function() {
-      let bgColorButton = byId('copy-btn').style.backgroundColor;
-      let copyText = byId('output');
-      copyText.select();
-      copyText.setSelectionRange(0, 99999);
-      document.execCommand("copy");
-      byId('copy-btn').innerHTML = 'Copied!'
-      byId('copy-btn').style.backgroundColor = 'green';
-      setTimeout(function() {
-        byId('copy-btn').innerHTML = 'Copy Result';
-        byId('copy-btn').style.backgroundColor = bgColorButton;
-      }, 5000)
+      navigator.permissions.query({name: "clipboard-write"})
+      .then((permissionStatus) => {
+        if (permissionStatus.state == 'granted' || permissionStatus.state == 'prompt') {
+          navigator.clipboard.writeText(byId('output').value);
+          let bgColorButton = byId('copy-btn').style.backgroundColor;
+          byId('copy-btn').innerHTML = 'Copied!'
+          byId('copy-btn').style.backgroundColor = 'green';
+          setTimeout(function() {
+            byId('copy-btn').innerHTML = 'Copy Result';
+            byId('copy-btn').style.backgroundColor = bgColorButton;
+          }, 5000);
+        } else {
+          alert("Access was denied to clipboard-write, please give access to continue.");
+        }
+      });
     }
   };
 
