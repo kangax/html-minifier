@@ -84,6 +84,7 @@
   }
 
   byId('minify-btn').onclick = function() {
+    byId('copy-btn').disabled = false;
     byId('minify-btn').disabled = true;
     var originalValue = byId('input').value;
     minify(originalValue, getOptions(), function(minifiedValue) {
@@ -104,6 +105,23 @@
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
       byId('minify-btn').disabled = false;
     });
+    byId('copy-btn').onclick = function() {
+      navigator.permissions.query({name: "clipboard-write"})
+      .then((permissionStatus) => {
+        if (permissionStatus.state == 'granted' || permissionStatus.state == 'prompt') {
+          navigator.clipboard.writeText(byId('output').value);
+          let bgColorButton = byId('copy-btn').style.backgroundColor;
+          byId('copy-btn').innerHTML = 'Copied!';
+          byId('copy-btn').className = 'copied-button';
+          setTimeout(function() {
+            byId('copy-btn').innerHTML = 'Copy Result';
+            byId('copy-btn').className = 'copy-button';
+          }, 5000);
+        } else {
+          alert("Access was denied to clipboard-write, please give access to continue.");
+        }
+      });
+    }
   };
 
   byId('select-all').onclick = function() {
