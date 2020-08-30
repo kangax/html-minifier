@@ -111,11 +111,11 @@
         if (permissionStatus.state == 'granted' || permissionStatus.state == 'prompt') {
           navigator.clipboard.writeText(byId('output').value);
           let bgColorButton = byId('copy-btn').style.backgroundColor;
-          byId('copy-btn').innerHTML = 'Copied!'
-          byId('copy-btn').style.backgroundColor = 'green';
+          byId('copy-btn').innerHTML = 'Copied!';
+          byId('copy-btn').className = 'copied-button';
           setTimeout(function() {
             byId('copy-btn').innerHTML = 'Copy Result';
-            byId('copy-btn').style.backgroundColor = bgColorButton;
+            byId('copy-btn').className = 'copy-button';
           }, 5000);
         } else {
           alert("Access was denied to clipboard-write, please give access to continue.");

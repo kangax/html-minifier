@@ -5,6 +5,8 @@ h1 span { font-size: 0.6em; }
 button { font-weight: bold; width: 100px; }
 
 .minify-button { margin: 16px 0; }
+.copy-button { margin: 16px 0; }
+.copied-button { margin: 16px 0; background-color: green; }
 #outer-wrapper { overflow: hidden; }
 #wrapper { width: 65%; float: left; }
 #input { width: 99%; height: 18em; }
