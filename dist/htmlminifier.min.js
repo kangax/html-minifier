@@ -1,6 +1,6 @@
 /*!
  * HTMLMinifier v4.0.0 (https://kangax.github.io/html-minifier/)
- * Copyright 2010-2019 Juriy "kangax" Zaytsev
+ * Copyright 2010-2021 Juriy "kangax" Zaytsev
  * Licensed under the MIT license
  */
 
