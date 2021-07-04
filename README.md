@@ -168,7 +168,7 @@ const options = {
     collapseWhitespace: true
 };
 
-function gHtmlMinify() {
+function html() {
     return src('app/**/*.html')
         .on('data', function(file) {
             const buferFile = Buffer.from(htmlMinify.minify(file.contents.toString(), options))
@@ -177,7 +177,7 @@ function gHtmlMinify() {
         .pipe(dest('build'))
 }
 
-exports.gHtmlMinify = series(gHtmlMinify)
+exports.html = series(html)
 ```
 
 ## Running benchmarks
