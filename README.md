@@ -172,9 +172,7 @@ function gHtmlMinify() {
     return src('app/**/*.html')
         .on('data', function(file) {
             const buferFile = Buffer.from(htmlMinify.minify(file.contents.toString(), options))
-            file.contents = buferFile;
-            console.log(file);
-            return;
+            return file.contents = buferFile
         })
         .pipe(dest('build'))
 }
