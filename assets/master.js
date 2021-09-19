@@ -110,7 +110,6 @@
       .then((permissionStatus) => {
         if (permissionStatus.state == 'granted' || permissionStatus.state == 'prompt') {
           navigator.clipboard.writeText(byId('output').value);
-          let bgColorButton = byId('copy-btn').style.backgroundColor;
           byId('copy-btn').innerHTML = 'Copied!';
           byId('copy-btn').className = 'copied-button';
           setTimeout(function() {
