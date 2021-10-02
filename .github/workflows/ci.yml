@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: [8, 10, 12, 14, 16]
+        node: [10, 12, 14, 16]
 
     steps:
       - name: Clone repository
