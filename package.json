@@ -47,7 +47,7 @@
     "url": "https://github.com/kangax/html-minifier/issues"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=10"
   },
   "scripts": {
     "dist": "grunt dist",
