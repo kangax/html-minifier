@@ -297,7 +297,7 @@ run(fileNames.map(function(fileName) {
 
     function testWillPeavy(done) {
       readText(filePath, function(data) {
-        var options = url.parse('https://www.willpeavy.com/minifier/');
+        var options = url.parse('https://www.willpeavy.com/tools/minifier/');
         options.method = 'POST';
         options.headers = {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -335,7 +335,7 @@ run(fileNames.map(function(fileName) {
 
     function testHTMLCompressor(done) {
       readText(filePath, function(data) {
-        var options = url.parse('https://htmlcompressor.com/compress_ajax_v2.php');
+        var options = url.parse('https://htmlcompressor.com/compress');
         options.method = 'POST';
         options.headers = {
           'Accept-Encoding': 'gzip',
