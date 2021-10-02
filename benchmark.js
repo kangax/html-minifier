@@ -20,8 +20,7 @@ else if (installed.status) {
   process.exit(installed.status);
 }
 
-var brotli = require('brotli'),
-    chalk = require('chalk'),
+var chalk = require('chalk'),
     fork = require('child_process').fork,
     fs = require('fs'),
     https = require('https'),
@@ -124,6 +123,13 @@ function gzip(inPath, outPath, callback) {
   fs.createReadStream(inPath).pipe(zlib.createGzip({
     level: zlib.Z_BEST_COMPRESSION
   })).pipe(fs.createWriteStream(outPath)).on('finish', callback);
+}
+
+function brotli(inPath, outPath, callback) {
+  fs.createReadStream(inPath)
+    .pipe(zlib.createBrotliCompress())
+    .pipe(fs.createWriteStream(outPath))
+    .on('finish', callback);
 }
 
 function run(tasks, done) {
@@ -253,15 +259,12 @@ run(fileNames.map(function(fileName) {
         },
         // Apply Brotli on minified output
         function(done) {
-          readBuffer(info.filePath, function(data) {
-            var output = Buffer.from(brotli.compress(data, true).buffer);
-            writeBuffer(info.brFilePath, output, function() {
-              info.brTime = Date.now();
-              // Open and read the size of the minified+brotli output
-              readSize(info.brFilePath, function(size) {
-                info.brSize = size;
-                done();
-              });
+          brotli(info.filePath, info.brFilePath, function() {
+            info.brTime = Date.now();
+            // Open and read the size of the minified+brotli output
+            readSize(info.brFilePath, function(size) {
+              info.brSize = size;
+              done();
             });
           });
         },
