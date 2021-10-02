@@ -382,6 +382,7 @@ run(fileNames.map(function(fileName) {
           });
         }).on('error', failed).end(querystring.stringify({
           code_type: 'html',
+          output_format: 'json',
           html_level: 3,
           html_strip_quotes: 1,
           minimize_style: 1,
