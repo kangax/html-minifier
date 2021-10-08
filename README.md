@@ -1,7 +1,7 @@
 # HTMLMinifier
 
-[![NPM version](https://img.shields.io/npm/v/html-minifier.svg)](https://www.npmjs.com/package/html-minifier)
-[![Build Status](https://img.shields.io/travis/kangax/html-minifier.svg)](https://travis-ci.org/kangax/html-minifier)
+[![npm version](https://img.shields.io/npm/v/html-minifier.svg)](https://www.npmjs.com/package/html-minifier)
+[![Build Status](https://img.shields.io/github/workflow/status/kangax/html-minifier/CI/gh-pages)](https://github.com/kangax/html-minifier/actions?query=workflow%3ACI+branch%3Agh-pages)
 [![Dependency Status](https://img.shields.io/david/kangax/html-minifier.svg)](https://david-dm.org/kangax/html-minifier)
 
 [HTMLMinifier](https://kangax.github.io/html-minifier/) is a highly **configurable**, **well-tested**, JavaScript-based HTML minifier.
