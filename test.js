@@ -1,4 +1,4 @@
-/* eslint-env phantomjs, qunit */
+/* eslint-env qunit */
 'use strict';
 
 function load(path) {
@@ -26,26 +26,6 @@ function hook() {
   QUnit.start();
 }
 
-if (typeof phantom === 'undefined') {
-  load('./src/htmlminifier');
-  require(process.argv[2]);
-  hook();
-}
-else {
-  var system = require('system');
-  setTimeout(function() {
-    system.stderr.write('timed out');
-    phantom.exit(1);
-  }, 15000);
-  var page = require('webpage').create();
-  page.onAlert = function(details) {
-    console.log(details);
-    phantom.exit();
-  };
-  page.open(system.args[1], function(status) {
-    if (status !== 'success') {
-      phantom.exit(1);
-    }
-    page.evaluate(hook);
-  });
-}
+load('./src/htmlminifier');
+require(process.argv[2]);
+hook();

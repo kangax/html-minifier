@@ -125,15 +125,21 @@ module.exports = function(grunt) {
     return details.failed;
   }
 
-  var phantomjs = require('phantomjs-prebuilt').path;
   grunt.registerMultiTask('qunit', function() {
     var done = this.async();
     var errors = [];
 
     function run(testType, binPath, testPath) {
+      var testrunner;
+      if (testType === 'web') {
+        testrunner = 'test-chrome.js';
+      }
+      else {
+        testrunner = 'test.js';
+      }
       grunt.util.spawn({
         cmd: binPath,
-        args: ['test.js', testPath]
+        args: [testrunner, testPath]
       }, function(error, result) {
         if (error) {
           grunt.log.error(result.stderr);
@@ -158,7 +164,7 @@ module.exports = function(grunt) {
     }
 
     run('node', process.argv[0], this.data[0]);
-    run('web', phantomjs, this.data[1]);
+    run('web', process.argv[0], this.data[1]);
   });
 
   grunt.registerMultiTask('replace', function() {
