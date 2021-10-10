@@ -93,25 +93,16 @@ function isConditionalComment(text) {
 }
 
 function isIgnoredComment(text, options) {
-  for (let i = 0, len = options.ignoreCustomComments.length; i < len; i++) {
-    if (options.ignoreCustomComments[i].test(text)) {
-      return true;
-    }
-  }
-
-  return false;
+  return Array.isArray(options.ignoreCustomComments) ?
+    options.ignoreCustomComments.some(comment => comment.test(text)) :
+    Boolean(options.ignoreCustomComments);
 }
 
 function isEventAttribute(attrName, options) {
   const patterns = options.customEventAttributes;
-  if (patterns) {
-    for (let i = patterns.length; i--;) {
-      if (patterns[i].test(attrName)) {
-        return true;
-      }
-    }
 
-    return false;
+  if (patterns) {
+    return patterns.some(pattern => pattern.test(attrName));
   }
 
   return /^on[a-z]{3,}$/.test(attrName);
@@ -123,13 +114,7 @@ function canRemoveAttributeQuotes(value) {
 }
 
 function attributesInclude(attributes, attribute) {
-  for (let i = attributes.length; i--;) {
-    if (attributes[i].name.toLowerCase() === attribute) {
-      return true;
-    }
-  }
-
-  return false;
+  return attributes.some(attr => attr.name.toLowerCase() === attribute);
 }
 
 function isAttributeRedundant(tag, attrName, attrValue, attrs) {
@@ -509,13 +494,7 @@ function canDeleteEmptyAttribute(tag, attrName, attrValue, options) {
 }
 
 function hasAttrName(name, attrs) {
-  for (let i = attrs.length - 1; i >= 0; i--) {
-    if (attrs[i].name === name) {
-      return true;
-    }
-  }
-
-  return false;
+  return attrs.some(attribute => attribute.name === name);
 }
 
 function canRemoveElement(tag, attrs) {
