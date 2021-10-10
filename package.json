@@ -73,7 +73,6 @@
   "benchmarkDependencies": {
     "chalk": "^4.1.2",
     "cli-table": "^0.3.6",
-    "lzma": "^2.3.2",
     "minimize": "^2.2.0",
     "progress": "^2.0.3"
   },

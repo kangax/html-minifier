@@ -24,7 +24,6 @@ var chalk = require('chalk'),
     fork = require('child_process').fork,
     fs = require('fs'),
     https = require('https'),
-    lzma = require('lzma'),
     Minimize = require('minimize'),
     path = require('path'),
     Progress = require('progress'),
@@ -212,7 +211,6 @@ run(fileNames.map(function(fileName) {
     var original = {
       filePath: filePath,
       gzFilePath: path.join('benchmarks/generated/', fileName + '.html.gz'),
-      lzFilePath: path.join('benchmarks/generated/', fileName + '.html.lz'),
       brFilePath: path.join('benchmarks/generated/', fileName + '.html.br')
     };
     var infos = {};
@@ -220,7 +218,6 @@ run(fileNames.map(function(fileName) {
       infos[name] = {
         filePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html'),
         gzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.gz'),
-        lzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.lz'),
         brFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.br')
       };
     });
@@ -236,24 +233,6 @@ run(fileNames.map(function(fileName) {
             readSize(info.gzFilePath, function(size) {
               info.gzSize = size;
               done();
-            });
-          });
-        },
-        // Apply LZMA on minified output
-        function(done) {
-          readBuffer(info.filePath, function(data) {
-            lzma.compress(data, 1, function(result, error) {
-              if (error) {
-                throw error;
-              }
-              writeBuffer(info.lzFilePath, Buffer.from(result), function() {
-                info.lzTime = Date.now();
-                // Open and read the size of the minified+lzma output
-                readSize(info.lzFilePath, function(size) {
-                  info.lzSize = size;
-                  done();
-                });
-              });
             });
           });
         },
@@ -325,7 +304,6 @@ run(fileNames.map(function(fileName) {
             else {
               info.size = 0;
               info.gzSize = 0;
-              info.lzSize = 0;
               info.brSize = 0;
               done();
             }
@@ -351,7 +329,6 @@ run(fileNames.map(function(fileName) {
           if (info) {
             info.size = 0;
             info.gzSize = 0;
-            info.lzSize = 0;
             info.brSize = 0;
             info = null;
             done();
@@ -411,8 +388,8 @@ run(fileNames.map(function(fileName) {
       testHTMLCompressor
     ], function() {
       var display = [
-        [fileName, '+ gzip', '+ lzma', '+ brotli'].join('\n'),
-        [redSize(original.size), redSize(original.gzSize), redSize(original.lzSize), redSize(original.brSize)].join('\n')
+        [fileName, '+ gzip', '+ brotli'].join('\n'),
+        [redSize(original.size), redSize(original.gzSize), redSize(original.brSize)].join('\n')
       ];
       var report = [
         '[' + fileName + '](' + urls[fileName] + ')',
@@ -420,21 +397,19 @@ run(fileNames.map(function(fileName) {
       ];
       for (var name in infos) {
         var info = infos[name];
-        display.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.lzSize), greenSize(info.brSize)].join('\n'));
+        display.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.brSize)].join('\n'));
         report.push(info.size ? toKb(info.size) : 'n/a');
       }
       display.push(
         [
           blueSavings(original.size, infos.minifier.size),
           blueSavings(original.gzSize, infos.minifier.gzSize),
-          blueSavings(original.lzSize, infos.minifier.lzSize),
           blueSavings(original.brSize, infos.minifier.brSize)
         ].join('\n'),
         [
           blueTime(infos.minifier.endTime - infos.minifier.startTime),
           blueTime(original.gzTime - original.endTime),
-          blueTime(original.lzTime - original.gzTime),
-          blueTime(original.brTime - original.lzTime)
+          blueTime(original.brTime - original.gzTime)
         ].join('\n')
       );
       rows[fileName] = {
