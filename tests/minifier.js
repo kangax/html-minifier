@@ -431,7 +431,7 @@ QUnit.test('doctype normalization', function(assert) {
   assert.equal(minify(input, {
     useShortDoctype: true,
     removeTagWhitespace: true
-  }), '<!doctypehtml>');
+  }), '<!doctype html>');
 
   input = '<!DOCTYPE\nhtml>';
   assert.equal(minify(input, { useShortDoctype: false }), '<!DOCTYPE html>');

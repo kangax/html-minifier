@@ -1255,9 +1255,11 @@ function minify(value, options, partialMarkup) {
       buffer.push(text);
     },
     doctype: function(doctype) {
-      buffer.push(options.useShortDoctype ? '<!doctype' +
-        (options.removeTagWhitespace ? '' : ' ') + 'html>' :
-        collapseWhitespaceAll(doctype));
+      buffer.push(
+        options.useShortDoctype ?
+          '<!doctype html>' :
+          collapseWhitespaceAll(doctype)
+      );
     }
   });
 
