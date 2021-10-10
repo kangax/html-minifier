@@ -206,6 +206,7 @@ function displayTable() {
 
 run(fileNames.map(function(fileName) {
   var filePath = path.join('benchmarks/', fileName + '.html');
+  fs.mkdirSync('benchmarks/generated/', { recursive: true });
 
   function processFile(site, done) {
     var original = {
