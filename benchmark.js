@@ -20,12 +20,10 @@ else if (installed.status) {
   process.exit(installed.status);
 }
 
-var brotli = require('brotli'),
-    chalk = require('chalk'),
+var chalk = require('chalk'),
     fork = require('child_process').fork,
     fs = require('fs'),
     https = require('https'),
-    lzma = require('lzma'),
     Minimize = require('minimize'),
     path = require('path'),
     Progress = require('progress'),
@@ -121,9 +119,17 @@ function readSize(filePath, callback) {
 }
 
 function gzip(inPath, outPath, callback) {
-  fs.createReadStream(inPath).pipe(zlib.createGzip({
-    level: zlib.Z_BEST_COMPRESSION
-  })).pipe(fs.createWriteStream(outPath)).on('finish', callback);
+  fs.createReadStream(inPath)
+    .pipe(zlib.createGzip())
+    .pipe(fs.createWriteStream(outPath))
+    .on('finish', callback);
+}
+
+function brotli(inPath, outPath, callback) {
+  fs.createReadStream(inPath)
+    .pipe(zlib.createBrotliCompress())
+    .pipe(fs.createWriteStream(outPath))
+    .on('finish', callback);
 }
 
 function run(tasks, done) {
@@ -201,12 +207,12 @@ function displayTable() {
 
 run(fileNames.map(function(fileName) {
   var filePath = path.join('benchmarks/', fileName + '.html');
+  fs.mkdirSync('benchmarks/generated/', { recursive: true });
 
   function processFile(site, done) {
     var original = {
       filePath: filePath,
       gzFilePath: path.join('benchmarks/generated/', fileName + '.html.gz'),
-      lzFilePath: path.join('benchmarks/generated/', fileName + '.html.lz'),
       brFilePath: path.join('benchmarks/generated/', fileName + '.html.br')
     };
     var infos = {};
@@ -214,7 +220,6 @@ run(fileNames.map(function(fileName) {
       infos[name] = {
         filePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html'),
         gzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.gz'),
-        lzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.lz'),
         brFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.br')
       };
     });
@@ -233,35 +238,14 @@ run(fileNames.map(function(fileName) {
             });
           });
         },
-        // Apply LZMA on minified output
-        function(done) {
-          readBuffer(info.filePath, function(data) {
-            lzma.compress(data, 1, function(result, error) {
-              if (error) {
-                throw error;
-              }
-              writeBuffer(info.lzFilePath, new Buffer(result), function() {
-                info.lzTime = Date.now();
-                // Open and read the size of the minified+lzma output
-                readSize(info.lzFilePath, function(size) {
-                  info.lzSize = size;
-                  done();
-                });
-              });
-            });
-          });
-        },
         // Apply Brotli on minified output
         function(done) {
-          readBuffer(info.filePath, function(data) {
-            var output = new Buffer(brotli.compress(data, true).buffer);
-            writeBuffer(info.brFilePath, output, function() {
-              info.brTime = Date.now();
-              // Open and read the size of the minified+brotli output
-              readSize(info.brFilePath, function(size) {
-                info.brSize = size;
-                done();
-              });
+          brotli(info.filePath, info.brFilePath, function() {
+            info.brTime = Date.now();
+            // Open and read the size of the minified+brotli output
+            readSize(info.brFilePath, function(size) {
+              info.brSize = size;
+              done();
             });
           });
         },
@@ -297,7 +281,7 @@ run(fileNames.map(function(fileName) {
 
     function testWillPeavy(done) {
       readText(filePath, function(data) {
-        var options = url.parse('https://www.willpeavy.com/minifier/');
+        var options = url.parse('https://www.willpeavy.com/tools/minifier/');
         options.method = 'POST';
         options.headers = {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -322,7 +306,6 @@ run(fileNames.map(function(fileName) {
             else {
               info.size = 0;
               info.gzSize = 0;
-              info.lzSize = 0;
               info.brSize = 0;
               done();
             }
@@ -335,7 +318,7 @@ run(fileNames.map(function(fileName) {
 
     function testHTMLCompressor(done) {
       readText(filePath, function(data) {
-        var options = url.parse('https://htmlcompressor.com/compress_ajax_v2.php');
+        var options = url.parse('https://htmlcompressor.com/compress');
         options.method = 'POST';
         options.headers = {
           'Accept-Encoding': 'gzip',
@@ -348,7 +331,6 @@ run(fileNames.map(function(fileName) {
           if (info) {
             info.size = 0;
             info.gzSize = 0;
-            info.lzSize = 0;
             info.brSize = 0;
             info = null;
             done();
@@ -382,6 +364,7 @@ run(fileNames.map(function(fileName) {
           });
         }).on('error', failed).end(querystring.stringify({
           code_type: 'html',
+          output_format: 'json',
           html_level: 3,
           html_strip_quotes: 1,
           minimize_style: 1,
@@ -407,8 +390,8 @@ run(fileNames.map(function(fileName) {
       testHTMLCompressor
     ], function() {
       var display = [
-        [fileName, '+ gzip', '+ lzma', '+ brotli'].join('\n'),
-        [redSize(original.size), redSize(original.gzSize), redSize(original.lzSize), redSize(original.brSize)].join('\n')
+        [fileName, '+ gzip', '+ brotli'].join('\n'),
+        [redSize(original.size), redSize(original.gzSize), redSize(original.brSize)].join('\n')
       ];
       var report = [
         '[' + fileName + '](' + urls[fileName] + ')',
@@ -416,21 +399,19 @@ run(fileNames.map(function(fileName) {
       ];
       for (var name in infos) {
         var info = infos[name];
-        display.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.lzSize), greenSize(info.brSize)].join('\n'));
+        display.push([greenSize(info.size), greenSize(info.gzSize), greenSize(info.brSize)].join('\n'));
         report.push(info.size ? toKb(info.size) : 'n/a');
       }
       display.push(
         [
           blueSavings(original.size, infos.minifier.size),
           blueSavings(original.gzSize, infos.minifier.gzSize),
-          blueSavings(original.lzSize, infos.minifier.lzSize),
           blueSavings(original.brSize, infos.minifier.brSize)
         ].join('\n'),
         [
           blueTime(infos.minifier.endTime - infos.minifier.startTime),
           blueTime(original.gzTime - original.endTime),
-          blueTime(original.lzTime - original.gzTime),
-          blueTime(original.brTime - original.lzTime)
+          blueTime(original.brTime - original.gzTime)
         ].join('\n')
       );
       rows[fileName] = {
