@@ -1,41 +1,45 @@
 (function() {
   'use strict';
 
-  var minify = (function() {
-    var minify = require('html-minifier').minify;
-    return function(value, options, callback, errorback) {
-      options.log = function(message) {
+  let minify = (() => {
+    const { minify } = require('html-minifier');
+    return (value, options, callback, errorback) => {
+      options.log = message => {
         console.log(message);
       };
-      var minified;
+
+      let minified;
       try {
         minified = minify(value, options);
-      }
-      catch (err) {
+      } catch (err) {
         return errorback(err);
       }
+
       callback(minified);
     };
   })();
+
   if (typeof Worker === 'function') {
-    var worker = new Worker('assets/worker.js');
-    worker.onmessage = function() {
-      minify = function(value, options, callback, errorback) {
-        worker.onmessage = function(event) {
-          var data = event.data;
+    const worker = new Worker('assets/worker.js');
+    /* eslint-disable unicorn/prefer-add-event-listener */
+    worker.onmessage = () => {
+      minify = (value, options, callback, errorback) => {
+        worker.onmessage = event => {
+          const { data } = event;
           if (data.error) {
             errorback(data.error);
-          }
-          else {
+          } else {
             callback(data);
           }
         };
+
         worker.postMessage({
-          value: value,
-          options: options
+          value,
+          options
         });
       };
     };
+    /* eslint-enable unicorn/prefer-add-event-listener */
   }
 
   function byId(id) {
@@ -43,34 +47,35 @@
   }
 
   function escapeHTML(str) {
-    return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   function forEachOption(fn) {
-    [].forEach.call(byId('options').getElementsByTagName('input'), fn);
+    Array.prototype.forEach.call(byId('options').getElementsByTagName('input'), fn);
   }
 
   function getOptions() {
-    var options = {};
-    forEachOption(function(element) {
-      var key = element.id;
-      var value;
+    const options = {};
+    forEachOption(element => {
+      const key = element.id;
+      let value;
       if (element.type === 'checkbox') {
         value = element.checked;
-      }
-      else {
+      } else {
         value = element.value.replace(/^\s+|\s+$/, '');
         if (!value) {
           return;
         }
       }
+
       switch (key) {
         case 'maxLineLength':
-          value = parseInt(value);
+          value = Number.parseInt(value, 10);
           break;
         case 'processScripts':
           value = value.split(/\s*,\s*/);
       }
+
       options[key] = value;
     });
     return options;
@@ -83,12 +88,12 @@
       .split('').reverse().join('');
   }
 
-  byId('minify-btn').onclick = function() {
+  byId('minify-btn').addEventListener('click', () => {
     byId('minify-btn').disabled = true;
-    var originalValue = byId('input').value;
-    minify(originalValue, getOptions(), function(minifiedValue) {
-      var diff = originalValue.length - minifiedValue.length;
-      var savings = originalValue.length ? (100 * diff / originalValue.length).toFixed(2) : 0;
+    const originalValue = byId('input').value;
+    minify(originalValue, getOptions(), minifiedValue => {
+      const diff = originalValue.length - minifiedValue.length;
+      const savings = originalValue.length > 0 ? (100 * diff / originalValue.length).toFixed(2) : 0;
 
       byId('output').value = minifiedValue;
 
@@ -99,42 +104,42 @@
           '. Savings: <strong>' + commify(diff) + ' (' + savings + '%)</strong>.' +
         '</span>';
       byId('minify-btn').disabled = false;
-    }, function(err) {
+    }, err => {
       byId('output').value = '';
       byId('stats').innerHTML = '<span class="failure">' + escapeHTML(err) + '</span>';
       byId('minify-btn').disabled = false;
     });
-  };
+  });
 
-  byId('select-all').onclick = function() {
-    forEachOption(function(element) {
+  byId('select-all').addEventListener('click', () => {
+    forEachOption(element => {
       if (element.type === 'checkbox') {
         element.checked = true;
       }
     });
     return false;
-  };
+  });
 
-  byId('select-none').onclick = function() {
-    forEachOption(function(element) {
+  byId('select-none').addEventListener('click', () => {
+    forEachOption(element => {
       if (element.type === 'checkbox') {
         element.checked = false;
-      }
-      else {
+      } else {
         element.value = '';
       }
     });
     return false;
-  };
+  });
 
-  var defaultOptions = getOptions();
-  byId('select-defaults').onclick = function() {
-    for (var key in defaultOptions) {
-      var element = byId(key);
+  const defaultOptions = getOptions();
+  byId('select-defaults').addEventListener('click', () => {
+    for (const key in defaultOptions) {
+      const element = byId(key);
       element[element.type === 'checkbox' ? 'checked' : 'value'] = defaultOptions[key];
     }
+
     return false;
-  };
+  });
 })();
 
 /* eslint-disable */
@@ -156,3 +161,4 @@ ga('send', 'pageview');
   f.style.borderWidth = 0;
   s.parentNode.insertBefore(f, s);
 })('wrapper');
+/* eslint-enable */

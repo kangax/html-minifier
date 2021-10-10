@@ -1,19 +1,19 @@
-(function() {
+(() => {
   'use strict';
 
   importScripts('../dist/htmlminifier.min.js');
-  var minify = require('html-minifier').minify;
-  addEventListener('message', function(event) {
+  const { minify } = require('html-minifier');
+  addEventListener('message', event => {
     try {
-      var options = event.data.options;
-      options.log = function(message) {
+      const { options } = event.data;
+      options.log = message => {
         console.log(message);
       };
+
       postMessage(minify(event.data.value, options));
-    }
-    catch (err) {
+    } catch (err) {
       postMessage({
-        error: err + ''
+        error: String(err)
       });
     }
   });
