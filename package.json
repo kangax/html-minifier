@@ -51,7 +51,9 @@
   },
   "scripts": {
     "dist": "grunt dist",
-    "test": "grunt test"
+    "lint": "xo",
+    "fix": "xo --fix",
+    "test": "npm run lint && grunt test"
   },
   "dependencies": {
     "camel-case": "^3.0.0",
@@ -66,9 +68,9 @@
     "grunt": "^1.4.1",
     "grunt-browserify": "^6.0.0",
     "grunt-contrib-uglify": "^5.0.1",
-    "grunt-eslint": "^23.0.0",
     "phantomjs-prebuilt": "^2.1.16",
-    "qunit": "^2.17.2"
+    "qunit": "^2.17.2",
+    "xo": "^0.45.0"
   },
   "benchmarkDependencies": {
     "brotli": "^1.3.2",
@@ -82,5 +84,60 @@
     "src/*.js",
     "cli.js",
     "sample-cli-config-file.conf"
-  ]
+  ],
+  "xo": {
+    "space": true,
+    "rules": {
+      "arrow-body-style": "off",
+      "camelcase": "off",
+      "capitalized-comments": "off",
+      "comma-dangle": [
+        "error",
+        "never"
+      ],
+      "default-case": "off",
+      "guard-for-in": "off",
+      "no-mixed-operators": "off",
+      "node/prefer-promises/fs": "off",
+      "operator-linebreak": [
+        "error",
+        "after"
+      ],
+      "object-curly-spacing": [
+        "error",
+        "always"
+      ],
+      "space-before-function-paren": [
+        "error",
+        "never"
+      ],
+      "spaced-comment": "off",
+      "unicorn/better-regex": "off",
+      "unicorn/catch-error-name": "off",
+      "unicorn/filename-case": "off",
+      "unicorn/no-array-for-each": "off",
+      "unicorn/no-array-reduce": "off",
+      "unicorn/prefer-module": "off",
+      "unicorn/prefer-query-selector": "off",
+      "unicorn/prefer-string-slice": "off",
+      "unicorn/prevent-abbreviations": "off",
+      "unicorn/require-post-message-target-origin": "off"
+    },
+    "overrides": [
+      {
+        "files": "tests/*.js",
+        "envs": [
+          "browser",
+          "qunit"
+        ]
+      },
+      {
+        "files": "assets/*.js",
+        "envs": [
+          "browser",
+          "worker"
+        ]
+      }
+    ]
+  }
 }

@@ -57,24 +57,6 @@ module.exports = function(grunt) {
       }
     },
 
-    eslint: {
-      grunt: {
-        src: 'Gruntfile.js'
-      },
-      src: {
-        src: ['cli.js', 'src/**/*.js']
-      },
-      tests: {
-        src: ['tests/*.js', 'test.js']
-      },
-      web: {
-        src: ['assets/master.js', 'assets/worker.js']
-      },
-      other: {
-        src: ['backtest.js', 'benchmark.js']
-      }
-    },
-
     qunit: {
       htmlminifier: ['./tests/minifier', 'tests/index.html']
     },
@@ -108,7 +90,6 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-eslint');
 
   function report(type, details) {
     grunt.log.writeln(type + ' completed in ' + details.runtime + 'ms');
@@ -176,7 +157,6 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('test', [
-    'eslint',
     'dist',
     'qunit'
   ]);
