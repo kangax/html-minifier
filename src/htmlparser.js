@@ -149,7 +149,7 @@ function HTMLParser(html, handler) {
         }
 
         // https://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
-        if (/^<!\[/.test(html)) {
+        if (html.startsWith('<![')) {
           const conditionalEnd = html.indexOf(']>');
 
           if (conditionalEnd >= 0) {

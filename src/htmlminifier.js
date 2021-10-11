@@ -934,7 +934,7 @@ function minify(value, options, partialMarkup) {
 
   function removeEndTag() {
     let index = buffer.length - 1;
-    while (index > 0 && !/^<\//.test(buffer[index])) {
+    while (index > 0 && !buffer[index].startsWith('</')) {
       index--;
     }
 
