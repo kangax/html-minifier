@@ -162,53 +162,58 @@ function generateMarkdownTable() {
     'htmlcompressor.com'
   ];
 
-  fileNames.forEach(fileName => {
+  for (const fileName of fileNames) {
     const row = rows[fileName].report;
     row[2] = '**' + row[2] + '**';
-  });
+  }
 
   const widths = headers.map((header, index) => {
     let width = header.length;
-    fileNames.forEach(fileName => {
+    for (const fileName of fileNames) {
       width = Math.max(width, rows[fileName].report[index].length);
-    });
+    }
+
     return width;
   });
 
   let content = '';
 
   function output(row) {
-    widths.forEach((width, index) => {
+    for (const [index, width] of widths.entries()) {
       const text = row[index];
       const length = width - text.length + 2;
       content += '| ' + text + Array.from({ length }).join(' ');
-    });
+    }
+
     content += '|\n';
   }
 
   output(headers);
-  widths.forEach((width, index) => {
+  for (const [index, width] of widths.entries()) {
     const length = width + 1;
     content += '|';
     content += index === 1 ? ':' : ' ';
     content += Array.from({ length }).join('-');
     content += index === 0 ? ' ' : ':';
-  });
+  }
+
   content += '|\n';
-  fileNames.sort((a, b) => {
+  for (const fileName of fileNames.sort((a, b) => {
     const r = Number(rows[a].report[1]);
     const s = Number(rows[b].report[1]);
     return r < s ? -1 : (r > s ? 1 : a < b ? -1 : a > b ? 1 : 0);
-  }).forEach(fileName => {
+  })) {
     output(rows[fileName].report);
-  });
+  }
+
   return content;
 }
 
 function displayTable() {
-  fileNames.forEach(fileName => {
+  for (const fileName of fileNames) {
     table.push(rows[fileName].display);
-  });
+  }
+
   console.log();
   console.log(table.toString());
 }
@@ -224,14 +229,14 @@ run(fileNames.map(fileName => {
       brFilePath: path.join('benchmarks/generated/', fileName + '.html.br')
     };
     const infos = {};
-    ['minifier', 'minimize', 'willpeavy', 'compressor'].forEach(name => {
+    for (const name of ['minifier', 'minimize', 'willpeavy', 'compressor']) {
       infos[name] = {
         filePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html'),
         gzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.gz'),
         lzFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.lz'),
         brFilePath: path.join('benchmarks/generated/', fileName + '.' + name + '.html.br')
       };
-    });
+    }
 
     function readSizes(info, done) {
       info.endTime = Date.now();

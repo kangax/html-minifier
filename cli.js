@@ -141,7 +141,7 @@ const mainOptions = {
   useShortDoctype: 'Replaces the doctype with the short (HTML5) doctype'
 };
 const mainOptionKeys = Object.keys(mainOptions);
-mainOptionKeys.forEach(key => {
+for (let key of mainOptionKeys) {
   const option = mainOptions[key];
   if (Array.isArray(option)) {
     key = key === 'minifyURLs' ? '--minify-urls' : '--' + paramCase(key);
@@ -152,7 +152,8 @@ mainOptionKeys.forEach(key => {
   } else {
     program.option('--' + paramCase(key), option);
   }
-});
+}
+
 program.option('-o --output <file>', 'Specify output file (if not specified STDOUT will be used for output)');
 
 function readFile(file) {
@@ -176,7 +177,7 @@ program.option('-c --config-file <file>', 'Use config file', configPath => {
     }
   }
 
-  mainOptionKeys.forEach(key => {
+  for (const key of mainOptionKeys) {
     if (key in config) {
       const option = mainOptions[key];
       if (Array.isArray(option)) {
@@ -184,7 +185,7 @@ program.option('-c --config-file <file>', 'Use config file', configPath => {
         config[key] = option[1](typeof value === 'string' ? value : JSON.stringify(value));
       }
     }
-  });
+  }
 });
 program.option('--input-dir <dir>', 'Specify an input directory');
 program.option('--output-dir <dir>', 'Specify an output directory');
@@ -196,14 +197,15 @@ program.arguments('[files...]').action(files => {
 
 function createOptions() {
   const options = {};
-  mainOptionKeys.forEach(key => {
+  for (const key of mainOptionKeys) {
     const param = program[key === 'minifyURLs' ? 'minifyUrls' : camelCase(key)];
     if (typeof param !== 'undefined') {
       options[key] = param;
     } else if (key in config) {
       options[key] = config[key];
     }
-  });
+  }
+
   return options;
 }
 
@@ -253,7 +255,7 @@ function processDirectory(inputDir, outputDir, fileExt) {
       fatal('Cannot read directory ' + inputDir + '\n' + err.message);
     }
 
-    files.forEach(file => {
+    for (const file of files) {
       const inputFile = path.join(inputDir, file);
       const outputFile = path.join(outputDir, file);
       fs.stat(inputFile, (err, stat) => {
@@ -267,7 +269,7 @@ function processDirectory(inputDir, outputDir, fileExt) {
           });
         }
       });
-    });
+    }
   });
 }
 

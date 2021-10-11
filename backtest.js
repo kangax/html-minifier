@@ -60,7 +60,7 @@ function minify(hash, options) {
   const minify = loadModule();
   process.send('ready');
   let count = fileNames.length;
-  fileNames.forEach(fileName => {
+  for (const fileName of fileNames) {
     readText(path.join('benchmarks/', fileName + '.html'), (err, data) => {
       if (err) {
         throw err;
@@ -81,7 +81,7 @@ function minify(hash, options) {
         }
       }
     });
-  });
+  }
 }
 
 function print(table) {
@@ -93,9 +93,10 @@ function print(table) {
   for (const hash in table) {
     const data = table[hash];
     row = [hash, '"' + data.date + '"'];
-    fileNames.forEach(fileName => {
+    for (const fileName of fileNames) {
       row.push(data[fileName]);
-    });
+    }
+
     output.push(row.join(','));
     if (data.error) {
       errors.push(hash + ' - ' + data.error);

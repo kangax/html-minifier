@@ -36,9 +36,10 @@ module.exports = function(grunt) {
           banner: '<%= banner %>',
           preBundleCB() {
             const files = {};
-            UglifyJS.FILES.forEach(file => {
+            for (const file of UglifyJS.FILES) {
               files[file] = fs.readFileSync(file, 'utf8');
-            });
+            }
+
             fs.writeFileSync('./dist/uglify.js', UglifyJS.minify(files, {
               compress: false,
               mangle: false,
@@ -95,15 +96,16 @@ module.exports = function(grunt) {
 
   function report(type, details) {
     grunt.log.writeln(type + ' completed in ' + details.runtime + 'ms');
-    details.failures.forEach(details => {
+    for (const detail of details.failures) {
       grunt.log.error();
-      grunt.log.error(details.name + (details.message ? ' [' + details.message + ']' : ''));
-      grunt.log.error(details.source);
+      grunt.log.error(detail.name + (detail.message ? ' [' + detail.message + ']' : ''));
+      grunt.log.error(detail.source);
       grunt.log.error('Actual:');
-      grunt.log.error(details.actual);
+      grunt.log.error(detail.actual);
       grunt.log.error('Expected:');
-      grunt.log.error(details.expected);
-    });
+      grunt.log.error(detail.expected);
+    }
+
     grunt.log[details.failed ? 'error' : 'ok'](
       details.passed + ' of ' + details.total + ' passed, ' + details.failed + ' failed'
     );

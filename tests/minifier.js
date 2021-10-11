@@ -205,7 +205,7 @@ QUnit.test('space normalization around text', assert => {
     conservativeCollapse: true,
     preserveLineBreaks: true
   }), output);
-  [
+  for (const el of [
     'a',
     'abbr',
     'acronym',
@@ -230,7 +230,7 @@ QUnit.test('space normalization around text', assert => {
     'tt',
     'u',
     'var'
-  ].forEach(el => {
+  ]) {
     assert.equal(minify('foo <' + el + '>baz</' + el + '> bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '> bar');
     assert.equal(minify('foo<' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '>bar');
     assert.equal(minify('foo <' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '>bar');
@@ -247,11 +247,12 @@ QUnit.test('space normalization around text', assert => {
     assert.equal(minify('<div>foo<' + el + '> baz </' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '> baz </' + el + '>bar</div>');
     assert.equal(minify('<div>foo <' + el + '> baz </' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz </' + el + '>bar</div>');
     assert.equal(minify('<div>foo<' + el + '> baz </' + el + '> bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '> baz </' + el + '>bar</div>');
-  });
+  }
+
   // Don't trim whitespace around element, but do trim within
-  [
+  for (const el of [
     'bdi', 'bdo', 'button', 'cite', 'code', 'dfn', 'math', 'q', 'rt', 'rtc', 'ruby', 'svg'
-  ].forEach(el => {
+  ]) {
     assert.equal(minify('foo <' + el + '>baz</' + el + '> bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '> bar');
     assert.equal(minify('foo<' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo<' + el + '>baz</' + el + '>bar');
     assert.equal(minify('foo <' + el + '>baz</' + el + '>bar', { collapseWhitespace: true }), 'foo <' + el + '>baz</' + el + '>bar');
@@ -268,8 +269,9 @@ QUnit.test('space normalization around text', assert => {
     assert.equal(minify('<div>foo<' + el + '> baz </' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '>baz</' + el + '>bar</div>');
     assert.equal(minify('<div>foo <' + el + '> baz </' + el + '>bar</div>', { collapseWhitespace: true }), '<div>foo <' + el + '>baz</' + el + '>bar</div>');
     assert.equal(minify('<div>foo<' + el + '> baz </' + el + '> bar</div>', { collapseWhitespace: true }), '<div>foo<' + el + '>baz</' + el + '> bar</div>');
-  });
-  [
+  }
+
+  for (const inputs of [
     ['<span> foo </span>', '<span>foo</span>'],
     [' <span> foo </span> ', '<span>foo</span>'],
     ['<nobr>a</nobr>', '<nobr>a</nobr>'],
@@ -292,7 +294,7 @@ QUnit.test('space normalization around text', assert => {
     ['a <nobr>b </nobr> c', 'a <nobr>b</nobr> c'],
     ['a <nobr> b</nobr> c', 'a <nobr>b</nobr> c'],
     ['a <nobr> b </nobr> c', 'a <nobr>b</nobr> c']
-  ].forEach(inputs => {
+  ]) {
     assert.equal(minify(inputs[0], {
       collapseWhitespace: true,
       conservativeCollapse: true
@@ -305,7 +307,8 @@ QUnit.test('space normalization around text', assert => {
     }), input, input);
     const output = '<div>' + inputs[1] + '</div>';
     assert.equal(minify(input, { collapseWhitespace: true }), output, input);
-  });
+  }
+
   assert.equal(minify('<p>foo <img> bar</p>', { collapseWhitespace: true }), '<p>foo <img> bar</p>');
   assert.equal(minify('<p>foo<img>bar</p>', { collapseWhitespace: true }), '<p>foo<img>bar</p>');
   assert.equal(minify('<p>foo <img>bar</p>', { collapseWhitespace: true }), '<p>foo <img>bar</p>');
@@ -326,7 +329,7 @@ QUnit.test('space normalization around text', assert => {
     collapseWhitespace: true,
     removeComments: true
   }), '<div>a <input> c</div>');
-  [
+  for (let input of [
     ' a <? b ?> c ',
     '<!-- d --> a <? b ?> c ',
     ' <!-- d -->a <? b ?> c ',
@@ -336,7 +339,7 @@ QUnit.test('space normalization around text', assert => {
     ' a <? b ?> <!-- d -->c ',
     ' a <? b ?> c<!-- d --> ',
     ' a <? b ?> c <!-- d -->'
-  ].forEach(input => {
+  ]) {
     assert.equal(minify(input, {
       collapseWhitespace: true,
       conservativeCollapse: true
@@ -364,7 +367,8 @@ QUnit.test('space normalization around text', assert => {
       conservativeCollapse: true,
       removeComments: true
     }), '<p> a <? b ?> c </p>', input);
-  });
+  }
+
   input = '<li><i></i> <b></b> foo</li>';
   output = '<li><i></i> <b></b> foo</li>';
   assert.equal(minify(input, { collapseWhitespace: true }), output);
@@ -3485,7 +3489,7 @@ QUnit.test('decode entity characters', assert => {
 });
 
 QUnit.test('tests from PHPTAL', assert => {
-  [
+  for (const tokens of [
     // trailing </p> removed by minifier, but not by PHPTAL
     ['<p>foo bar baz', '<p>foo     \t bar\n\n\n baz</p>'],
     ['<p>foo bar<pre>  \tfoo\t   \nbar   </pre>', '<p>foo   \t\n bar</p><pre>  \tfoo\t   \nbar   </pre>'],
@@ -3562,7 +3566,7 @@ QUnit.test('tests from PHPTAL', assert => {
       '<br/>\n' +
       'foo</body> </html>  <!-- bla -->'
     ]*/
-  ].forEach(tokens => {
+  ]) {
     assert.equal(minify(tokens[1], {
       collapseBooleanAttributes: true,
       collapseWhitespace: true,
@@ -3577,7 +3581,7 @@ QUnit.test('tests from PHPTAL', assert => {
       sortAttributes: true,
       useShortDoctype: true
     }), tokens[0]);
-  });
+  }
 });
 
 QUnit.test('canCollapseWhitespace and canTrimWhitespace hooks', assert => {

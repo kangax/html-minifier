@@ -151,10 +151,10 @@ function isExecutableScript(tag, attrs) {
     return false;
   }
 
-  for (let i = 0, len = attrs.length; i < len; i++) {
-    const attrName = attrs[i].name.toLowerCase();
+  for (const attr of attrs) {
+    const attrName = attr.name.toLowerCase();
     if (attrName === 'type') {
-      return isScriptTypeAttribute(attrs[i].value);
+      return isScriptTypeAttribute(attr.value);
     }
   }
 
@@ -171,10 +171,10 @@ function isStyleSheet(tag, attrs) {
     return false;
   }
 
-  for (let i = 0, len = attrs.length; i < len; i++) {
-    const attrName = attrs[i].name.toLowerCase();
+  for (const attr of attrs) {
+    const attrName = attr.name.toLowerCase();
     if (attrName === 'type') {
-      return isStyleLinkTypeAttribute(attrs[i].value);
+      return isStyleLinkTypeAttribute(attr.value);
     }
   }
 
@@ -220,8 +220,8 @@ function isLinkType(tag, attrs, value) {
     return false;
   }
 
-  for (let i = 0, len = attrs.length; i < len; i++) {
-    if (attrs[i].name === 'rel' && attrs[i].value === value) {
+  for (const attr of attrs) {
+    if (attr.name === 'rel' && attr.value === value) {
       return true;
     }
   }
@@ -317,8 +317,8 @@ function isMetaViewport(tag, attrs) {
     return false;
   }
 
-  for (let i = 0, len = attrs.length; i < len; i++) {
-    if (attrs[i].name === 'name' && attrs[i].value === 'viewport') {
+  for (const attr of attrs) {
+    if (attr.name === 'name' && attr.value === 'viewport') {
       return true;
     }
   }
@@ -329,8 +329,8 @@ function isContentSecurityPolicy(tag, attrs) {
     return false;
   }
 
-  for (let i = 0, len = attrs.length; i < len; i++) {
-    if (attrs[i].name.toLowerCase() === 'http-equiv' && attrs[i].value.toLowerCase() === 'content-security-policy') {
+  for (const attr of attrs) {
+    if (attr.name.toLowerCase() === 'http-equiv' && attr.value.toLowerCase() === 'content-security-policy') {
       return true;
     }
   }
@@ -646,7 +646,7 @@ function processOptions(values) {
     minifyJS: identity,
     minifyURLs: identity
   };
-  Object.keys(values).forEach(key => {
+  for (const key of Object.keys(values)) {
     let value = values[key];
     if (key === 'caseSensitive') {
       if (value) {
@@ -658,7 +658,7 @@ function processOptions(values) {
       }
     } else if (key === 'minifyCSS' && typeof value !== 'function') {
       if (!value) {
-        return;
+        continue;
       }
 
       if (typeof value !== 'object') {
@@ -671,7 +671,10 @@ function processOptions(values) {
         });
         const cleanCssOutput = new CleanCSS(value).minify(wrapCSS(text, type));
         if (cleanCssOutput.errors.length > 0) {
-          cleanCssOutput.errors.forEach(error => options.log(error));
+          for (const error of cleanCssOutput.errors) {
+            options.log(error);
+          }
+
           return text;
         }
 
@@ -679,7 +682,7 @@ function processOptions(values) {
       };
     } else if (key === 'minifyJS' && typeof value !== 'function') {
       if (!value) {
-        return;
+        continue;
       }
 
       if (typeof value !== 'object') {
@@ -701,7 +704,7 @@ function processOptions(values) {
       };
     } else if (key === 'minifyURLs' && typeof value !== 'function') {
       if (!value) {
-        return;
+        continue;
       }
 
       if (typeof value === 'string') {
@@ -721,7 +724,8 @@ function processOptions(values) {
     } else {
       options[key] = value;
     }
-  });
+  }
+
   return options;
 }
 
@@ -766,8 +770,7 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
           attrChains[tag].add(attrNames(attrs).filter(attr => shouldSkipUIDs(attr)));
         }
 
-        for (let i = 0, len = attrs.length; i < len; i++) {
-          const attr = attrs[i];
+        for (const attr of attrs) {
           if (classChain && attr.value && options.name(attr.name) === 'class') {
             classChain.add(trimWhitespace(attr.value).split(/[ \t\n\f\r]+/).filter(chunk => shouldSkipUIDs(chunk)));
           } else if (options.processScripts && attr.name.toLowerCase() === 'type') {
@@ -805,12 +808,13 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
       if (sorter) {
         const attrMap = Object.create(null);
         const names = attrNames(attrs);
-        names.forEach((name, index) => {
+        for (const [index, name] of Object.entries(names)) {
           (attrMap[name] || (attrMap[name] = [])).push(attrs[index]);
-        });
-        sorter.sort(names).forEach((name, index) => {
+        }
+
+        for (const [index, name] of Object.entries(sorter.sort(names))) {
           attrs[index] = attrMap[name].shift();
-        });
+        }
       }
     };
   }
@@ -875,18 +879,21 @@ function minify(value, options, partialMarkup) {
                 return chunks[1] + uidAttr + index + uidAttr + chunks[2];
               });
               const ids = [];
-              new CleanCSS().minify(wrapCSS(text, type)).warnings.forEach(warning => {
+              const cleancssWarnings = new CleanCSS().minify(wrapCSS(text, type)).warnings;
+              for (const warning of cleancssWarnings) {
                 const match = uidPattern.exec(warning);
                 if (match) {
                   const id = uidAttr + match[2] + uidAttr;
                   text = text.replace(id, ignoreCSS(id));
                   ids.push(id);
                 }
-              });
+              }
+
               text = fn(text, type);
-              ids.forEach(id => {
+              for (const id of ids) {
                 text = text.replace(ignoreCSS(id), id);
-              });
+              }
+
               return text;
             };
           })(options.minifyCSS);

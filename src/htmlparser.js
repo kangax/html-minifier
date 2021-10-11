@@ -451,8 +451,8 @@ exports.HTMLtoXML = html => {
     start(tag, attrs, unary) {
       results += '<' + tag;
 
-      for (let i = 0, len = attrs.length; i < len; i++) {
-        results += ' ' + attrs[i].name + '="' + (attrs[i].value || '').replace(/"/g, '&#34;') + '"';
+      for (const attr of attrs) {
+        results += ' ' + attr.name + '="' + (attr.value || '').replace(/"/g, '&#34;') + '"';
       }
 
       results += (unary ? '/' : '') + '>';
