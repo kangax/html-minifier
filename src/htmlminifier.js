@@ -604,7 +604,7 @@ function buildAttr(normalized, hasUnarySlash, options, isLast, uidAttr) {
       emittedAttrValue += ' ';
     }
   // make sure trailing slash is not interpreted as HTML self-closing tag
-  } else if (isLast && !hasUnarySlash && !/\/$/.test(attrValue)) {
+  } else if (isLast && !hasUnarySlash && attrValue && !attrValue.endsWith('/')) {
     emittedAttrValue = attrValue;
   } else {
     emittedAttrValue = attrValue + ' ';
