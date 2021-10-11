@@ -510,8 +510,7 @@ exports.HTMLtoDOM = (html, doc) => {
       const html = doc.createElement('html');
       const head = doc.createElement('head');
       head.append(doc.createElement('title'));
-      html.append(head);
-      html.append(doc.createElement('body'));
+      html.append(head, doc.createElement('body'));
       doc.append(html);
     })();
   }
