@@ -53,7 +53,8 @@
     "dist": "grunt dist",
     "lint": "xo",
     "fix": "xo --fix",
-    "test": "npm run lint && grunt test"
+    "test": "npm run lint && grunt test",
+    "test:ci": "grunt test"
   },
   "dependencies": {
     "camel-case": "^3.0.0",

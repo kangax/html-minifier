@@ -1,21 +1,15 @@
-name: CI
+name: Lint
 
 on: [push, pull_request]
 
 env:
   FORCE_COLOR: 2
+  NODE: 14 # The Node.js version to run lint on
 
 jobs:
-  test:
-    name: Node ${{ matrix.node }}
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        node: [12, 14, 16]
-
+  run:
+    name: Lint
+    runs-on: ubuntu-latest
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
@@ -23,11 +17,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node }}
+          node-version: ${{ env.NODE }}
           cache: npm
 
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npm run test:ci
+      - name: Run lint
+        run: npm run lint
