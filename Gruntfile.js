@@ -4,7 +4,7 @@ const process = require('process');
 const fs = require('fs');
 const qunit = require('qunit');
 const UglifyJS = require('uglify-js');
-const { path: phantomJsPath } = require('phantomjs-prebuilt');
+//const { path: phantomJsPath } = require('phantomjs-prebuilt');
 
 function qunitVersion() {
   const { prepareStackTrace } = Error;
@@ -143,7 +143,7 @@ module.exports = function(grunt) {
     }
 
     run('node', process.argv[0], this.data[0]);
-    run('web', phantomJsPath, this.data[1]);
+    //run('web', phantomJsPath, this.data[1]);
   });
 
   grunt.registerMultiTask('replace', function() {
