@@ -27,13 +27,15 @@
 
 'use strict';
 
-var camelCase = require('camel-case');
+var camelCase = require('camel-case').camelCase;
 var fs = require('fs');
 var info = require('./package.json');
 var minify = require('./' + info.main).minify;
-var paramCase = require('param-case');
+var paramCase = require('param-case').paramCase;
 var path = require('path');
-var program = require('commander');
+var command = require('commander').Command;
+var program = new command();
+var programOptions = program.opts();
 
 program._name = info.name;
 program.version(info.version);
@@ -41,6 +43,12 @@ program.version(info.version);
 function fatal(message) {
   console.error(message);
   process.exit(1);
+}
+
+// If no argument has been specified on the command line, show help message and exit
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+  process.exit();
 }
 
 /**
@@ -198,7 +206,7 @@ program.arguments('[files...]').action(function(files) {
 function createOptions() {
   var options = {};
   mainOptionKeys.forEach(function(key) {
-    var param = program[key === 'minifyURLs' ? 'minifyUrls' : camelCase(key)];
+    var param = programOptions[key === 'minifyURLs' ? 'minifyUrls' : camelCase(key)];
     if (typeof param !== 'undefined') {
       options[key] = param;
     }
@@ -280,14 +288,14 @@ function writeMinify() {
   catch (e) {
     fatal('Minification error:\n' + e.message);
   }
-  (program.output ? fs.createWriteStream(program.output).on('error', function(e) {
-    fatal('Cannot write ' + program.output + '\n' + e.message);
+  (programOptions.output ? fs.createWriteStream(programOptions.output).on('error', function(e) {
+    fatal('Cannot write ' + programOptions.output + '\n' + e.message);
   }) : process.stdout).write(minified);
 }
 
-var inputDir = program.inputDir;
-var outputDir = program.outputDir;
-var fileExt = program.fileExt;
+var inputDir = programOptions.inputDir;
+var outputDir = programOptions.outputDir;
+var fileExt = programOptions.fileExt;
 if (inputDir || outputDir) {
   if (!inputDir) {
     fatal('The option output-dir needs to be used with the option input-dir. If you are working with a single file, use -o.');
