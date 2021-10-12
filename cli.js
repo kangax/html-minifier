@@ -189,7 +189,7 @@ program.option('-c --config-file <file>', 'Use config file', function(configPath
 });
 program.option('--input-dir <dir>', 'Specify an input directory');
 program.option('--output-dir <dir>', 'Specify an output directory');
-program.option('--file-ext <text>', 'Specify an extension to be read, ex: html');
+program.option('--file-ext <ext>', 'Specify an extension to be read, ex: html');
 var content;
 program.arguments('[files...]').action(function(files) {
   content = files.map(readFile).join('');
