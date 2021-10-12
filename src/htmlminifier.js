@@ -828,6 +828,10 @@ function createSortFns(value, options, uidIgnore, uidAttr) {
 }
 
 function minify(value, options, partialMarkup) {
+  if(value === null || value === undefined){
+    throw new SyntaxError("value cannot be 'null' or 'undefined'");
+  }
+  
   if (options.collapseWhitespace) {
     value = collapseWhitespace(value, options, true, true);
   }
