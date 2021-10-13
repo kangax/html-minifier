@@ -110,10 +110,10 @@
       .then((permissionStatus) => {
         if (permissionStatus.state == 'granted' || permissionStatus.state == 'prompt') {
           navigator.clipboard.writeText(byId('output').value);
-          byId('copy-btn').innerHTML = 'Copied!';
+          byId('copy-btn').innerText = 'Copied!';
           byId('copy-btn').className = 'copied-button';
           setTimeout(function() {
-            byId('copy-btn').innerHTML = 'Copy Result';
+            byId('copy-btn').innerText = 'Copy Result';
             byId('copy-btn').className = 'copy-button';
           }, 5000);
         } else {
