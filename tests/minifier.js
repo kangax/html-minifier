@@ -873,7 +873,7 @@ QUnit.test('custom processors', function(assert) {
   assert.equal(minify(input, { minifyURLs: null }), input);
   assert.equal(minify(input, { minifyURLs: false }), input);
   assert.equal(minify(input, { minifyURLs: url }), input);
-  output = '<style>.foo{background:url(URL)}</style>';
+  output = '<style>.foo{background:url("URL")}</style>';
   assert.equal(minify(input, { minifyCSS: true, minifyURLs: url }), output);
 });
 
@@ -2085,7 +2085,7 @@ QUnit.test('script minification', function(assert) {
   assert.equal(minify(input, { minifyJS: true }), output);
 
   input = '<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({\'gtm.start\':new Date().getTime(),event:\'gtm.js\'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';j.async=true;j.src=\'//www.googletagmanager.com/gtm.js?id=\'+i+dl;f.parentNode.insertBefore(j,f);})(window,document,\'script\',\'dataLayer\',\'GTM-67NT\');</script>';
-  output = '<script>!function(w,d,s,l,i){w[l]=w[l]||[],w[l].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id=GTM-67NT",f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer")</script>';
+  output = '<script>!function(w,d,j,f){w[f]=w[f]||[],w[f].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});f=d.getElementsByTagName(j)[0],j=d.createElement(j);j.async=!0,j.src="//www.googletagmanager.com/gtm.js?id=GTM-67NT",f.parentNode.insertBefore(j,f)}(window,document,"script","dataLayer")</script>';
 
   assert.equal(minify(input, { minifyJS: { mangle: false } }), output);
 
@@ -2320,7 +2320,7 @@ QUnit.test('style minification', function(assert) {
 
   input = '<div style="background: url(\'images/<% image %>\')"></div>';
   assert.equal(minify(input), input);
-  output = '<div style="background:url(images/<% image %>)"></div>';
+  output = '<div style="background:url(\'images/<% image %>\')"></div>';
   assert.equal(minify(input, { minifyCSS: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
@@ -2338,7 +2338,7 @@ QUnit.test('style minification', function(assert) {
 
   input = '<style>p { background: url("images/<% image %>") }</style>';
   assert.equal(minify(input), input);
-  output = '<style>p{background:url(images/<% image %>)}</style>';
+  output = '<style>p{background:url("images/<% image %>")}</style>';
   assert.equal(minify(input, { minifyCSS: true }), output);
   assert.equal(minify(input, {
     collapseWhitespace: true,
@@ -2455,9 +2455,9 @@ QUnit.test('url attribute minification', function(assert) {
   input = '<style>body { background: url(\'http://website.com/bg.png\') }</style>';
   assert.equal(minify(input, { minifyURLs: 'http://website.com/' }), input);
   assert.equal(minify(input, { minifyURLs: { site: 'http://website.com/' } }), input);
-  output = '<style>body{background:url(http://website.com/bg.png)}</style>';
+  output = '<style>body{background:url(\'http://website.com/bg.png\')}</style>';
   assert.equal(minify(input, { minifyCSS: true }), output);
-  output = '<style>body{background:url(bg.png)}</style>';
+  output = '<style>body{background:url(\'bg.png\')}</style>';
   assert.equal(minify(input, {
     minifyCSS: true,
     minifyURLs: 'http://website.com/'
@@ -2471,7 +2471,7 @@ QUnit.test('url attribute minification', function(assert) {
   assert.equal(minify(input, { minifyURLs: { site: 'http://website.com/foo bar/' } }), input);
   output = '<style>body{background:url("http://website.com/foo bar/bg.png")}</style>';
   assert.equal(minify(input, { minifyCSS: true }), output);
-  output = '<style>body{background:url(bg.png)}</style>';
+  output = '<style>body{background:url("bg.png")}</style>';
   assert.equal(minify(input, {
     minifyCSS: true,
     minifyURLs: { site: 'http://website.com/foo bar/' }
@@ -2491,7 +2491,7 @@ QUnit.test('url attribute minification', function(assert) {
     minifyCSS: true,
     minifyURLs: { site: 'http://website.com/foo%20bar/' }
   }), output);
-  output = '<style>body{background:url(bg.png)}</style>';
+  output = '<style>body{background:url("bg.png")}</style>';
   assert.equal(minify(input, {
     minifyCSS: true,
     minifyURLs: { site: 'http://website.com/foo%20bar/(baz)/' }
