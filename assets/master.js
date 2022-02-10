@@ -120,7 +120,7 @@
           else {
             alert('Access was denied to clipboard-write, please give access to continue.');
           }
-      });
+        });
     };
   };
 
