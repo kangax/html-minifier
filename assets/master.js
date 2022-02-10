@@ -107,7 +107,7 @@
     });
     byId('copy-btn').onclick = function() {
       navigator.permissions.query({name: "clipboard-write"})
-      .then((permissionStatus) => {
+      .then(function(permissionStatus) {
         if (permissionStatus.state == 'granted' || permissionStatus.state == 'prompt') {
           navigator.clipboard.writeText(byId('output').value);
           byId('copy-btn').innerText = 'Copied!';
