@@ -187,3 +187,4 @@ Benchmarks for minified HTML:
 ```shell
 node benchmark.js
 ```
+// open source
