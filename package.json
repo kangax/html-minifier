@@ -54,11 +54,11 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "camel-case": "^3.0.0",
+    "camel-case": "^4.1.2",
     "clean-css": "^5.2.1",
-    "commander": "^2.20.3",
+    "commander": "^7.2.0",
     "he": "^1.2.0",
-    "param-case": "^2.1.1",
+    "param-case": "^3.0.4",
     "relateurl": "^0.2.7",
     "uglify-js": "^3.14.2"
   },
