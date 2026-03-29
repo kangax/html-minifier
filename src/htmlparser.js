@@ -140,6 +140,17 @@ function HTMLParser(html, handler) {
           }
         }
 
+        // Treat <![CDATA[...]]> as a comment for backward compatibility. It was
+        // was unintentionally parsed as a conditional comment before
+        // https://github.com/kangax/html-minifier/pull/1162.
+        if (html.startsWith('<![CDATA[')) {
+          var cdataEnd = html.indexOf(']]>');
+          handler.comment(html.substring(2, cdataEnd + 2), true /* non-standard */);
+          html = html.substring(cdataEnd + 3);
+          prevTag = '';
+          continue;
+        }
+
         // https://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
         if (/^<!\[/.test(html)) {
           var conditionalEnd = html.indexOf(']>');
