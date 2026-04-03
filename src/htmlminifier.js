@@ -385,14 +385,38 @@ function cleanConditionalComment(comment, options) {
   }) : comment;
 }
 
+var JSON_SCRIPT_TYPES = [
+  'application/json',
+  'application/ld+json',
+  'application/manifest+json',
+  'application/vnd.geo+json',
+  'importmap',
+  'speculationrules',
+];
+
 function processScript(text, options, currentAttrs) {
   for (var i = 0, len = currentAttrs.length; i < len; i++) {
+    if (currentAttrs[i].name.toLowerCase() === 'type' &&
+        JSON_SCRIPT_TYPES.indexOf(currentAttrs[i].value) > -1) {
+      return minifyJson(text, options);
+    }
+
     if (currentAttrs[i].name.toLowerCase() === 'type' &&
         options.processScripts.indexOf(currentAttrs[i].value) > -1) {
       return minify(text, options);
     }
   }
   return text;
+}
+
+function minifyJson(text, options) {
+  try {
+    return JSON.stringify(JSON.parse(text));
+  }
+  catch (err) {
+    options.log(err);
+    return text;
+  }
 }
 
 // Tag omission rules from https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
