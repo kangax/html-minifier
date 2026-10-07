@@ -2,6 +2,8 @@
 
 ## ⚠️ This version of html-minifier is no longer maintained. For an up-to-date version with [new features and critical security fixes](https://github.com/j9t/html-minifier-next/blob/main/CHANGELOG.md), use [HTML Minifier Next (HMN)](https://github.com/j9t/html-minifier-next) ([@j9t](https://meiert.com/)).
 
+html-minifier was created by [Juriy "kangax" Zaytsev](https://github.com/kangax) in 2010; its last release was 4.0.0 in 2019. [html-minifier-terser](https://github.com/terser/html-minifier-terser) and [HTML Minifier Next](https://github.com/j9t/html-minifier-next) both descend from it.
+
 # HTMLMinifier
 
 [![npm version](https://img.shields.io/npm/v/html-minifier.svg)](https://www.npmjs.com/package/html-minifier)
