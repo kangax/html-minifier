@@ -389,6 +389,11 @@ function processScript(text, options, currentAttrs) {
   for (var i = 0, len = currentAttrs.length; i < len; i++) {
     if (currentAttrs[i].name.toLowerCase() === 'type' &&
         options.processScripts.indexOf(currentAttrs[i].value) > -1) {
+
+      if(typeof options.processScriptsFunction === "function") {
+        return options.processScriptsFunction(text, currentAttrs[i].value)
+      }
+
       return minify(text, options);
     }
   }
