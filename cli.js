@@ -97,6 +97,10 @@ function parseString(value) {
   return value;
 }
 
+if (!program.args.length){
+   program.outputHelp();
+}  
+
 var mainOptions = {
   caseSensitive: 'Treat attributes in case sensitive manner (useful for SVG; e.g. viewBox)',
   collapseBooleanAttributes: 'Omit attribute values from boolean attributes',
