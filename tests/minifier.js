@@ -2822,6 +2822,33 @@ QUnit.test('processScripts', function(assert) {
   }), output);
 });
 
+QUnit.test('processScripts application/ld+json', function(assert) {
+  var input = '<script type="application/ld+json">{"foo":  "bar"}\n\n</script>';
+  var output = '<script type="application/ld+json">{"foo":"bar"}</script>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    processScripts: ['application/ld+json']
+  }), output);
+});
+
+QUnit.test('processScripts application/ld+json (invalid/malformed)', function(assert) {
+  var input = '<script type="application/ld+json">{"foo:  "bar"}\n\n</script>';
+  var output = '<script type="application/ld+json">{"foo:  "bar"}</script>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    processScripts: ['application/ld+json']
+  }), output);
+});
+
+QUnit.test('processScripts importmap', function(assert) {
+  var input = '<script type="importmap">\n{\n  "imports": {\n    "lodash": "/js/lodash.js",\n    "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.js"\n  }\n}\n</script>';
+  var output = '<script type="importmap">{"imports":{"lodash":"/js/lodash.js","vue":"https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.js"}}</script>';
+  assert.equal(minify(input, {
+    collapseWhitespace: true,
+    processScripts: ['importmap']
+  }), output);
+});
+
 QUnit.test('ignore', function(assert) {
   var input, output;
 
